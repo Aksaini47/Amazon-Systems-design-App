@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "979860034835",
+    "project_id": "rf-logger",
+    "storage_bucket": "rf-logger.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:979860034835:android:7d6e7e2a5a34f13e5d76e6",
+        "android_client_info": {
+          "package_name": "com.repairfully.logger"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6BjgitAObruimiYIRfeR0cjVCPe7brN8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

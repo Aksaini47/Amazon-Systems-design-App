@@ -1,0 +1,87 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.idea/
+.vscode/
+
+# Flutter/Dart
+*.g.dart
+*.freezed.dart
+*.pb.dart
+*.pbenum.dart
+*.pbserver.dart
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# Android
+*.jks
+*.apk
+*.aab
+*.sign
+.gradle/
+local.properties
+
+# iOS
+*.hmap
+*.ipa
+*.xcuserstate
+**/.symlinks/
+
+# Keystore (NEVER commit)
+*.keystore
+*.jks
+key.properties
+
+# Crash dumps & JVM diagnostic files (huge, never useful in VCS)
+*.hprof
+hs_err_pid*.log
+java_pid*.hprof
+java_pid*.log
+
+# Build/diagnostic clutter
+build_error*.txt
+build_log*.txt
+files.txt
+mobile/settings.png
+mobile/rf_*.png
+backend/data/seller.db
+backend/orders/
+
+# Node modules (not needed in repo)
+backend/node_modules/
+
+# Firebase google-services.json IS safe to commit for private repos
+# (client config restricted by package+SHA fingerprint). Leave it tracked.
+
+# Graphify (build artifacts)
+graphify-out/
+.graphify_ast.json
+.graphify_extract.json
+.graphify_cached.json
+.graphify_uncached.txt
+.graphify_python
+.graphify_analysis.json
+.graphify_detect.json
+build_graph.py
+
+# Temporary files
+*.tmp
+*.temp
+Temp/
+temp/
+c:/temp/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local

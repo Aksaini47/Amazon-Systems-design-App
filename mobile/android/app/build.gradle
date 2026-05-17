@@ -1,0 +1,90 @@
+// App-level build.gradle for the RepairFully camera Flutter app
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+    // ─── Firebase plugins (enabled 2026-05-17 — google-services.json present) ─
+    // google-services parses google-services.json + injects Firebase config
+    // into Android resources at build time. crashlytics maps Dart obfuscated
+    // symbols to readable stack traces in the Firebase console.
+    id "com.google.gms.google-services"
+    id "com.google.firebase.crashlytics"
+}
+
+// ─── Release signing — load credentials from key.properties ───────────────
+// key.properties lives in /android/ (gitignored). Format:
+//   storePassword=...
+//   keyPassword=...
+//   keyAlias=...
+//   storeFile=repairfully-dev.jks
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace "com.repairfully.logger"
+    compileSdk = 35
+    ndkVersion = "27.1.12297006"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    defaultConfig {
+        applicationId "com.repairfully.logger"
+        // Camera package requires minSdk 21; mDNS / bonsoir requires 21+
+        minSdkVersion = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+
+        // Required for large video uploads without OOM
+        multiDexEnabled true
+    }
+
+    signingConfigs {
+        release {
+            // The Kotlin DSL version of build.gradle uses the same lookup;
+            // these `?:` fallbacks keep CI green if key.properties is absent
+            // (signing then falls back to debug).
+            if (keystorePropertiesFile.exists()) {
+                keyAlias = keystoreProperties['keyAlias']
+                keyPassword = keystoreProperties['keyPassword']
+                storeFile = keystoreProperties['storeFile'] ? rootProject.file(keystoreProperties['storeFile']) : null
+                storePassword = keystoreProperties['storePassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // Use the release keystore if it's configured, else fall back
+            // to debug signing so local builds still work for non-signing
+            // contributors. Production CI must always have key.properties.
+            signingConfig = keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
+            // Keep R8 off for now — many Flutter plugins (camera, ML Kit,
+            // mobile_scanner) need proguard rules we haven't audited yet.
+            // Enable in a separate CR with full proguard-rules.pro pass.
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+}
+
+flutter {
+    source "../.."
+}
+
+// ─── Firebase Crashlytics dependencies (Crashlytics plugin enabled later) ─
+// dependencies block disabled until google-services.json is in place; the
+// firebase_core / firebase_crashlytics Flutter packages still ship via
+// Flutter's plugin system once added to pubspec.yaml. The native AGP
+// google-services plugin is what fails compile without the JSON.
