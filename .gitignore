@@ -85,3 +85,17 @@ c:/temp/
 .env
 .env.local
 .env.*.local
+backend/.env
+agent/.env
+agent/.venv/
+
+# Mahika runtime data (orders, cookies, screenshots — never commit)
+data/
+
+# Catalog builder
+catalog-builder/node_modules/
+catalog-builder/dist/
+
+# Graphify build cache (keep graph.json local only if large)
+graphify-out/cache/
+graphify-out/*.py
