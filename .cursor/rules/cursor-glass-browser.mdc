@@ -1,0 +1,39 @@
+---
+description: Cursor Glass browser must be visible before agent navigates — never Chrome fallback
+alwaysApply: true
+---
+
+# Cursor built-in browser (Glass) — visibility protocol
+
+Sir uses **Cursor browser only** for Seller Central discovery (not external Chrome/Playwright unless explicitly asked).
+
+## Root cause when "browser side mein nahi dikh raha"
+
+1. **Glass WebView bug (primary on this PC):** Log shows `WebView must be attached to the DOM` — browser UI never mounts in Agents window.
+2. **Glass mode** (`glassMode: true`) — Browser tab must be opened with **`Ctrl+Shift+B`** first.
+3. **Background navigate** — `browser_navigate` without `position: "side"` / `"active"` runs headless.
+4. **Panel not mounted** — `browser_tabs new` → `Timed out waiting for glass browser view`.
+
+Agent CAN load pages in hidden `glass-browser-*` viewId; Sir still sees blank unless WebView is fixed.
+
+## Mandatory agent workflow (browser tasks Sir must see)
+
+**Black panel / empty URL bar fix:** Always first call:
+`browser_navigate({ url, newTab: true, position: "side" })` — **never reuse old `glass-browser-*` viewId**.
+
+1. If panel missing: Sir **`Ctrl+Shift+B`**, then agent runs navigate above.
+2. **Never** `Start-Process` / external Chrome unless Sir explicitly says external OK.
+3. If `newTab` times out → **Developer: Reload Window**, retry once.
+
+## After panel is open
+
+- `browser_lock` only after successful visible navigate.
+- Amazon sign-in URL: `https://sellercentral.amazon.in/signin?ref_=INscwp_signin_n&mons_sel_locale=en_IN&ld=SCINWPDirect` (not bare `/ap/signin` — 404).
+- Continue button: use CDP `form.requestSubmit()` if click fails (DOM is `input#continue`, not button).
+
+## Fallback (only if Glass browser broken after panel open)
+
+- **File → Open Editor Window** (`Ctrl+Shift+N`) → Browser tab works more reliably than Agents-only Glass.
+- Do **not** use Playwright headed browser for discovery unless moving to automation lane.
+
+See `specs/cursor-browser-troubleshooting.md` for full diagnosis.

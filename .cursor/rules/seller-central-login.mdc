@@ -1,0 +1,247 @@
+---
+description: Seller Central login — flow graph, 60s Amazon cooldown, 3 OTP scenarios (Sir edits here)
+alwaysApply: true
+---
+
+# Seller Central login (Mahika)
+
+**Account:** `arunsaini416@gmail.com` · **OTP suffix:** `711` · **Telegram:** `@mahika_arun_bot` (6-digit only)  
+**Trust device:** always tick — *Don't ask for codes on this device*  
+**OTP wait:** **3 attempts × 60s** (Scenario 1)  
+**Call 711 (Scenario 2):** submit → **120s** → resubmit → **300s** (×**2** rounds) → fail = log + close  
+**Default command:** `python -m mahika.cli seller-login` — cookies **rakho**  
+**Full family tree:** `agent/Graphs & workflows/seller-central-login/MASTER_FLOW_TREE.md`
+
+---
+
+## Full flow graph (master)
+
+```mermaid
+flowchart TD
+  START([mahika seller-login])
+
+  START --> TST{--fresh flag?}
+  TST -->|No — normal| LOAD[Load seller_central_cookies.json]
+  TST -->|Yes — test only| CLR[Clear cookies + Chromium profile]
+  LOAD --> NAV[Open Seller Central — use saved session]
+  CLR --> NAV2[Sign-in URL clean slate]
+  NAV --> AUTH{Already home?}
+  NAV2 --> S1
+  AUTH -->|yes| S6[S6 Home — done]
+  AUTH -->|no| PICKACC[Account picker / sign-in if needed]
+  PICKACC --> BR
+  NAV2 --> S1
+
+  subgraph CRED["Credentials when needed"]
+    S1[S1: Email → Continue]
+    S1 --> S2[S2: Password → Sign in]
+  end
+
+  S2 --> BR{Which screen?}
+  PICKACC --> BR
+
+  BR -->|S3| S3PATH[S3: Delivery picker]
+  BR -->|S4 already| S4SKIP[S4: OTP entry — skip picker R3]
+  BR -->|S5| S5PATH[S5: Didn't receive multi-option]
+
+  subgraph S3FLOW["S3 — Send OTP once"]
+    S3PATH --> SC{Scenario}
+    SC -->|1 Ideal| DEF[Keep default radio — no WhatsApp re-click]
+    SC -->|2 or 3 on picker| CALL711[Select Call …711]
+    DEF --> R8A[R8: 60s if radio changed]
+    CALL711 --> R8A
+    R8A --> SEND[Click Send OTP — 1× only]
+    SEND --> R8B[R8: 60s after Send OTP]
+    R8B --> RL{Rate limit banner?}
+    RL -->|Yes| R8B
+    RL -->|No| S4
+  end
+
+  S4SKIP --> S4
+  S3FLOW --> S4[S4: OTP entry screen]
+
+  subgraph S4FLOW["S4 — OTP + Telegram"]
+    S4 --> TRUST[Tick Don't ask codes on this device]
+    TRUST --> TG["Telegram wait: 3 × 60s"]
+    TG -->|attempt 1/3| T1[Reminder + terminal line]
+    T1 --> T2[attempt 2/3]
+    T2 --> T3[attempt 3/3]
+    T3 -->|OTP received| SUBMIT[Fill OTP → Sign in]
+    T3 -->|no OTP| FAIL3[3 min done]
+  end
+
+  SUBMIT --> S7[S7: Badeja Enterprises → India → Select account]
+  S7 --> S6[S6: Home — save cookies]
+  FAIL3 --> S2BUSY[Scenario 2: Call 711 tree]
+  S2BUSY --> C1[Submit Call 711]
+  C1 --> W120[Wait 120s]
+  W120 --> C2[Resubmit Call 711]
+  C2 --> W300[Wait 300s + Telegram]
+  W300 -->|fail x2| FAIL_CLOSE[Log + script CLOSE]
+  W300 -->|OTP| S7
+
+  subgraph SC2["Scenario 2 — Busy"]
+    S2BUSY --> DIDNT[S4: Didn't receive OTP?]
+    DIDNT --> S5CALL[S5: Call …711 → R8 → Send OTP → R8]
+    S5CALL --> S4B[S4 again]
+    S4B --> TG2["Telegram 3 × 60s again"]
+    TG2 -->|OTP| SUBMIT
+    TG2 -->|fail| ENDFAIL([Login failed — otp_failed.png])
+  end
+
+  S5PATH --> S5CALL
+
+  subgraph SC3["Scenario 3 — Shortcut"]
+    REOPEN([Browser reopen — cookies OK]) --> BR3{S3 or S4?}
+    BR3 -->|S3| S3SHORT[Call 711 + Send OTP + R8×2]
+    BR3 -->|S4| S4SKIP
+    S3SHORT --> S4
+  end
+
+  subgraph FORBID["FORBIDDEN"]
+    WA[Re-click WhatsApp on S4]
+    SPAM[Send OTP twice under 60s]
+    WA --> SPAM
+  end
+
+  S4 -.->|never| FORBID
+```
+
+---
+
+## R0 — Cookies / cache (normal vs test)
+
+| Mode | Command | Cookies | Chromium profile |
+|------|---------|---------|------------------|
+| **Normal (default)** | `seller-login` | **Load** `seller_central_cookies.json` | Reuse |
+| **Test reset only** | `seller-login --fresh` | Delete | Delete `_pw_fresh_profile` |
+
+| Rule | Action |
+|------|--------|
+| R0.1 | **Normal runs:** cookies/cache **mat** clear karo |
+| R0.2 | `--fresh` sirf jab test/debug ho (galat screen, WhatsApp loop) |
+| R0.3 | Agent default path = load cookies → account picker → OTP (Scenario 3 friendly) |
+
+---
+
+## Timing summary
+
+| Phase | Duration |
+|-------|----------|
+| Each Telegram attempt | 60s |
+| Per scenario OTP wait | **3 × 60s = 3 min** |
+| Scenario 1 + 2 max OTP wait | up to **6 min** |
+| After radio / Send OTP | **+60s each** (R8) |
+
+---
+
+## Screen map
+
+| ID | Screen | Detect |
+|----|--------|--------|
+| S1 | Email | `#ap_email` |
+| S2 | Password | `#ap_password` |
+| S3 | Delivery picker | `/ap/mfa/new-otp` or radios + Send OTP |
+| S4 | OTP entry | `#auth-mfa-otpcode` |
+| S5 | Didn't receive | Multi radio after link |
+| S6 | Home | Dashboard — cookies save |
+| S7 | Account switcher | `/account-switcher/` — **Badeja → India → Select account** |
+| RL | Rate limit | *wait at least one minute* |
+
+---
+
+## Scenario 1 — Ideal
+
+```mermaid
+sequenceDiagram
+  participant U as Sir
+  participant A as Mahika
+  participant AM as Amazon
+  U->>A: seller-login
+  Note over A: Load cookies — no clear
+  A->>AM: Account picker or S1/S2
+  A->>AM: S3 Send OTP default 1x
+  Note over A,AM: R8 wait 60s
+  A->>AM: S4 trust device
+  loop 3 attempts x 60s
+    A->>U: Telegram attempt N/3
+    A->>A: Terminal ping
+    U-->>A: 6-digit OTP
+  end
+  A->>AM: Submit OTP
+  A->>AM: S7 Badeja → India → Select account
+  AM-->>A: S6 Home + cookies
+```
+
+---
+
+## Scenario 2 — Busy
+
+```mermaid
+flowchart LR
+  A[S4: 3x60s fail] --> B[Didn't receive?]
+  B --> C[Call 711]
+  C --> D[R8 60s]
+  D --> E[Send OTP]
+  E --> F[R8 60s]
+  F --> G[S4: 3x60s Telegram]
+  G --> H{OTP?}
+  H -->|yes| I[Home]
+  H -->|no| J[Fail]
+```
+
+---
+
+## Scenario 3 — Shortcut
+
+```mermaid
+flowchart TD
+  R[Reopen browser — cookies kept] --> Q{Screen?}
+  Q -->|S3 picker| C[Call 711 + Send OTP + R8]
+  Q -->|S4 OTP box| W[3x60s only — no picker]
+  C --> W
+  W --> H[Home or Scenario 2]
+```
+
+---
+
+## R4 — Telegram + terminal (3 attempts)
+
+| Rule | Value |
+|------|-------|
+| R4.1 | **3** attempts × **60** seconds |
+| R4.2 | Har attempt: Telegram `attempt N/3` + terminal ping |
+| R4.3 | `OTP_TELEGRAM_ATTEMPTS = 3` in `seller_login.py` |
+
+---
+
+## R8 — Amazon cooldown
+
+After radio select or Send OTP → **60s wait**. RL banner → wait only, no re-click.
+
+---
+
+## R3 — WhatsApp loop (FORBIDDEN)
+
+S4 visible → no picker re-Send. Green WhatsApp banner → 3×60s wait only.
+
+---
+
+## Code map
+
+| File | Role |
+|------|------|
+| `seller_login.py` | `fresh=False` default; `--fresh` test only |
+| `session.py` | `load_cookies` / `clear_all_seller_browser_state` |
+| `amazon_signin_flow.py` | R8, picker |
+| `account_switcher.py` | S7 Badeja → India → Select account |
+
+---
+
+## Sir checklist
+
+- [ ] Normal: `seller-login` (**no** `--fresh`)
+- [ ] OTP within 3 min → Telegram 6-digit
+- [ ] RL → 60s auto wait
+
+*Edit this file — `specs/seller-central-flow/login-flow.md` mirrors diagrams.*
