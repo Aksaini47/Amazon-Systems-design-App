@@ -1,0 +1,29 @@
+"
+⚠️ Important! This Product spreadsheet has changed."
+""
+What is changing and why?
+"In order to improve the shopping experience for Customers, we are changing how we collect, categorise and display product data from Sellers. This includes the types of data that are required and optional. "
+""
+What types of changes will I see?
+"Depending on the product category, you can expect to see:
+ - New or updated attribute requirements for listing
+ - New or updated attribute groupings
+ - Updated attribute names
+
+If you are a Business Seller, you will see updated labels for Amazon Business (B2B) specific attributes (E.g: Business Price will be referred as Your Price under 'Offer (Amazon Business)' field group)"
+""
+How will this affect me right now?
+"You may continue to use the old spreadsheets until further notice. We will notify 30 days before the date from which you will no longer be able to upload the old spreadsheets to create or update listings. To provide updated product details, we recommend you to start using the new templates."
+""
+How will I know that I am generating the new spreadsheet?
+"Download a spreadsheet using the Add Products via Upload page as usual. When you select product categories and marketplaces supported by the new template, we will let you know that you are generating a new spreadsheet through a message alert before you generate the spreadsheet."
+""
+What can I do to prepare for the change?
+Download the new spreadsheets. Review the changes to the attributes so you know what to expect. Provide all new required attributes for all your listings. We recommend making these changes sooner to take advantage of additional features such as improved dropdown and conditional requirement highlights.
+""
+Changes to Variation Theme options (UPDATE - March 2026)
+"We have removed variation themes that are no longer relevant from the new version of the Product Spreadsheet template. These themes appeared with a “Deprecated: Do not use"" tag in the dropdown options for the ""Variation Theme Name"" attribute in the template. This change does not affect your existing variation listings, which will continue to operate normally with no change in the customer experience.
+If you want to update your variations associated with those themes to use a new variation theme: (a) Delete the existing Parent SKU either using Manage Inventory or through a Category Listings Report (Inventory Reports → Category Listings Report). If you are using the Category Listings Report, identify the Parent SKU row and set Listing Action to “Delete” only for that row. Upload the file on the Spreadsheet tab in Add Products. Once you delete the Parent SKU, all Child SKUs will automatically become individual listings. (b) Use the same Category Listing Report to create a new Parent SKU using the most appropriate variation theme for your family that do not have a suffix “Deprecated: Do not use”. In the same step, update your Child SKUs to this new Parent SKU by filling in the Parentage Level, Parent SKU and Variation Theme Name. Upload the file on the Spreadsheet tab in Add Products."
+""
+Changes to Offer attributes
+"Amazon has updated the grouping of 'Offer' attributes in order to improve multi-offer listing capability for Sellers catering to more than one buyer segment (such as Amazon Business). If you are an Amazon Business Seller, you will see separate offer grouping to set prices for intended buyer segments. You will see ""Sell on Amazon"" (to set standard customer prices) and ""Amazon Business"" (to set discounted business price) Offer groups. In the old spreadsheet, the discounted price for Amazon Business customers was called 'Business Price'. In the new spreadsheet, the business price is called as 'Your Price"" under 'Offer - Amazon Business (B2B)' group. Quantity Discount attributes are also now available within the same group to simplify setting of quantity discounts for business offers."

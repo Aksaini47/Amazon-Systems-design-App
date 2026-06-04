@@ -1,0 +1,31 @@
+item-name: Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Combo Folder
+item-description: NOTICE: If Any Customer Will Try To Do Any Type Of Fraud/cheating In Terms Of Refund Or Replacement Under The Amazon Guarantee Program Then On Prima Facia Evidence Our Company Will Take Legal Action Against Such Customers And Report Them Under The Apple iPhoneoco Section 415/420. Violation Of Apple iPhoneoco Section 415/420 Is Punishable By Imprisonment And A Monetary Fine Decided By The Court Of Law. Processor: 1. Replacement Screen + Frame + Touchpad Digitizer Assembly . 2. Replace The Old, Broken, Cracked, Damaged One We Strongly Recommend Servicing Under Expert Technical Supervision. Self-installation Without The RequiRedmi Skills Can Be Dangerous To The Screen/device. Do Not Remove The Sticker Till The Complete Satisfaction, Sticker Removal Means Acceptance Of The Product. When You Are Certain That Everything Is Working Fine Then Your Technician Can Install it Permanently. it's Important To Keep The item In its Original Condition And Don't Remove The Sticker. We Do Not Offer For Manufacturing Defects But Not For Any Physical Damage Done By You Or Your Technician During Installation. Got A Broken Display In Your Phone? Buy The Complete Display With Touch Screen For Your Phone And Replace The Broken, Cracked, Or ScraTecnohed Screen In Your Handset. Fit With High Manufacturing Quality. With The Least Technical Know-how RequiRedmi, it Is Easiest To Replace The Display For Your Handset. The Replacement Combo Display With Touch For Your Phone Comes With A Manufacturing Quality And The ShApple iPhoneping Is Done In SecuRedmi Packing To Make Sure You Get The Product In Shape.
+listing-id: 0919FQ4YJ9A
+seller-sku: 1+10RLCD
+price: 2428
+quantity: 97
+open-date: 2025-09-19 19:57:09 IST
+image-url: 
+item-is-marketplace: y
+product-id-type: 1
+zshop-shipping-fee: 
+item-note: 
+item-condition: 11
+zshop-category1: 
+zshop-browse-path: 
+zshop-storefront-feature: 
+asin1: B0FRSYKD46
+asin2: 
+asin3: 
+will-ship-internationally: 
+expedited-shipping: 
+zshop-boldface: 
+product-id: B0FRSYKD46
+bid-for-featured-placement: 
+add-delete: 
+pending-quantity: 0
+fulfillment-channel: DEFAULT
+optional-payment-type-exclusion: 
+merchant-shipping-group: Migrated Template
+status: Active
+maximum-retail-price: 5699.0

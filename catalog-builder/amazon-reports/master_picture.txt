@@ -1,0 +1,136 @@
+============================================================
+MASTER PICTURE (Corrected)
+============================================================
+
+AMAZON LISTINGS (All Listings Report):
+  Total in system: 1430
+  Active: 186  (live on Seller Central)
+  Inactive: 1244  (paused/archived)
+
+YOUR PHYSICAL STOCK (actual stock.txt - in your office):
+  Unique variants: 100
+  Total physical units: 109
+
+SALES HISTORY (Sep 2025 - May 12, 2026):
+  Unique SKUs with orders: 192
+  Gross revenue: Rs.701,225
+  Refunds: Rs.375,457
+  Net revenue: Rs.325,768
+
+============================================================
+BRAND BREAKDOWN - YOUR PHYSICAL STOCK
+============================================================
+  MIX: 18 variants, 19 units, 3 have sold on Amazon
+  SAMSUNG: 12 variants, 15 units, 3 have sold on Amazon
+  XIAOMI/REDMI/POCO: 15 variants, 15 units, 7 have sold on Amazon
+  REALME: 14 variants, 14 units, 0 have sold on Amazon
+  OPPO: 10 variants, 14 units, 0 have sold on Amazon
+  ONEPLUS: 11 variants, 12 units, 2 have sold on Amazon
+  VIVO: 10 variants, 10 units, 3 have sold on Amazon
+  APPLE: 10 variants, 10 units, 0 have sold on Amazon
+
+============================================================
+STOCK NOT YET SOLD ON AMAZON
+============================================================
+82 variants (90 units) - in office but never sold:
+  [APPLE] iPhone 11 Incell | 1x | Incell LCD | Standard
+  [APPLE] iPhone 11 Pro Max OLED | 1x | OLED/AMOLED | Standard
+  [APPLE] iPhone 13 Incell | 1x | Incell LCD | Standard
+  [APPLE] iPhone 13 Pro Max Incell | 1x | Incell LCD | Standard
+  [APPLE] iPhone 13 Pro Max OLED | 1x | OLED/AMOLED | Standard
+  [APPLE] iPhone 13 Pro OLED | 1x | OLED/AMOLED | Standard
+  [APPLE] iPhone 14 Pro Max Incell | 1x | Incell LCD | Standard
+  [APPLE] iPhone 8 CareOG | 1x | Unknown | CareOG
+  [APPLE] iPhone 8 Plus Incell | 1x | Incell LCD | Standard
+  [APPLE] iPhone XS Incell | 1x | Incell LCD | Standard
+  [MIX] Asus ROG Phone 2 Incell | 1x | Incell LCD | Standard
+  [MIX] Asus Zenfone Max M2 Incell | 1x | Incell LCD | Standard
+  [MIX] Honor 7X Incell | 1x | Incell LCD | Standard
+  [MIX] Honor 7X White Incell | 1x | Incell LCD | Standard
+  [MIX] Honor 8C Incell | 1x | Incell LCD | Standard
+  [MIX] Honor 8X Incell | 1x | Incell LCD | Standard
+  [MIX] Honor X9B Incell | 1x | Incell LCD | Standard
+  [MIX] Infinix Hot 9 Incell | 1x | Incell LCD | Standard
+  [MIX] Infinix Note 10 Incell | 1x | Incell LCD | Standard
+  [MIX] Infinix Note 11S Incell | 1x | Incell LCD | Standard
+  [MIX] Nokia C3 Incell | 1x | Incell LCD | Standard
+  [MIX] Nokia G10 Incell | 1x | Incell LCD | Standard
+  [MIX] Nokia G20 Incell | 2x | Incell LCD | Standard
+  [MIX] Nokia G21 Incell | 1x | Incell LCD | Standard
+  [MIX] Nothing Phone 1 CareOG | 1x | Unknown | CareOG
+  [ONEPLUS] OnePlus 10 Pro CareOG | 1x | Unknown | CareOG
+  [ONEPLUS] OnePlus 10R Incell | 1x | Incell LCD | Standard
+  [ONEPLUS] OnePlus 11R CareOG | 1x | Unknown | CareOG
+  [ONEPLUS] OnePlus 7 CareOG | 1x | Unknown | CareOG
+  [ONEPLUS] OnePlus 7 Incell | 1x | Incell LCD | Standard
+  [ONEPLUS] OnePlus 8 CareOG | 2x | Unknown | CareOG
+  [ONEPLUS] OnePlus 8 Pro Incell | 1x | Incell LCD | Standard
+  [ONEPLUS] OnePlus 9 CareOG | 1x | Unknown | CareOG
+  [ONEPLUS] OnePlus 9RT Incell | 1x | Incell LCD | Standard
+  [OPPO] A53 CareOG | 2x | Unknown | CareOG
+  [OPPO] A54 5G Incell | 1x | Incell LCD | Standard
+  [OPPO] A57 5G CareOG | 3x | Unknown | CareOG
+  [OPPO] F17 Pro OLED | 1x | OLED/AMOLED | Standard
+  [OPPO] F19 OLED | 1x | OLED/AMOLED | Standard
+  [OPPO] F27 OLED | 1x | OLED/AMOLED | Standard
+  [OPPO] F5 Frame | 1x | Unknown | With Frame
+  [OPPO] F5 Incell | 1x | Incell LCD | Standard
+  [OPPO] F9 Incell | 1x | Incell LCD | Standard
+  [OPPO] Reno 10 Pro Plus CareOG | 2x | Unknown | CareOG
+  [REALME] Realme 11 Pro CareOG | 1x | Unknown | CareOG
+  [REALME] Realme 13 Pro CareOG | 1x | Unknown | CareOG
+  [REALME] Realme 3 Pro Frame | 1x | Unknown | With Frame
+  [REALME] Realme 7 Pro Incell | 1x | Incell LCD | Standard
+  [REALME] Realme 7i Incell | 1x | Incell LCD | Standard
+  [REALME] Realme 8 CareOG | 1x | Unknown | CareOG
+  [REALME] Realme 8i Incell | 1x | Incell LCD | Standard
+  [REALME] Realme 9 Incell | 1x | Incell LCD | Standard
+  [REALME] Realme 9i Incell | 1x | Incell LCD | Standard
+  [REALME] Realme C21 Incell | 1x | Incell LCD | Standard
+  [REALME] Realme C30 Incell | 1x | Incell LCD | Standard
+  [REALME] Realme C33 Incell | 1x | Incell LCD | Standard
+  [REALME] Realme C53 Incell | 1x | Incell LCD | Standard
+  [REALME] Realme C67 Incell | 1x | Incell LCD | Standard
+  [SAMSUNG] Galaxy A32 4G Incell | 1x | Incell LCD | Standard
+  [SAMSUNG] Galaxy A32 4G Incell | 1x | Incell LCD | Standard
+  [SAMSUNG] Galaxy A73 OLED | 1x | OLED/AMOLED | Standard
+  [SAMSUNG] Galaxy J7 2015 Incell | 1x | Incell LCD | Standard
+  [SAMSUNG] Galaxy J7 2016 Incell | 1x | Incell LCD | Standard
+  [SAMSUNG] Galaxy J7 Max Incell | 1x | Incell LCD | Standard
+  [SAMSUNG] Galaxy J7 Next Incell | 3x | Incell LCD | Standard
+  [SAMSUNG] Galaxy S20 FE With Frame OLED | 1x | OLED/AMOLED | With Frame
+  [SAMSUNG] Galaxy S21 FE OLED | 1x | OLED/AMOLED | Standard
+  [VIVO] Vivo T2x CareOG | 1x | Unknown | CareOG
+  [VIVO] Vivo V11 Pro CareOG | 1x | Unknown | CareOG
+  [VIVO] Vivo V17 CareOG | 1x | Unknown | CareOG
+  [VIVO] Vivo X70 Pro Plus CareOG | 1x | Unknown | CareOG
+  [VIVO] Vivo X80 CareOG | 1x | Unknown | CareOG
+  [VIVO] Vivo Y22 CareOG | 1x | Unknown | CareOG
+  [VIVO] Vivo Y22 Incell | 1x | Incell LCD | Standard
+  [XIAOMI/REDMI/POCO] 11X Incell | 1x | Incell LCD | Standard
+  [XIAOMI/REDMI/POCO] A3 Incell | 1x | Incell LCD | Standard
+  [XIAOMI/REDMI/POCO] K20 Incell | 1x | Incell LCD | Standard
+  [XIAOMI/REDMI/POCO] Redmi 10 Power Incell | 1x | Incell LCD | Standard
+  [XIAOMI/REDMI/POCO] Redmi 12 5G With Frame | 1x | Unknown | With Frame
+  [XIAOMI/REDMI/POCO] Redmi 12 With Frame | 1x | Unknown | With Frame
+  [XIAOMI/REDMI/POCO] Redmi 13 Pro Plus With Frame | 1x | Unknown | With Frame
+  [XIAOMI/REDMI/POCO] Redmi 4A With Frame Incell Black | 1x | Incell LCD | With Frame
+
+============================================================
+HIGH MARGIN SOLD ITEMS (net margin > 50%)
+============================================================
+  IP14PMGX: Rs.13,467 gross | Rs.0 refund | Rs.13,467 net | 100% margin
+  J6: Rs.11,188 gross | Rs.1,598 refund | Rs.9,590 net | 86% margin
+  MOTO1F+: Rs.8,831 gross | Rs.0 refund | Rs.8,831 net | 100% margin
+  RMEX2PROLED: Rs.10,687 gross | Rs.2,542 refund | Rs.8,146 net | 76% margin
+  MOTOG52: Rs.13,906 gross | Rs.5,960 refund | Rs.7,946 net | 57% margin
+  V20: Rs.11,054 gross | Rs.3,685 refund | Rs.7,370 net | 67% margin
+  TCCM20/CM20Pro: Rs.10,864 gross | Rs.3,622 refund | Rs.7,242 net | 67% margin
+  1+8ProLCD: Rs.6,863 gross | Rs.0 refund | Rs.6,863 net | 100% margin
+  GLXS20UltraWFLED: Rs.6,295 gross | Rs.0 refund | Rs.6,295 net | 100% margin
+  IP13ProLCD: Rs.6,098 gross | Rs.0 refund | Rs.6,098 net | 100% margin
+  OPOF11PROG: Rs.7,030 gross | Rs.1,440 refund | Rs.5,590 net | 80% margin
+  A50: Rs.7,030 gross | Rs.2,710 refund | Rs.4,319 net | 61% margin
+  A6+: Rs.7,030 gross | Rs.2,710 refund | Rs.4,319 net | 61% margin
+  MI-L8YY-8PTI: Rs.5,081 gross | Rs.1,270 refund | Rs.3,811 net | 75% margin
+  OP5OLED: Rs.5,103 gross | Rs.2,551 refund | Rs.2,552 net | 50% margin

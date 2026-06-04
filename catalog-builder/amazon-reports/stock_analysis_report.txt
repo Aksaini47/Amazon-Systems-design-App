@@ -1,0 +1,729 @@
+====================================================================================================
+ACTUAL STOCK vs AMAZON INVENTORY - DETAILED ANALYSIS WITH QUANTITIES
+====================================================================================================
+Total stock: 100 variants, 109 units
+
+STOCK SUMMARY BY BRAND:
+------------------------------------------------------------
+  Mixed                       19 units
+  Samsung                     15 units
+  XIAOMI/REDMI/POCO           15 units
+  Realme                      14 units
+  Oppo                        14 units
+  OnePlus                     12 units
+  Vivo                        10 units
+  Apple                       10 units
+
+====================================================================================================
+Realme - 14 variants, 14 units
+----------------------------------------------------------------------------------------------------
+
+[1x] Realme C67 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: RLM10Pro+LCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.3239
+     Title: Compatible for Realme 10 Pro+ LCD (No Fingerprint Support) Display+Touch Screen 
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Realme 8 CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: RM85GCARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 2 | Rs.2789
+     Title: Compatible for Realme 8 (5G) CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Realme 7i Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: RLM10Pro+LCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.3239
+     Title: Compatible for Realme 10 Pro+ LCD (No Fingerprint Support) Display+Touch Screen 
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Realme 9 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: RLM10Pro+LCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.3239
+     Title: Compatible for Realme 10 Pro+ LCD (No Fingerprint Support) Display+Touch Screen 
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Realme C33 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: RLM10Pro+LCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.3239
+     Title: Compatible for Realme 10 Pro+ LCD (No Fingerprint Support) Display+Touch Screen 
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Realme 11 Pro CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: RM85GCARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 2 | Rs.2789
+     Title: Compatible for Realme 8 (5G) CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Realme 9i Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: RME9iOG
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.2474
+     Title: Compatible for Realme 9i (4G) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Realme C21 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: RMEC21YOG
+     Amazon: LCD/Standard | Status: Active | Qty: 100 | Rs.1915
+     Title: Compatible for Realme C21Y LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Realme C30 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: RLM10Pro+LCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.3239
+     Title: Compatible for Realme 10 Pro+ LCD (No Fingerprint Support) Display+Touch Screen 
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Realme C53 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: RLM10Pro+LCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.3239
+     Title: Compatible for Realme 10 Pro+ LCD (No Fingerprint Support) Display+Touch Screen 
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Realme 8i Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: RME8IOG
+     Amazon: LCD/Standard | Status: Active | Qty: 100 | Rs.2671
+     Title: Compatible for Realme 8i LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Realme 13 Pro CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: RM85GCARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 2 | Rs.2789
+     Title: Compatible for Realme 8 (5G) CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Realme 3 Pro Frame
+      Screen: Not Specified | Quality: With Frame
+  -> ACTIVE: RLM10Pro+LCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.3239
+     Title: Compatible for Realme 10 Pro+ LCD (No Fingerprint Support) Display+Touch Screen 
+     [WARN] MISMATCH: Screen: stock=Not Specified vs listing=LCD | Quality: stock=With Frame vs listing=Standard
+
+
+[1x] Realme 7 Pro Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: RLM10Pro+LCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.3239
+     Title: Compatible for Realme 10 Pro+ LCD (No Fingerprint Support) Display+Touch Screen 
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+====================================================================================================
+Vivo - 10 variants, 10 units
+----------------------------------------------------------------------------------------------------
+
+[1x] Vivo Y33s Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: V15PRO
+     Amazon: LCD/Standard | Status: Active | Qty: 99 | Rs.2475
+     Title: Compatible for Vivo V15 Pro (No Fingerprint Support) LCD Display+Touch Screen Co
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Vivo Y22 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: V15PRO
+     Amazon: LCD/Standard | Status: Active | Qty: 99 | Rs.2475
+     Title: Compatible for Vivo V15 Pro (No Fingerprint Support) LCD Display+Touch Screen Co
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Vivo Y22 CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: Y22CARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 1 | Rs.2462
+     Title: Compatible for Vivo Y22/Y22s CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Vivo T1 CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: Y02CARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 1 | Rs.2226
+     Title: Compatible for Vivo Y02/Y02T/Y02A CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Vivo T2x CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: Y02CARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 1 | Rs.2226
+     Title: Compatible for Vivo Y02/Y02T/Y02A CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Vivo X70 Pro Plus CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: Y02CARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 1 | Rs.2226
+     Title: Compatible for Vivo Y02/Y02T/Y02A CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Vivo V11 Pro CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: Y02CARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 1 | Rs.2226
+     Title: Compatible for Vivo Y02/Y02T/Y02A CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Vivo V17 CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: Y02CARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 1 | Rs.2226
+     Title: Compatible for Vivo Y02/Y02T/Y02A CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Vivo V15 CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: Y02CARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 1 | Rs.2226
+     Title: Compatible for Vivo Y02/Y02T/Y02A CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Vivo X80 CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: Y02CARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 1 | Rs.2226
+     Title: Compatible for Vivo Y02/Y02T/Y02A CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+====================================================================================================
+Oppo - 10 variants, 14 units
+----------------------------------------------------------------------------------------------------
+
+[1x] F17 Pro OLED
+      Screen: OLED | Quality: Standard
+  -> ACTIVE: TCCM20/CM20Pro
+     Amazon: OLED/Standard | Status: Active | Qty: 97 | Rs.4499
+     Title: Compatible for Tecno Camon 20/Camon 20 Pro OLED (Fingerprint Support) Display+To
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[2x] A53 CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: OPA535GCARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 1 | Rs.2462
+     Title: Compatible for Oppo A53 (5G) CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[3x] A57 5G CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: OPA57/57S4GCARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 1 | Rs.2095
+     Title: Compatible for Oppo A57/A57s (4G) CareOG Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] F19 OLED
+      Screen: OLED | Quality: Standard
+  -> ACTIVE: OPF19/PROOG
+     Amazon: LCD/Standard | Status: Active | Qty: 100 | Rs.2276
+     Title: Compatible for Oppo F19/F19 Pro (No Fingerprint Support) LCD Display+Touch Scree
+     [WARN] MISMATCH: Screen: stock=OLED vs listing=LCD
+
+
+[1x] A54 5G Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: OPOA545GOG
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.2227
+     Title: Compatible for Oppo A54 (5G) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] F27 OLED
+      Screen: OLED | Quality: Standard
+  -> ACTIVE: OPF275GLCD
+     Amazon: LCD/Standard | Status: Active | Qty: 100 | Rs.2799
+     Title: Compatible for Oppo F27 5G LCD (No Fingerprint Support) Display+Touch Screen Com
+     [WARN] MISMATCH: Screen: stock=OLED vs listing=LCD
+
+
+[1x] F9 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: OPF9/proOG
+     Amazon: LCD/Standard | Status: Active | Qty: 99 | Rs.1768
+     Title: Compatible for Oppo F9/F9 Pro LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[2x] Reno 10 Pro Plus CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: RNO2ZINCELL
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.2315
+     Title: Compatible for Oppo Reno 2Z (No Fingerprint Support) LCD Display+Touch Screen Co
+     [WARN] MISMATCH: Screen: stock=Not Specified vs listing=LCD | Quality: stock=CareOG vs listing=Standard
+
+
+[1x] F5 Frame
+      Screen: Not Specified | Quality: With Frame
+  -> ACTIVE: OPOF5BCARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 1 | Rs.2474
+     Title: Compatible for Oppo F5 (Black) CareOG Display+Touch Screen Combo Folder
+     [WARN] MISMATCH: Quality: stock=With Frame vs listing=CareOG
+
+
+[1x] F5 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: OPOF5BCARE
+     Amazon: Not Specified/CareOG | Status: Active | Qty: 1 | Rs.2474
+     Title: Compatible for Oppo F5 (Black) CareOG Display+Touch Screen Combo Folder
+     [WARN] MISMATCH: Screen: stock=Incell LCD vs listing=Not Specified | Quality: stock=Standard vs listing=CareOG
+
+====================================================================================================
+OnePlus - 11 variants, 12 units
+----------------------------------------------------------------------------------------------------
+
+[2x] OnePlus 8 CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: 1+10RLCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.2428
+     Title: Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Com
+     [WARN] MISMATCH: Screen: stock=Not Specified vs listing=LCD | Quality: stock=CareOG vs listing=Standard
+
+
+[1x] OnePlus 10 Pro CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: 1+10RLCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.2428
+     Title: Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Com
+     [WARN] MISMATCH: Screen: stock=Not Specified vs listing=LCD | Quality: stock=CareOG vs listing=Standard
+
+
+[1x] OnePlus 7 CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: 1+10RLCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.2428
+     Title: Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Com
+     [WARN] MISMATCH: Screen: stock=Not Specified vs listing=LCD | Quality: stock=CareOG vs listing=Standard
+
+
+[1x] OnePlus 7 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: 1+10RLCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.2428
+     Title: Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Com
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] OnePlus 8 Pro Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: 1+10RLCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.2428
+     Title: Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Com
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] OnePlus 10R Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: 1+10RLCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.2428
+     Title: Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Com
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] OnePlus 11R CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: 1+10RLCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.2428
+     Title: Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Com
+     [WARN] MISMATCH: Screen: stock=Not Specified vs listing=LCD | Quality: stock=CareOG vs listing=Standard
+
+
+[1x] OnePlus Nord CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: NORD2UNI
+     Amazon: LCD/Standard | Status: Active | Qty: 96 | Rs.2737
+     Title: Compatible for OnePlus Nord 2 (No Fingerprint Support) LCD Display+Touch Screen 
+     [WARN] MISMATCH: Screen: stock=Not Specified vs listing=LCD | Quality: stock=CareOG vs listing=Standard
+
+
+[1x] OnePlus 9RT Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: 1+9RtLCD
+     Amazon: LCD/Standard | Status: Active | Qty: 2 | Rs.2498
+     Title: Compatible for OnePlus 9Rt LCD (No Fingerprint Support) Display+Touch Screen Com
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] OnePlus 9 CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: 1+10RLCD
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.2428
+     Title: Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Com
+     [WARN] MISMATCH: Screen: stock=Not Specified vs listing=LCD | Quality: stock=CareOG vs listing=Standard
+
+
+[1x] OnePlus Nord CE 2 Lite Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: P2-NAQO-T7PA
+     Amazon: LCD/Standard | Status: Active | Qty: 100 | Rs.2469
+     Title: Compatible for OnePlus Nord CE 2 Lite LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+====================================================================================================
+Apple - 10 variants, 10 units
+----------------------------------------------------------------------------------------------------
+
+[1x] iPhone 13 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: J2-UX7K-WFHB
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.1885
+     Title: Compatible for Apple iPhone 6s (Black) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] iPhone 13 Pro OLED
+      Screen: OLED | Quality: Standard
+  -> ACTIVE: IP13PMGX
+     Amazon: OLED/Standard | Status: Active | Qty: 1 | Rs.10174
+     Title: Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Fold
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] iPhone 13 Pro Max OLED
+      Screen: OLED | Quality: Standard
+  -> ACTIVE: IP13PMGX
+     Amazon: OLED/Standard | Status: Active | Qty: 1 | Rs.10174
+     Title: Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Fold
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] iPhone 13 Pro Max Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: J2-UX7K-WFHB
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.1885
+     Title: Compatible for Apple iPhone 6s (Black) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] iPhone 11 Pro Max OLED
+      Screen: OLED | Quality: Standard
+  -> ACTIVE: IP13PMGX
+     Amazon: OLED/Standard | Status: Active | Qty: 1 | Rs.10174
+     Title: Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Fold
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] iPhone 11 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: J2-UX7K-WFHB
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.1885
+     Title: Compatible for Apple iPhone 6s (Black) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] iPhone 8 Plus Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: J2-UX7K-WFHB
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.1885
+     Title: Compatible for Apple iPhone 6s (Black) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] iPhone 8 CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: IP13PMGX
+     Amazon: OLED/Standard | Status: Active | Qty: 1 | Rs.10174
+     Title: Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Fold
+     [WARN] MISMATCH: Screen: stock=Not Specified vs listing=OLED | Quality: stock=CareOG vs listing=Standard
+
+
+[1x] iPhone XS Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: J2-UX7K-WFHB
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.1885
+     Title: Compatible for Apple iPhone 6s (Black) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] iPhone 14 Pro Max Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: J2-UX7K-WFHB
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.1885
+     Title: Compatible for Apple iPhone 6s (Black) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+====================================================================================================
+Samsung - 12 variants, 15 units
+----------------------------------------------------------------------------------------------------
+
+[1x] Galaxy A73 OLED
+      Screen: OLED | Quality: Standard
+  -> ACTIVE: GJ7NXTBLED
+     Amazon: OLED/Standard | Status: Active | Qty: 1 | Rs.2938
+     Title: Compatible for Samsung Galaxy J7 Nxt (Black) OLED Display+Touch Screen Combo Fol
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Galaxy A32 4G Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: A324G
+     Amazon: LCD/Standard | Status: Active | Qty: 100 | Rs.2050
+     Title: Compatible for Samsung Galaxy A32 (4G) (No Fingerprint Support) LCD Display+Touc
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Galaxy A32 4G Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: A324G
+     Amazon: LCD/Standard | Status: Active | Qty: 100 | Rs.2050
+     Title: Compatible for Samsung Galaxy A32 (4G) (No Fingerprint Support) LCD Display+Touc
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Galaxy A31 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: A31
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.2049
+     Title: Compatible for Samsung Galaxy A31 (No Fingerprint Support) LCD Display+Touch Scr
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Galaxy S21 FE OLED
+      Screen: OLED | Quality: Standard
+  -> ACTIVE: GJ7NXTBLED
+     Amazon: OLED/Standard | Status: Active | Qty: 1 | Rs.2938
+     Title: Compatible for Samsung Galaxy J7 Nxt (Black) OLED Display+Touch Screen Combo Fol
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Galaxy S20 FE With Frame OLED
+      Screen: OLED | Quality: With Frame
+  -> ACTIVE: 79-BD48-06Y2
+     Amazon: LCD/Standard | Status: Active | Qty: 98 | Rs.1699
+     Title: Compatible for Samsung Galaxy A13 (4G) LCD Display+Touch Screen Combo Folder
+     [WARN] MISMATCH: Screen: stock=OLED vs listing=LCD | Quality: stock=With Frame vs listing=Standard
+
+
+[3x] Galaxy J7 Next Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: 79-BD48-06Y2
+     Amazon: LCD/Standard | Status: Active | Qty: 98 | Rs.1699
+     Title: Compatible for Samsung Galaxy A13 (4G) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Galaxy J7 2016 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: 79-BD48-06Y2
+     Amazon: LCD/Standard | Status: Active | Qty: 98 | Rs.1699
+     Title: Compatible for Samsung Galaxy A13 (4G) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Galaxy J7 2015 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: 79-BD48-06Y2
+     Amazon: LCD/Standard | Status: Active | Qty: 98 | Rs.1699
+     Title: Compatible for Samsung Galaxy A13 (4G) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[2x] Galaxy A30s Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: A30S
+     Amazon: LCD/Standard | Status: Active | Qty: 2 | Rs.2298
+     Title: Compatible for Samsung Galaxy A30s (No Fingerprint Support) LCD Display+Touch Sc
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Galaxy J7 Max Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: 79-BD48-06Y2
+     Amazon: LCD/Standard | Status: Active | Qty: 98 | Rs.1699
+     Title: Compatible for Samsung Galaxy A13 (4G) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Galaxy A10 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: A10S
+     Amazon: LCD/Standard | Status: Active | Qty: 100 | Rs.1966
+     Title: Compatible for Samsung Galaxy A10s LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+====================================================================================================
+Xiaomi/Redmi/Poco - 0 variants, 0 units
+----------------------------------------------------------------------------------------------------
+====================================================================================================
+Mixed - 18 variants, 19 units
+----------------------------------------------------------------------------------------------------
+
+[1x] Nothing Phone 1 CareOG
+      Screen: Not Specified | Quality: CareOG
+  -> ACTIVE: IP13PMGX
+     Amazon: OLED/Standard | Status: Active | Qty: 1 | Rs.10174
+     Title: Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Fold
+     [WARN] MISMATCH: Screen: stock=Not Specified vs listing=OLED | Quality: stock=CareOG vs listing=Standard
+
+
+[1x] Infinix Note 10 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: INFNOT10TFT
+     Amazon: TFT LCD/Standard | Status: Active | Qty: 99 | Rs.2040
+     Title: for Infinix Note 10 Compatible LCD/TFT - Display Screen Replacement Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Infinix Hot 9 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: HOT11PLAY
+     Amazon: LCD/Standard | Status: Active | Qty: 100 | Rs.2276
+     Title: Compatible for Infinix Hot 11 Play LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Infinix Note 11S Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: INFNOT10TFT
+     Amazon: TFT LCD/Standard | Status: Active | Qty: 99 | Rs.2040
+     Title: for Infinix Note 10 Compatible LCD/TFT - Display Screen Replacement Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Honor 7X Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: HNR7XW
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.1814
+     Title: Compatible for Honor 7X (White) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Honor 7X White Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: HNR7XW
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.1814
+     Title: Compatible for Honor 7X (White) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Honor 8C Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: HNR7XW
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.1814
+     Title: Compatible for Honor 7X (White) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Honor 8X Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: HNR7XW
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.1814
+     Title: Compatible for Honor 7X (White) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Honor X9B Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: HNR7XW
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.1814
+     Title: Compatible for Honor 7X (White) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Nokia G10 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: NKG10
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.2047
+     Title: Compatible for Nokia G10 LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[2x] Nokia G20 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: NKG20
+     Amazon: LCD/Standard | Status: Active | Qty: 2 | Rs.2462
+     Title: Compatible for Nokia G20 LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Nokia G21 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: NKG10
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.2047
+     Title: Compatible for Nokia G10 LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Nokia C3 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: NKG10
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.2047
+     Title: Compatible for Nokia G10 LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Moto G9 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: MOTOG9
+     Amazon: LCD/Standard | Status: Active | Qty: 100 | Rs.2474
+     Title: Compatible for Motorola Moto G9/G9 Play LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Moto Edge 50 Fusion Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: MOTO1F+
+     Amazon: LCD/Standard | Status: Active | Qty: 96 | Rs.2605
+     Title: Compatible for Motorola Moto One Fusion+ LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Moto G34 Frame
+      Screen: Not Specified | Quality: With Frame
+  -> ACTIVE: MOTO1F+
+     Amazon: LCD/Standard | Status: Active | Qty: 96 | Rs.2605
+     Title: Compatible for Motorola Moto One Fusion+ LCD Display+Touch Screen Combo Folder
+     [WARN] MISMATCH: Screen: stock=Not Specified vs listing=LCD | Quality: stock=With Frame vs listing=Standard
+
+
+[1x] Asus Zenfone Max M2 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: ZFMXPROM1TFT
+     Amazon: LCD/Standard | Status: Active | Qty: 97 | Rs.2148
+     Title: Compatible for Asus Zenfone Max Pro M1 LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+
+[1x] Asus ROG Phone 2 Incell
+      Screen: Incell LCD | Quality: Standard
+  -> ACTIVE: J2-UX7K-WFHB
+     Amazon: LCD/Standard | Status: Active | Qty: 1 | Rs.1885
+     Title: Compatible for Apple iPhone 6s (Black) LCD Display+Touch Screen Combo Folder
+     [OK] QUALITY MATCH - Screen & Quality correctly aligned
+
+====================================================================================================
+SUMMARY
+====================================================================================================
+
+ACTIVE LISTINGS: 92 variants (101 units)
+INACTIVE LISTINGS: 5 variants (5 units)
+NOT LISTED AT ALL: 3 variants (3 units)
+
+TOTAL: 100 variants, 109 units

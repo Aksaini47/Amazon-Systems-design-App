@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Orders · Mahika cockpit{% endblock %}
+{% block content %}
+<h2>Orders</h2>
+<form class="filter-form" method="get">
+  <label for="state">State</label>
+  <select name="state" id="state">
+    <option value="">All</option>
+    {% for s in all_states %}
+    <option value="{{ s }}" {% if state == s %}selected{% endif %}>{{ s }}</option>
+    {% endfor %}
+  </select>
+  <label for="verdict">Verdict</label>
+  <select name="verdict" id="verdict">
+    <option value="">Any</option>
+    {% for v in all_verdicts %}
+    <option value="{{ v }}" {% if verdict == v %}selected{% endif %}>{{ v }}</option>
+    {% endfor %}
+  </select>
+  <label for="limit">Limit</label>
+  <input name="limit" id="limit" type="number" value="{{ limit }}" min="10" max="500">
+  <button type="submit">Filter</button>
+</form>
+
+{% if orders %}
+<table>
+  <thead>
+    <tr>
+      <th>Order ID</th><th>State</th><th>Verdict</th><th>Captured</th>
+      <th>Refund</th><th>Amount</th><th>Updated</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for o in orders %}
+    <tr>
+      <td><code>{{ o.order_id }}</code></td>
+      <td><span class="pill pill-{{ o.state_pill }}">{{ o.state }}</span></td>
+      <td>{{ o.verdict or '—' }}</td>
+      <td>{{ o.captured_at_str }}</td>
+      <td>{{ o.refund_processed_at_str or '—' }}</td>
+      <td>{% if o.refund_amount_paise %}₹{{ "%.2f"|format(o.refund_amount_paise / 100) }}{% else %}—{% endif %}</td>
+      <td>{{ o.updated_at_str }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<p class="muted">Showing {{ orders|length }} of {{ total }} orders matching filter.</p>
+{% else %}
+<p class="muted">No orders match the current filter.</p>
+{% endif %}
+{% endblock %}

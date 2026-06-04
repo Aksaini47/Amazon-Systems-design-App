@@ -1,0 +1,118 @@
+actual stock
+
+
+REALME
+Realme C67 Incell  
+Realme 8 CareOG  
+Realme 7i Incell  
+Realme 9 Incell  
+Realme C33 Incell  
+Realme 11 Pro CareOG  
+Realme 9i Incell  
+Realme C21 Incell  
+Realme C30 Incell  
+Realme C53 Incell  
+Realme 8i Incell  
+Realme 13 Pro CareOG  
+Realme 3 Pro Frame  
+Realme 7 Pro Incell  
+
+VIVO
+Vivo Y33s Incell  
+Vivo Y22 Incell  
+Vivo Y22 CareOG  
+Vivo T1 CareOG  
+Vivo T2x CareOG  
+Vivo X70 Pro Plus CareOG  
+Vivo V11 Pro CareOG  
+Vivo V17 CareOG  
+Vivo V15 CareOG  
+Vivo X80 CareOG  
+
+OPPO
+F17 Pro OLED  
+A53 CareOG - 2  
+A57 5G CareOG - 3  
+F19 OLED  
+A54 5G Incell  
+F27 OLED  
+F9 Incell  
+Reno 10 Pro Plus CareOG - 2  
+F5 Frame  
+F5 Incell  
+
+ONEPLUS
+OnePlus 8 CareOG - 2  
+OnePlus 10 Pro CareOG  
+OnePlus 7 CareOG  
+OnePlus 7 Incell  
+OnePlus 8 Pro Incell  
+OnePlus 10R Incell  
+OnePlus 11R CareOG  
+OnePlus Nord CareOG  
+OnePlus 9RT Incell  
+OnePlus 9 CareOG  
+OnePlus Nord CE 2 Lite Incell  
+
+APPLE
+iPhone 13 Incell  
+iPhone 13 Pro OLED  
+iPhone 13 Pro Max OLED  
+iPhone 13 Pro Max Incell  
+iPhone 11 Pro Max OLED  
+iPhone 11 Incell  
+iPhone 8 Plus Incell  
+iPhone 8 CareOG  
+iPhone XS Incell  
+iPhone 14 Pro Max Incell  
+
+SAMSUNG
+Galaxy A73 OLED  
+Galaxy A32 4G Incell  
+Galaxy A32 4G Incell  
+Galaxy A31 Incell  
+Galaxy S21 FE OLED  
+Galaxy S20 FE With Frame OLED  
+Galaxy J7 Next Incell - 3  
+Galaxy J7 2016 Incell  
+Galaxy J7 2015 Incell  
+Galaxy A30s Incell - 2  
+Galaxy J7 Max Incell  
+Galaxy A10 Incell  
+
+XIAOMI/REDMI/POCO
+Redmi Note 5 With Frame White  
+11X OLED  
+11X Incell  
+Redmi 4A With Frame Incell Black  
+A3 Incell  
+Redmi Note 10T With Frame  
+K20 Incell  
+Redmi 12 With Frame  
+Redmi 12 5G With Frame  
+Redmi 13 Pro Plus With Frame  
+Redmi 10 Power Incell  
+Redmi Note 6 Pro Incell  
+Redmi Note 7 Incell  
+Poco X3 Incell  
+Poco M4 Incell  
+
+MIX
+Nothing Phone 1 CareOG  
+Infinix Note 10 Incell  
+Infinix Hot 9 Incell  
+Infinix Note 11S Incell  
+Honor 7X Incell  
+Honor 7X White Incell  
+Honor 8C Incell  
+Honor 8X Incell  
+Honor X9B Incell  
+Nokia G10 Incell  
+Nokia G20 Incell - 2  
+Nokia G21 Incell  
+Nokia C3 Incell  
+Moto G9 Incell  
+Moto Edge 50 Fusion Incell  
+Moto G34 Frame  
+Asus Zenfone Max M2 Incell  
+Asus ROG Phone 2 Incell  

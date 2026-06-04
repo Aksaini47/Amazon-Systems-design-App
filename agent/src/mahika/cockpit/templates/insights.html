@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Insights · Mahika cockpit{% endblock %}
+{% block content %}
+<h2>Insights & suggestions</h2>
+
+<h3>Pending suggestions ({{ pending|length }})</h3>
+{% if pending %}
+<p class="muted">Mahika never auto-applies suggestions — Sir reviews each one.</p>
+<div class="grid">
+  {% for s in pending %}
+  <div class="card">
+    <div class="flex" style="justify-content: space-between;">
+      <div>
+        <strong>{{ s.title }}</strong>
+        <div class="muted">Proposed {{ s.suggested_at_str }}</div>
+      </div>
+      <div class="flex">
+        <form method="post" action="/insights/decide" style="display:inline;">
+          <input type="hidden" name="suggestion_id" value="{{ s.id }}">
+          <input type="hidden" name="decision" value="approved">
+          <button class="btn-primary btn-good" type="submit">Approve</button>
+        </form>
+        <form method="post" action="/insights/decide" style="display:inline;">
+          <input type="hidden" name="suggestion_id" value="{{ s.id }}">
+          <input type="hidden" name="decision" value="rejected">
+          <button class="btn-primary btn-warn" type="submit">Reject</button>
+        </form>
+      </div>
+    </div>
+    <p>{{ s.body }}</p>
+    <p class="muted"><em>Rationale:</em> {{ s.rationale or '—' }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="muted">No pending suggestions. Mahika will surface new ones every Sunday at 23:00 UTC.</p>
+{% endif %}
+
+<h3>Recent insight metrics</h3>
+{% if insights %}
+<table>
+  <thead>
+    <tr>
+      <th>Generated</th><th>Period</th><th>Pattern</th>
+      <th>Metric</th><th>Value</th><th>n</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for i in insights %}
+    <tr>
+      <td>{{ i.generated_at_str }}</td>
+      <td>{{ i.period_start }} → {{ i.period_end }}</td>
+      <td>{{ i.pattern_type }}</td>
+      <td>{{ i.metric_label }}</td>
+      <td>{% if i.metric_value is not none %}{{ "%.3f"|format(i.metric_value) }}{% else %}—{% endif %}</td>
+      <td>{{ i.sample_size or '—' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">Insights Engine hasn't run yet — wait for Sunday 23:00 UTC or run manually:
+<code>python -m mahika.cli start --once</code></p>
+{% endif %}
+
+<h3>Decided (approved + rejected, recent 20)</h3>
+{% if decided %}
+<table>
+  <thead>
+    <tr><th>Title</th><th>Status</th><th>Decided</th><th>By</th><th>Reason</th></tr>
+  </thead>
+  <tbody>
+    {% for s in decided %}
+    <tr>
+      <td>{{ s.title }}</td>
+      <td>
+        <span class="pill pill-{{ 'good' if s.status == 'approved' else 'warn' }}">{{ s.status }}</span>
+      </td>
+      <td>{{ s.decided_at_str or '—' }}</td>
+      <td>{{ s.decided_by or '—' }}</td>
+      <td>{{ s.rejection_reason or '—' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">No decisions on file yet.</p>
+{% endif %}
+{% endblock %}

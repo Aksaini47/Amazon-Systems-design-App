@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Audit log · Mahika cockpit{% endblock %}
+{% block content %}
+<h2>Audit log</h2>
+<form class="filter-form" method="get">
+  <label for="event_type">Event type</label>
+  <input id="event_type" name="event_type" value="{{ event_type or '' }}" placeholder="e.g. claim.queued">
+  <label for="order_id">Order</label>
+  <input id="order_id" name="order_id" value="{{ order_id or '' }}" placeholder="407-...">
+  <label for="limit">Limit</label>
+  <input id="limit" name="limit" type="number" min="20" max="1000" value="{{ limit }}">
+  <button type="submit">Filter</button>
+</form>
+
+{% if rows %}
+<table>
+  <thead>
+    <tr>
+      <th>When (UTC)</th><th>Actor</th><th>Event</th><th>Order</th>
+      <th>State before → after</th><th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.event_at_str }}</td>
+      <td><code>{{ r.actor }}</code></td>
+      <td>{{ r.event_type }}</td>
+      <td>{% if r.order_id %}<code>{{ r.order_id }}</code>{% else %}—{% endif %}</td>
+      <td>
+        {% if r.state_before or r.state_after %}
+        {{ r.state_before or '—' }} → {{ r.state_after or '—' }}
+        {% else %}—{% endif %}
+      </td>
+      <td>{{ r.reason or '—' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<p class="muted">Showing {{ rows|length }} rows ordered newest-first.</p>
+{% else %}
+<p class="muted">No audit rows match the current filter.</p>
+{% endif %}
+{% endblock %}

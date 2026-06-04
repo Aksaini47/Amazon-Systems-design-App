@@ -1,0 +1,178 @@
+STOCK vs AMAZON LISTING - PROPER MAPPING (Clean Model)
+============================================================================================================================================
+Total stock: 100 variants, 109 units
+ACTIVE + EXACT (screen+quality match): 11
+ACTIVE + MISMATCH: 0
+ONLY INACTIVE: 14
+NOT LISTED: 75
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+ACTIVE + EXACT MATCH:
+--------------------------------------------------------------------------------------------------------------------------------------------
+[REALME] Realme 7 Pro Incell | qty:1 | STOCK:Incell LCD/Standard -> RME7PROG | LIST:LCD/Standard | qty:100 | Rs.2050
+  Compatible for Realme 7 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+
+[VIVO] Vivo Y22 CareOG | qty:1 | STOCK:Not Specified/CareOG -> Y22CARE | LIST:Not Specified/CareOG | qty:1 | Rs.2462
+  Compatible for Vivo Y22/Y22s CareOG Display+Touch Screen Combo Folder
+
+[OPPO] F9 Incell | qty:1 | STOCK:Incell LCD/Standard -> OPF9/proOG | LIST:LCD/Standard | qty:99 | Rs.1768
+  Compatible for Oppo F9/F9 Pro LCD Display+Touch Screen Combo Folder
+
+[ONEPLUS] OnePlus Nord CE 2 Lite Incell | qty:1 | STOCK:Incell LCD/Standard -> NORD2UNI | LIST:LCD/Standard | qty:96 | Rs.2737
+  Compatible for OnePlus Nord 2 (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+
+[XIAOMI/REDMI/POCO] K20 Incell | qty:1 | STOCK:Incell LCD/Standard -> MIK20 | LIST:LCD/Standard | qty:1 | Rs.2474
+  Compatible for Redmi K20/K20 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+
+[XIAOMI/REDMI/POCO] Redmi 10 Power Incell | qty:1 | STOCK:Incell LCD/Standard -> MI10POWER | LIST:LCD/Standard | qty:1 | Rs.1932
+  Compatible for Redmi 10 Power LCD Display+Touch Screen Combo Folder
+
+[XIAOMI/REDMI/POCO] Redmi Note 6 Pro Incell | qty:1 | STOCK:Incell LCD/Standard -> INN10P | LIST:LCD/Standard | qty:99 | Rs.2737
+  Compatible for Infinix Note 10 Pro LCD Display+Touch Screen Combo Folder
+
+[MIX] Infinix Note 11S Incell | qty:1 | STOCK:Incell LCD/Standard -> INN10P | LIST:LCD/Standard | qty:99 | Rs.2737
+  Compatible for Infinix Note 10 Pro LCD Display+Touch Screen Combo Folder
+
+[MIX] Nokia G10 Incell | qty:1 | STOCK:Incell LCD/Standard -> MOTOG10 | LIST:LCD/Standard | qty:100 | Rs.2069
+  Compatible for Motorola Moto G10/G10 Power LCD Display+Touch Screen Combo Folder
+
+[MIX] Moto G9 Incell | qty:1 | STOCK:Incell LCD/Standard -> MOTOG9 | LIST:LCD/Standard | qty:100 | Rs.2474
+  Compatible for Motorola Moto G9/G9 Play LCD Display+Touch Screen Combo Folder
+
+[MIX] Asus Zenfone Max M2 Incell | qty:1 | STOCK:Incell LCD/Standard -> ZFMXPROM1TFT | LIST:LCD/Standard | qty:97 | Rs.2148
+  Compatible for Asus Zenfone Max Pro M1 LCD Display+Touch Screen Combo Folder
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+ACTIVE + SCREEN/QUALITY MISMATCH:
+--------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+ONLY INACTIVE:
+--------------------------------------------------------------------------------------------------------------------------------------------
+[REALME] Realme 11 Pro CareOG | STOCK:Not Specified/CareOG | RLM11ProOG | status:Inactive | LIST:Not Specified/CareOG
+
+[VIVO] Vivo Y33s Incell | STOCK:Incell LCD/Standard | Y33S | status:Inactive | LIST:LCD/Standard
+
+[VIVO] Vivo Y22 Incell | STOCK:Incell LCD/Standard | Y22 | status:Inactive | LIST:LCD/Standard
+
+[VIVO] Vivo X70 Pro Plus CareOG | STOCK:Not Specified/CareOG | VVX70Pro+OG | status:Inactive | LIST:Not Specified/CareOG
+
+[VIVO] Vivo V11 Pro CareOG | STOCK:Not Specified/CareOG | V11PROLED | status:Inactive | LIST:Not Specified/CareOG
+
+[OPPO] Reno 10 Pro Plus CareOG | STOCK:Not Specified/CareOG | OPAssOG | status:Inactive | LIST:Not Specified/CareOG
+
+[ONEPLUS] OnePlus 10 Pro CareOG | STOCK:Not Specified/CareOG | 1+10PROCARE | status:Inactive | LIST:Not Specified/CareOG
+
+[ONEPLUS] OnePlus 8 Pro Incell | STOCK:Incell LCD/Standard | 1+8ProLCD | status:Inactive | LIST:LCD/Standard
+
+[ONEPLUS] OnePlus Nord CareOG | STOCK:Not Specified/CareOG | CE2LYTCARE | status:Inactive | LIST:Not Specified/CareOG
+
+[XIAOMI/REDMI/POCO] Redmi 12 With Frame | STOCK:Not Specified/With Frame | MI12CARE | status:Inactive | LIST:Not Specified/CareOG
+
+[XIAOMI/REDMI/POCO] Redmi Note 7 Incell | STOCK:Incell LCD/Standard | VL-KE1B-VAIP | status:Inactive | LIST:LCD/Standard
+
+[MIX] Infinix Note 10 Incell | STOCK:Incell LCD/Standard | MIRN104G | status:Inactive | LIST:LCD/Standard
+
+[MIX] Infinix Hot 9 Incell | STOCK:Incell LCD/Standard | INFH9 | status:Inactive | LIST:LCD/Standard
+
+[MIX] Moto Edge 50 Fusion Incell | STOCK:Incell LCD/Standard | EDGE30FusionLCD | status:Inactive | LIST:LCD/Standard
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+NOT LISTED AT ALL:
+--------------------------------------------------------------------------------------------------------------------------------------------
+[REALME] Realme C67 Incell | qty:1 | Incell LCD/Standard
+[REALME] Realme 8 CareOG | qty:1 | Not Specified/CareOG
+[REALME] Realme 7i Incell | qty:1 | Incell LCD/Standard
+[REALME] Realme 9 Incell | qty:1 | Incell LCD/Standard
+[REALME] Realme C33 Incell | qty:1 | Incell LCD/Standard
+[REALME] Realme 9i Incell | qty:1 | Incell LCD/Standard
+[REALME] Realme C21 Incell | qty:1 | Incell LCD/Standard
+[REALME] Realme C30 Incell | qty:1 | Incell LCD/Standard
+[REALME] Realme C53 Incell | qty:1 | Incell LCD/Standard
+[REALME] Realme 8i Incell | qty:1 | Incell LCD/Standard
+[REALME] Realme 13 Pro CareOG | qty:1 | Not Specified/CareOG
+[REALME] Realme 3 Pro Frame | qty:1 | Not Specified/With Frame
+[VIVO] Vivo T1 CareOG | qty:1 | Not Specified/CareOG
+[VIVO] Vivo T2x CareOG | qty:1 | Not Specified/CareOG
+[VIVO] Vivo V17 CareOG | qty:1 | Not Specified/CareOG
+[VIVO] Vivo V15 CareOG | qty:1 | Not Specified/CareOG
+[VIVO] Vivo X80 CareOG | qty:1 | Not Specified/CareOG
+[OPPO] F17 Pro OLED | qty:1 | OLED/Standard
+[OPPO] A53 CareOG | qty:2 | Not Specified/CareOG
+[OPPO] A57 5G CareOG | qty:3 | Not Specified/CareOG
+[OPPO] F19 OLED | qty:1 | OLED/Standard
+[OPPO] A54 5G Incell | qty:1 | Incell LCD/Standard
+[OPPO] F27 OLED | qty:1 | OLED/Standard
+[OPPO] F5 Frame | qty:1 | Not Specified/With Frame
+[OPPO] F5 Incell | qty:1 | Incell LCD/Standard
+[ONEPLUS] OnePlus 8 CareOG | qty:2 | Not Specified/CareOG
+[ONEPLUS] OnePlus 7 CareOG | qty:1 | Not Specified/CareOG
+[ONEPLUS] OnePlus 7 Incell | qty:1 | Incell LCD/Standard
+[ONEPLUS] OnePlus 10R Incell | qty:1 | Incell LCD/Standard
+[ONEPLUS] OnePlus 11R CareOG | qty:1 | Not Specified/CareOG
+[ONEPLUS] OnePlus 9RT Incell | qty:1 | Incell LCD/Standard
+[ONEPLUS] OnePlus 9 CareOG | qty:1 | Not Specified/CareOG
+[APPLE] iPhone 13 Incell | qty:1 | Incell LCD/Standard
+[APPLE] iPhone 13 Pro OLED | qty:1 | OLED/Standard
+[APPLE] iPhone 13 Pro Max OLED | qty:1 | OLED/Standard
+[APPLE] iPhone 13 Pro Max Incell | qty:1 | Incell LCD/Standard
+[APPLE] iPhone 11 Pro Max OLED | qty:1 | OLED/Standard
+[APPLE] iPhone 11 Incell | qty:1 | Incell LCD/Standard
+[APPLE] iPhone 8 Plus Incell | qty:1 | Incell LCD/Standard
+[APPLE] iPhone 8 CareOG | qty:1 | Not Specified/CareOG
+[APPLE] iPhone XS Incell | qty:1 | Incell LCD/Standard
+[APPLE] iPhone 14 Pro Max Incell | qty:1 | Incell LCD/Standard
+[SAMSUNG] Galaxy A73 OLED | qty:1 | OLED/Standard
+[SAMSUNG] Galaxy A32 4G Incell | qty:1 | Incell LCD/Standard
+[SAMSUNG] Galaxy A32 4G Incell | qty:1 | Incell LCD/Standard
+[SAMSUNG] Galaxy A31 Incell | qty:1 | Incell LCD/Standard
+[SAMSUNG] Galaxy S21 FE OLED | qty:1 | OLED/Standard
+[SAMSUNG] Galaxy S20 FE With Frame OLED | qty:1 | OLED/With Frame
+[SAMSUNG] Galaxy J7 Next Incell | qty:3 | Incell LCD/Standard
+[SAMSUNG] Galaxy J7 2016 Incell | qty:1 | Incell LCD/Standard
+[SAMSUNG] Galaxy J7 2015 Incell | qty:1 | Incell LCD/Standard
+[SAMSUNG] Galaxy A30s Incell | qty:2 | Incell LCD/Standard
+[SAMSUNG] Galaxy J7 Max Incell | qty:1 | Incell LCD/Standard
+[SAMSUNG] Galaxy A10 Incell | qty:1 | Incell LCD/Standard
+[XIAOMI/REDMI/POCO] Redmi Note 5 With Frame White | qty:1 | Not Specified/With Frame
+[XIAOMI/REDMI/POCO] 11X OLED | qty:1 | OLED/Standard
+[XIAOMI/REDMI/POCO] 11X Incell | qty:1 | Incell LCD/Standard
+[XIAOMI/REDMI/POCO] Redmi 4A With Frame Incell Black | qty:1 | Incell LCD/With Frame
+[XIAOMI/REDMI/POCO] A3 Incell | qty:1 | Incell LCD/Standard
+[XIAOMI/REDMI/POCO] Redmi Note 10T With Frame | qty:1 | Not Specified/With Frame
+[XIAOMI/REDMI/POCO] Redmi 12 5G With Frame | qty:1 | Not Specified/With Frame
+[XIAOMI/REDMI/POCO] Redmi 13 Pro Plus With Frame | qty:1 | Not Specified/With Frame
+[XIAOMI/REDMI/POCO] Poco X3 Incell | qty:1 | Incell LCD/Standard
+[XIAOMI/REDMI/POCO] Poco M4 Incell | qty:1 | Incell LCD/Standard
+[MIX] Nothing Phone 1 CareOG | qty:1 | Not Specified/CareOG
+[MIX] Honor 7X Incell | qty:1 | Incell LCD/Standard
+[MIX] Honor 7X White Incell | qty:1 | Incell LCD/Standard
+[MIX] Honor 8C Incell | qty:1 | Incell LCD/Standard
+[MIX] Honor 8X Incell | qty:1 | Incell LCD/Standard
+[MIX] Honor X9B Incell | qty:1 | Incell LCD/Standard
+[MIX] Nokia G20 Incell | qty:2 | Incell LCD/Standard
+[MIX] Nokia G21 Incell | qty:1 | Incell LCD/Standard
+[MIX] Nokia C3 Incell | qty:1 | Incell LCD/Standard
+[MIX] Moto G34 Frame | qty:1 | Not Specified/With Frame
+[MIX] Asus ROG Phone 2 Incell | qty:1 | Incell LCD/Standard
+
+============================================================================================================================================
+BRAND SUMMARY:
+  MIX: 18 stock | 4 exact | 0 mismatch | 3 inactive | 11 none
+  XIAOMI/REDMI/POCO: 15 stock | 3 exact | 0 mismatch | 2 inactive | 10 none
+  REALME: 14 stock | 1 exact | 0 mismatch | 1 inactive | 12 none
+  SAMSUNG: 12 stock | 0 exact | 0 mismatch | 0 inactive | 12 none
+  ONEPLUS: 11 stock | 1 exact | 0 mismatch | 3 inactive | 7 none
+  VIVO: 10 stock | 1 exact | 0 mismatch | 4 inactive | 5 none
+  OPPO: 10 stock | 1 exact | 0 mismatch | 1 inactive | 8 none
+  APPLE: 10 stock | 0 exact | 0 mismatch | 0 inactive | 10 none
+
+STOCK SCREEN TYPES:
+  Incell LCD: 60
+  Not Specified: 30
+  OLED: 10
+
+ACTIVE LISTING SCREEN TYPES:
+  LCD: 159
+  Unknown: 14
+  OLED: 11
+  TFT LCD: 2

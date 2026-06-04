@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Login · Mahika cockpit{% endblock %}
+{% block content %}
+<div class="login-shell">
+  <h2>Mahika ❄️</h2>
+  <p class="muted">Paste your cockpit token to continue. The token lives in <code>.env</code> as
+  <code>MAHIKA_COCKPIT_TOKEN</code>.</p>
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+  <form method="post" action="/login">
+    <label for="token">Token</label>
+    <input id="token" name="token" type="password" autofocus required>
+    <button class="btn-primary" type="submit">Sign in</button>
+  </form>
+</div>
+{% endblock %}

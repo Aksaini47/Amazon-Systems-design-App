@@ -1,0 +1,455 @@
+STOCK vs AMAZON LISTING MATCHING (v2)
+========================================================================================================================
+
+INACTIVE REALME|Realme C67 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> RLMC67WFOG | status:Inactive | Compatible for Realme C67 (with Frame) CareOG Display+Touch Screen Combo Folder
+         (2 total inactive matches)
+
+NOT LISTED REALME|Realme 8 CareOG|qty:1|screen:Unknown|quality:CareOG
+
+INACTIVE REALME|Realme 7i Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MOTOE7 | status:Inactive | Compatible for Motorola Moto E7/E7 Power/E7i LCD Display+Touch Screen Combo Fold
+         (3 total inactive matches)
+
+NOT LISTED REALME|Realme 9 Incell|qty:1|screen:Incell LCD|quality:Standard
+
+INACTIVE REALME|Realme C33 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> RLMC33WFOG | status:Inactive | Compatible for Realme C33 (with Frame) CareOG Display+Touch Screen Combo Folder
+         (5 total inactive matches)
+
+ACTIVE   REALME|Realme 11 Pro CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> OPOF11PROG | qty:91 | Rs.1699 | Compatible for Oppo F11 Pro LCD Display+Touch Screen Combo Folder
+
+ACTIVE   REALME|Realme 9i Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> RME9iOG | qty:1 | Rs.2474 | Compatible for Realme 9i (4G) LCD Display+Touch Screen Combo Folder
+
+ACTIVE   REALME|Realme C21 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> RMEC21YOG | qty:100 | Rs.1915 | Compatible for Realme C21Y LCD Display+Touch Screen Combo Folder
+
+INACTIVE REALME|Realme C30 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> C30WF | status:Inactive | Compatible for Nokia C30 (with Frame) LCD Display+Touch Screen Combo Folder
+         (6 total inactive matches)
+
+ACTIVE   REALME|Realme C53 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> RMC53CARE | qty:1 | Rs.2736 | Compatible for Realme C53 CareOG Display+Touch Screen Combo Folder
+
+ACTIVE   REALME|Realme 8i Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> HOT8i | qty:1 | Rs.2227 | Compatible for Infinix Hot 8i LCD Display+Touch Screen Combo Folder
+ACTIVE   REALME|Realme 8i Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> RME8IOG | qty:100 | Rs.2671 | Compatible for Realme 8i LCD Display+Touch Screen Combo Folder
+
+ACTIVE   REALME|Realme 13 Pro CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> IP13PMGX | qty:1 | Rs.10174 | Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Folder
+
+ACTIVE   REALME|Realme 3 Pro Frame|qty:1|screen:Unknown|quality:With Frame
+         -> IP13PMGX | qty:1 | Rs.10174 | Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Folder
+ACTIVE   REALME|Realme 3 Pro Frame|qty:1|screen:Unknown|quality:With Frame
+         -> OPA3ProLCD | qty:100 | Rs.3239 | Compatible for Oppo A3 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   REALME|Realme 3 Pro Frame|qty:1|screen:Unknown|quality:With Frame
+         -> iTelA23P | qty:100 | Rs.2069 | Compatible for iTel A23 Pro LCD Display+Touch Screen Combo Folder
+
+ACTIVE   REALME|Realme 7 Pro Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> OPOF17PROG | qty:100 | Rs.2737 | Compatible for Oppo F17 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+ACTIVE   REALME|Realme 7 Pro Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> RME7PROG | qty:100 | Rs.2050 | Compatible for Realme 7 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+ACTIVE   REALME|Realme 7 Pro Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> TCNS7P | qty:100 | Rs.2276 | Compatible for Tecno Spark 7 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   REALME|Realme 7 Pro Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> VY17P | qty:99 | Rs.2475 | Compatible for Vivo V17 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+
+INACTIVE VIVO|Vivo Y33s Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MI3SB | status:Inactive | Compatible for Redmi 3/3S/3X/3S Prime/3 Pro (Black) LCD Display+Touch Screen Com
+         (7 total inactive matches)
+
+ACTIVE   VIVO|Vivo Y22 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MIY2WFCAREB | qty:1 | Rs.2564 | Compatible for Redmi Y2/S2 (Black) (with Frame) CareOG Display+Touch Screen Combo Folder
+ACTIVE   VIVO|Vivo Y22 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> Y22CARE | qty:1 | Rs.2462 | Compatible for Vivo Y22/Y22s CareOG Display+Touch Screen Combo Folder
+
+ACTIVE   VIVO|Vivo Y22 CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> MIY2WFCAREB | qty:1 | Rs.2564 | Compatible for Redmi Y2/S2 (Black) (with Frame) CareOG Display+Touch Screen Combo Folder
+ACTIVE   VIVO|Vivo Y22 CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> Y22CARE | qty:1 | Rs.2462 | Compatible for Vivo Y22/Y22s CareOG Display+Touch Screen Combo Folder
+
+INACTIVE VIVO|Vivo T1 CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> T12021CARE | status:Inactive | Compatible for Vivo T1 (2021) CareOG Display+Touch Screen Combo Folder
+         (3 total inactive matches)
+
+INACTIVE VIVO|Vivo T2x CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> T2XCARE | status:Inactive | Compatible for Vivo T2x CareOG Display+Touch Screen Combo Folder
+
+INACTIVE VIVO|Vivo X70 Pro Plus CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> VVX70Pro+OG | status:Inactive | Compatible for Vivo X70 Pro+ CareOG (Fingerprint Support) Display+Touch Screen C
+
+INACTIVE VIVO|Vivo V11 Pro CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> 11PMAXLCD | status:Inactive | Compatible for Apple iPhone 11 Pro Max LCD Display+Touch Screen Combo Folder
+         (10 total inactive matches)
+
+ACTIVE   VIVO|Vivo V17 CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> V17LCD | qty:100 | Rs.3999 | Compatible for Vivo V17 (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+ACTIVE   VIVO|Vivo V17 CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> VY17P | qty:99 | Rs.2475 | Compatible for Vivo V17 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+
+ACTIVE   VIVO|Vivo V15 CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> V15PRO | qty:99 | Rs.2475 | Compatible for Vivo V15 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+
+INACTIVE VIVO|Vivo X80 CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> VVX80OG | status:Inactive | Compatible for Vivo X80 CareOG (Fingerprint Support) Display+Touch Screen Combo 
+
+ACTIVE   OPPO|F17 Pro OLED|qty:1|screen:OLED|quality:Standard
+         -> OPOF17PROG | qty:100 | Rs.2737 | Compatible for Oppo F17 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+ACTIVE   OPPO|F17 Pro OLED|qty:1|screen:OLED|quality:Standard
+         -> RME7PROG | qty:100 | Rs.2050 | Compatible for Realme 7 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+
+ACTIVE   OPPO|A53 CareOG|qty:2|screen:Unknown|quality:CareOG
+         -> OPA535GCARE | qty:1 | Rs.2462 | Compatible for Oppo A53 (5G) CareOG Display+Touch Screen Combo Folder
+
+ACTIVE   OPPO|A57 5G CareOG|qty:3|screen:Unknown|quality:CareOG
+         -> OPA57/57S4GCARE | qty:1 | Rs.2095 | Compatible for Oppo A57/A57s (4G) CareOG Display+Touch Screen Combo Folder
+
+ACTIVE   OPPO|F19 OLED|qty:1|screen:OLED|quality:Standard
+         -> OPF19/PROOG | qty:100 | Rs.2276 | Compatible for Oppo F19/F19 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Fo
+
+NOT LISTED OPPO|A54 5G Incell|qty:1|screen:Incell LCD|quality:Standard
+
+ACTIVE   OPPO|F27 OLED|qty:1|screen:OLED|quality:Standard
+         -> OPF275GLCD | qty:100 | Rs.2799 | Compatible for Oppo F27 5G LCD (No Fingerprint Support) Display+Touch Screen Combo Folder
+
+ACTIVE   OPPO|F9 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> OPF9/proOG | qty:99 | Rs.1768 | Compatible for Oppo F9/F9 Pro LCD Display+Touch Screen Combo Folder
+
+ACTIVE   OPPO|Reno 10 Pro Plus CareOG|qty:2|screen:Unknown|quality:CareOG
+         -> RLM10Pro+LCD | qty:97 | Rs.3239 | Compatible for Realme 10 Pro+ LCD (No Fingerprint Support) Display+Touch Screen Combo Fold
+ACTIVE   OPPO|Reno 10 Pro Plus CareOG|qty:2|screen:Unknown|quality:CareOG
+         -> RME10PROG | qty:99 | Rs.2887 | Compatible for Realme 10 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   OPPO|Reno 10 Pro Plus CareOG|qty:2|screen:Unknown|quality:CareOG
+         -> RNO2ZINCELL | qty:1 | Rs.2315 | Compatible for Oppo Reno 2Z (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+
+ACTIVE   OPPO|F5 Frame|qty:1|screen:Unknown|quality:With Frame
+         -> OPOF5BCARE | qty:1 | Rs.2474 | Compatible for Oppo F5 (Black) CareOG Display+Touch Screen Combo Folder
+
+ACTIVE   OPPO|F5 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> OPOF5BCARE | qty:1 | Rs.2474 | Compatible for Oppo F5 (Black) CareOG Display+Touch Screen Combo Folder
+
+ACTIVE   ONEPLUS|OnePlus 8 CareOG|qty:2|screen:Unknown|quality:CareOG
+         -> MOTO1P | qty:96 | Rs.2606 | Compatible for Motorola Moto One Power LCD Display+Touch Screen Combo Folder
+
+ACTIVE   ONEPLUS|OnePlus 10 Pro CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> INN10P | qty:99 | Rs.2737 | Compatible for Infinix Note 10 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   ONEPLUS|OnePlus 10 Pro CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> MOTO1P | qty:96 | Rs.2606 | Compatible for Motorola Moto One Power LCD Display+Touch Screen Combo Folder
+ACTIVE   ONEPLUS|OnePlus 10 Pro CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> RLM10Pro+LCD | qty:97 | Rs.3239 | Compatible for Realme 10 Pro+ LCD (No Fingerprint Support) Display+Touch Screen Combo Fold
+ACTIVE   ONEPLUS|OnePlus 10 Pro CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> RME10PROG | qty:99 | Rs.2887 | Compatible for Realme 10 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   ONEPLUS|OnePlus 10 Pro CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> VS1 | qty:98 | Rs.2148 | Compatible for Vivo S1/S1 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Fold
+ACTIVE   ONEPLUS|OnePlus 10 Pro CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> VS1LED | qty:93 | Rs.3746 | Compatible for Vivo S1/S1 Pro (Fingerprint Support) OLED Display+Touch Screen Combo Folder
+
+ACTIVE   ONEPLUS|OnePlus 7 CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> MOTO1P | qty:96 | Rs.2606 | Compatible for Motorola Moto One Power LCD Display+Touch Screen Combo Folder
+
+ACTIVE   ONEPLUS|OnePlus 7 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MOTO1P | qty:96 | Rs.2606 | Compatible for Motorola Moto One Power LCD Display+Touch Screen Combo Folder
+
+ACTIVE   ONEPLUS|OnePlus 8 Pro Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MOTO1P | qty:96 | Rs.2606 | Compatible for Motorola Moto One Power LCD Display+Touch Screen Combo Folder
+
+ACTIVE   ONEPLUS|OnePlus 10R Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> 1+10RLCD | qty:97 | Rs.2428 | Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Combo Folder
+ACTIVE   ONEPLUS|OnePlus 10R Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MOTO1P | qty:96 | Rs.2606 | Compatible for Motorola Moto One Power LCD Display+Touch Screen Combo Folder
+ACTIVE   ONEPLUS|OnePlus 10R Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> VS1 | qty:98 | Rs.2148 | Compatible for Vivo S1/S1 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Fold
+ACTIVE   ONEPLUS|OnePlus 10R Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> VS1LED | qty:93 | Rs.3746 | Compatible for Vivo S1/S1 Pro (Fingerprint Support) OLED Display+Touch Screen Combo Folder
+
+ACTIVE   ONEPLUS|OnePlus 11R CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> MOTO1P | qty:96 | Rs.2606 | Compatible for Motorola Moto One Power LCD Display+Touch Screen Combo Folder
+ACTIVE   ONEPLUS|OnePlus 11R CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> VS1 | qty:98 | Rs.2148 | Compatible for Vivo S1/S1 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Fold
+ACTIVE   ONEPLUS|OnePlus 11R CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> VS1LED | qty:93 | Rs.3746 | Compatible for Vivo S1/S1 Pro (Fingerprint Support) OLED Display+Touch Screen Combo Folder
+
+ACTIVE   ONEPLUS|OnePlus Nord CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> MOTO1P | qty:96 | Rs.2606 | Compatible for Motorola Moto One Power LCD Display+Touch Screen Combo Folder
+ACTIVE   ONEPLUS|OnePlus Nord CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> NORD2UNI | qty:96 | Rs.2737 | Compatible for OnePlus Nord 2 (No Fingerprint Support) LCD Display+Touch Screen Combo Fold
+ACTIVE   ONEPLUS|OnePlus Nord CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> P2-NAQO-T7PA | qty:100 | Rs.2469 | Compatible for OnePlus Nord CE 2 Lite LCD Display+Touch Screen Combo Folder
+
+ACTIVE   ONEPLUS|OnePlus 9RT Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> 1+9RtLCD | qty:2 | Rs.2498 | Compatible for OnePlus 9Rt LCD (No Fingerprint Support) Display+Touch Screen Combo Folder
+ACTIVE   ONEPLUS|OnePlus 9RT Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MOTO1P | qty:96 | Rs.2606 | Compatible for Motorola Moto One Power LCD Display+Touch Screen Combo Folder
+
+ACTIVE   ONEPLUS|OnePlus 9 CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> MOTO1P | qty:96 | Rs.2606 | Compatible for Motorola Moto One Power LCD Display+Touch Screen Combo Folder
+
+ACTIVE   ONEPLUS|OnePlus Nord CE 2 Lite Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MOTO1P | qty:96 | Rs.2606 | Compatible for Motorola Moto One Power LCD Display+Touch Screen Combo Folder
+ACTIVE   ONEPLUS|OnePlus Nord CE 2 Lite Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> NORD2UNI | qty:96 | Rs.2737 | Compatible for OnePlus Nord 2 (No Fingerprint Support) LCD Display+Touch Screen Combo Fold
+ACTIVE   ONEPLUS|OnePlus Nord CE 2 Lite Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> P2-NAQO-T7PA | qty:100 | Rs.2469 | Compatible for OnePlus Nord CE 2 Lite LCD Display+Touch Screen Combo Folder
+
+ACTIVE   APPLE|iPhone 13 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> IP13PMGX | qty:1 | Rs.10174 | Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Folder
+
+ACTIVE   APPLE|iPhone 13 Pro OLED|qty:1|screen:OLED|quality:Standard
+         -> IP13PMGX | qty:1 | Rs.10174 | Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Folder
+
+ACTIVE   APPLE|iPhone 13 Pro Max OLED|qty:1|screen:OLED|quality:Standard
+         -> IP13PMGX | qty:1 | Rs.10174 | Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Folder
+
+ACTIVE   APPLE|iPhone 13 Pro Max Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> IP13PMGX | qty:1 | Rs.10174 | Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Folder
+
+INACTIVE APPLE|iPhone 11 Pro Max OLED|qty:1|screen:OLED|quality:Standard
+         -> 11PMAXLCD | status:Inactive | Compatible for Apple iPhone 11 Pro Max LCD Display+Touch Screen Combo Folder
+         (10 total inactive matches)
+
+INACTIVE APPLE|iPhone 11 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> 11PMAXLCD | status:Inactive | Compatible for Apple iPhone 11 Pro Max LCD Display+Touch Screen Combo Folder
+         (6 total inactive matches)
+
+INACTIVE APPLE|iPhone 8 Plus Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> IPH8PBCARE | status:Inactive | Compatible for Apple iPhone 8 Plus (Black) CareOG Display+Touch Screen Combo Fol
+
+INACTIVE APPLE|iPhone 8 CareOG|qty:1|screen:Unknown|quality:CareOG
+         -> EH02022114 | status:Inactive | Compatible for Apple iPhone 8+ (White) LCD Display+Touch Screen Combo Folder
+         (8 total inactive matches)
+
+INACTIVE APPLE|iPhone XS Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> IPXSGX | status:Inactive | Compatible for Apple iPhone Xs GX OLED Display+Touch Screen Combo Folder
+         (3 total inactive matches)
+
+INACTIVE APPLE|iPhone 14 Pro Max Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> IP14PMGX | status:Inactive | Compatible for Apple iPhone 14 Pro Max GX Amoled Display+Touch Screen Combo Fold
+         (4 total inactive matches)
+
+INACTIVE SAMSUNG|Galaxy A73 OLED|qty:1|screen:OLED|quality:Standard
+         -> SAMA73CARE | status:Inactive | Compatible for Samsung Galaxy A73 (Fingerprint Support) CareOG Display+Touch Scr
+
+NOT LISTED SAMSUNG|Galaxy A32 4G Incell|qty:1|screen:Incell LCD|quality:Standard
+
+NOT LISTED SAMSUNG|Galaxy A32 4G Incell|qty:1|screen:Incell LCD|quality:Standard
+
+ACTIVE   SAMSUNG|Galaxy A31 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> A31 | qty:97 | Rs.2049 | Compatible for Samsung Galaxy A31 (No Fingerprint Support) LCD Display+Touch Screen Combo 
+
+NOT LISTED SAMSUNG|Galaxy S21 FE OLED|qty:1|screen:OLED|quality:Standard
+
+INACTIVE SAMSUNG|Galaxy S20 FE With Frame OLED|qty:1|screen:OLED|quality:With Frame
+         -> GLXS20FeWFLED | status:Inactive | Compatible for Samsung Galaxy S20 FE (with Frame) Amoled (Fingerprint Support) D
+
+INACTIVE SAMSUNG|Galaxy J7 Next Incell|qty:3|screen:Incell LCD|quality:Standard
+         -> J17GLED | status:Inactive | Compatible for Samsung Galaxy J7/J7 Pro (2017) (Gold) OLED Display+Touch Screen 
+         (3 total inactive matches)
+
+INACTIVE SAMSUNG|Galaxy J7 2016 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> J17GLED | status:Inactive | Compatible for Samsung Galaxy J7/J7 Pro (2017) (Gold) OLED Display+Touch Screen 
+         (3 total inactive matches)
+
+INACTIVE SAMSUNG|Galaxy J7 2015 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> J17GLED | status:Inactive | Compatible for Samsung Galaxy J7/J7 Pro (2017) (Gold) OLED Display+Touch Screen 
+         (4 total inactive matches)
+
+ACTIVE   SAMSUNG|Galaxy A30s Incell|qty:2|screen:Incell LCD|quality:Standard
+         -> A30S | qty:2 | Rs.2298 | Compatible for Samsung Galaxy A30s (No Fingerprint Support) LCD Display+Touch Screen Combo
+
+INACTIVE SAMSUNG|Galaxy J7 Max Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> J17GLED | status:Inactive | Compatible for Samsung Galaxy J7/J7 Pro (2017) (Gold) OLED Display+Touch Screen 
+         (6 total inactive matches)
+
+ACTIVE   SAMSUNG|Galaxy A10 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> A10S | qty:100 | Rs.1966 | Compatible for Samsung Galaxy A10s LCD Display+Touch Screen Combo Folder
+
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 5 With Frame White|qty:1|screen:Unknown|quality:With Frame
+         -> INN10P | qty:99 | Rs.2737 | Compatible for Infinix Note 10 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 5 With Frame White|qty:1|screen:Unknown|quality:With Frame
+         -> INN11 | qty:99 | Rs.2226 | Compatible for Infinix Note 11 LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 5 With Frame White|qty:1|screen:Unknown|quality:With Frame
+         -> MIN6PRO | qty:1 | Rs.1932 | Compatible for Redmi Note 6 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 5 With Frame White|qty:1|screen:Unknown|quality:With Frame
+         -> MINOTE11E | qty:1 | Rs.2316 | Compatible for Redmi Note 11e LCD Display+Touch Screen Combo Folder
+
+INACTIVE XIAOMI/REDMI/POCO|11X OLED|qty:1|screen:OLED|quality:Standard
+         -> Mi11i/11XOLED | status:Inactive | for Mi 11i/ 11X Compatible OLED - Display Screen Replacement Combo Folder
+         (2 total inactive matches)
+
+INACTIVE XIAOMI/REDMI/POCO|11X Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> Mi11i/11XOLED | status:Inactive | for Mi 11i/ 11X Compatible OLED - Display Screen Replacement Combo Folder
+         (2 total inactive matches)
+
+INACTIVE XIAOMI/REDMI/POCO|Redmi 4A With Frame Incell Black|qty:1|screen:Incell LCD|quality:With Frame
+         -> MI4ABFCARE | status:Inactive | Compatible for Redmi 4A (Black) (with Frame) CareOG Display+Touch Screen Combo F
+         (4 total inactive matches)
+
+ACTIVE   XIAOMI/REDMI/POCO|A3 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> A30 | qty:2 | Rs.1932 | Compatible for Samsung Galaxy A30 LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|A3 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> A30S | qty:2 | Rs.2298 | Compatible for Samsung Galaxy A30s (No Fingerprint Support) LCD Display+Touch Screen Combo
+ACTIVE   XIAOMI/REDMI/POCO|A3 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> A31 | qty:97 | Rs.2049 | Compatible for Samsung Galaxy A31 (No Fingerprint Support) LCD Display+Touch Screen Combo 
+ACTIVE   XIAOMI/REDMI/POCO|A3 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> A324G | qty:100 | Rs.2050 | Compatible for Samsung Galaxy A32 (4G) (No Fingerprint Support) LCD Display+Touch Screen C
+ACTIVE   XIAOMI/REDMI/POCO|A3 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> OPA3ProLCD | qty:100 | Rs.3239 | Compatible for Oppo A3 Pro LCD Display+Touch Screen Combo Folder
+
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 10T With Frame|qty:1|screen:Unknown|quality:With Frame
+         -> INN10P | qty:99 | Rs.2737 | Compatible for Infinix Note 10 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 10T With Frame|qty:1|screen:Unknown|quality:With Frame
+         -> INN11 | qty:99 | Rs.2226 | Compatible for Infinix Note 11 LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 10T With Frame|qty:1|screen:Unknown|quality:With Frame
+         -> MIN6PRO | qty:1 | Rs.1932 | Compatible for Redmi Note 6 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 10T With Frame|qty:1|screen:Unknown|quality:With Frame
+         -> MINOTE11E | qty:1 | Rs.2316 | Compatible for Redmi Note 11e LCD Display+Touch Screen Combo Folder
+
+ACTIVE   XIAOMI/REDMI/POCO|K20 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MIK20 | qty:1 | Rs.2474 | Compatible for Redmi K20/K20 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo F
+
+ACTIVE   XIAOMI/REDMI/POCO|Redmi 12 With Frame|qty:1|screen:Unknown|quality:With Frame
+         -> INH12P | qty:100 | Rs.2279 | Compatible for Infinix Hot 12 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi 12 With Frame|qty:1|screen:Unknown|quality:With Frame
+         -> INH12PLAY | qty:99 | Rs.1699 | Compatible for Infinix Hot 12 Play LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi 12 With Frame|qty:1|screen:Unknown|quality:With Frame
+         -> M12 | qty:99 | Rs.2017 | Compatible for Samsung Galaxy M12 LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi 12 With Frame|qty:1|screen:Unknown|quality:With Frame
+         -> XB-XQNW-NAJK | qty:100 | Rs.1930 | Compatible for Vivo Y11/Y12/Y15 LCD Display+Touch Screen Combo Folder
+
+INACTIVE XIAOMI/REDMI/POCO|Redmi 12 5G With Frame|qty:1|screen:Unknown|quality:With Frame
+         -> IP12OG | status:Inactive | Compatible for Apple iPhone 12/12 Pro LCD Display+Touch Screen Combo Folder
+         (3 total inactive matches)
+
+ACTIVE   XIAOMI/REDMI/POCO|Redmi 13 Pro Plus With Frame|qty:1|screen:Unknown|quality:With Frame
+         -> IP13PMGX | qty:1 | Rs.10174 | Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Folder
+
+ACTIVE   XIAOMI/REDMI/POCO|Redmi 10 Power Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MI10POWER | qty:1 | Rs.1932 | Compatible for Redmi 10 Power LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi 10 Power Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MOTOG10 | qty:100 | Rs.2069 | Compatible for Motorola Moto G10/G10 Power LCD Display+Touch Screen Combo Folder
+
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 6 Pro Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> INN10P | qty:99 | Rs.2737 | Compatible for Infinix Note 10 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 6 Pro Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> INN11 | qty:99 | Rs.2226 | Compatible for Infinix Note 11 LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 6 Pro Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MIN6PRO | qty:1 | Rs.1932 | Compatible for Redmi Note 6 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 6 Pro Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MINOTE11E | qty:1 | Rs.2316 | Compatible for Redmi Note 11e LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 6 Pro Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> RME6PROG | qty:100 | Rs.2993 | Compatible for Realme 6 Pro LCD Display+Touch Screen Combo Folder
+
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 7 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> INN10P | qty:99 | Rs.2737 | Compatible for Infinix Note 10 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 7 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> INN11 | qty:99 | Rs.2226 | Compatible for Infinix Note 11 LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 7 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MIN6PRO | qty:1 | Rs.1932 | Compatible for Redmi Note 6 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   XIAOMI/REDMI/POCO|Redmi Note 7 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MINOTE11E | qty:1 | Rs.2316 | Compatible for Redmi Note 11e LCD Display+Touch Screen Combo Folder
+
+INACTIVE XIAOMI/REDMI/POCO|Poco X3 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> FINDX3LITEOG | status:Inactive | Compatible for Oppo Find X3 Lite (No Fingerprint Support) LCD Display+Touch Scre
+         (5 total inactive matches)
+
+ACTIVE   XIAOMI/REDMI/POCO|Poco M4 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> POCOM4 | qty:1 | Rs.2228 | Compatible for Poco M4 LCD Display+Touch Screen Combo Folder
+
+NOT LISTED MIX|Nothing Phone 1 CareOG|qty:1|screen:Unknown|quality:CareOG
+
+ACTIVE   MIX|Infinix Note 10 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> INFNOT10TFT | qty:99 | Rs.2040 | for Infinix Note 10 Compatible LCD/TFT - Display Screen Replacement Combo Folder
+ACTIVE   MIX|Infinix Note 10 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> INN10P | qty:99 | Rs.2737 | Compatible for Infinix Note 10 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   MIX|Infinix Note 10 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> INN11 | qty:99 | Rs.2226 | Compatible for Infinix Note 11 LCD Display+Touch Screen Combo Folder
+ACTIVE   MIX|Infinix Note 10 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MIN6PRO | qty:1 | Rs.1932 | Compatible for Redmi Note 6 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   MIX|Infinix Note 10 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MINOTE11E | qty:1 | Rs.2316 | Compatible for Redmi Note 11e LCD Display+Touch Screen Combo Folder
+
+ACTIVE   MIX|Infinix Hot 9 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> INH9PLAY | qty:100 | Rs.1699 | Compatible for Infinix Hot 9 Play LCD Display+Touch Screen Combo Folder
+
+ACTIVE   MIX|Infinix Note 11S Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> INN10P | qty:99 | Rs.2737 | Compatible for Infinix Note 10 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   MIX|Infinix Note 11S Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> INN11 | qty:99 | Rs.2226 | Compatible for Infinix Note 11 LCD Display+Touch Screen Combo Folder
+ACTIVE   MIX|Infinix Note 11S Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MIN6PRO | qty:1 | Rs.1932 | Compatible for Redmi Note 6 Pro LCD Display+Touch Screen Combo Folder
+ACTIVE   MIX|Infinix Note 11S Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MINOTE11E | qty:1 | Rs.2316 | Compatible for Redmi Note 11e LCD Display+Touch Screen Combo Folder
+
+ACTIVE   MIX|Honor 7X Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> HNR7XW | qty:1 | Rs.1814 | Compatible for Honor 7X (White) LCD Display+Touch Screen Combo Folder
+
+ACTIVE   MIX|Honor 7X White Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> HNR7XW | qty:1 | Rs.1814 | Compatible for Honor 7X (White) LCD Display+Touch Screen Combo Folder
+
+INACTIVE MIX|Honor 8C Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> HNR8C | status:Inactive | Compatible for Honor 8C LCD Display+Touch Screen Combo Folder
+         (2 total inactive matches)
+
+INACTIVE MIX|Honor 8X Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> HNR8X | status:Inactive | Compatible for Honor 8X LCD Display+Touch Screen Combo Folder
+
+INACTIVE MIX|Honor X9B Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> HNRX9B(5G)LCD | status:Inactive | Compatible for Honor X9B LCD (No Fingerprint Support) Display+Touch Screen Combo
+         (2 total inactive matches)
+
+ACTIVE   MIX|Nokia G10 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MOTOG10 | qty:100 | Rs.2069 | Compatible for Motorola Moto G10/G10 Power LCD Display+Touch Screen Combo Folder
+ACTIVE   MIX|Nokia G10 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> NKG10 | qty:1 | Rs.2047 | Compatible for Nokia G10 LCD Display+Touch Screen Combo Folder
+
+ACTIVE   MIX|Nokia G20 Incell|qty:2|screen:Incell LCD|quality:Standard
+         -> MOTOG20 | qty:1 | Rs.2094 | Compatible for Motorola Moto G20 LCD Display+Touch Screen Combo Folder
+ACTIVE   MIX|Nokia G20 Incell|qty:2|screen:Incell LCD|quality:Standard
+         -> NKG20 | qty:2 | Rs.2462 | Compatible for Nokia G20 LCD Display+Touch Screen Combo Folder
+
+INACTIVE MIX|Nokia G21 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> G21WF | status:Inactive | Compatible for Nokia G21 (with Frame) LCD Display+Touch Screen Combo Folder
+         (2 total inactive matches)
+
+ACTIVE   MIX|Nokia C3 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> RMEC31OG | qty:100 | Rs.1966 | Compatible for Realme C31 LCD Display+Touch Screen Combo Folder
+ACTIVE   MIX|Nokia C3 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> RMEC3OG | qty:100 | Rs.1886 | Compatible for Realme C3 LCD Display+Touch Screen Combo Folder
+
+ACTIVE   MIX|Moto G9 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MOTOG9 | qty:100 | Rs.2474 | Compatible for Motorola Moto G9/G9 Play LCD Display+Touch Screen Combo Folder
+ACTIVE   MIX|Moto G9 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> MOTOG9P | qty:100 | Rs.2474 | Compatible for Motorola Moto G9 Power LCD Display+Touch Screen Combo Folder
+
+INACTIVE MIX|Moto Edge 50 Fusion Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> EDGE2021WFCARE | status:Inactive | Compatible for Motorola Moto Edge (2021) (with Frame) CareOG Display+Touch Scree
+         (6 total inactive matches)
+
+INACTIVE MIX|Moto G34 Frame|qty:1|screen:Unknown|quality:With Frame
+         -> MOTOG34WFOG | status:Inactive | Compatible for Motorola Moto G34 (with Frame) CareOG Display+Touch Screen Combo 
+
+ACTIVE   MIX|Asus Zenfone Max M2 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> ZFMXPROM1TFT | qty:97 | Rs.2148 | Compatible for Asus Zenfone Max Pro M1 LCD Display+Touch Screen Combo Folder
+
+INACTIVE MIX|Asus ROG Phone 2 Incell|qty:1|screen:Incell LCD|quality:Standard
+         -> ROG2CARE | status:Inactive | Compatible for Asus ROG Phone 2 (Fingerprint Support) CareOG Display+Touch Scree
+
+========================================================================================================================
+SUMMARY BY BRAND:
+
+  MIX: 18 stock | 10 ACTIVE | 7 INACTIVE | 1 NOT LISTED
+  XIAOMI/REDMI/POCO: 15 stock | 10 ACTIVE | 5 INACTIVE | 0 NOT LISTED
+  REALME: 14 stock | 8 ACTIVE | 4 INACTIVE | 2 NOT LISTED
+  SAMSUNG: 12 stock | 3 ACTIVE | 6 INACTIVE | 3 NOT LISTED
+  ONEPLUS: 11 stock | 11 ACTIVE | 0 INACTIVE | 0 NOT LISTED
+  VIVO: 10 stock | 4 ACTIVE | 6 INACTIVE | 0 NOT LISTED
+  OPPO: 10 stock | 9 ACTIVE | 0 INACTIVE | 1 NOT LISTED
+  APPLE: 10 stock | 4 ACTIVE | 6 INACTIVE | 0 NOT LISTED
+
+TOTAL STOCK: 100 variants, 109 units
+  ACTIVE on Amazon: 59
+  INACTIVE on Amazon: 34
+  NOT LISTED at all: 7

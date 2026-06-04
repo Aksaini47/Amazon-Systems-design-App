@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Mahika cockpit{% endblock %}
+{% block content %}
+<h2>Status snapshot</h2>
+<div class="grid grid-4">
+  <div class="card">
+    <div class="muted">Captured (PK done)</div>
+    <div class="num">{{ states.get('captured', 0) }}</div>
+  </div>
+  <div class="card">
+    <div class="muted">Pending refund</div>
+    <div class="num">{{ states.get('pending_refund', 0) }}</div>
+  </div>
+  <div class="card">
+    <div class="muted">Claim queued</div>
+    <div class="num">{{ states.get('claim_queued', 0) }}</div>
+  </div>
+  <div class="card">
+    <div class="muted">Claim filed (in flight)</div>
+    <div class="num">{{ in_flight_count }}</div>
+  </div>
+</div>
+
+<div class="grid grid-3">
+  <div class="card">
+    <div class="muted">Claim approved</div>
+    <div class="num">{{ states.get('claim_approved', 0) }}</div>
+  </div>
+  <div class="card">
+    <div class="muted">Claim rejected</div>
+    <div class="num">{{ states.get('claim_rejected', 0) }}</div>
+  </div>
+  <div class="card">
+    <div class="muted">Claim closed (settled)</div>
+    <div class="num">{{ states.get('claim_closed', 0) }}</div>
+  </div>
+</div>
+
+<h3>Urgency worklist</h3>
+<p class="muted">Orders ranked by what needs Sir's attention most. Red = act today.</p>
+{% if worklist %}
+<table>
+  <thead>
+    <tr>
+      <th>Order ID</th><th>State</th><th>Verdict</th>
+      <th>Refund processed</th><th>SAFE-T days left</th><th>Urgency</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in worklist %}
+    <tr class="row-{{ row.urgency_class }}">
+      <td><code>{{ row.order_id }}</code></td>
+      <td><span class="pill pill-{{ row.state_pill }}">{{ row.state }}</span></td>
+      <td>{{ row.verdict or '—' }}</td>
+      <td>{{ row.refund_processed_at_str or '—' }}</td>
+      <td>{{ row.days_left if row.days_left is not none else '—' }}</td>
+      <td><span class="pill pill-{{ row.urgency_class }}">{{ row.urgency_label }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">No active orders. Worklist will populate once captures start landing.</p>
+{% endif %}
+
+<h3>Recent audit events</h3>
+{% if recent_audit %}
+<table>
+  <thead><tr><th>When</th><th>Actor</th><th>Event</th><th>Order</th></tr></thead>
+  <tbody>
+    {% for e in recent_audit %}
+    <tr>
+      <td>{{ e.event_at_str }}</td>
+      <td><code>{{ e.actor }}</code></td>
+      <td>{{ e.event_type }}</td>
+      <td>{% if e.order_id %}<code>{{ e.order_id }}</code>{% else %}—{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">Audit log is empty.</p>
+{% endif %}
+
+<h3>Heartbeat</h3>
+{% if heartbeat %}
+<p>Last seen: <strong>{{ heartbeat.last_seen_str }}</strong> from <code>{{ heartbeat.runner_id }}</code>.
+{% if heartbeat.stale %}<span class="pill pill-warn">STALE</span>{% else %}<span class="pill pill-good">CURRENT</span>{% endif %}</p>
+{% else %}
+<p class="muted">No heartbeat recorded yet — the scheduler hasn't run.</p>
+{% endif %}
+{% endblock %}

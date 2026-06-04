@@ -1,0 +1,331 @@
+{
+  "Changes to the template": {
+    "rows": 23,
+    "cols": 1,
+    "headers": [
+      "\n⚠️ Important! This Product spreadsheet has changed."
+    ],
+    "sample_data": [
+      {
+        "col_1": "\n⚠️ Important! This Product spreadsheet has changed."
+      },
+      {
+        "col_1": "What is changing and why?"
+      },
+      {
+        "col_1": "In order to improve the shopping experience for Customers, we are changing how we collect, categorise and display product data from Sellers. This incl"
+      }
+    ]
+  },
+  "Instructions": {
+    "rows": 40,
+    "cols": 1,
+    "headers": [
+      "Using your Inventory File Template"
+    ],
+    "sample_data": [
+      {
+        "col_1": "Using your Inventory File Template"
+      },
+      {
+        "col_1": "Print this page"
+      },
+      {
+        "col_1": "This page contains information you need to create, validate and upload your inventory file to Amazon. We recommend that you print this page so you can"
+      },
+      {
+        "col_1": "Save a copy of this file as an Excel worksheet on your hard drive. Then proceed to enter your product data into the Template tab, using the guidelines"
+      }
+    ]
+  },
+  "Images": {
+    "rows": 47,
+    "cols": 2,
+    "headers": [
+      "Image Standards"
+    ],
+    "sample_data": [
+      {
+        "col_1": "Image Standards"
+      },
+      {
+        "col_1": "Every product on Amazon needs one or more product images. Choose images that are clear, straightforward and easy to understand. They must accurately r"
+      },
+      {
+        "col_1": "We reserve the right to reject images that do not meet our image standards."
+      },
+      {
+        "col_1": "It is your responsibility to ensure that you have all necessary rights to the images you submit."
+      }
+    ]
+  },
+  "Data Definitions": {
+    "rows": 178,
+    "cols": 6,
+    "headers": [
+      "How to complete your inventory template"
+    ],
+    "sample_data": [
+      {
+        "col_1": "How to complete your inventory template"
+      },
+      {
+        "col_1": "Group Name",
+        "col_2": "Field Name",
+        "col_3": "Local Label Name",
+        "col_4": "Accepted Values",
+        "col_5": "Example",
+        "col_6": "Required?"
+      },
+      {
+        "col_1": "Listing Identity"
+      },
+      {
+        "col_2": "contribution_sku#1.value",
+        "col_3": "SKU",
+        "col_4": "This attribute indicates the SKU number as assigned by the contributor",
+        "col_5": "ABC123",
+        "col_6": "Required"
+      },
+      {
+        "col_2": "product_type#1.value",
+        "col_3": "Product Type",
+        "col_4": "Select the appropriate product type that best suits the item",
+        "col_5": "ACCESSORY",
+        "col_6": "Required"
+      }
+    ]
+  },
+  "Template": {
+    "rows": 6,
+    "cols": 234,
+    "headers": [
+      "settings=feedType=256&timestamp=2026-05-13T09%3A13%3A23.739Z&contributorId=amzn1.cr.o.AF2WD92BX5KMB&primaryMarketplaceId=amzn1.mp.o.A21TJRUUN4KGV&cont",
+      "settings2=TgiOiJFVUgwMTgiLCJFVUgwMTQiOiJFVUgwMTQiLCJIMjgxIjoiSDI4MSIsIkgyODAiOiJIMjgwIiwiSDIwMSI6IkgyMDEiLCJIMjAwIjoiSDIwMCIsIkgyMDMiOiJIMjAzIiwiSDM1M",
+      "settings3=MwNCI6IkgzMDQiLCJFVUg0MDEiOiJFVUg0MDEiLCJIMzcxIjoiSDM3MSIsIkgyNTAiOiJIMjUwIiwiSDM3MCI6IkgzNzAiLCJIMzczIjoiSDM3MyIsIkgyNTIiOiJIMjUyIiwiSDM3Mi"
+    ],
+    "sample_data": [
+      {
+        "col_1": "settings=feedType=256&timestamp=2026-05-13T09%3A13%3A23.739Z&contributorId=amzn1.cr.o.AF2WD92BX5KMB&primaryMarketplaceId=amzn1.mp.o.A21TJRUUN4KGV&cont",
+        "col_2": "settings2=TgiOiJFVUgwMTgiLCJFVUgwMTQiOiJFVUgwMTQiLCJIMjgxIjoiSDI4MSIsIkgyODAiOiJIMjgwIiwiSDIwMSI6IkgyMDEiLCJIMjAwIjoiSDIwMCIsIkgyMDMiOiJIMjAzIiwiSDM1M",
+        "col_3": "settings3=MwNCI6IkgzMDQiLCJFVUg0MDEiOiJFVUg0MDEiLCJIMzcxIjoiSDM3MSIsIkgyNTAiOiJIMjUwIiwiSDM3MCI6IkgzNzAiLCJIMzczIjoiSDM3MyIsIkgyNTIiOiJIMjUyIiwiSDM3Mi"
+      },
+      {
+        "col_1": "      "
+      },
+      {
+        "col_1": "Listing Identity",
+        "col_4": "Variations",
+        "col_7": "Product Identity"
+      },
+      {
+        "col_1": "SKU",
+        "col_2": "Product Type",
+        "col_3": "Listing Action",
+        "col_4": "Parentage Level",
+        "col_5": "Parent SKU",
+        "col_6": "Variation Theme Name",
+        "col_7": "Item Name",
+        "col_8": "Brand Name",
+        "col_9": "Product Id Type"
+      },
+      {
+        "col_1": "contribution_sku#1.value",
+        "col_2": "product_type#1.value",
+        "col_3": "::record_action",
+        "col_4": "parentage_level[marketplace_id=A21TJRUUN4KGV]#1.value",
+        "col_5": "child_parent_sku_relationship[marketplace_id=A21TJRUUN4KGV]#1.parent_sku",
+        "col_6": "variation_theme#1.name",
+        "col_7": "item_name[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value",
+        "col_8": "brand[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value",
+        "col_9": "amzn1.volt.ca.product_id_type"
+      }
+    ]
+  },
+  "Browse Data": {
+    "rows": 31,
+    "cols": 2,
+    "headers": [
+      "Browse Node",
+      "BrowsePath"
+    ],
+    "sample_data": [
+      {
+        "col_1": "Browse Node",
+        "col_2": "BrowsePath"
+      },
+      {
+        "col_1": "21529686031",
+        "col_2": "Electronics > Accessories > Mobile Accessories > Gaming Accessories > Finger Sleeves"
+      },
+      {
+        "col_1": "1389408031",
+        "col_2": "Car & Motorbike > Car & Vehicle Electronics > Accessories > Mobile Phone Accessories > Kits"
+      },
+      {
+        "col_1": "21529669031",
+        "col_2": "Electronics > Accessories > Mobile Accessories > Décor"
+      },
+      {
+        "col_1": "11180538031",
+        "col_2": "Electronics > Accessories > Mobile Accessories > Photo & Video Accessories > Flashes & Selfie Lights"
+      }
+    ]
+  },
+  "Conditions List": {
+    "rows": 14,
+    "cols": 15,
+    "headers": [
+      "CONDITION_LIST_0",
+      "CONDITION_LIST_1",
+      "CONDITION_LIST_2",
+      "CONDITION_LIST_3",
+      "CONDITION_LIST_4",
+      "CONDITION_LIST_5",
+      "CONDITION_LIST_6",
+      "CONDITION_LIST_7",
+      "CONDITION_LIST_8",
+      "CONDITION_LIST_9",
+      "CONDITION_LIST_10",
+      "CONDITION_LIST_11",
+      "CONDITION_LIST_12",
+      "CONDITION_LIST_13",
+      "CONDITION_LIST_14"
+    ],
+    "sample_data": [
+      {
+        "col_1": "CONDITION_LIST_0",
+        "col_2": "CONDITION_LIST_1",
+        "col_3": "CONDITION_LIST_2",
+        "col_4": "CONDITION_LIST_3",
+        "col_5": "CONDITION_LIST_4",
+        "col_6": "CONDITION_LIST_5",
+        "col_7": "CONDITION_LIST_6",
+        "col_8": "CONDITION_LIST_7",
+        "col_9": "CONDITION_LIST_8"
+      },
+      {
+        "col_1": "Child",
+        "col_2": "SIZE/STYLE/PRODUCT_GRADE",
+        "col_3": "NUMBER_OF_ITEMS",
+        "col_4": "COLOR/PRODUCT_GRADE",
+        "col_5": "SIZE/STYLE/PRODUCT_GRADE",
+        "col_6": "Fulfillment by Merchant (Default)",
+        "col_7": "AMAZON_IN",
+        "col_8": "Yes",
+        "col_9": "Other Than Listed"
+      },
+      {
+        "col_2": "STYLE/PRODUCT_GRADE",
+        "col_4": "SIZE/COLOR",
+        "col_5": "SIZE/PRODUCT_GRADE"
+      },
+      {
+        "col_4": "COLOR",
+        "col_5": "SIZE/COLOR"
+      },
+      {
+        "col_5": "SIZE"
+      }
+    ]
+  },
+  "Valid Values": {
+    "rows": 73,
+    "cols": 270,
+    "headers": [
+      "Listing Identity"
+    ],
+    "sample_data": [
+      {
+        "col_1": "Listing Identity"
+      },
+      {
+        "col_2": "Product Type - [  ]",
+        "col_3": "PHONE_ACCESSORY"
+      },
+      {
+        "col_2": "Listing Action - [  ]",
+        "col_3": "Create or Replace (Full Update)",
+        "col_4": "Edit (Partial Update)",
+        "col_5": "Delete"
+      },
+      {
+        "col_1": "Variations"
+      },
+      {
+        "col_2": "Parentage Level - [ PHONE_ACCESSORY ]",
+        "col_3": "Parent",
+        "col_4": "Child"
+      }
+    ]
+  },
+  "Dropdown Lists": {
+    "rows": 271,
+    "cols": 91,
+    "headers": [],
+    "sample_data": [
+      {
+        "col_4": "PHONE_ACCESSORY",
+        "col_5": "PHONE_ACCESSORY",
+        "col_6": "PHONE_ACCESSORY",
+        "col_7": "PHONE_ACCESSORY",
+        "col_8": "PHONE_ACCESSORY",
+        "col_9": "PHONE_ACCESSORY"
+      },
+      {
+        "col_3": "::record_action",
+        "col_4": "parentage_level[marketplace_id=A21TJRUUN4KGV]#1.value",
+        "col_5": "variation_theme#1.name",
+        "col_6": "amzn1.volt.ca.product_id_type",
+        "col_7": "display[marketplace_id=A21TJRUUN4KGV]#1.size#1.unit",
+        "col_8": "pattern[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value",
+        "col_9": "unit_count[marketplace_id=A21TJRUUN4KGV]#1.type[language_tag=en_IN].value"
+      },
+      {
+        "col_3": "Create or Replace (Full Update)",
+        "col_4": "Parent",
+        "col_5": "COLOR",
+        "col_6": "EAN",
+        "col_7": "Centimeters",
+        "col_8": "Animal Print",
+        "col_9": "Can"
+      },
+      {
+        "col_3": "Edit (Partial Update)",
+        "col_4": "Child",
+        "col_5": "ITEM_WEIGHT",
+        "col_6": "GTIN",
+        "col_7": "Inches",
+        "col_8": "Argyle",
+        "col_9": "Case"
+      }
+    ]
+  },
+  "AttributePTDMAP": {
+    "rows": 36,
+    "cols": 2,
+    "headers": [
+      "PHONE_ACCESSORY"
+    ],
+    "sample_data": [
+      {
+        "col_2": "PHONE_ACCESSORY"
+      },
+      {
+        "col_1": "fulfillment_availability#1.fulfillment_channel_code",
+        "col_2": "1"
+      },
+      {
+        "col_1": "merchant_shipping_group[marketplace_id=A21TJRUUN4KGV]#1.value",
+        "col_2": "1"
+      },
+      {
+        "col_2": "PHONE_ACCESSORY"
+      },
+      {
+        "col_1": "fulfillment_availability#1.lead_time_to_ship_max_days",
+        "col_2": "1"
+      }
+    ]
+  }
+}

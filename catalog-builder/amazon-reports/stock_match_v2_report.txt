@@ -1,0 +1,656 @@
+==============================================================================================================
+ACTUAL STOCK vs AMAZON INVENTORY — PRECISE MODEL MATCHING
+==============================================================================================================
+Total stock: 100 variants, 109 units
+
+STOCK BY BRAND:
+------------------------------------------------------------
+  Mixed                      18 variants,  19 units
+  Samsung                    12 variants,  15 units
+  XIAOMI/REDMI/POCO          15 variants,  15 units
+  Realme                     14 variants,  14 units
+  Oppo                       10 variants,  14 units
+  OnePlus                    11 variants,  12 units
+  Vivo                       10 variants,  10 units
+  Apple                      10 variants,  10 units
+
+==============================================================================================================
+Realme — 14 variants, 14 units
+--------------------------------------------------------------------------------------------------------------
+
+[1x] Realme C67 Incell
+      Stock: Incell LCD | Standard | model_key=c67
+  -> [LOW] Inactive: RLMC67WFOG
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.2969
+     Title: Compatible for Realme C67 (with Frame) CareOG Display+Touch Screen Combo Folder
+     [WARN] LOW CONFIDENCE — Screen MISMATCH: stock=Incell LCD vs listing=Not Specified | Quality MISMATCH: stock=Standard vs listing=CareOG
+
+
+[1x] Realme 8 CareOG
+      Stock: Not Specified | CareOG | model_key=8
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Realme 7i Incell
+      Stock: Incell LCD | Standard | model_key=7i
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Realme 9 Incell
+      Stock: Incell LCD | Standard | model_key=9
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Realme C33 Incell
+      Stock: Incell LCD | Standard | model_key=c33
+  -> [HIGH] Inactive: RMEC33OG
+     Amazon: LCD/Standard | Qty: 0 | Rs.1966
+     Title: Compatible for Realme C33 LCD Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Realme 11 Pro CareOG
+      Stock: Not Specified | CareOG | model_key=11pro
+  -> [HIGH] Inactive: RLM11ProOG
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.4895
+     Title: Compatible for Realme 11 Pro CareOG (Fingerprint Support) Display+Touch Screen Combo Folde
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Realme 9i Incell
+      Stock: Incell LCD | Standard | model_key=9i
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Realme C21 Incell
+      Stock: Incell LCD | Standard | model_key=c21
+  -> [HIGH] Active: RMEC21YOG
+     Amazon: LCD/Standard | Qty: 100 | Rs.1915
+     Title: Compatible for Realme C21Y LCD Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Realme C30 Incell
+      Stock: Incell LCD | Standard | model_key=c30
+  -> [LOW] Inactive: RLMC30SWFOG
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.2699
+     Title: Compatible for Realme C30S (with Frame) CareOG Display+Touch Screen Combo Folder
+     [WARN] LOW CONFIDENCE — Screen MISMATCH: stock=Incell LCD vs listing=Not Specified | Quality MISMATCH: stock=Standard vs listing=CareOG
+
+
+[1x] Realme C53 Incell
+      Stock: Incell LCD | Standard | model_key=c53
+  -> [LOW] Active: RMC53CARE
+     Amazon: Not Specified/CareOG | Qty: 1 | Rs.2736
+     Title: Compatible for Realme C53 CareOG Display+Touch Screen Combo Folder
+     [WARN] LOW CONFIDENCE — Screen MISMATCH: stock=Incell LCD vs listing=Not Specified | Quality MISMATCH: stock=Standard vs listing=CareOG
+
+
+[1x] Realme 8i Incell
+      Stock: Incell LCD | Standard | model_key=8i
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Realme 13 Pro CareOG
+      Stock: Not Specified | CareOG | model_key=13pro
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Realme 3 Pro Frame
+      Stock: Not Specified | With Frame | model_key=3pro
+  -> [MEDIUM] Inactive: RM3PCARE
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.2737
+     Title: Compatible for Realme 3 Pro CareOG Display+Touch Screen Combo Folder
+     [WARN] MEDIUM CONFIDENCE — Quality MISMATCH: stock=With Frame vs listing=CareOG
+
+
+[1x] Realme 7 Pro Incell
+      Stock: Incell LCD | Standard | model_key=7pro
+  -> [HIGH] Active: RME7PROG
+     Amazon: LCD/Standard | Qty: 100 | Rs.2050
+     Title: Compatible for Realme 7 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+==============================================================================================================
+Vivo — 10 variants, 10 units
+--------------------------------------------------------------------------------------------------------------
+
+[1x] Vivo Y33s Incell
+      Stock: Incell LCD | Standard | model_key=y33s
+  -> [HIGH] Inactive: Y33S
+     Amazon: LCD/Standard | Qty: 0 | Rs.1932
+     Title: Compatible for Vivo Y33s LCD Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Vivo Y22 Incell
+      Stock: Incell LCD | Standard | model_key=y22
+  -> [HIGH] Inactive: Y22
+     Amazon: LCD/Standard | Qty: 0 | Rs.2148
+     Title: Compatible for Vivo Y22/Y22s LCD Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Vivo Y22 CareOG
+      Stock: Not Specified | CareOG | model_key=y22
+  -> [HIGH] Active: Y22CARE
+     Amazon: Not Specified/CareOG | Qty: 1 | Rs.2462
+     Title: Compatible for Vivo Y22/Y22s CareOG Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Vivo T1 CareOG
+      Stock: Not Specified | CareOG | model_key=t1
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Vivo T2x CareOG
+      Stock: Not Specified | CareOG | model_key=t2x
+  -> [HIGH] Inactive: T2XCARE
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.2886
+     Title: Compatible for Vivo T2x CareOG Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Vivo X70 Pro Plus CareOG
+      Stock: Not Specified | CareOG | model_key=x70proplus
+  -> [HIGH] Inactive: VVX70Pro+OG
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.8499
+     Title: Compatible for Vivo X70 Pro+ CareOG (Fingerprint Support) Display+Touch Screen Combo Folde
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Vivo V11 Pro CareOG
+      Stock: Not Specified | CareOG | model_key=v11pro
+  -> [HIGH] Inactive: V11PROLED
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.4596
+     Title: Compatible for Vivo V11 Pro (Fingerprint Support) CareOG Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Vivo V17 CareOG
+      Stock: Not Specified | CareOG | model_key=v17
+  -> [HIGH] Inactive: V17CARE
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.7591
+     Title: Compatible for Vivo V17 (Fingerprint Support) CareOG Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Vivo V15 CareOG
+      Stock: Not Specified | CareOG | model_key=v15
+  -> [HIGH] Inactive: V15CARE
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.2737
+     Title: Compatible for Vivo V15 CareOG Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Vivo X80 CareOG
+      Stock: Not Specified | CareOG | model_key=x80
+  -> [HIGH] Inactive: VVX80OG
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.6104
+     Title: Compatible for Vivo X80 CareOG (Fingerprint Support) Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+==============================================================================================================
+Oppo — 10 variants, 14 units
+--------------------------------------------------------------------------------------------------------------
+
+[1x] F17 Pro OLED
+      Stock: OLED | Standard | model_key=f17pro
+  -> [LOW] Active: OPOF17PROG
+     Amazon: LCD/Standard | Qty: 100 | Rs.2737
+     Title: Compatible for Oppo F17 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder
+     [WARN] LOW CONFIDENCE — Screen MISMATCH: stock=OLED vs listing=LCD
+
+
+[2x] A53 CareOG
+      Stock: Not Specified | CareOG | model_key=a53
+  -> [HIGH] Active: OPA535GCARE
+     Amazon: Not Specified/CareOG | Qty: 1 | Rs.2462
+     Title: Compatible for Oppo A53 (5G) CareOG Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[3x] A57 5G CareOG
+      Stock: Not Specified | CareOG | model_key=a575g
+  -> [HIGH] Active: OPA57/57S4GCARE
+     Amazon: Not Specified/CareOG | Qty: 1 | Rs.2095
+     Title: Compatible for Oppo A57/A57s (4G) CareOG Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] F19 OLED
+      Stock: OLED | Standard | model_key=f19
+  -> [LOW] Active: OPF19/PROOG
+     Amazon: LCD/Standard | Qty: 100 | Rs.2276
+     Title: Compatible for Oppo F19/F19 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Fo
+     [WARN] LOW CONFIDENCE — Screen MISMATCH: stock=OLED vs listing=LCD
+
+
+[1x] A54 5G Incell
+      Stock: Incell LCD | Standard | model_key=a545g
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] F27 OLED
+      Stock: OLED | Standard | model_key=f27
+  -> [LOW] Active: OPF275GLCD
+     Amazon: LCD/Standard | Qty: 100 | Rs.2799
+     Title: Compatible for Oppo F27 5G LCD (No Fingerprint Support) Display+Touch Screen Combo Folder
+     [WARN] LOW CONFIDENCE — Screen MISMATCH: stock=OLED vs listing=LCD
+
+
+[1x] F9 Incell
+      Stock: Incell LCD | Standard | model_key=f9
+  -> [HIGH] Active: OPF9/proOG
+     Amazon: LCD/Standard | Qty: 99 | Rs.1768
+     Title: Compatible for Oppo F9/F9 Pro LCD Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[2x] Reno 10 Pro Plus CareOG
+      Stock: Not Specified | CareOG | model_key=reno10proplus
+  -> [HIGH] Inactive: OPAssOG
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.2099
+     Title: Compatible for Oppo Reno ACE CareOG Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] F5 Frame
+      Stock: Not Specified | With Frame | model_key=f5
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] F5 Incell
+      Stock: Incell LCD | Standard | model_key=f5
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+==============================================================================================================
+OnePlus — 11 variants, 12 units
+--------------------------------------------------------------------------------------------------------------
+
+[2x] OnePlus 8 CareOG
+      Stock: Not Specified | CareOG | model_key=8
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] OnePlus 10 Pro CareOG
+      Stock: Not Specified | CareOG | model_key=10pro
+  -> [HIGH] Inactive: 1+10PROCARE
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.18488
+     Title: Compatible for OnePlus 10 Pro (Fingerprint Support) CareOG Display+Touch Screen Combo Fold
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] OnePlus 7 CareOG
+      Stock: Not Specified | CareOG | model_key=7
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] OnePlus 7 Incell
+      Stock: Incell LCD | Standard | model_key=7
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] OnePlus 8 Pro Incell
+      Stock: Incell LCD | Standard | model_key=8pro
+  -> [HIGH] Inactive: 1+8ProLCD
+     Amazon: LCD/Standard | Qty: 0 | Rs.4048
+     Title: Compatible for OnePlus 8 Pro LCD (No Fingerprint Support) Display+Touch Screen Combo Folde
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] OnePlus 10R Incell
+      Stock: Incell LCD | Standard | model_key=10r
+  -> [HIGH] Active: 1+10RLCD
+     Amazon: LCD/Standard | Qty: 97 | Rs.2428
+     Title: Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] OnePlus 11R CareOG
+      Stock: Not Specified | CareOG | model_key=11r
+  -> [HIGH] Inactive: 1+11RCARE
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.6748
+     Title: Compatible for OnePlus 11R (Fingerprint Support) CareOG Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] OnePlus Nord CareOG
+      Stock: Not Specified | CareOG | model_key=nord
+  -> [HIGH] Inactive: CE2LYTCARE
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.2789
+     Title: Compatible for OnePlus Nord CE 2 Lite CareOG Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] OnePlus 9RT Incell
+      Stock: Incell LCD | Standard | model_key=9rt
+  -> [HIGH] Active: 1+9RtLCD
+     Amazon: LCD/Standard | Qty: 2 | Rs.2498
+     Title: Compatible for OnePlus 9Rt LCD (No Fingerprint Support) Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] OnePlus 9 CareOG
+      Stock: Not Specified | CareOG | model_key=9
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] OnePlus Nord CE 2 Lite Incell
+      Stock: Incell LCD | Standard | model_key=nordce2lite
+  -> [HIGH] Active: NORD2UNI
+     Amazon: LCD/Standard | Qty: 96 | Rs.2737
+     Title: Compatible for OnePlus Nord 2 (No Fingerprint Support) LCD Display+Touch Screen Combo Fold
+     [OK] MATCH — screen & quality aligned
+
+==============================================================================================================
+Apple — 10 variants, 10 units
+--------------------------------------------------------------------------------------------------------------
+
+[1x] iPhone 13 Incell
+      Stock: Incell LCD | Standard | model_key=13
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] iPhone 13 Pro OLED
+      Stock: OLED | Standard | model_key=13pro
+  -> [HIGH] Active: IP13PMGX
+     Amazon: OLED/Standard | Qty: 1 | Rs.10174
+     Title: Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] iPhone 13 Pro Max OLED
+      Stock: OLED | Standard | model_key=13promax
+  -> [HIGH] Active: IP13PMGX
+     Amazon: OLED/Standard | Qty: 1 | Rs.10174
+     Title: Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] iPhone 13 Pro Max Incell
+      Stock: Incell LCD | Standard | model_key=13promax
+  -> [HIGH] Inactive: IP13PMLCD
+     Amazon: LCD/Standard | Qty: 0 | Rs.4139
+     Title: Compatible for Apple iPhone 13 Pro Max LCD Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] iPhone 11 Pro Max OLED
+      Stock: OLED | Standard | model_key=11promax
+  -> [HIGH] Inactive: 11PMAXOLED
+     Amazon: OLED/Standard | Qty: 0 | Rs.4588
+     Title: Compatible for Apple iPhone 11 Pro Max GX Amoled Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] iPhone 11 Incell
+      Stock: Incell LCD | Standard | model_key=11
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] iPhone 8 Plus Incell
+      Stock: Incell LCD | Standard | model_key=8plus
+  -> [LOW] Inactive: IPH8PBCARE
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.3464
+     Title: Compatible for Apple iPhone 8 Plus (Black) CareOG Display+Touch Screen Combo Folder
+     [WARN] LOW CONFIDENCE — Screen MISMATCH: stock=Incell LCD vs listing=Not Specified | Quality MISMATCH: stock=Standard vs listing=CareOG
+
+
+[1x] iPhone 8 CareOG
+      Stock: Not Specified | CareOG | model_key=8
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] iPhone XS Incell
+      Stock: Incell LCD | Standard | model_key=xs
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] iPhone 14 Pro Max Incell
+      Stock: Incell LCD | Standard | model_key=14promax
+  -> [HIGH] Inactive: IP14PMLCD
+     Amazon: LCD/Standard | Qty: 0 | Rs.4650
+     Title: Compatible for Apple iPhone 14 Pro Max LCD Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+==============================================================================================================
+Samsung — 12 variants, 15 units
+--------------------------------------------------------------------------------------------------------------
+
+[1x] Galaxy A73 OLED
+      Stock: OLED | Standard | model_key=a73
+  -> [LOW] Inactive: SAMA73CARE
+     Amazon: Not Specified/CareOG | Qty: 0 | Rs.6180
+     Title: Compatible for Samsung Galaxy A73 (Fingerprint Support) CareOG Display+Touch Screen Combo 
+     [WARN] LOW CONFIDENCE — Screen MISMATCH: stock=OLED vs listing=Not Specified | Quality MISMATCH: stock=Standard vs listing=CareOG
+
+
+[1x] Galaxy A32 4G Incell
+      Stock: Incell LCD | Standard | model_key=a324g
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Galaxy A32 4G Incell
+      Stock: Incell LCD | Standard | model_key=a324g
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Galaxy A31 Incell
+      Stock: Incell LCD | Standard | model_key=a31
+  -> [HIGH] Active: A31
+     Amazon: LCD/Standard | Qty: 97 | Rs.2049
+     Title: Compatible for Samsung Galaxy A31 (No Fingerprint Support) LCD Display+Touch Screen Combo 
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Galaxy S21 FE OLED
+      Stock: OLED | Standard | model_key=s21fe
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Galaxy S20 FE With Frame OLED
+      Stock: OLED | With Frame | model_key=s20fewith
+  -> [HIGH] Inactive: GLXS20FeWFLED
+     Amazon: OLED/With Frame | Qty: 0 | Rs.4796
+     Title: Compatible for Samsung Galaxy S20 FE (with Frame) Amoled (Fingerprint Support) Display+Tou
+     [OK] MATCH — screen & quality aligned
+
+
+[3x] Galaxy J7 Next Incell
+      Stock: Incell LCD | Standard | model_key=j7next
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Galaxy J7 2016 Incell
+      Stock: Incell LCD | Standard | model_key=j72016
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Galaxy J7 2015 Incell
+      Stock: Incell LCD | Standard | model_key=j72015
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[2x] Galaxy A30s Incell
+      Stock: Incell LCD | Standard | model_key=a30s
+  -> [HIGH] Active: A30S
+     Amazon: LCD/Standard | Qty: 2 | Rs.2298
+     Title: Compatible for Samsung Galaxy A30s (No Fingerprint Support) LCD Display+Touch Screen Combo
+     [OK] MATCH — screen & quality aligned
+
+
+[1x] Galaxy J7 Max Incell
+      Stock: Incell LCD | Standard | model_key=j7max
+  -> [LOW] Inactive: J7MXBLED
+     Amazon: OLED/Standard | Qty: 0 | Rs.2225
+     Title: Compatible for Samsung Galaxy J7 Max (2017) (Black) OLED Display+Touch Screen Combo Folder
+     [WARN] LOW CONFIDENCE — Screen MISMATCH: stock=Incell LCD vs listing=OLED
+
+
+[1x] Galaxy A10 Incell
+      Stock: Incell LCD | Standard | model_key=a10
+  -> [HIGH] Active: A10S
+     Amazon: LCD/Standard | Qty: 100 | Rs.1966
+     Title: Compatible for Samsung Galaxy A10s LCD Display+Touch Screen Combo Folder
+     [OK] MATCH — screen & quality aligned
+
+==============================================================================================================
+Mixed — 18 variants, 19 units
+--------------------------------------------------------------------------------------------------------------
+
+[1x] Nothing Phone 1 CareOG
+      Stock: Not Specified | CareOG | model_key=1
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Infinix Note 10 Incell
+      Stock: Incell LCD | Standard | model_key=note10
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Infinix Hot 9 Incell
+      Stock: Incell LCD | Standard | model_key=hot9
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Infinix Note 11S Incell
+      Stock: Incell LCD | Standard | model_key=note11s
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Honor 7X Incell
+      Stock: Incell LCD | Standard | model_key=7x
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Honor 7X White Incell
+      Stock: Incell LCD | Standard | model_key=7x
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Honor 8C Incell
+      Stock: Incell LCD | Standard | model_key=8c
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Honor 8X Incell
+      Stock: Incell LCD | Standard | model_key=8x
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Honor X9B Incell
+      Stock: Incell LCD | Standard | model_key=x9b
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Nokia G10 Incell
+      Stock: Incell LCD | Standard | model_key=g10
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[2x] Nokia G20 Incell
+      Stock: Incell LCD | Standard | model_key=g20
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Nokia G21 Incell
+      Stock: Incell LCD | Standard | model_key=g21
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Nokia C3 Incell
+      Stock: Incell LCD | Standard | model_key=c3
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Moto G9 Incell
+      Stock: Incell LCD | Standard | model_key=g9
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Moto Edge 50 Fusion Incell
+      Stock: Incell LCD | Standard | model_key=edge50fusion
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Moto G34 Frame
+      Stock: Not Specified | With Frame | model_key=g34
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Asus Zenfone Max M2 Incell
+      Stock: Incell LCD | Standard | model_key=zenfonemaxm2
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+
+[1x] Asus ROG Phone 2 Incell
+      Stock: Incell LCD | Standard | model_key=rogphone2
+  -> [NO MATCH] NO MATCHING AMAZON LISTING FOUND
+
+==============================================================================================================
+SUMMARY
+==============================================================================================================
+
+ACTIVE LISTINGS:    18 variants (22 units)
+INACTIVE LISTINGS: 25 variants (26 units)
+NOT LISTED:        42 variants (46 units)
+TOTAL:             100 variants, 109 units
+
+==============================================================================================================
+ITEMS NEEDING ATTENTION
+==============================================================================================================
+REALME     | Realme C67 Incell              | Incell LCD   | Standard     | Screen MISMATCH: stock=Incell LCD vs listing=Not Specified | Quality MISMATCH: stock=Standard vs listing=CareOG
+REALME     | Realme 8 CareOG                | Not Specified | CareOG       | NOT LISTED ON AMAZON
+REALME     | Realme 7i Incell               | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+REALME     | Realme 9 Incell                | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+REALME     | Realme 9i Incell               | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+REALME     | Realme C30 Incell              | Incell LCD   | Standard     | Screen MISMATCH: stock=Incell LCD vs listing=Not Specified | Quality MISMATCH: stock=Standard vs listing=CareOG
+REALME     | Realme C53 Incell              | Incell LCD   | Standard     | Screen MISMATCH: stock=Incell LCD vs listing=Not Specified | Quality MISMATCH: stock=Standard vs listing=CareOG
+REALME     | Realme 8i Incell               | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+REALME     | Realme 13 Pro CareOG           | Not Specified | CareOG       | NOT LISTED ON AMAZON
+REALME     | Realme 3 Pro Frame             | Not Specified | With Frame   | Quality MISMATCH: stock=With Frame vs listing=CareOG
+VIVO       | Vivo T1 CareOG                 | Not Specified | CareOG       | NOT LISTED ON AMAZON
+OPPO       | F17 Pro OLED                   | OLED         | Standard     | Screen MISMATCH: stock=OLED vs listing=LCD
+OPPO       | F19 OLED                       | OLED         | Standard     | Screen MISMATCH: stock=OLED vs listing=LCD
+OPPO       | A54 5G Incell                  | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+OPPO       | F27 OLED                       | OLED         | Standard     | Screen MISMATCH: stock=OLED vs listing=LCD
+OPPO       | F5 Frame                       | Not Specified | With Frame   | NOT LISTED ON AMAZON
+OPPO       | F5 Incell                      | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+ONEPLUS    | OnePlus 8 CareOG               | Not Specified | CareOG       | NOT LISTED ON AMAZON
+ONEPLUS    | OnePlus 7 CareOG               | Not Specified | CareOG       | NOT LISTED ON AMAZON
+ONEPLUS    | OnePlus 7 Incell               | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+ONEPLUS    | OnePlus 9 CareOG               | Not Specified | CareOG       | NOT LISTED ON AMAZON
+APPLE      | iPhone 13 Incell               | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+APPLE      | iPhone 11 Incell               | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+APPLE      | iPhone 8 Plus Incell           | Incell LCD   | Standard     | Screen MISMATCH: stock=Incell LCD vs listing=Not Specified | Quality MISMATCH: stock=Standard vs listing=CareOG
+APPLE      | iPhone 8 CareOG                | Not Specified | CareOG       | NOT LISTED ON AMAZON
+APPLE      | iPhone XS Incell               | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+SAMSUNG    | Galaxy A73 OLED                | OLED         | Standard     | Screen MISMATCH: stock=OLED vs listing=Not Specified | Quality MISMATCH: stock=Standard vs listing=CareOG
+SAMSUNG    | Galaxy A32 4G Incell           | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+SAMSUNG    | Galaxy A32 4G Incell           | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+SAMSUNG    | Galaxy S21 FE OLED             | OLED         | Standard     | NOT LISTED ON AMAZON
+SAMSUNG    | Galaxy J7 Next Incell          | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+SAMSUNG    | Galaxy J7 2016 Incell          | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+SAMSUNG    | Galaxy J7 2015 Incell          | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+SAMSUNG    | Galaxy J7 Max Incell           | Incell LCD   | Standard     | Screen MISMATCH: stock=Incell LCD vs listing=OLED
+MIX        | Nothing Phone 1 CareOG         | Not Specified | CareOG       | NOT LISTED ON AMAZON
+MIX        | Infinix Note 10 Incell         | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Infinix Hot 9 Incell           | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Infinix Note 11S Incell        | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Honor 7X Incell                | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Honor 7X White Incell          | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Honor 8C Incell                | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Honor 8X Incell                | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Honor X9B Incell               | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Nokia G10 Incell               | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Nokia G20 Incell               | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Nokia G21 Incell               | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Nokia C3 Incell                | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Moto G9 Incell                 | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Moto Edge 50 Fusion Incell     | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Moto G34 Frame                 | Not Specified | With Frame   | NOT LISTED ON AMAZON
+MIX        | Asus Zenfone Max M2 Incell     | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+MIX        | Asus ROG Phone 2 Incell        | Incell LCD   | Standard     | NOT LISTED ON AMAZON
+

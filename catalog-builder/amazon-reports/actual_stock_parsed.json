@@ -1,0 +1,702 @@
+[
+  {
+    "brand": "REALME",
+    "name": "Realme C67 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme 8 CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme 7i Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme 9 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme C33 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme 11 Pro CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme 9i Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme C21 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme C30 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme C53 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme 8i Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme 13 Pro CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme 3 Pro Frame",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "With Frame"
+  },
+  {
+    "brand": "REALME",
+    "name": "Realme 7 Pro Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "VIVO",
+    "name": "Vivo Y33s Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "VIVO",
+    "name": "Vivo Y22 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "VIVO",
+    "name": "Vivo Y22 CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "VIVO",
+    "name": "Vivo T1 CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "VIVO",
+    "name": "Vivo T2x CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "VIVO",
+    "name": "Vivo X70 Pro Plus CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "VIVO",
+    "name": "Vivo V11 Pro CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "VIVO",
+    "name": "Vivo V17 CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "VIVO",
+    "name": "Vivo V15 CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "VIVO",
+    "name": "Vivo X80 CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "OPPO",
+    "name": "F17 Pro OLED",
+    "qty": 1,
+    "screen": "OLED/AMOLED",
+    "quality": "Standard"
+  },
+  {
+    "brand": "OPPO",
+    "name": "A53 CareOG",
+    "qty": 2,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "OPPO",
+    "name": "A57 5G CareOG",
+    "qty": 3,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "OPPO",
+    "name": "F19 OLED",
+    "qty": 1,
+    "screen": "OLED/AMOLED",
+    "quality": "Standard"
+  },
+  {
+    "brand": "OPPO",
+    "name": "A54 5G Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "OPPO",
+    "name": "F27 OLED",
+    "qty": 1,
+    "screen": "OLED/AMOLED",
+    "quality": "Standard"
+  },
+  {
+    "brand": "OPPO",
+    "name": "F9 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "OPPO",
+    "name": "Reno 10 Pro Plus CareOG",
+    "qty": 2,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "OPPO",
+    "name": "F5 Frame",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "With Frame"
+  },
+  {
+    "brand": "OPPO",
+    "name": "F5 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "ONEPLUS",
+    "name": "OnePlus 8 CareOG",
+    "qty": 2,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "ONEPLUS",
+    "name": "OnePlus 10 Pro CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "ONEPLUS",
+    "name": "OnePlus 7 CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "ONEPLUS",
+    "name": "OnePlus 7 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "ONEPLUS",
+    "name": "OnePlus 8 Pro Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "ONEPLUS",
+    "name": "OnePlus 10R Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "ONEPLUS",
+    "name": "OnePlus 11R CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "ONEPLUS",
+    "name": "OnePlus Nord CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "ONEPLUS",
+    "name": "OnePlus 9RT Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "ONEPLUS",
+    "name": "OnePlus 9 CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "ONEPLUS",
+    "name": "OnePlus Nord CE 2 Lite Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "APPLE",
+    "name": "iPhone 13 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "APPLE",
+    "name": "iPhone 13 Pro OLED",
+    "qty": 1,
+    "screen": "OLED/AMOLED",
+    "quality": "Standard"
+  },
+  {
+    "brand": "APPLE",
+    "name": "iPhone 13 Pro Max OLED",
+    "qty": 1,
+    "screen": "OLED/AMOLED",
+    "quality": "Standard"
+  },
+  {
+    "brand": "APPLE",
+    "name": "iPhone 13 Pro Max Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "APPLE",
+    "name": "iPhone 11 Pro Max OLED",
+    "qty": 1,
+    "screen": "OLED/AMOLED",
+    "quality": "Standard"
+  },
+  {
+    "brand": "APPLE",
+    "name": "iPhone 11 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "APPLE",
+    "name": "iPhone 8 Plus Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "APPLE",
+    "name": "iPhone 8 CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "APPLE",
+    "name": "iPhone XS Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "APPLE",
+    "name": "iPhone 14 Pro Max Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "SAMSUNG",
+    "name": "Galaxy A73 OLED",
+    "qty": 1,
+    "screen": "OLED/AMOLED",
+    "quality": "Standard"
+  },
+  {
+    "brand": "SAMSUNG",
+    "name": "Galaxy A32 4G Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "SAMSUNG",
+    "name": "Galaxy A32 4G Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "SAMSUNG",
+    "name": "Galaxy A31 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "SAMSUNG",
+    "name": "Galaxy S21 FE OLED",
+    "qty": 1,
+    "screen": "OLED/AMOLED",
+    "quality": "Standard"
+  },
+  {
+    "brand": "SAMSUNG",
+    "name": "Galaxy S20 FE With Frame OLED",
+    "qty": 1,
+    "screen": "OLED/AMOLED",
+    "quality": "With Frame"
+  },
+  {
+    "brand": "SAMSUNG",
+    "name": "Galaxy J7 Next Incell",
+    "qty": 3,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "SAMSUNG",
+    "name": "Galaxy J7 2016 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "SAMSUNG",
+    "name": "Galaxy J7 2015 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "SAMSUNG",
+    "name": "Galaxy A30s Incell",
+    "qty": 2,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "SAMSUNG",
+    "name": "Galaxy J7 Max Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "SAMSUNG",
+    "name": "Galaxy A10 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "Redmi Note 5 With Frame White",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "With Frame"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "11X OLED",
+    "qty": 1,
+    "screen": "OLED/AMOLED",
+    "quality": "Standard"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "11X Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "Redmi 4A With Frame Incell Black",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "With Frame"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "A3 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "Redmi Note 10T With Frame",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "With Frame"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "K20 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "Redmi 12 With Frame",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "With Frame"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "Redmi 12 5G With Frame",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "With Frame"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "Redmi 13 Pro Plus With Frame",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "With Frame"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "Redmi 10 Power Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "Redmi Note 6 Pro Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "Redmi Note 7 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "Poco X3 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "XIAOMI/REDMI/POCO",
+    "name": "Poco M4 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Nothing Phone 1 CareOG",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "CareOG"
+  },
+  {
+    "brand": "MIX",
+    "name": "Infinix Note 10 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Infinix Hot 9 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Infinix Note 11S Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Honor 7X Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Honor 7X White Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Honor 8C Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Honor 8X Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Honor X9B Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Nokia G10 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Nokia G20 Incell",
+    "qty": 2,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Nokia G21 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Nokia C3 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Moto G9 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Moto Edge 50 Fusion Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Moto G34 Frame",
+    "qty": 1,
+    "screen": "Unknown",
+    "quality": "With Frame"
+  },
+  {
+    "brand": "MIX",
+    "name": "Asus Zenfone Max M2 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  },
+  {
+    "brand": "MIX",
+    "name": "Asus ROG Phone 2 Incell",
+    "qty": 1,
+    "screen": "Incell LCD",
+    "quality": "Standard"
+  }
+]

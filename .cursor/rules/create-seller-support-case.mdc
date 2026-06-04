@@ -1,0 +1,31 @@
+---
+description: Case Log — create seller / SP-API support case after login (Sir edits flow here)
+alwaysApply: false
+---
+
+# Create seller support case (Case Log)
+
+**Prerequisite:** `python -m mahika.cli seller-login` OK (cookies saved)  
+**Command:** `python -m mahika.cli support-case`  
+**Account:** Badeja Enterprises → India (S7 — same as login)  
+**Full tree:** `agent/Graphs & workflows/create-seller-support-case/MASTER_FLOW_TREE.md`
+
+## Quick flow
+
+1. Load cookies → re-login only if session expired  
+2. S7 Badeja → India  
+3. Case Log: Develop Apps → SPP **or** developer.amazonservices.com/support **or** direct `/support/cases`  
+4. Fill SP-API production case (Mahika V1 defaults)  
+5. Default: **review 120s** — use `--submit` to auto-send  
+
+## Cursor browser (teach / manual)
+
+**Sir sikhata hai:** `agent/Graphs & workflows/create-seller-support-case/CURSOR_BROWSER_TEACH.md`  
+**OTP:** `python -m mahika.cli otp-watch` → `data/mahika/sessions/cursor_otp.txt`  
+**Browser:** `Ctrl+Shift+B` → agent `browser_navigate` with `position: side`, `newTab: true`  
+**Not:** Playwright Chromium for this lane unless Sir asks
+
+## Code (automation lane)
+
+- `agent/src/mahika/playwright/support_case_flow.py`
+- Legacy: `agent/scripts/raise_sp_api_production_case.py`

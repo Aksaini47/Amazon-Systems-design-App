@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d//**)",
+      "Bash(python stock_v6.py)",
+      "Bash(python -c ' *)",
+      "Bash(python3 fill_upload_from_category.py)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\DELL\\.claude\\skills\\amazon-india-mobile-parts"
+    ]
+  }
+}

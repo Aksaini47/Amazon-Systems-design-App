@@ -1,0 +1,52 @@
+﻿Sales Dashboard
+Last updated,May 13 2026 1:46:33 PM IST
+
+Filter Selection
+Date,Today - May 13 2026
+Sales breakdown,Marketplace total
+Fulfilment Channel,Both (Amazon and seller)
+
+Sales Snapshot
+Total Order Items,Units Ordered,Ordered Product Sales,Average units/order item,Average sales/order item
+1,1,"₹2,049.00",1.0,2049.0
+Compare Sales - Graph view
+Time,Today so far (Ordered product sales),Today so far (Units ordered),Yesterday (Ordered product sales),Yesterday (Units ordered),Same day last week (Ordered product sales),Same day last week (Units ordered),Same day last year (Ordered product sales),Same day last year (Units ordered)
+12 a.m.,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0,"₹299.00",1.0
+1 a.m.,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+2 a.m.,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+3 a.m.,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+4 a.m.,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+5 a.m.,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+6 a.m.,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+7 a.m.,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+8 a.m.,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+9 a.m.,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+10 a.m.,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+11 a.m.,"₹0.00",0.0,"₹0.00",0.0,"₹1,696.00",1.0,"₹0.00",0.0
+12 p.m.,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+1 p.m.,,,"₹0.00",0.0,"₹1,699.00",1.0,"₹0.00",0.0
+2 p.m.,,,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+3 p.m.,,,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+4 p.m.,,,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+5 p.m.,,,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+6 p.m.,,,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+7 p.m.,,,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+8 p.m.,,,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+9 p.m.,,,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+10 p.m.,,,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+11 p.m.,,,"₹0.00",0.0,"₹0.00",0.0,"₹0.00",0.0
+Compare Sales - Table view
+,Total Order Items,Units Ordered,Ordered Product Sales,Average units/order item,Average sales/order item
+Today so far,1,1,"₹2,049.00",1.0,2049.0
+Yesterday,0,0,"₹0.00",0.0,0.0
+Same day last week,2,2,"₹3,395.00",1.0,1697.5
+Same day last year,1,1,"₹299.00",1.0,299.0
+% change from yesterday,N/A,N/A,N/A,N/A,N/A
+Today through 1 p.m. IST,0,0,"₹0.00",0.0,0.0
+Yesterday through 1 p.m. IST,0,0,"₹0.00",0.0,0.0
+% change from same day last week,-100%,-100%,-100.00%,-100.0%,-100.0%
+Today through 1 p.m. IST,0,0,"₹0.00",0.0,0.0
+Same day last week through 1 p.m. IST,1,1,"₹1,696.00",1.0,1696.0
+% change from same day last year,-100%,-100%,-100.00%,-100.0%,-100.0%
+Today through 1 p.m. IST,0,0,"₹0.00",0.0,0.0
+Same day last year through 1 p.m. IST,1,1,"₹299.00",1.0,299.0

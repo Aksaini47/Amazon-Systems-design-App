@@ -1,0 +1,52 @@
+L0: Sales Dashboard
+L1: Last updated,May 13 2026 1:46:33 PM IST
+L2: 
+L3: Filter Selection
+L4: Date,Today - May 13 2026
+L5: Sales breakdown,Marketplace total
+L6: Fulfilment Channel,Both (Amazon and seller)
+L7: 
+L8: Sales Snapshot
+L9: Total Order Items,Units Ordered,Ordered Product Sales,Average units/order item,Average sales/order item
+L10: 1,1,"Rs.2,049.00",1.0,2049.0
+L11: Compare Sales - Graph view
+L12: Time,Today so far (Ordered product sales),Today so far (Units ordered),Yesterday (Ordered product sales),Yesterday (Units ordered),Same day last week 
+L13: 12 a.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.299.00",1.0
+L14: 1 a.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L15: 2 a.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L16: 3 a.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L17: 4 a.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L18: 5 a.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L19: 6 a.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L20: 7 a.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L21: 8 a.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L22: 9 a.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L23: 10 a.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L24: 11 a.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.1,696.00",1.0,"Rs.0.00",0.0
+L25: 12 p.m.,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L26: 1 p.m.,,,"Rs.0.00",0.0,"Rs.1,699.00",1.0,"Rs.0.00",0.0
+L27: 2 p.m.,,,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L28: 3 p.m.,,,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L29: 4 p.m.,,,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L30: 5 p.m.,,,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L31: 6 p.m.,,,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L32: 7 p.m.,,,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L33: 8 p.m.,,,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L34: 9 p.m.,,,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L35: 10 p.m.,,,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L36: 11 p.m.,,,"Rs.0.00",0.0,"Rs.0.00",0.0,"Rs.0.00",0.0
+L37: Compare Sales - Table view
+L38: ,Total Order Items,Units Ordered,Ordered Product Sales,Average units/order item,Average sales/order item
+L39: Today so far,1,1,"Rs.2,049.00",1.0,2049.0
+L40: Yesterday,0,0,"Rs.0.00",0.0,0.0
+L41: Same day last week,2,2,"Rs.3,395.00",1.0,1697.5
+L42: Same day last year,1,1,"Rs.299.00",1.0,299.0
+L43: % change from yesterday,N/A,N/A,N/A,N/A,N/A
+L44: Today through 1 p.m. IST,0,0,"Rs.0.00",0.0,0.0
+L45: Yesterday through 1 p.m. IST,0,0,"Rs.0.00",0.0,0.0
+L46: % change from same day last week,-100%,-100%,-100.00%,-100.0%,-100.0%
+L47: Today through 1 p.m. IST,0,0,"Rs.0.00",0.0,0.0
+L48: Same day last week through 1 p.m. IST,1,1,"Rs.1,696.00",1.0,1696.0
+L49: % change from same day last year,-100%,-100%,-100.00%,-100.0%,-100.0%
+L50: Today through 1 p.m. IST,0,0,"Rs.0.00",0.0,0.0
+L51: Same day last year through 1 p.m. IST,1,1,"Rs.299.00",1.0,299.0

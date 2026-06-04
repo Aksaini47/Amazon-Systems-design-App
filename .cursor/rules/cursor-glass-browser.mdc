@@ -7,6 +7,13 @@ alwaysApply: true
 
 Sir uses **Cursor browser only** for Seller Central discovery (not external Chrome/Playwright unless explicitly asked).
 
+## Testing mode (default now)
+
+- **Always visible:** every `browser_navigate` MUST set `position: "side"` or `"active"` and `newTab: true` when opening login.
+- **Never** omit `position` (background/hidden tab) during testing.
+- **Never** run Playwright / `mahika.cli seller-login` / `support-case` with `block_until_ms: 0` or background shell — Sir must see the window.
+- **Never** `Start-Process` external Chrome for login tests.
+
 ## Root cause when "browser side mein nahi dikh raha"
 
 1. **Glass WebView bug (primary on this PC):** Log shows `WebView must be attached to the DOM` — browser UI never mounts in Agents window.

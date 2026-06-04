@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Mahika cockpit{% endblock %}</title>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <style>
+    :root {
+      --ink:        #1a1a1a;
+      --paper:      #fafafa;
+      --accent:     #0f3c5a;
+      --accent-soft:#e6eef4;
+      --warn:       #c8200a;
+      --warn-soft:  #fdecea;
+      --caution:    #c87f0a;
+      --caution-soft:#fff4e6;
+      --good:       #1f7a3a;
+      --good-soft:  #e6f4ec;
+      --muted:      #6a6a6a;
+      --border:     #d9d9d9;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    header.topbar {
+      display: flex; align-items: center; gap: 1.25rem;
+      padding: 0.6rem 1.2rem;
+      background: var(--accent); color: white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+    header.topbar h1 {
+      font-size: 1.05rem; margin: 0; font-weight: 600; letter-spacing: 0.02em;
+    }
+    header.topbar nav { display: flex; gap: 1rem; margin-left: auto; }
+    header.topbar nav a {
+      color: white; text-decoration: none; padding: 0.25rem 0.5rem;
+      border-radius: 3px; opacity: 0.85;
+    }
+    header.topbar nav a:hover { background: rgba(255,255,255,0.12); opacity: 1; }
+    header.topbar nav a.active { background: rgba(255,255,255,0.18); opacity: 1; }
+    .runner-meta {
+      font-size: 0.78rem; opacity: 0.8;
+    }
+    main { padding: 1.2rem 1.5rem 3rem; max-width: 1400px; margin: 0 auto; }
+    h2 { margin-top: 0.4rem; margin-bottom: 1rem; font-size: 1.4rem; }
+    h3 { margin: 1.6rem 0 0.5rem; font-size: 1.05rem; color: var(--accent); }
+    table { border-collapse: collapse; width: 100%; background: white; border: 1px solid var(--border); }
+    th, td {
+      text-align: left; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th { background: #f0f0f0; font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
+    .pill {
+      display: inline-block; padding: 0.1rem 0.55rem; border-radius: 10px;
+      font-size: 0.78rem; font-weight: 600; white-space: nowrap;
+    }
+    .pill-good { background: var(--good-soft); color: var(--good); }
+    .pill-caution { background: var(--caution-soft); color: var(--caution); }
+    .pill-warn { background: var(--warn-soft); color: var(--warn); }
+    .pill-info { background: var(--accent-soft); color: var(--accent); }
+    .pill-muted { background: #ececec; color: var(--muted); }
+    .card {
+      background: white; border: 1px solid var(--border);
+      border-radius: 4px; padding: 1rem 1.2rem; margin-bottom: 1rem;
+    }
+    .card h3 { margin-top: 0; }
+    .grid { display: grid; gap: 1rem; }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .num { font-size: 1.6rem; font-weight: 600; color: var(--accent); }
+    .muted { color: var(--muted); font-size: 0.85rem; }
+    .row-warn td { background: var(--warn-soft); }
+    .row-caution td { background: var(--caution-soft); }
+    code { background: #efefef; padding: 1px 5px; border-radius: 3px; font-size: 0.85rem; }
+    .filter-form { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; align-items: center; }
+    .filter-form input, .filter-form select {
+      padding: 0.35rem 0.5rem; font-size: 0.9rem; border: 1px solid var(--border); border-radius: 3px;
+    }
+    .filter-form button {
+      padding: 0.35rem 0.9rem; background: var(--accent); color: white; border: none;
+      border-radius: 3px; cursor: pointer; font-size: 0.9rem;
+    }
+    .btn-primary {
+      padding: 0.4rem 1rem; background: var(--accent); color: white; border: none;
+      border-radius: 3px; cursor: pointer; font-size: 0.9rem;
+    }
+    .btn-good { background: var(--good); }
+    .btn-warn { background: var(--warn); }
+    .btn-muted { background: var(--muted); }
+    footer.bottombar {
+      padding: 1rem 1.5rem; text-align: center; color: var(--muted);
+      font-size: 0.78rem; border-top: 1px solid var(--border); margin-top: 2rem;
+    }
+    .flex { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+    .login-shell {
+      max-width: 360px; margin: 6rem auto; padding: 2rem;
+      background: white; border: 1px solid var(--border); border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .login-shell input[type=password] {
+      width: 100%; padding: 0.5rem; font-size: 1rem;
+      border: 1px solid var(--border); border-radius: 3px; margin: 0.5rem 0 1rem;
+    }
+    .login-shell button { width: 100%; padding: 0.55rem; font-size: 1rem; }
+    .err {
+      color: var(--warn); background: var(--warn-soft); padding: 0.5rem 0.8rem;
+      border-radius: 3px; margin: 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+{% if request.cookies.get('mahika_session') %}
+<header class="topbar">
+  <h1>Mahika ❄️ cockpit</h1>
+  <nav>
+    <a href="/"        class="{% if active == 'dashboard' %}active{% endif %}">Dashboard</a>
+    <a href="/orders"  class="{% if active == 'orders' %}active{% endif %}">Orders</a>
+    <a href="/claims"  class="{% if active == 'claims' %}active{% endif %}">Claims</a>
+    <a href="/audit"   class="{% if active == 'audit' %}active{% endif %}">Audit</a>
+    <a href="/insights" class="{% if active == 'insights' %}active{% endif %}">Insights</a>
+    <span class="runner-meta">{{ runner_id }} · {{ mode|upper }}</span>
+    <a href="/logout">Logout</a>
+  </nav>
+</header>
+{% endif %}
+<main>
+  {% block content %}{% endblock %}
+</main>
+<footer class="bottombar">
+  Mahika ❄️ — Project Alpha cockpit · runner {{ runner_id }}
+</footer>
+</body>
+</html>

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Claims · Mahika cockpit{% endblock %}
+{% block content %}
+<h2>Claim queue</h2>
+
+<div class="grid grid-3">
+  <div class="card">
+    <div class="muted">Awaiting filing</div>
+    <div class="num">{{ depth }}</div>
+  </div>
+  <div class="card">
+    <div class="muted">Filed (in flight)</div>
+    <div class="num">{{ in_flight }}</div>
+  </div>
+  <div class="card">
+    <div class="muted">Closed (settled)</div>
+    <div class="num">{{ closed }}</div>
+  </div>
+</div>
+
+<h3>Queued (next on deck first)</h3>
+{% if queued %}
+<table>
+  <thead>
+    <tr>
+      <th>Order ID</th><th>Template</th><th>Attempts</th>
+      <th>Queued</th><th>Last error</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in queued %}
+    <tr class="{% if c.attempt_count >= 3 %}row-warn{% elif c.attempt_count >= 1 %}row-caution{% endif %}">
+      <td><code>{{ c.order_id }}</code></td>
+      <td>{{ c.template_version }}</td>
+      <td>{{ c.attempt_count }}</td>
+      <td>{{ c.queued_at_str }}</td>
+      <td>{{ c.last_error or '—' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">Queue is empty.</p>
+{% endif %}
+
+<h3>Recently filed</h3>
+{% if filed %}
+<table>
+  <thead>
+    <tr>
+      <th>Order ID</th><th>Amazon claim ID</th><th>Filed</th><th>State</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in filed %}
+    <tr>
+      <td><code>{{ c.order_id }}</code></td>
+      <td><code>{{ c.amazon_claim_id or '—' }}</code></td>
+      <td>{{ c.filed_at_str }}</td>
+      <td><span class="pill pill-{{ c.state_pill }}">{{ c.state }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">No filed claims yet.</p>
+{% endif %}
+{% endblock %}

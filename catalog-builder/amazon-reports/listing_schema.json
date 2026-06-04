@@ -1,0 +1,227 @@
+{
+  "file": "PHONE_ACCESSORY.xlsm - Amazon Bulk Upload Template",
+  "description": "Amazon India bulk upload template for PHONE_ACCESSORY product type",
+  "product_type": "PHONE_ACCESSORY",
+  "header_row": 4,
+  "attribute_row": 5,
+  "data_starts_row": 7,
+
+  "sheets": {
+    "Changes to the template": "Changelog - Amazon updates",
+    "Instructions": "How to use the template",
+    "Images": "Image upload guidelines",
+    "Data Definitions": "Field definitions and requirements",
+    "Template": "Main data entry sheet",
+    "Browse Data": "Browse node IDs",
+    "Conditions List": "Variation theme options",
+    "Valid Values": "Dropdown options",
+    "Dropdown Lists": "All dropdown values",
+    "AttributePTDMAP": "Attribute to PTD mapping"
+  },
+
+  "columns": {
+    "1": {
+      "name": "SKU",
+      "field": "contribution_sku#1.value",
+      "label": "SKU",
+      "required": true,
+      "notes": "Unique seller SKU identifier"
+    },
+    "2": {
+      "name": "Product Type",
+      "field": "product_type#1.value",
+      "label": "Product Type",
+      "required": true,
+      "fixed_value": "PHONE_ACCESSORY",
+      "notes": "Must be PHONE_ACCESSORY for mobile accessories"
+    },
+    "3": {
+      "name": "Listing Action",
+      "field": "::record_action",
+      "label": "Listing Action",
+      "required": true,
+      "options": ["Create or Replace (Full Update)", "Edit (Partial Update)", "Delete"],
+      "notes": "Create = New listing, Edit = Update existing"
+    },
+    "4": {
+      "name": "Parentage Level",
+      "field": "parentage_level[marketplace_id=A21TJRUUN4KGV]#1.value",
+      "label": "Parentage Level",
+      "required": false,
+      "options": ["Parent", "Child"],
+      "notes": "Parent for variation families, Child for variants"
+    },
+    "5": {
+      "name": "Parent SKU",
+      "field": "child_parent_sku_relationship[marketplace_id=A21TJRUUN4KGV]#1.parent_sku",
+      "label": "Parent SKU",
+      "required": false,
+      "notes": "Required if Parentage = Child"
+    },
+    "6": {
+      "name": "Variation Theme Name",
+      "field": "variation_theme#1.name",
+      "label": "Variation Theme Name",
+      "required": false,
+      "notes": "e.g., COLOR, SIZE/PRODUCT_GRADE"
+    },
+    "7": {
+      "name": "Item Name",
+      "field": "item_name[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value",
+      "label": "Item Name",
+      "required": true,
+      "max_chars": 200,
+      "notes": "Product title - customer facing"
+    },
+    "8": {
+      "name": "Brand Name",
+      "field": "brand[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value",
+      "label": "Brand Name",
+      "required": true,
+      "notes": "Generic for unbranded products"
+    },
+    "20": {
+      "name": "Main Image URL",
+      "field": "main_product_image_locator[marketplace_id=A21TJRUUN4KGV]#1.media_location",
+      "label": "Main Image URL",
+      "required": false,
+      "notes": "Pure white background, 85% frame fill, min 1600x1600px"
+    },
+    "29-37": {
+      "name": "Other Image URL",
+      "field": "other_product_image_locator_*",
+      "label": "Other Image URL",
+      "notes": "Up to 8 additional images (slots 1-8)"
+    },
+    "30": {
+      "name": "Product Description",
+      "field": "product_description[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value",
+      "label": "Product Description",
+      "required": false,
+      "max_chars": 2000,
+      "notes": "Plain text only - HTML stripped by Amazon"
+    },
+    "31-35": {
+      "name": "Bullet Points 1-5",
+      "field": "bullet_point[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#*.value",
+      "label": "Bullet Point",
+      "required": false,
+      "max_chars": 255,
+      "notes": "5 bullet points max, ~200 chars each recommended"
+    },
+    "36": {
+      "name": "Generic Keyword",
+      "field": "generic_keyword[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value",
+      "label": "Generic Keyword",
+      "required": false,
+      "max_bytes": 200,
+      "notes": "India: 200 bytes MAX per field"
+    },
+    "44-46": {
+      "name": "Compatible Phone Models",
+      "field": "compatible_phone_models[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#*.value",
+      "label": "Compatible Phone Models",
+      "required": false,
+      "notes": "Multiple entries allowed"
+    },
+    "419": {
+      "name": "Fulfillment Channel",
+      "field": "fulfillment_availability#1.fulfillment_channel_code",
+      "label": "Fulfillment Channel Code (IN)",
+      "required": true,
+      "options": ["AMAZON_IN", "Fulfillment by Merchant (Default)"],
+      "notes": "AMAZON = FBA, MERCHANT = FBM"
+    },
+    "420": {
+      "name": "Quantity",
+      "field": "fulfillment_availability#1.quantity",
+      "label": "Quantity (IN)",
+      "required": true,
+      "notes": "Stock quantity available"
+    },
+    "424": {
+      "name": "Your Price INR",
+      "field": "purchasable_offer[marketplace_id=A21TJRUUN4KGV][audience=ALL]#1.our_price#1.schedule#1.value_with_tax",
+      "label": "Your Price INR (Sell on Amazon, IN)",
+      "required": false,
+      "notes": "Selling price in INR"
+    },
+    "425": {
+      "name": "Maximum Retail Price",
+      "field": "purchasable_offer[marketplace_id=A21TJRUUN4KGV][audience=ALL]#1.maximum_retail_price#1.schedule#1.value_with_tax",
+      "label": "Maximum Retail Price (Sell on Amazon, IN)",
+      "required": false,
+      "notes": "MRP printed on product"
+    }
+  },
+
+  "required_fields": [
+    "contribution_sku#1.value",
+    "product_type#1.value",
+    "::record_action",
+    "item_name",
+    "brand",
+    "fulfillment_availability#1.fulfillment_channel_code",
+    "fulfillment_availability#1.quantity"
+  ],
+
+  "listing_actions": {
+    "Create or Replace (Full Update)": {
+      "description": "Create new listing or replace all data",
+      "brand_rule": "Use 'Generic'",
+      "required_fields": "All required fields must be populated"
+    },
+    "Edit (Partial Update)": {
+      "description": "Update specific fields without changing others",
+      "brand_rule": "Leave BLANK (do not include column)",
+      "required_fields": "Only changed fields need to be populated"
+    },
+    "Delete": {
+      "description": "Remove listing from Amazon",
+      "brand_rule": "Leave BLANK",
+      "required_fields": "Only SKU required"
+    }
+  },
+
+  "brand_name_rules": {
+    "Edit (Partial Update)": "BLANK - do not include this column",
+    "Edit (Full)": "BLANK - do not include this column",
+    "New": "Generic"
+  },
+
+  "compliance_limits": {
+    "title_max_chars": 200,
+    "bullet_max_chars": 255,
+    "bullet_total_indexing": 1000,
+    "description_max_chars": 2000,
+    "backend_keyword_max_bytes_per_field": 200,
+    "max_images": 9
+  },
+
+  "banned_terms": [
+    "best",
+    "number1",
+    "top-rated",
+    "money back",
+    "refund",
+    "100% original",
+    "emojis",
+    "ALL CAPS promotional",
+    "gst (in bullets)",
+    "whatsapp (in bullets)"
+  ],
+
+  "image_requirements": {
+    "main_image": {
+      "background": "Pure white (#FFFFFF)",
+      "frame_fill": "85% minimum",
+      "resolution": "1600x1600 minimum",
+      "format": "JPEG or PNG",
+      "text_watermarks": "Not allowed"
+    },
+    "other_images": {
+      "count": "Up to 8 additional",
+      "types": "Lifestyle, infographic, comparison, installation"
+    }
+  }
+}

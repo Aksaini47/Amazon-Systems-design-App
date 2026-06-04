@@ -1,0 +1,2958 @@
+{
+  "file": "Category+Listings+Report_05-12-2026.xlsm",
+  "total_columns": 591,
+  "data_starts_row": 7,
+  "header_row": 4,
+  "columns": [
+    {
+      "column_number": 1,
+      "display_name": "Status",
+      "sample_value": "Active"
+    },
+    {
+      "column_number": 2,
+      "display_name": "Title",
+      "sample_value": "Compatible for Motorola Moto G6 Play (Gold) LCD Display+Touch Screen Combo Folder"
+    },
+    {
+      "column_number": 3,
+      "display_name": "SKU",
+      "sample_value": "MOTOG6PLAYG"
+    },
+    {
+      "column_number": 4,
+      "display_name": "Product Type",
+      "sample_value": "CELLULAR_PHONE"
+    },
+    {
+      "column_number": 5,
+      "display_name": "Listing Action",
+      "sample_value": "Edit (Partial Update)"
+    },
+    {
+      "column_number": 6,
+      "display_name": "Parentage Level",
+      "sample_value": null
+    },
+    {
+      "column_number": 7,
+      "display_name": "Parent SKU",
+      "sample_value": null
+    },
+    {
+      "column_number": 8,
+      "display_name": "Variation Theme Name",
+      "sample_value": null
+    },
+    {
+      "column_number": 9,
+      "display_name": "Item Name",
+      "sample_value": "Compatible for Motorola Moto G6 Play (Gold) LCD Display+Touch Screen Combo Folder"
+    },
+    {
+      "column_number": 10,
+      "display_name": "Brand Name",
+      "sample_value": "Generic"
+    },
+    {
+      "column_number": 11,
+      "display_name": "Product Id Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 12,
+      "display_name": "Product Id",
+      "sample_value": null
+    },
+    {
+      "column_number": 13,
+      "display_name": "Recommended Browse Nodes",
+      "sample_value": "Mobile Screen Guards (1389425031)"
+    },
+    {
+      "column_number": 14,
+      "display_name": "Recommended Browse Nodes",
+      "sample_value": null
+    },
+    {
+      "column_number": 15,
+      "display_name": "Recommended Browse Nodes",
+      "sample_value": null
+    },
+    {
+      "column_number": 16,
+      "display_name": "Recommended Browse Nodes",
+      "sample_value": null
+    },
+    {
+      "column_number": 17,
+      "display_name": "Recommended Browse Nodes",
+      "sample_value": null
+    },
+    {
+      "column_number": 18,
+      "display_name": "Model Number",
+      "sample_value": "MOTOG6PLAYG"
+    },
+    {
+      "column_number": 19,
+      "display_name": "Model Name",
+      "sample_value": null
+    },
+    {
+      "column_number": 20,
+      "display_name": "Manufacturer",
+      "sample_value": "Generic"
+    },
+    {
+      "column_number": 21,
+      "display_name": "UNSPSC Code",
+      "sample_value": null
+    },
+    {
+      "column_number": 22,
+      "display_name": "National Stock Number",
+      "sample_value": null
+    },
+    {
+      "column_number": 23,
+      "display_name": "Item Highlight",
+      "sample_value": null
+    },
+    {
+      "column_number": 24,
+      "display_name": "Item Highlight",
+      "sample_value": null
+    },
+    {
+      "column_number": 25,
+      "display_name": "Item Highlight",
+      "sample_value": null
+    },
+    {
+      "column_number": 26,
+      "display_name": "Item Highlight",
+      "sample_value": null
+    },
+    {
+      "column_number": 27,
+      "display_name": "Item Highlight",
+      "sample_value": null
+    },
+    {
+      "column_number": 28,
+      "display_name": "Model Year",
+      "sample_value": null
+    },
+    {
+      "column_number": 29,
+      "display_name": "Main Image URL",
+      "sample_value": "https://m.media-amazon.com/images/I/51YaowaZIiL.jpg"
+    },
+    {
+      "column_number": 30,
+      "display_name": "Other Image URL",
+      "sample_value": null
+    },
+    {
+      "column_number": 31,
+      "display_name": "Other Image URL",
+      "sample_value": null
+    },
+    {
+      "column_number": 32,
+      "display_name": "Other Image URL",
+      "sample_value": null
+    },
+    {
+      "column_number": 33,
+      "display_name": "Other Image URL",
+      "sample_value": null
+    },
+    {
+      "column_number": 34,
+      "display_name": "Other Image URL",
+      "sample_value": null
+    },
+    {
+      "column_number": 35,
+      "display_name": "Other Image URL",
+      "sample_value": null
+    },
+    {
+      "column_number": 36,
+      "display_name": "Other Image URL",
+      "sample_value": null
+    },
+    {
+      "column_number": 37,
+      "display_name": "Other Image URL",
+      "sample_value": null
+    },
+    {
+      "column_number": 38,
+      "display_name": "Swatch Image URL",
+      "sample_value": null
+    },
+    {
+      "column_number": 39,
+      "display_name": "Product Description",
+      "sample_value": "NOTICE: If Any Customer Will Try To Do Any Type Of Fraud/cheating In Terms Of Refund Or Replacement "
+    },
+    {
+      "column_number": 40,
+      "display_name": "Bullet Point",
+      "sample_value": "📱 Premium Display Technology 🔹 Grade A LCD/TFT Display – A bright, energy-efficient, and cost-effect"
+    },
+    {
+      "column_number": 41,
+      "display_name": "Bullet Point",
+      "sample_value": "📲 Perfect Compatibility ✅ Designed for Motorola Moto G6 Play (Gold) – Precise fit"
+    },
+    {
+      "column_number": 42,
+      "display_name": "Bullet Point",
+      "sample_value": "🔧 Professional Installation STRONGLY Recommended – Improper installation can cause touch issues, dea"
+    },
+    {
+      "column_number": 43,
+      "display_name": "Bullet Point",
+      "sample_value": "🔬 Rigorously Tested for Performance – Each display undergoes strict quality checks for touch sensiti"
+    },
+    {
+      "column_number": 44,
+      "display_name": "Bullet Point",
+      "sample_value": "⚠️ Important Warranty & Installation Info 🛡️ 7-Day Replacement Warranty – Covers manufacturing defec"
+    },
+    {
+      "column_number": 45,
+      "display_name": "Generic Keyword",
+      "sample_value": "Moto G6 Play (Gold) LCD Display"
+    },
+    {
+      "column_number": 46,
+      "display_name": "Generic Keyword",
+      "sample_value": null
+    },
+    {
+      "column_number": 47,
+      "display_name": "Generic Keyword",
+      "sample_value": null
+    },
+    {
+      "column_number": 48,
+      "display_name": "Generic Keyword",
+      "sample_value": null
+    },
+    {
+      "column_number": 49,
+      "display_name": "Generic Keyword",
+      "sample_value": null
+    },
+    {
+      "column_number": 50,
+      "display_name": "Special Features",
+      "sample_value": null
+    },
+    {
+      "column_number": 51,
+      "display_name": "Special Features",
+      "sample_value": null
+    },
+    {
+      "column_number": 52,
+      "display_name": "Special Features",
+      "sample_value": null
+    },
+    {
+      "column_number": 53,
+      "display_name": "Special Features",
+      "sample_value": null
+    },
+    {
+      "column_number": 54,
+      "display_name": "Special Features",
+      "sample_value": null
+    },
+    {
+      "column_number": 55,
+      "display_name": "Style",
+      "sample_value": null
+    },
+    {
+      "column_number": 56,
+      "display_name": "Material",
+      "sample_value": null
+    },
+    {
+      "column_number": 57,
+      "display_name": "Material",
+      "sample_value": null
+    },
+    {
+      "column_number": 58,
+      "display_name": "Material",
+      "sample_value": null
+    },
+    {
+      "column_number": 59,
+      "display_name": "Material",
+      "sample_value": null
+    },
+    {
+      "column_number": 60,
+      "display_name": "Material",
+      "sample_value": null
+    },
+    {
+      "column_number": 61,
+      "display_name": "Number of Items",
+      "sample_value": "1"
+    },
+    {
+      "column_number": 62,
+      "display_name": "Item Package Quantity",
+      "sample_value": null
+    },
+    {
+      "column_number": 63,
+      "display_name": "Item Type Name",
+      "sample_value": "Mobile Screen Replacement Part"
+    },
+    {
+      "column_number": 64,
+      "display_name": "Water Resistance Level",
+      "sample_value": null
+    },
+    {
+      "column_number": 65,
+      "display_name": "Screen Size",
+      "sample_value": null
+    },
+    {
+      "column_number": 66,
+      "display_name": "Screen Size Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 67,
+      "display_name": "Color",
+      "sample_value": null
+    },
+    {
+      "column_number": 68,
+      "display_name": "Ring Size",
+      "sample_value": null
+    },
+    {
+      "column_number": 69,
+      "display_name": "Size",
+      "sample_value": null
+    },
+    {
+      "column_number": 70,
+      "display_name": "Part Number",
+      "sample_value": "MOTOG6PLAYG"
+    },
+    {
+      "column_number": 71,
+      "display_name": "Item Shape",
+      "sample_value": null
+    },
+    {
+      "column_number": 72,
+      "display_name": "Manufacturer Contact Information",
+      "sample_value": null
+    },
+    {
+      "column_number": 73,
+      "display_name": "Edition",
+      "sample_value": null
+    },
+    {
+      "column_number": 74,
+      "display_name": "Configuration",
+      "sample_value": null
+    },
+    {
+      "column_number": 75,
+      "display_name": "Platform for Display",
+      "sample_value": null
+    },
+    {
+      "column_number": 76,
+      "display_name": "Screen Surface Description",
+      "sample_value": null
+    },
+    {
+      "column_number": 77,
+      "display_name": "Item Hardness",
+      "sample_value": null
+    },
+    {
+      "column_number": 78,
+      "display_name": "Compatible Phone Models",
+      "sample_value": null
+    },
+    {
+      "column_number": 79,
+      "display_name": "Compatible Phone Models",
+      "sample_value": null
+    },
+    {
+      "column_number": 80,
+      "display_name": "Compatible Phone Models",
+      "sample_value": null
+    },
+    {
+      "column_number": 81,
+      "display_name": "Compatible Phone Models",
+      "sample_value": null
+    },
+    {
+      "column_number": 82,
+      "display_name": "Compatible Phone Models",
+      "sample_value": null
+    },
+    {
+      "column_number": 83,
+      "display_name": "Clarity",
+      "sample_value": null
+    },
+    {
+      "column_number": 84,
+      "display_name": "Item Display Height",
+      "sample_value": null
+    },
+    {
+      "column_number": 85,
+      "display_name": "Item Display Height Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 86,
+      "display_name": "Item Display Width",
+      "sample_value": null
+    },
+    {
+      "column_number": 87,
+      "display_name": "Item Display Width Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 88,
+      "display_name": "Flavor",
+      "sample_value": null
+    },
+    {
+      "column_number": 89,
+      "display_name": "Orientation",
+      "sample_value": null
+    },
+    {
+      "column_number": 90,
+      "display_name": "Customer Package Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 91,
+      "display_name": "Pattern",
+      "sample_value": null
+    },
+    {
+      "column_number": 92,
+      "display_name": "Compatible Devices",
+      "sample_value": "Motorola Moto G6 Play (Gold)"
+    },
+    {
+      "column_number": 93,
+      "display_name": "Compatible Devices",
+      "sample_value": null
+    },
+    {
+      "column_number": 94,
+      "display_name": "Compatible Devices",
+      "sample_value": null
+    },
+    {
+      "column_number": 95,
+      "display_name": "Compatible Devices",
+      "sample_value": null
+    },
+    {
+      "column_number": 96,
+      "display_name": "Compatible Devices",
+      "sample_value": null
+    },
+    {
+      "column_number": 97,
+      "display_name": "Finish Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 98,
+      "display_name": "Unit Count",
+      "sample_value": null
+    },
+    {
+      "column_number": 99,
+      "display_name": "Unit Count Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 100,
+      "display_name": "Product Site Launch Date",
+      "sample_value": null
+    },
+    {
+      "column_number": 101,
+      "display_name": "Included Components",
+      "sample_value": null
+    },
+    {
+      "column_number": 102,
+      "display_name": "Included Components",
+      "sample_value": null
+    },
+    {
+      "column_number": 103,
+      "display_name": "Included Components",
+      "sample_value": null
+    },
+    {
+      "column_number": 104,
+      "display_name": "Included Components",
+      "sample_value": null
+    },
+    {
+      "column_number": 105,
+      "display_name": "Included Components",
+      "sample_value": null
+    },
+    {
+      "column_number": 106,
+      "display_name": "League Name",
+      "sample_value": null
+    },
+    {
+      "column_number": 107,
+      "display_name": "League Name",
+      "sample_value": null
+    },
+    {
+      "column_number": 108,
+      "display_name": "League Name",
+      "sample_value": null
+    },
+    {
+      "column_number": 109,
+      "display_name": "League Name",
+      "sample_value": null
+    },
+    {
+      "column_number": 110,
+      "display_name": "League Name",
+      "sample_value": null
+    },
+    {
+      "column_number": 111,
+      "display_name": "Team Name",
+      "sample_value": null
+    },
+    {
+      "column_number": 112,
+      "display_name": "Team Name",
+      "sample_value": null
+    },
+    {
+      "column_number": 113,
+      "display_name": "Band Color",
+      "sample_value": null
+    },
+    {
+      "column_number": 114,
+      "display_name": "External Product Information Entity",
+      "sample_value": "HSN Code"
+    },
+    {
+      "column_number": 115,
+      "display_name": "External Product Information",
+      "sample_value": "851770"
+    },
+    {
+      "column_number": 116,
+      "display_name": "Importer Contact Information",
+      "sample_value": null
+    },
+    {
+      "column_number": 117,
+      "display_name": "Importer Contact Information",
+      "sample_value": null
+    },
+    {
+      "column_number": 118,
+      "display_name": "Importer Contact Information",
+      "sample_value": null
+    },
+    {
+      "column_number": 119,
+      "display_name": "Importer Contact Information",
+      "sample_value": null
+    },
+    {
+      "column_number": 120,
+      "display_name": "Importer Contact Information",
+      "sample_value": null
+    },
+    {
+      "column_number": 121,
+      "display_name": "Packer Contact Information",
+      "sample_value": "‎RepairFully.com, Import Hub E-Commerce 122503, Pataudi, Haryana"
+    },
+    {
+      "column_number": 122,
+      "display_name": "Packer Contact Information",
+      "sample_value": null
+    },
+    {
+      "column_number": 123,
+      "display_name": "Packer Contact Information",
+      "sample_value": null
+    },
+    {
+      "column_number": 124,
+      "display_name": "Packer Contact Information",
+      "sample_value": null
+    },
+    {
+      "column_number": 125,
+      "display_name": "Packer Contact Information",
+      "sample_value": null
+    },
+    {
+      "column_number": 126,
+      "display_name": "Item Length Longer Edge",
+      "sample_value": null
+    },
+    {
+      "column_number": 127,
+      "display_name": "Item Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 128,
+      "display_name": "Item Width Shorter Edge",
+      "sample_value": null
+    },
+    {
+      "column_number": 129,
+      "display_name": "Item Width Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 130,
+      "display_name": "Number of Packs",
+      "sample_value": null
+    },
+    {
+      "column_number": 131,
+      "display_name": "Set Name",
+      "sample_value": null
+    },
+    {
+      "column_number": 132,
+      "display_name": "Is Green Purchasing Law Compliant",
+      "sample_value": null
+    },
+    {
+      "column_number": 133,
+      "display_name": "Subject Character",
+      "sample_value": null
+    },
+    {
+      "column_number": 134,
+      "display_name": "Special Size",
+      "sample_value": null
+    },
+    {
+      "column_number": 135,
+      "display_name": "Metal Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 136,
+      "display_name": "Metal Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 137,
+      "display_name": "Metal Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 138,
+      "display_name": "Metal Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 139,
+      "display_name": "Metal Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 140,
+      "display_name": "Case Material Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 141,
+      "display_name": "Case Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 142,
+      "display_name": "Theme",
+      "sample_value": null
+    },
+    {
+      "column_number": 143,
+      "display_name": "Theme",
+      "sample_value": null
+    },
+    {
+      "column_number": 144,
+      "display_name": "Theme",
+      "sample_value": null
+    },
+    {
+      "column_number": 145,
+      "display_name": "Theme",
+      "sample_value": null
+    },
+    {
+      "column_number": 146,
+      "display_name": "Theme",
+      "sample_value": null
+    },
+    {
+      "column_number": 147,
+      "display_name": "Material Composition",
+      "sample_value": null
+    },
+    {
+      "column_number": 148,
+      "display_name": "Magnification Strength",
+      "sample_value": null
+    },
+    {
+      "column_number": 149,
+      "display_name": "Magnification Strength Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 150,
+      "display_name": "Lens Color",
+      "sample_value": null
+    },
+    {
+      "column_number": 151,
+      "display_name": "Lens Width",
+      "sample_value": null
+    },
+    {
+      "column_number": 152,
+      "display_name": "Lens Width Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 153,
+      "display_name": "Item Display Depth",
+      "sample_value": null
+    },
+    {
+      "column_number": 154,
+      "display_name": "Item Display Depth Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 155,
+      "display_name": "Item Display Diameter",
+      "sample_value": null
+    },
+    {
+      "column_number": 156,
+      "display_name": "Item Display Diameter Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 157,
+      "display_name": "Item Display Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 158,
+      "display_name": "Item Display Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 159,
+      "display_name": "Form Factor",
+      "sample_value": null
+    },
+    {
+      "column_number": 160,
+      "display_name": "Connector Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 161,
+      "display_name": "Connector Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 162,
+      "display_name": "Athlete",
+      "sample_value": null
+    },
+    {
+      "column_number": 163,
+      "display_name": "Is Autographed",
+      "sample_value": null
+    },
+    {
+      "column_number": 164,
+      "display_name": "Scent",
+      "sample_value": null
+    },
+    {
+      "column_number": 165,
+      "display_name": "Scent",
+      "sample_value": null
+    },
+    {
+      "column_number": 166,
+      "display_name": "Scent",
+      "sample_value": null
+    },
+    {
+      "column_number": 167,
+      "display_name": "Scent",
+      "sample_value": null
+    },
+    {
+      "column_number": 168,
+      "display_name": "Scent",
+      "sample_value": null
+    },
+    {
+      "column_number": 169,
+      "display_name": "Hand Orientation",
+      "sample_value": null
+    },
+    {
+      "column_number": 170,
+      "display_name": "Embellishment Feature",
+      "sample_value": null
+    },
+    {
+      "column_number": 171,
+      "display_name": "Embellishment Feature",
+      "sample_value": null
+    },
+    {
+      "column_number": 172,
+      "display_name": "Embellishment Feature",
+      "sample_value": null
+    },
+    {
+      "column_number": 173,
+      "display_name": "Embellishment Feature",
+      "sample_value": null
+    },
+    {
+      "column_number": 174,
+      "display_name": "Embellishment Feature",
+      "sample_value": null
+    },
+    {
+      "column_number": 175,
+      "display_name": "Item Thickness Decimal Value",
+      "sample_value": null
+    },
+    {
+      "column_number": 176,
+      "display_name": "Item Thickness",
+      "sample_value": null
+    },
+    {
+      "column_number": 177,
+      "display_name": "Item Thickness Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 178,
+      "display_name": "Closure Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 179,
+      "display_name": "Closure Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 180,
+      "display_name": "Closure Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 181,
+      "display_name": "Closure Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 182,
+      "display_name": "Closure Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 183,
+      "display_name": "Item Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 184,
+      "display_name": "Item Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 185,
+      "display_name": "Interior Color",
+      "sample_value": null
+    },
+    {
+      "column_number": 186,
+      "display_name": "Wireless Charging Standard",
+      "sample_value": null
+    },
+    {
+      "column_number": 187,
+      "display_name": "Wireless Charging Standard",
+      "sample_value": null
+    },
+    {
+      "column_number": 188,
+      "display_name": "Wireless Charging Standard",
+      "sample_value": null
+    },
+    {
+      "column_number": 189,
+      "display_name": "Letter Character",
+      "sample_value": null
+    },
+    {
+      "column_number": 190,
+      "display_name": "Display Maximum Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 191,
+      "display_name": "Display Pixel Density",
+      "sample_value": null
+    },
+    {
+      "column_number": 192,
+      "display_name": "Pixel Density Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 193,
+      "display_name": "Display Refresh Rate in Hertz",
+      "sample_value": null
+    },
+    {
+      "column_number": 194,
+      "display_name": "Display Resolution Maximum",
+      "sample_value": null
+    },
+    {
+      "column_number": 195,
+      "display_name": "Display Resolution Maximum Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 196,
+      "display_name": "Display Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 197,
+      "display_name": "Telephone Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 198,
+      "display_name": "Aspect Ratio",
+      "sample_value": null
+    },
+    {
+      "column_number": 199,
+      "display_name": "Aspect Ratio",
+      "sample_value": null
+    },
+    {
+      "column_number": 200,
+      "display_name": "Aspect Ratio",
+      "sample_value": null
+    },
+    {
+      "column_number": 201,
+      "display_name": "Specific Absorption Rate",
+      "sample_value": null
+    },
+    {
+      "column_number": 202,
+      "display_name": "Specific Absorption Rate Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 203,
+      "display_name": "Cellular Technology",
+      "sample_value": null
+    },
+    {
+      "column_number": 204,
+      "display_name": "Phone Talk Time",
+      "sample_value": null
+    },
+    {
+      "column_number": 205,
+      "display_name": "Phone Talk Time Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 206,
+      "display_name": "Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 207,
+      "display_name": "Wireless Service Provider",
+      "sample_value": null
+    },
+    {
+      "column_number": 208,
+      "display_name": "Capacity",
+      "sample_value": null
+    },
+    {
+      "column_number": 209,
+      "display_name": "Capacity Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 210,
+      "display_name": "Frame Rate",
+      "sample_value": null
+    },
+    {
+      "column_number": 211,
+      "display_name": "Frame Rate",
+      "sample_value": null
+    },
+    {
+      "column_number": 212,
+      "display_name": "Frame Rate",
+      "sample_value": null
+    },
+    {
+      "column_number": 213,
+      "display_name": "Camera Description",
+      "sample_value": null
+    },
+    {
+      "column_number": 214,
+      "display_name": "Camera Description",
+      "sample_value": null
+    },
+    {
+      "column_number": 215,
+      "display_name": "Service Provider",
+      "sample_value": null
+    },
+    {
+      "column_number": 216,
+      "display_name": "Connectivity Technology",
+      "sample_value": null
+    },
+    {
+      "column_number": 217,
+      "display_name": "Connectivity Technology",
+      "sample_value": null
+    },
+    {
+      "column_number": 218,
+      "display_name": "Connectivity Technology",
+      "sample_value": null
+    },
+    {
+      "column_number": 219,
+      "display_name": "Connectivity Technology",
+      "sample_value": null
+    },
+    {
+      "column_number": 220,
+      "display_name": "Connectivity Technology",
+      "sample_value": null
+    },
+    {
+      "column_number": 221,
+      "display_name": "Digital Storage Capacity",
+      "sample_value": null
+    },
+    {
+      "column_number": 222,
+      "display_name": "Digital Storage Capacity Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 223,
+      "display_name": "Memory Storage Capacity",
+      "sample_value": null
+    },
+    {
+      "column_number": 224,
+      "display_name": "Memory Storage Capacity Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 225,
+      "display_name": "Video Capture Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 226,
+      "display_name": "Video Capture Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 227,
+      "display_name": "Operating System",
+      "sample_value": null
+    },
+    {
+      "column_number": 228,
+      "display_name": "Operating System",
+      "sample_value": null
+    },
+    {
+      "column_number": 229,
+      "display_name": "Operating System",
+      "sample_value": null
+    },
+    {
+      "column_number": 230,
+      "display_name": "Operating System",
+      "sample_value": null
+    },
+    {
+      "column_number": 231,
+      "display_name": "Operating System",
+      "sample_value": null
+    },
+    {
+      "column_number": 232,
+      "display_name": "Product Grade",
+      "sample_value": null
+    },
+    {
+      "column_number": 233,
+      "display_name": "Front Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 234,
+      "display_name": "Front Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 235,
+      "display_name": "Front Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 236,
+      "display_name": "Front Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 237,
+      "display_name": "Front Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 238,
+      "display_name": "Front Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 239,
+      "display_name": "GPS",
+      "sample_value": null
+    },
+    {
+      "column_number": 240,
+      "display_name": "Headphones Jack",
+      "sample_value": null
+    },
+    {
+      "column_number": 241,
+      "display_name": "Effective Still Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 242,
+      "display_name": "Effective Still Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 243,
+      "display_name": "RAM Memory Installed",
+      "sample_value": null
+    },
+    {
+      "column_number": 244,
+      "display_name": "RAM Memory Installed Size Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 245,
+      "display_name": "Camera Flash",
+      "sample_value": null
+    },
+    {
+      "column_number": 246,
+      "display_name": "Digital Zoom",
+      "sample_value": null
+    },
+    {
+      "column_number": 247,
+      "display_name": "Digital Zoom Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 248,
+      "display_name": "Human Interface Input",
+      "sample_value": null
+    },
+    {
+      "column_number": 249,
+      "display_name": "Human Interface Input",
+      "sample_value": null
+    },
+    {
+      "column_number": 250,
+      "display_name": "Human Interface Input",
+      "sample_value": null
+    },
+    {
+      "column_number": 251,
+      "display_name": "Human Interface Input",
+      "sample_value": null
+    },
+    {
+      "column_number": 252,
+      "display_name": "Shooting Modes",
+      "sample_value": null
+    },
+    {
+      "column_number": 253,
+      "display_name": "Specific Uses for Product",
+      "sample_value": null
+    },
+    {
+      "column_number": 254,
+      "display_name": "Specific Uses for Product",
+      "sample_value": null
+    },
+    {
+      "column_number": 255,
+      "display_name": "Specific Uses for Product",
+      "sample_value": null
+    },
+    {
+      "column_number": 256,
+      "display_name": "Effective Video Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 257,
+      "display_name": "Effective Video Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 258,
+      "display_name": "Biometric Security Feature",
+      "sample_value": null
+    },
+    {
+      "column_number": 259,
+      "display_name": "Computer Memory Size",
+      "sample_value": null
+    },
+    {
+      "column_number": 260,
+      "display_name": "Computer Memory Size Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 261,
+      "display_name": "CPU Model",
+      "sample_value": null
+    },
+    {
+      "column_number": 262,
+      "display_name": "CPU Base Speed",
+      "sample_value": null
+    },
+    {
+      "column_number": 263,
+      "display_name": "CPU Base Speed Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 264,
+      "display_name": "CPU Base Speed",
+      "sample_value": null
+    },
+    {
+      "column_number": 265,
+      "display_name": "CPU Base Speed Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 266,
+      "display_name": "CPU Base Speed",
+      "sample_value": null
+    },
+    {
+      "column_number": 267,
+      "display_name": "CPU Base Speed Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 268,
+      "display_name": "CPU Base Speed",
+      "sample_value": null
+    },
+    {
+      "column_number": 269,
+      "display_name": "CPU Base Speed Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 270,
+      "display_name": "CPU Base Speed",
+      "sample_value": null
+    },
+    {
+      "column_number": 271,
+      "display_name": "CPU Base Speed Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 272,
+      "display_name": "Flash Memory Installed Size",
+      "sample_value": null
+    },
+    {
+      "column_number": 273,
+      "display_name": "Flash Memory Installed Size Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 274,
+      "display_name": "Flash Memory Supported Size Maximum",
+      "sample_value": null
+    },
+    {
+      "column_number": 275,
+      "display_name": "Flash Memory Supported Size Maximum Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 276,
+      "display_name": "Generation",
+      "sample_value": null
+    },
+    {
+      "column_number": 277,
+      "display_name": "Hard Disk Size",
+      "sample_value": null
+    },
+    {
+      "column_number": 278,
+      "display_name": "Hard Disk Size Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 279,
+      "display_name": "Optical Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 280,
+      "display_name": "Optical Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 281,
+      "display_name": "Payment Schedule",
+      "sample_value": null
+    },
+    {
+      "column_number": 282,
+      "display_name": "Payment Schedule",
+      "sample_value": null
+    },
+    {
+      "column_number": 283,
+      "display_name": "Version for Country",
+      "sample_value": null
+    },
+    {
+      "column_number": 284,
+      "display_name": "Version for Country",
+      "sample_value": null
+    },
+    {
+      "column_number": 285,
+      "display_name": "Version for Country",
+      "sample_value": null
+    },
+    {
+      "column_number": 286,
+      "display_name": "Version for Country",
+      "sample_value": null
+    },
+    {
+      "column_number": 287,
+      "display_name": "Version for Country",
+      "sample_value": null
+    },
+    {
+      "column_number": 288,
+      "display_name": "Wireless Network Technology",
+      "sample_value": null
+    },
+    {
+      "column_number": 289,
+      "display_name": "Wireless Network Technology",
+      "sample_value": null
+    },
+    {
+      "column_number": 290,
+      "display_name": "Wireless Network Technology",
+      "sample_value": null
+    },
+    {
+      "column_number": 291,
+      "display_name": "Control Method",
+      "sample_value": null
+    },
+    {
+      "column_number": 292,
+      "display_name": "Control Method",
+      "sample_value": null
+    },
+    {
+      "column_number": 293,
+      "display_name": "Control Method",
+      "sample_value": null
+    },
+    {
+      "column_number": 294,
+      "display_name": "Control Method",
+      "sample_value": null
+    },
+    {
+      "column_number": 295,
+      "display_name": "Number of Rear Facing Cameras",
+      "sample_value": null
+    },
+    {
+      "column_number": 296,
+      "display_name": "Rear Facing Camera Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 297,
+      "display_name": "Rear Facing Camera Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 298,
+      "display_name": "Rear Facing Camera Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 299,
+      "display_name": "Rear Facing Camera Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 300,
+      "display_name": "Rear Facing Camera Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 301,
+      "display_name": "Rear Facing Camera Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 302,
+      "display_name": "Rear Facing Camera Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 303,
+      "display_name": "Rear Facing Camera Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 304,
+      "display_name": "SIM Card Slot Count",
+      "sample_value": null
+    },
+    {
+      "column_number": 305,
+      "display_name": "Rapid Charging Performance",
+      "sample_value": null
+    },
+    {
+      "column_number": 306,
+      "display_name": "Repairability Index Criteria Table URL",
+      "sample_value": null
+    },
+    {
+      "column_number": 307,
+      "display_name": "Repairability Index Regulation",
+      "sample_value": null
+    },
+    {
+      "column_number": 308,
+      "display_name": "Repairability Index Value",
+      "sample_value": null
+    },
+    {
+      "column_number": 309,
+      "display_name": "Keyboard Layout",
+      "sample_value": null
+    },
+    {
+      "column_number": 310,
+      "display_name": "Sim Card Size",
+      "sample_value": null
+    },
+    {
+      "column_number": 311,
+      "display_name": "Supported Satellite Navigation System",
+      "sample_value": null
+    },
+    {
+      "column_number": 312,
+      "display_name": "Supported Satellite Navigation System",
+      "sample_value": null
+    },
+    {
+      "column_number": 313,
+      "display_name": "Supported Satellite Navigation System",
+      "sample_value": null
+    },
+    {
+      "column_number": 314,
+      "display_name": "Supported Satellite Navigation System",
+      "sample_value": null
+    },
+    {
+      "column_number": 315,
+      "display_name": "Quick Charge Charge Time",
+      "sample_value": null
+    },
+    {
+      "column_number": 316,
+      "display_name": "Quick Charge Charge Time Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 317,
+      "display_name": "Expected Life Per Charge Time",
+      "sample_value": null
+    },
+    {
+      "column_number": 318,
+      "display_name": "Expected Life Per Charge Time Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 319,
+      "display_name": "Rear Camera Lens Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 320,
+      "display_name": "Rear Camera Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 321,
+      "display_name": "Rear Camera Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 322,
+      "display_name": "Rear Camera Focal Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 323,
+      "display_name": "Rear Camera Focal Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 324,
+      "display_name": "Rear Camera Aperture",
+      "sample_value": null
+    },
+    {
+      "column_number": 325,
+      "display_name": "Rear Camera Lens Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 326,
+      "display_name": "Rear Camera Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 327,
+      "display_name": "Rear Camera Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 328,
+      "display_name": "Rear Camera Focal Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 329,
+      "display_name": "Rear Camera Focal Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 330,
+      "display_name": "Rear Camera Aperture",
+      "sample_value": null
+    },
+    {
+      "column_number": 331,
+      "display_name": "Rear Camera Lens Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 332,
+      "display_name": "Rear Camera Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 333,
+      "display_name": "Rear Camera Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 334,
+      "display_name": "Rear Camera Focal Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 335,
+      "display_name": "Rear Camera Focal Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 336,
+      "display_name": "Rear Camera Aperture",
+      "sample_value": null
+    },
+    {
+      "column_number": 337,
+      "display_name": "Rear Camera Lens Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 338,
+      "display_name": "Rear Camera Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 339,
+      "display_name": "Rear Camera Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 340,
+      "display_name": "Rear Camera Focal Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 341,
+      "display_name": "Rear Camera Focal Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 342,
+      "display_name": "Rear Camera Aperture",
+      "sample_value": null
+    },
+    {
+      "column_number": 343,
+      "display_name": "Rear Camera Lens Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 344,
+      "display_name": "Rear Camera Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 345,
+      "display_name": "Rear Camera Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 346,
+      "display_name": "Rear Camera Focal Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 347,
+      "display_name": "Rear Camera Focal Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 348,
+      "display_name": "Rear Camera Aperture",
+      "sample_value": null
+    },
+    {
+      "column_number": 349,
+      "display_name": "Number of Front Cameras",
+      "sample_value": null
+    },
+    {
+      "column_number": 350,
+      "display_name": "Front Camera Lens Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 351,
+      "display_name": "Front Camera Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 352,
+      "display_name": "Front Camera Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 353,
+      "display_name": "Front Camera Focal Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 354,
+      "display_name": "Front Camera Focal Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 355,
+      "display_name": "Front Camera Aperture",
+      "sample_value": null
+    },
+    {
+      "column_number": 356,
+      "display_name": "Front Camera Lens Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 357,
+      "display_name": "Front Camera Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 358,
+      "display_name": "Front Camera Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 359,
+      "display_name": "Front Camera Focal Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 360,
+      "display_name": "Front Camera Focal Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 361,
+      "display_name": "Front Camera Aperture",
+      "sample_value": null
+    },
+    {
+      "column_number": 362,
+      "display_name": "Front Camera Lens Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 363,
+      "display_name": "Front Camera Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 364,
+      "display_name": "Front Camera Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 365,
+      "display_name": "Front Camera Focal Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 366,
+      "display_name": "Front Camera Focal Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 367,
+      "display_name": "Front Camera Aperture",
+      "sample_value": null
+    },
+    {
+      "column_number": 368,
+      "display_name": "Model Series",
+      "sample_value": null
+    },
+    {
+      "column_number": 369,
+      "display_name": "Model Series",
+      "sample_value": null
+    },
+    {
+      "column_number": 370,
+      "display_name": "Model Series",
+      "sample_value": null
+    },
+    {
+      "column_number": 371,
+      "display_name": "Model Series",
+      "sample_value": null
+    },
+    {
+      "column_number": 372,
+      "display_name": "Model Series",
+      "sample_value": null
+    },
+    {
+      "column_number": 373,
+      "display_name": "Model Variant",
+      "sample_value": null
+    },
+    {
+      "column_number": 374,
+      "display_name": "Number of eSIMs Supported",
+      "sample_value": null
+    },
+    {
+      "column_number": 375,
+      "display_name": "GenAI Model",
+      "sample_value": null
+    },
+    {
+      "column_number": 376,
+      "display_name": "Lens Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 377,
+      "display_name": "Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 378,
+      "display_name": "Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 379,
+      "display_name": "Focal Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 380,
+      "display_name": "Focal Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 381,
+      "display_name": "Aperture",
+      "sample_value": null
+    },
+    {
+      "column_number": 382,
+      "display_name": "Lens Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 383,
+      "display_name": "Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 384,
+      "display_name": "Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 385,
+      "display_name": "Focal Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 386,
+      "display_name": "Focal Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 387,
+      "display_name": "Aperture",
+      "sample_value": null
+    },
+    {
+      "column_number": 388,
+      "display_name": "Lens Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 389,
+      "display_name": "Photo Sensor Resolution",
+      "sample_value": null
+    },
+    {
+      "column_number": 390,
+      "display_name": "Photo Sensor Resolution Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 391,
+      "display_name": "Focal Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 392,
+      "display_name": "Focal Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 393,
+      "display_name": "Aperture",
+      "sample_value": null
+    },
+    {
+      "column_number": 394,
+      "display_name": "Skip Offer",
+      "sample_value": null
+    },
+    {
+      "column_number": 395,
+      "display_name": "Item Condition",
+      "sample_value": "New"
+    },
+    {
+      "column_number": 396,
+      "display_name": "Offer Condition Note",
+      "sample_value": null
+    },
+    {
+      "column_number": 397,
+      "display_name": "Product Tax Code",
+      "sample_value": "A_ELECTRONICS_GEN"
+    },
+    {
+      "column_number": 398,
+      "display_name": "Merchant Release Date",
+      "sample_value": null
+    },
+    {
+      "column_number": 399,
+      "display_name": "Maximum Order Quantity",
+      "sample_value": "1"
+    },
+    {
+      "column_number": 400,
+      "display_name": "Offering Can Be Gift Messaged",
+      "sample_value": null
+    },
+    {
+      "column_number": 401,
+      "display_name": "Is Gift Wrap Available",
+      "sample_value": null
+    },
+    {
+      "column_number": 402,
+      "display_name": "Main Image Location",
+      "sample_value": null
+    },
+    {
+      "column_number": 403,
+      "display_name": "Other Image Location",
+      "sample_value": null
+    },
+    {
+      "column_number": 404,
+      "display_name": "Other Image Location",
+      "sample_value": null
+    },
+    {
+      "column_number": 405,
+      "display_name": "Other Image Location",
+      "sample_value": null
+    },
+    {
+      "column_number": 406,
+      "display_name": "Other Image Location",
+      "sample_value": null
+    },
+    {
+      "column_number": 407,
+      "display_name": "Other Image Location",
+      "sample_value": null
+    },
+    {
+      "column_number": 408,
+      "display_name": "Accessories",
+      "sample_value": null
+    },
+    {
+      "column_number": 409,
+      "display_name": "Battery Life Percentage",
+      "sample_value": null
+    },
+    {
+      "column_number": 410,
+      "display_name": "Cosmetic",
+      "sample_value": null
+    },
+    {
+      "column_number": 411,
+      "display_name": "Features",
+      "sample_value": null
+    },
+    {
+      "column_number": 412,
+      "display_name": "Features",
+      "sample_value": null
+    },
+    {
+      "column_number": 413,
+      "display_name": "Features",
+      "sample_value": null
+    },
+    {
+      "column_number": 414,
+      "display_name": "Features",
+      "sample_value": null
+    },
+    {
+      "column_number": 415,
+      "display_name": "Features",
+      "sample_value": null
+    },
+    {
+      "column_number": 416,
+      "display_name": "Functional Condition",
+      "sample_value": null
+    },
+    {
+      "column_number": 417,
+      "display_name": "Packaging",
+      "sample_value": null
+    },
+    {
+      "column_number": 418,
+      "display_name": "Source Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 419,
+      "display_name": "Fulfillment Channel Code (IN)",
+      "sample_value": "Fulfillment by Merchant (Default)"
+    },
+    {
+      "column_number": 420,
+      "display_name": "Quantity (IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 421,
+      "display_name": "Handling Time (IN)",
+      "sample_value": "2"
+    },
+    {
+      "column_number": 422,
+      "display_name": "Restock Date (IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 423,
+      "display_name": "Inventory Always Available (IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 424,
+      "display_name": "Your Price INR (Sell on Amazon, IN)",
+      "sample_value": "2226.0"
+    },
+    {
+      "column_number": 425,
+      "display_name": "Maximum Retail Price (Sell on Amazon, IN)",
+      "sample_value": "2999.0"
+    },
+    {
+      "column_number": 426,
+      "display_name": "Pricing Rule (Sell on Amazon, IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 427,
+      "display_name": "Minimum Seller Allowed Price (Sell on Amazon, IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 428,
+      "display_name": "Maximum Seller Allowed Price (Sell on Amazon, IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 429,
+      "display_name": "Sale Price INR (Sell on Amazon, IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 430,
+      "display_name": "Sale Start Date (Sell on Amazon, IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 431,
+      "display_name": "Sale End Date (Sell on Amazon, IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 432,
+      "display_name": "Offering Release Date (Sell on Amazon, IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 433,
+      "display_name": "Stop Selling Date (Sell on Amazon, IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 434,
+      "display_name": "Your Price INR (Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 435,
+      "display_name": "Maximum Retail Price (Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 436,
+      "display_name": "Minimum Seller Allowed Price (Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 437,
+      "display_name": "Maximum Seller Allowed Price (Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 438,
+      "display_name": "Offering Release Date (Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 439,
+      "display_name": "Stop Selling Date (Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 440,
+      "display_name": "Quantity Price Type (Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 441,
+      "display_name": "Quantity Threshold (Lower Bound, Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 442,
+      "display_name": "Quantity Price (Fixed Price/Percentage Discount, Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 443,
+      "display_name": "Quantity Threshold (Lower Bound, Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 444,
+      "display_name": "Quantity Price (Fixed Price/Percentage Discount, Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 445,
+      "display_name": "Quantity Threshold (Lower Bound, Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 446,
+      "display_name": "Quantity Price (Fixed Price/Percentage Discount, Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 447,
+      "display_name": "Quantity Threshold (Lower Bound, Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 448,
+      "display_name": "Quantity Price (Fixed Price/Percentage Discount, Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 449,
+      "display_name": "Quantity Threshold (Lower Bound, Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 450,
+      "display_name": "Quantity Price (Fixed Price/Percentage Discount, Amazon Business (B2B), IN)",
+      "sample_value": null
+    },
+    {
+      "column_number": 451,
+      "display_name": "Shipping Template (IN)",
+      "sample_value": "Migrated Template"
+    },
+    {
+      "column_number": 452,
+      "display_name": "Item Package Length",
+      "sample_value": "26.00"
+    },
+    {
+      "column_number": 453,
+      "display_name": "Package Length Unit",
+      "sample_value": "Centimetres"
+    },
+    {
+      "column_number": 454,
+      "display_name": "Item Package Width",
+      "sample_value": "13.00"
+    },
+    {
+      "column_number": 455,
+      "display_name": "Package Width Unit",
+      "sample_value": "Centimetres"
+    },
+    {
+      "column_number": 456,
+      "display_name": "Item Package Height",
+      "sample_value": "3.00"
+    },
+    {
+      "column_number": 457,
+      "display_name": "Package Height Unit",
+      "sample_value": "Centimetres"
+    },
+    {
+      "column_number": 458,
+      "display_name": "Package Weight",
+      "sample_value": "220.00"
+    },
+    {
+      "column_number": 459,
+      "display_name": "Package Weight Unit",
+      "sample_value": "Grams"
+    },
+    {
+      "column_number": 460,
+      "display_name": "Master Pack Layers per Pallet Quantity",
+      "sample_value": null
+    },
+    {
+      "column_number": 461,
+      "display_name": "Master Packs Per Layer Quantity",
+      "sample_value": null
+    },
+    {
+      "column_number": 462,
+      "display_name": "Item Length",
+      "sample_value": null
+    },
+    {
+      "column_number": 463,
+      "display_name": "Item Length Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 464,
+      "display_name": "Item Width",
+      "sample_value": null
+    },
+    {
+      "column_number": 465,
+      "display_name": "Item Width Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 466,
+      "display_name": "Item Height",
+      "sample_value": null
+    },
+    {
+      "column_number": 467,
+      "display_name": "Item Height Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 468,
+      "display_name": "Number of Boxes",
+      "sample_value": null
+    },
+    {
+      "column_number": 469,
+      "display_name": "Country of Origin",
+      "sample_value": "China"
+    },
+    {
+      "column_number": 470,
+      "display_name": "Warranty Description",
+      "sample_value": "7 Days QC Testing Warranty Only. If You Have Any Issues With The Product Do Not Install It And Get A"
+    },
+    {
+      "column_number": 471,
+      "display_name": "Warranty Description",
+      "sample_value": null
+    },
+    {
+      "column_number": 472,
+      "display_name": "Warranty Description",
+      "sample_value": null
+    },
+    {
+      "column_number": 473,
+      "display_name": "Warranty Description",
+      "sample_value": null
+    },
+    {
+      "column_number": 474,
+      "display_name": "Warranty Description",
+      "sample_value": null
+    },
+    {
+      "column_number": 475,
+      "display_name": "Are batteries required?",
+      "sample_value": "No"
+    },
+    {
+      "column_number": 476,
+      "display_name": "Are batteries included?",
+      "sample_value": null
+    },
+    {
+      "column_number": 477,
+      "display_name": "Battery Cell Composition",
+      "sample_value": null
+    },
+    {
+      "column_number": 478,
+      "display_name": "Battery Cell Composition Other Than Listed",
+      "sample_value": null
+    },
+    {
+      "column_number": 479,
+      "display_name": "Battery Weight",
+      "sample_value": null
+    },
+    {
+      "column_number": 480,
+      "display_name": "Battery Weight Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 481,
+      "display_name": "Number of Batteries",
+      "sample_value": null
+    },
+    {
+      "column_number": 482,
+      "display_name": "Battery Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 483,
+      "display_name": "Number of Batteries",
+      "sample_value": null
+    },
+    {
+      "column_number": 484,
+      "display_name": "Battery Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 485,
+      "display_name": "Number of Batteries",
+      "sample_value": null
+    },
+    {
+      "column_number": 486,
+      "display_name": "Battery Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 487,
+      "display_name": "Number of Batteries",
+      "sample_value": null
+    },
+    {
+      "column_number": 488,
+      "display_name": "Battery Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 489,
+      "display_name": "Number of Batteries",
+      "sample_value": null
+    },
+    {
+      "column_number": 490,
+      "display_name": "Battery Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 491,
+      "display_name": "Number of Lithium Metal Cells",
+      "sample_value": null
+    },
+    {
+      "column_number": 492,
+      "display_name": "Number of Lithium-ion Cells",
+      "sample_value": null
+    },
+    {
+      "column_number": 493,
+      "display_name": "Lithium Battery Energy Content",
+      "sample_value": null
+    },
+    {
+      "column_number": 494,
+      "display_name": "Lithium Battery Energy Content Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 495,
+      "display_name": "Lithium Battery Packaging",
+      "sample_value": null
+    },
+    {
+      "column_number": 496,
+      "display_name": "Lithium Battery Weight",
+      "sample_value": null
+    },
+    {
+      "column_number": 497,
+      "display_name": "Lithium Battery Weight Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 498,
+      "display_name": "Dangerous Goods Regulations",
+      "sample_value": "Not Applicable"
+    },
+    {
+      "column_number": 499,
+      "display_name": "Dangerous Goods Regulations",
+      "sample_value": null
+    },
+    {
+      "column_number": 500,
+      "display_name": "Dangerous Goods Regulations",
+      "sample_value": null
+    },
+    {
+      "column_number": 501,
+      "display_name": "Dangerous Goods Regulations",
+      "sample_value": null
+    },
+    {
+      "column_number": 502,
+      "display_name": "Dangerous Goods Regulations",
+      "sample_value": null
+    },
+    {
+      "column_number": 503,
+      "display_name": "GHS Class",
+      "sample_value": null
+    },
+    {
+      "column_number": 504,
+      "display_name": "GHS Class",
+      "sample_value": null
+    },
+    {
+      "column_number": 505,
+      "display_name": "GHS Class",
+      "sample_value": null
+    },
+    {
+      "column_number": 506,
+      "display_name": "GHS Class",
+      "sample_value": null
+    },
+    {
+      "column_number": 507,
+      "display_name": "GHS Class",
+      "sample_value": null
+    },
+    {
+      "column_number": 508,
+      "display_name": "Hazmat Aspect",
+      "sample_value": null
+    },
+    {
+      "column_number": 509,
+      "display_name": "Hazmat",
+      "sample_value": null
+    },
+    {
+      "column_number": 510,
+      "display_name": "Safety Data Sheet (SDS or MSDS) URL",
+      "sample_value": null
+    },
+    {
+      "column_number": 511,
+      "display_name": "Item Weight",
+      "sample_value": null
+    },
+    {
+      "column_number": 512,
+      "display_name": "Item Weight Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 513,
+      "display_name": "Is This Product Subject To Buyer Age Restrictions",
+      "sample_value": null
+    },
+    {
+      "column_number": 514,
+      "display_name": "Compliance Regulation Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 515,
+      "display_name": "Regulatory Identification",
+      "sample_value": null
+    },
+    {
+      "column_number": 516,
+      "display_name": "Compliance Regulation Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 517,
+      "display_name": "Regulatory Identification",
+      "sample_value": null
+    },
+    {
+      "column_number": 518,
+      "display_name": "Compliance Regulation Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 519,
+      "display_name": "Regulatory Identification",
+      "sample_value": null
+    },
+    {
+      "column_number": 520,
+      "display_name": "Compliance Regulation Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 521,
+      "display_name": "Regulatory Identification",
+      "sample_value": null
+    },
+    {
+      "column_number": 522,
+      "display_name": "Compliance Regulation Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 523,
+      "display_name": "Regulatory Identification",
+      "sample_value": null
+    },
+    {
+      "column_number": 524,
+      "display_name": "Responsible Person's Email or Electronic Address",
+      "sample_value": null
+    },
+    {
+      "column_number": 525,
+      "display_name": "Compliance Media Source Location (en_IN, Application Guide)",
+      "sample_value": null
+    },
+    {
+      "column_number": 526,
+      "display_name": "Compliance Media Source Location (en_IN, Certificate of Analysis)",
+      "sample_value": null
+    },
+    {
+      "column_number": 527,
+      "display_name": "Compliance Media Source Location (en_IN, Certificate of Compliance)",
+      "sample_value": null
+    },
+    {
+      "column_number": 528,
+      "display_name": "Compliance Media Source Location (en_IN, Compatibility Guide)",
+      "sample_value": null
+    },
+    {
+      "column_number": 529,
+      "display_name": "Compliance Media Source Location (en_IN, Data Act Transparency Declaration)",
+      "sample_value": null
+    },
+    {
+      "column_number": 530,
+      "display_name": "Compliance Media Source Location (en_IN, Emergency Use Authorization)",
+      "sample_value": null
+    },
+    {
+      "column_number": 531,
+      "display_name": "Compliance Media Source Location (en_IN, Emergency Use Authorization Amendment)",
+      "sample_value": null
+    },
+    {
+      "column_number": 532,
+      "display_name": "Compliance Media Source Location (en_IN, Installation Manual)",
+      "sample_value": null
+    },
+    {
+      "column_number": 533,
+      "display_name": "Compliance Media Source Location (en_IN, Instructions for Use)",
+      "sample_value": null
+    },
+    {
+      "column_number": 534,
+      "display_name": "Compliance Media Source Location (en_IN, Patient Fact Sheet)",
+      "sample_value": null
+    },
+    {
+      "column_number": 535,
+      "display_name": "Compliance Media Source Location (en_IN, Product Certificate of Conformity)",
+      "sample_value": null
+    },
+    {
+      "column_number": 536,
+      "display_name": "Compliance Media Source Location (en_IN, Provider Fact Sheet)",
+      "sample_value": null
+    },
+    {
+      "column_number": 537,
+      "display_name": "Compliance Media Source Location (en_IN, Safety Data Sheet)",
+      "sample_value": null
+    },
+    {
+      "column_number": 538,
+      "display_name": "Compliance Media Source Location (en_IN, Safety Information)",
+      "sample_value": null
+    },
+    {
+      "column_number": 539,
+      "display_name": "Compliance Media Source Location (en_IN, Specification Sheet)",
+      "sample_value": null
+    },
+    {
+      "column_number": 540,
+      "display_name": "Compliance Media Source Location (en_IN, Troubleshooting Guide)",
+      "sample_value": null
+    },
+    {
+      "column_number": 541,
+      "display_name": "Compliance Media Source Location (en_IN, User Guide)",
+      "sample_value": null
+    },
+    {
+      "column_number": 542,
+      "display_name": "Compliance Media Source Location (en_IN, User Manual)",
+      "sample_value": null
+    },
+    {
+      "column_number": 543,
+      "display_name": "Compliance Media Source Location (en_IN, Warranty)",
+      "sample_value": null
+    },
+    {
+      "column_number": 544,
+      "display_name": "Safety Attestation",
+      "sample_value": null
+    },
+    {
+      "column_number": 545,
+      "display_name": "Manufacturer’s Email or Electronic Address",
+      "sample_value": null
+    },
+    {
+      "column_number": 546,
+      "display_name": "Ships Globally",
+      "sample_value": null
+    },
+    {
+      "column_number": 547,
+      "display_name": "Has Less than 30 Percent State of Charge",
+      "sample_value": null
+    },
+    {
+      "column_number": 548,
+      "display_name": "GHS Chemical H Code",
+      "sample_value": null
+    },
+    {
+      "column_number": 549,
+      "display_name": "GHS Chemical H Code",
+      "sample_value": null
+    },
+    {
+      "column_number": 550,
+      "display_name": "GHS Chemical H Code",
+      "sample_value": null
+    },
+    {
+      "column_number": 551,
+      "display_name": "GHS Chemical H Code",
+      "sample_value": null
+    },
+    {
+      "column_number": 552,
+      "display_name": "GHS Chemical H Code",
+      "sample_value": null
+    },
+    {
+      "column_number": 553,
+      "display_name": "Base Product Manufacturer Warranty Period",
+      "sample_value": null
+    },
+    {
+      "column_number": 554,
+      "display_name": "Base Product Warranty Manufacturer Period Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 555,
+      "display_name": "Base Product Manufacturer Warranty Terms and Conditions",
+      "sample_value": null
+    },
+    {
+      "column_number": 556,
+      "display_name": "Steps To Avail Warranty",
+      "sample_value": null
+    },
+    {
+      "column_number": 557,
+      "display_name": "Warranty Provider Contact Information",
+      "sample_value": null
+    },
+    {
+      "column_number": 558,
+      "display_name": "Battery IEC Code",
+      "sample_value": null
+    },
+    {
+      "column_number": 559,
+      "display_name": "Has Multiple Battery Powered Components",
+      "sample_value": null
+    },
+    {
+      "column_number": 560,
+      "display_name": "Compliance - Wood Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 561,
+      "display_name": "Contains Battery or Cell",
+      "sample_value": null
+    },
+    {
+      "column_number": 562,
+      "display_name": "Compliance - Cork Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 563,
+      "display_name": "Compliance - Covering Level",
+      "sample_value": null
+    },
+    {
+      "column_number": 564,
+      "display_name": "Compliance - Rubber Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 565,
+      "display_name": "Compliance - Primary Function",
+      "sample_value": null
+    },
+    {
+      "column_number": 566,
+      "display_name": "Compliance - Plastic Sheeting Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 567,
+      "display_name": "Compliance - Other Material Additions",
+      "sample_value": null
+    },
+    {
+      "column_number": 568,
+      "display_name": "Compliance - Is Handmade",
+      "sample_value": null
+    },
+    {
+      "column_number": 569,
+      "display_name": "Compliance Weave Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 570,
+      "display_name": "Compliance - Outer Surface Material",
+      "sample_value": null
+    },
+    {
+      "column_number": 571,
+      "display_name": "Battery Contains free Unabsorbed Liquid",
+      "sample_value": null
+    },
+    {
+      "column_number": 572,
+      "display_name": "Is Battery Non Spillable",
+      "sample_value": null
+    },
+    {
+      "column_number": 573,
+      "display_name": "Non-Lithium Battery Packaging",
+      "sample_value": null
+    },
+    {
+      "column_number": 574,
+      "display_name": "Has Replaceable Battery",
+      "sample_value": null
+    },
+    {
+      "column_number": 575,
+      "display_name": "Non-Lithium Battery Energy Content",
+      "sample_value": null
+    },
+    {
+      "column_number": 576,
+      "display_name": "Non-Lithium Battery Energy Content Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 577,
+      "display_name": "Battery Installation Device Type",
+      "sample_value": null
+    },
+    {
+      "column_number": 578,
+      "display_name": "Is OEM Sourced Product",
+      "sample_value": null
+    },
+    {
+      "column_number": 579,
+      "display_name": "Warranty Part Name",
+      "sample_value": null
+    },
+    {
+      "column_number": 580,
+      "display_name": "Part Warranty Duration",
+      "sample_value": null
+    },
+    {
+      "column_number": 581,
+      "display_name": "Part Warranty Duration Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 582,
+      "display_name": "Part Warranty Terms and Conditions",
+      "sample_value": null
+    },
+    {
+      "column_number": 583,
+      "display_name": "Battery Life",
+      "sample_value": null
+    },
+    {
+      "column_number": 584,
+      "display_name": "Average Battery Life Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 585,
+      "display_name": "Battery Capacity",
+      "sample_value": null
+    },
+    {
+      "column_number": 586,
+      "display_name": "Battery Capacity Unit",
+      "sample_value": null
+    },
+    {
+      "column_number": 587,
+      "display_name": "Battery Charge Time",
+      "sample_value": null
+    },
+    {
+      "column_number": 588,
+      "display_name": "Battery charge time",
+      "sample_value": null
+    },
+    {
+      "column_number": 589,
+      "display_name": "Battery Description",
+      "sample_value": null
+    },
+    {
+      "column_number": 590,
+      "display_name": "Battery Power",
+      "sample_value": null
+    }
+  ]
+}
