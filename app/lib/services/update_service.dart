@@ -36,12 +36,12 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '1.0.3+5:1 — RT flow + fixes\n'
+      '1.0.4+6:0 — RT flow + fixes\n'
       '• RT: reasons first, then label scan\n'
       '• Claim photos manual only\n'
       '• Folders saved as -PK / -RT\n'
       '• Clearer capture text + skip button\n'
-      '• Update banner now shows correctly';
+      '• Update banner fixed';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
