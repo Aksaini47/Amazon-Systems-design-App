@@ -35,7 +35,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '1.0.3+4:1 — RT flow + folder suffixes\n'
+      '1.0.3+5:0 — RT flow + folder suffixes\n'
       '• RT: QC reasons first, then return-label scan; claim photos manual only\n'
       '• Order folders suffixed -PK / -RT (no more overwrite on same order)\n'
       '• Claim capture instructions easier to read; translucent skip button\n'
