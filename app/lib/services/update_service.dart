@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
 
@@ -35,13 +36,15 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '1.0.3+5:0 — RT flow + folder suffixes\n'
-      '• RT: QC reasons first, then return-label scan; claim photos manual only\n'
-      '• Order folders suffixed -PK / -RT (no more overwrite on same order)\n'
-      '• Claim capture instructions easier to read; translucent skip button\n'
-      '• Crashlytics context on save failures';
+      '1.0.3+5:1 — RT flow + fixes\n'
+      '• RT: reasons first, then label scan\n'
+      '• Claim photos manual only\n'
+      '• Folders saved as -PK / -RT\n'
+      '• Clearer capture text + skip button\n'
+      '• Update banner now shows correctly';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
+  static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
 
   /// True only on devices where the Shorebird native engine is present
   /// (release / patched builds). Always false in `flutter run` debug.
@@ -123,9 +126,9 @@ class UpdateService {
             message: 'Update downloaded. Restart the app to apply.',
           );
         case UpdateStatus.upToDate:
-          return const UpdateCheckResult(
+          return UpdateCheckResult(
             outcome: UpdateOutcome.upToDate,
-            message: 'You are on the latest version.',
+            message: await _upToDateMessage(),
           );
         case UpdateStatus.restartRequired:
           final next = await nextPatchNumber();
@@ -158,22 +161,57 @@ class UpdateService {
   static Future<String?> consumePendingChangelog() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final lastSeen = prefs.getInt(_kLastSeenPatchKey);
-      final current = await currentPatchNumber() ?? 0;
-      if (lastSeen == null) {
-        // First-ever launch — seed but don't show changelog (nothing has
-        // changed from the user's perspective).
-        await prefs.setInt(_kLastSeenPatchKey, current);
+      final lastSeenPatch = prefs.getInt(_kLastSeenPatchKey);
+      final lastSeenBuild = prefs.getString(_kLastSeenBuildKey);
+      final currentPatch = await currentPatchNumber() ?? 0;
+
+      String? installedBuild;
+      try {
+        final info = await PackageInfo.fromPlatform();
+        installedBuild = '${info.version}+${info.buildNumber}';
+      } catch (_) {}
+
+      // Fresh install: seed keys, no banner (user just installed manually).
+      if (lastSeenPatch == null && lastSeenBuild == null) {
+        await prefs.setInt(_kLastSeenPatchKey, currentPatch);
+        if (installedBuild != null) {
+          await prefs.setString(_kLastSeenBuildKey, installedBuild);
+        }
         return null;
       }
-      if (current > lastSeen) {
-        await prefs.setInt(_kLastSeenPatchKey, current);
+
+      final patchUpdated = lastSeenPatch != null && currentPatch > lastSeenPatch;
+      final buildUpdated = installedBuild != null &&
+          lastSeenBuild != null &&
+          installedBuild != lastSeenBuild;
+
+      if (patchUpdated || buildUpdated) {
+        await prefs.setInt(_kLastSeenPatchKey, currentPatch);
+        if (installedBuild != null) {
+          await prefs.setString(_kLastSeenBuildKey, installedBuild);
+        }
         return latestChangelog;
       }
+
       return null;
     } catch (e) {
       debugPrint('UpdateService: consumePendingChangelog failed — $e');
       return null;
+    }
+  }
+
+  /// Shorebird OTA only delivers patches within the *same* release version.
+  /// A new Play Store build (e.g. 1.0.2 → 1.0.3) is never pushed OTA.
+  static Future<String> _upToDateMessage() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      final installed = '${info.version}+${info.buildNumber}';
+      final patch = await currentPatchNumber();
+      final patchLabel = patch == null ? 'base release' : 'patch #$patch';
+      return 'On latest OTA for $installed ($patchLabel). '
+          'New Play builds are not delivered via code-push — install from Play Store.';
+    } catch (_) {
+      return 'On latest OTA patch. New app versions require a Play Store install.';
     }
   }
 }

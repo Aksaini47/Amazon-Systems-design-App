@@ -848,9 +848,9 @@ class _AboutCardState extends State<_AboutCard> {
             'Code-push',
             _shorebirdAvailable
                 ? (_currentPatch == null
-                    ? 'Active · base release'
+                    ? 'Active · base release (no OTA patch yet)'
                     : 'Active · patch #$_currentPatch')
-                : 'Not active (debug build)',
+                : 'Not active — install Shorebird release APK',
             valueColor: _shorebirdAvailable ? const Color(0xFF3FB950) : const Color(0xFF8B949E),
           ),
           if (_nextPatch != null)
