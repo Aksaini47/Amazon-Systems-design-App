@@ -17,6 +17,7 @@ import '../services/sync_queue_service.dart';
 import '../services/sync_manager.dart';
 import '../services/dnd_service.dart';
 import '../services/file_naming_service.dart';
+import '../services/crash_reporting.dart';
 import '../utils/volume_button_service.dart';
 import '../utils/image_processing.dart';
 import '../widgets/rf_button.dart';
@@ -797,7 +798,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       _camera = null;
       _cameraReady = false;
       setState(() { _isRecording = false; _showCountdown = false; _phase = CapturePhase.stopped; });
-      _openBarcodePopup();
+      if (widget.mode == CaptureMode.rt) {
+        _openRtPostVideoFlow();
+      } else {
+        _openBarcodePopup();
+      }
     } catch (e) {
       _setError('Failed to stop recording: $e');
     }
@@ -977,49 +982,58 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
     _session['orderId'] = result['orderId'];
     _session['awb'] = result['awb'];
-
-    if (widget.mode == CaptureMode.rt) {
-      _openVerdictSheet();
-    } else {
-      _saveSession();
-    }
+    _saveSession();
   }
 
-  // ─── Verdict sheet ─────────────────────────────────────────────────────
+  // ─── RT post-video: verdict → order-ID scan → claim photos ───────────
 
-  void _openVerdictSheet() async {
+  /// RT only. User picks QC reasons first, then scans the return label /
+  /// order ID, then (if non-OK) manually captures claim photos.
+  Future<void> _openRtPostVideoFlow() async {
     final verdict = await showModalBottomSheet<QCVerdict>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => VerdictBottomSheet(orderId: _session['orderId']),
+      builder: (_) => const VerdictBottomSheet(),
     );
 
     if (verdict == null) {
       if (mounted) setState(() => _phase = CapturePhase.stopped);
+      await Future.delayed(const Duration(milliseconds: 500));
       await _initCameraWithAudio(_audioUsedForRecording);
       return;
     }
 
     _session['verdict'] = verdict;
 
-    // OK verdict → save directly, no claim photos needed.
-    if (verdict == QCVerdict.ok) {
-      _saveSession();
+    final result = await Navigator.of(context).push<Map<String, String?>>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => BarcodeSavePopup(mode: widget.mode),
+      ),
+    );
+
+    if (result == null || result['orderId'] == null) {
+      if (mounted) setState(() => _phase = CapturePhase.stopped);
+      await Future.delayed(const Duration(milliseconds: 500));
+      await _initCameraWithAudio(_audioUsedForRecording);
       return;
     }
 
-    // Non-OK verdict (DAMAGED / DIFFERENT / DAMAGED+DIFFERENT) → run 5-photo
-    // claim sequence before saving. Photos: label → contents → front → back → serial(optional).
-    await _runClaimPhotoSequence();
-    if (!mounted) return;
+    _session['orderId'] = result['orderId'];
+    _session['awb'] = result['awb'];
+
+    if (verdict != QCVerdict.ok) {
+      await _runClaimPhotoSequence();
+      if (!mounted) return;
+    }
     _saveSession();
   }
 
   // ─── RT claim-photo flow ─────────────────────────────────────────────
 
   /// Re-inits camera (audio off for photos) and runs the 5-photo claim sequence.
-  /// Each photo has a 3-second countdown with a Skip button below — skippable.
+  /// Manual capture only (no auto countdown) — user taps CAPTURE or Skip.
   /// If camera fails to init, saves what we have without photos.
   Future<void> _runClaimPhotoSequence() async {
     // Restore UI to capture mode + re-init camera (no audio needed for photos)
@@ -1051,9 +1065,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     }
   }
 
-  /// Single photo with countdown overlay + inline Skip button.
-  /// Honors _captureCountdownSec from settings (0 = manual; 3/5/10 = auto).
-  /// User can tap Skip → photo skipped, sequence continues.
+  /// Single claim photo — always manual (auto countdown disabled for RT claims).
   Future<void> _captureClaimPhoto(PhotoSide side) async {
     if (_camera == null || !_cameraReady || !mounted) return;
 
@@ -1061,33 +1073,17 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     setState(() {
       _nextPhotoSide = side;
       _showCountdown = true;
-      _countdownSeconds = _captureCountdownSec;
+      _countdownSeconds = 0;
       _phase = CapturePhase.recording;
     });
 
-    if (_captureCountdownSec <= 0) {
-      // Manual capture mode — wait for user to tap CAPTURE or Skip button
-      final captured = await _waitForManualCapture();
-      if (!mounted || !captured || _skipCurrentClaimPhoto) {
-        if (mounted) setState(() => _showCountdown = false);
-        if (!captured) debugPrint('Claim photo skipped (manual): ${side.name}');
-        return;
-      }
-    } else {
-      // Auto countdown — checks skip flag each tick
-      for (int i = _captureCountdownSec; i > 0; i--) {
-        if (!mounted || _skipCurrentClaimPhoto) break;
-        setState(() => _countdownSeconds = i);
-        if (_soundEnabled) HapticFeedback.selectionClick();
-        await Future.delayed(const Duration(seconds: 1));
-      }
-      if (!mounted) return;
-      setState(() => _showCountdown = false);
-      if (_skipCurrentClaimPhoto) {
-        debugPrint('Claim photo skipped (countdown): ${side.name}');
-        return;
-      }
+    final captured = await _waitForManualCapture();
+    if (!mounted || !captured || _skipCurrentClaimPhoto) {
+      if (mounted) setState(() => _showCountdown = false);
+      if (!captured) debugPrint('Claim photo skipped (manual): ${side.name}');
+      return;
     }
+    if (mounted) setState(() => _showCountdown = false);
 
     HapticFeedback.mediumImpact();
     if (_soundEnabled) NativeCameraSound.playShutter();
@@ -1207,8 +1203,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       // will remove it on success. If it fails (offline, network blip, app
       // killed mid-upload), the queue retries via SyncManager every 2 min
       // and on next app open.
-      final orderFolder = await _localStorage.getOrderFolder(orderId);
-      await SyncQueueService.enqueue(orderId, orderFolder.path);
+      final orderFolder = await _localStorage.getOrderFolder(orderId, mode: widget.mode);
+      final storageKey = orderFolder.path.split(Platform.pathSeparator).last;
+      await SyncQueueService.enqueue(storageKey, orderFolder.path);
 
       // Kick off immediate upload — fire-and-forget. Does not block the save
       // flow; user goes straight back to the camera. Result surfaces via
@@ -1217,7 +1214,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       UploadService.uploadSession(session: session, orderFolderPath: orderFolder.path)
           .then((r) async {
         if (r.status == UploadStatus.success) {
-          await SyncQueueService.remove(orderId);
+          await SyncQueueService.remove(storageKey);
         }
         // Trigger a SyncManager status emit so banners refresh
         // ignore: unawaited_futures
@@ -1260,6 +1257,12 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     } catch (e, st) {
       debugPrint('Save failed: $e');
       debugPrint('Stack trace: $st');
+      await CrashReporting.setCaptureContext(
+        mode: widget.mode,
+        orderId: _session['orderId'] as String?,
+        phase: 'save_failed',
+      );
+      await CrashReporting.recordNonFatal(e, st, reason: 'save_session');
       // Strip technical prefixes / clean up underlying-exception text for the
       // user-facing error overlay. The raw $e goes to debugPrint above for diagnostics.
       final clean = '$e'
@@ -1469,7 +1472,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
             // button has been removed.
             if (_phase != CapturePhase.complete
                 && _phase != CapturePhase.saving
-                && !(_showCountdown && _captureCountdownSec > 0))
+                && !(_showCountdown && _captureCountdownSec > 0 && !_inClaimFlow))
               _buildBottomControls(accent),
           ],
         ),
@@ -1818,6 +1821,10 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         ? (_nextPhotoSide == PhotoSide.front ? 'Position FRONT facing' : 'Position BACK facing')
         : _countdownInstruction;
 
+    final instructionColor = _inClaimFlow
+        ? RfColors.warning
+        : (widget.mode == CaptureMode.pk ? RfColors.pkAccent : RfColors.rtAccent);
+
     return Stack(
       children: [
         // (Top bar is rendered separately by _buildTopBar at the parent Stack level —
@@ -1847,13 +1854,26 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
             Text(
               instruction,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white70, fontSize: 18, fontWeight: FontWeight.w400),
+              style: TextStyle(
+                color: instructionColor,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                shadows: const [
+                  Shadow(color: Colors.black87, blurRadius: 12),
+                  Shadow(color: Colors.black54, blurRadius: 4),
+                ],
+              ),
             ),
-            if (_captureCountdownSec <= 0) ...[
+            if (_captureCountdownSec <= 0 || _inClaimFlow) ...[
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Tap CAPTURE below',
-                style: TextStyle(color: Colors.white38, fontSize: 12, fontStyle: FontStyle.italic),
+                style: TextStyle(
+                  color: RfColors.textSecondary,
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                  shadows: const [Shadow(color: Colors.black87, blurRadius: 8)],
+                ),
               ),
             ],
           ]),
@@ -1895,17 +1915,36 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           if (_inClaimFlow)
             Padding(
               padding: const EdgeInsets.only(bottom: 14),
-              child: RfButton.secondary(
-                label: 'SKIP THIS PHOTO',
-                icon: Icons.skip_next_rounded,
-                size: RfButtonSize.medium,
-                onPressed: () {
-                  if (_captureCountdownSec <= 0) {
-                    _onSkipManualCapture();
-                  } else {
-                    setState(() => _skipCurrentClaimPhoto = true);
-                  }
-                },
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _onSkipManualCapture,
+                  borderRadius: BorderRadius.circular(RfRadius.button),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(RfRadius.button),
+                      border: Border.all(color: RfColors.textSecondary.withValues(alpha: 0.45)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.skip_next_rounded, color: RfColors.textSecondary, size: 18),
+                        SizedBox(width: 8),
+                        Text(
+                          'SKIP THIS PHOTO',
+                          style: TextStyle(
+                            color: RfColors.textSecondary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
 

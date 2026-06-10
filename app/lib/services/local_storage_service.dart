@@ -68,11 +68,16 @@ class LocalStorageService {
   }
 
   /// Get or create the folder for a specific order.
-  Future<Directory> getOrderFolder(String orderId) async {
+  ///
+  /// With [mode]: creates `{orderId}-PK` or `{orderId}-RT`.
+  /// Without [mode]: [orderId] is treated as the on-disk folder key (gallery /
+  /// delete paths that already include the suffix).
+  Future<Directory> getOrderFolder(String orderId, {CaptureMode? mode}) async {
     final base = await _ordersDir();
-    // Sanitize orderId to prevent path traversal
-    final safeOrderId = orderId.replaceAll(RegExp(r'[^\w\-.]'), '_');
-    final folder = Directory('${base.path}/$safeOrderId');
+    final folderName = mode != null
+        ? FileNamingService.orderFolderName(orderId, mode)
+        : orderId.replaceAll(RegExp(r'[^\w\-.]'), '_');
+    final folder = Directory('${base.path}/$folderName');
     if (!await folder.exists()) await folder.create(recursive: true);
     return folder;
   }
@@ -165,6 +170,8 @@ class LocalStorageService {
         }
         out.add({
           'orderId': name,
+          'bareOrderId': FileNamingService.bareOrderIdFromFolder(name),
+          'mode': FileNamingService.modeFromFolder(name)?.name,
           'folderPath': entity.path,
           'videoPath': video?.path,
           'photoPaths': photos.map((f) => f.path).toList(),
@@ -321,7 +328,7 @@ class LocalStorageService {
   /// Promote a draft photo to its final order folder. Uses rename when
   /// possible; falls back to copy+delete across volumes.
   Future<String> promoteDraftPhoto(String draftPath, String orderId, CaptureMode mode, PhotoSide side) async {
-    final folder = await getOrderFolder(orderId);
+    final folder = await getOrderFolder(orderId, mode: mode);
     final fileName = FileNamingService.photoFileName(orderId, mode, side);
     final destPath = '${folder.path}/$fileName';
 
@@ -344,7 +351,7 @@ class LocalStorageService {
   /// same-filesystem (fast, atomic) and falls back to copy+delete across
   /// volumes. The draft file is removed on success.
   Future<String> promoteDraftVideo(String draftPath, String orderId, CaptureMode mode) async {
-    final folder = await getOrderFolder(orderId);
+    final folder = await getOrderFolder(orderId, mode: mode);
     final fileName = FileNamingService.videoFileName(orderId, mode);
     final destPath = '${folder.path}/$fileName';
 
@@ -370,7 +377,7 @@ class LocalStorageService {
   /// Save video file to order folder. Returns the saved file path.
   /// Uses XFile.saveTo() for reliable copy (works on all Android versions).
   Future<String> saveVideo(String orderId, XFile videoFile, CaptureMode mode) async {
-    final folder = await getOrderFolder(orderId);
+    final folder = await getOrderFolder(orderId, mode: mode);
     final fileName = FileNamingService.videoFileName(orderId, mode);
     final destPath = '${folder.path}/$fileName';
 
@@ -409,7 +416,7 @@ class LocalStorageService {
     CaptureMode mode,
     PhotoSide side,
   ) async {
-    final folder = await getOrderFolder(orderId);
+    final folder = await getOrderFolder(orderId, mode: mode);
     final fileName = FileNamingService.photoFileName(orderId, mode, side);
     final destPath = '${folder.path}/$fileName';
 
@@ -469,7 +476,7 @@ class LocalStorageService {
   /// Write session data to order's meta.json.
   Future<void> writeMetaJson(CaptureSession session) async {
     if (session.orderId == null) return;
-    final folder = await getOrderFolder(session.orderId!);
+    final folder = await getOrderFolder(session.orderId!, mode: session.mode);
     final file = File('${folder.path}/${FileNamingService.metaFileName(session.orderId!)}');
 
     Map<String, dynamic> existing = {};
@@ -528,7 +535,11 @@ class LocalStorageService {
     merged['awb'] = session.awb ?? existing['awb'];
     merged['mode'] = mode;
     merged['session_started_at'] = session.sessionStartedAt.toIso8601String();
-    merged['app_version'] = '1.0.0';
+    merged['app_version'] = '1.0.3';
+    merged['storage_key'] = FileNamingService.orderFolderName(
+      session.orderId!,
+      session.mode,
+    );
 
     if (session.videoPath != null) {
       merged['video'] = {

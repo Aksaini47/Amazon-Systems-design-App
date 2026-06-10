@@ -1,7 +1,7 @@
 name: repairfully_camera
 description: RepairFully — Amazon seller video manager mobile app
 publish_to: 'none'
-version: 1.0.2+3
+version: 1.0.3+4
 
 environment:
   sdk: '>=3.4.3 <4.0.0'

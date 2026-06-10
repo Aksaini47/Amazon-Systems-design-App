@@ -8,6 +8,7 @@ import 'package:native_camera_sound/native_camera_sound.dart';
 import '../models/capture_session.dart';
 import '../services/awb_classifier.dart';
 import '../services/local_storage_service.dart';
+import '../services/file_naming_service.dart';
 import '../services/ocr_service.dart';
 import '../theme/rf_colors.dart';
 import '../utils/volume_button_service.dart';
@@ -135,7 +136,13 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     final orderId = _orderIdController.text.trim();
     final awb = _awbController.text.trim();
     String? warn;
-    if (orderId.isNotEmpty && _existingOrderIds.contains(orderId)) {
+    if (orderId.isNotEmpty && _orderIdRegex.hasMatch(orderId)) {
+      final storageKey = FileNamingService.orderFolderName(orderId, widget.mode);
+      if (_existingOrderIds.contains(storageKey)) {
+        warn = 'Order $orderId already saved (${widget.mode.name.toUpperCase()})';
+      }
+    }
+    if (warn == null && orderId.isNotEmpty && _existingOrderIds.contains(orderId)) {
       warn = 'Order ID $orderId already in gallery';
     } else if (awb.isNotEmpty && _existingAwbs.contains(awb)) {
       warn = 'AWB $awb already in gallery (different order ID?)';

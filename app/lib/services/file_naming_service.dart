@@ -23,7 +23,27 @@ class FileNamingService {
     return '${orderId}_compare.jpg';
   }
 
-  /// Folder name = order ID (no path separator).
-  /// Actual path built by LocalStorageService.
-  static String orderFolderName(String orderId) => orderId;
+  /// Folder name = order ID + mode suffix so PK and RT for the same order
+  /// never collide (e.g. `407-1234567-1234567-RT`).
+  static String orderFolderName(String orderId, CaptureMode mode) {
+    final safe = orderId.replaceAll(RegExp(r'[^\w\-.]'), '_');
+    return '$safe-${mode.name.toUpperCase()}';
+  }
+
+  /// Bare Amazon order ID stripped from a storage folder name.
+  static String bareOrderIdFromFolder(String folderName) {
+    if (folderName.endsWith('-PK')) {
+      return folderName.substring(0, folderName.length - 3);
+    }
+    if (folderName.endsWith('-RT')) {
+      return folderName.substring(0, folderName.length - 3);
+    }
+    return folderName;
+  }
+
+  static CaptureMode? modeFromFolder(String folderName) {
+    if (folderName.endsWith('-PK')) return CaptureMode.pk;
+    if (folderName.endsWith('-RT')) return CaptureMode.rt;
+    return null;
+  }
 }

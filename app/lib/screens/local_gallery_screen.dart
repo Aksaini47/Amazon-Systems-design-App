@@ -791,12 +791,27 @@ class _OrderCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(order['orderId'] as String,
-                        style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'monospace')),
+                    Text(
+                      order['bareOrderId'] as String? ?? order['orderId'] as String,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Text(ts, style: const TextStyle(color: Color(0xFF8B949E), fontSize: 11)),
                     const SizedBox(height: 4),
                     Wrap(spacing: 8, runSpacing: 4, children: [
+                      if (order['mode'] != null)
+                        _chip(
+                          Icons.label_outline,
+                          (order['mode'] as String).toUpperCase(),
+                          (order['mode'] as String) == 'pk'
+                              ? const Color(0xFFE86C2B)
+                              : const Color(0xFF388BFD),
+                        ),
                       _chip(Icons.videocam, hasVideo ? 'Video' : 'No video', hasVideo ? const Color(0xFF3FB950) : const Color(0xFF8B949E)),
                       _chip(Icons.photo, '${photoPaths.length} photo${photoPaths.length == 1 ? '' : 's'}', const Color(0xFF8B949E)),
                       _chip(Icons.sd_storage, '${sizeMb} MB', const Color(0xFF8B949E)),
