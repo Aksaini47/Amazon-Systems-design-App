@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'theme/rf_colors.dart';
+import 'theme/rf_glass.dart';
 import 'screens/home_screen.dart';
 import 'services/update_service.dart';
 import 'utils/volume_button_service.dart';
@@ -81,13 +82,53 @@ class RepairfullyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: RfColors.navy,
           brightness: Brightness.dark,
+          surface: RfColors.glassFill(0.18),
         ),
         useMaterial3: true,
         scaffoldBackgroundColor: RfColors.bg,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: RfColors.card,
-          foregroundColor: Colors.white,
+        canvasColor: RfColors.bg,
+        dialogTheme: DialogThemeData(
+          backgroundColor: RfColors.glassElevated(0.75),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(RfRadius.lg),
+            side: BorderSide(color: RfColors.glassBorder(0.22)),
+          ),
+        ),
+        snackBarTheme: SnackBarThemeData(
+          backgroundColor: RfColors.glassElevated(0.85),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(RfRadius.card),
+            side: BorderSide(color: RfColors.glassBorder(0.18)),
+          ),
+        ),
+        bottomSheetTheme: BottomSheetThemeData(
+          backgroundColor: RfColors.glassElevated(0.72),
+          modalBackgroundColor: RfColors.glassElevated(0.72),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(RfRadius.lg)),
+          ),
+        ),
+        cardTheme: CardThemeData(
+          color: RfColors.glassFill(0.16),
           elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(RfRadius.card),
+            side: BorderSide(color: RfColors.glassBorder(0.20)),
+          ),
+        ),
+        dividerTheme: DividerThemeData(
+          color: RfColors.glassBorder(0.10),
+          thickness: 1,
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: RfColors.glassElevated(0.55),
+          foregroundColor: RfColors.textPrimary,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          shape: Border(
+            bottom: BorderSide(color: RfColors.glassBorder(0.12)),
+          ),
         ),
       ),
       home: const HomeScreen(),

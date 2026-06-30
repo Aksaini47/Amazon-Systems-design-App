@@ -7,6 +7,7 @@ import 'package:native_camera_sound/native_camera_sound.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import '../services/api_service.dart';
 import '../theme/rf_colors.dart';
+import '../theme/rf_glass.dart';
 import '../services/camera_settings_service.dart';
 import '../utils/volume_button_service.dart';
 import '../utils/image_processing.dart';
@@ -415,9 +416,8 @@ class _RecordScreenState extends State<RecordScreen> with TickerProviderStateMix
                   if (_orderId != null || _isFbaMode)
                     Positioned(
                       top: 4, left: 12, right: 12,
-                      child: Container(
+                      child: RfGlassPill(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(color: Colors.black.withAlpha(170), borderRadius: BorderRadius.circular(8)),
                         child: _isFbaMode
                           ? Row(children: [
                               Text(widget.fbaShipmentId!, style: const TextStyle(color: Color(0xFF58A6FF), fontFamily: 'monospace', fontSize: 12, fontWeight: FontWeight.bold)),
@@ -434,10 +434,9 @@ class _RecordScreenState extends State<RecordScreen> with TickerProviderStateMix
                   if (_uploading)
                     Positioned(
                       bottom: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(color: RfColors.card, borderRadius: BorderRadius.circular(20)),
-                        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                        child: RfGlassPill(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: const Row(mainAxisSize: MainAxisSize.min, children: [
                           SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
                           SizedBox(width: 8),
                           Text('Uploading...', style: TextStyle(color: Colors.white70, fontSize: 12)),
@@ -449,10 +448,14 @@ class _RecordScreenState extends State<RecordScreen> with TickerProviderStateMix
             ),
 
             // ── Bottom controls ──
-            Container(
-              color: Colors.black,
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-              child: Column(
+            DecoratedBox(
+              decoration: const BoxDecoration(
+                color: Colors.black,
+                border: Border(top: BorderSide(color: Colors.white12)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                child: Column(
                 children: [
                   // Zoom slider
                   Row(
@@ -552,6 +555,7 @@ class _RecordScreenState extends State<RecordScreen> with TickerProviderStateMix
                     ),
                   ),
                 ],
+                ),
               ),
             ),
           ],

@@ -1,0 +1,101 @@
+---
+description: Shorebird ship strategy — patch vs release decision, --no-tree-shake-icons rule, "patch release-version must match phone" rule, ship.ps1 usage
+alwaysApply: false
+---
+
+# Shorebird release strategy (RF Logger)
+
+**App dir:** `app/` · **app_id:** `c4217590-d971-4cca-9ed2-e804dc47453f` · **pkg:** `com.repairfully.logger`
+**One command:** `./tools/ship.ps1` (app dir se chalao)
+**Clean baseline:** `2.0.0+8` (pehli release jo `--no-tree-shake-icons` se bani — isi line par patches reliable). Purani lines (`2.0.0+7` aur pehle) tree-shake ON se bani thi → un par naya patch unpatchable.
+
+---
+
+## Sabse zaroori 3 rules
+
+1. **`--no-tree-shake-icons` HAMESHA** — release AUR patch dono me. Warna `MaterialIcons-Regular.otf` ka icon-set badalne par `UnpatchableChangeException` aata hai aur patch phone tak nahi pohanchta. `ship.ps1` me yeh baked hai.
+2. **Patch ka `--release-version` = phone par installed RELEASE version** (EXACT). Guess mat karo. Mismatch = patch kabhi nahi dikhega.
+3. **+build aur version saath chalao.** Purana confusion (`1.0.3+5 → 1.0.4+6`, do `1.0.4+x` lines) isi se aaya. Release mode `ship.ps1` sirf `+build` bump karta hai — clean line.
+
+---
+
+## Decision tree
+
+```mermaid
+flowchart TD
+  F[Sir bole "fixes"] --> Q{Kya badla?}
+  Q -->|Sirf Dart/lib| P[PATCH]
+  Q -->|android/ ios/ assets/ pubspec deps / flutter ver| R[RELEASE]
+  P --> P1["ship.ps1 -Mode patch<br/>--no-tree-shake-icons<br/>--release-version = phone wali"]
+  R --> R1["ship.ps1 -Mode release<br/>+build bump + APK + reinstall"]
+  P1 --> P2[Phone: app poora band -> kholo -> dobara kholo]
+  R1 --> R2[adb install -r APK]
+```
+
+| Change type | Action | Version |
+|---|---|---|
+| Dart-only (lib/) | `patch` | koi bump nahi |
+| android/, ios/, assets/, pubspec deps, launcher icon, gradle, Flutter ver | `release` | `+build` bump |
+| Shorebird `UnpatchableChange`/asset diff bole | `release` (us release ne tree-shake fix nahi liya tha) | `+build` bump |
+
+---
+
+## ship.ps1 usage
+
+```powershell
+# Dart-only fix -> newest active release ko patch (release-version auto-detect)
+./tools/ship.ps1 -Mode patch
+
+# Khaas release line target karni ho
+./tools/ship.ps1 -Mode patch -ReleaseVersion 2.0.0+8
+
+# Native/asset change -> nayi release + APK + (device ho to) auto install
+./tools/ship.ps1 -Mode release
+
+# git dekh kar khud decide kare
+./tools/ship.ps1 -Mode auto
+
+# Safe test (kuch upload nahi)
+./tools/ship.ps1 -Mode patch -DryRun
+
+# Changelog ke saath (auto <release>:<patch> marker + flutter analyze verify)
+./tools/ship.ps1 -Mode patch -Changelog "Fix: gallery crash`n- thumbnail null guard"
+```
+
+- Device disconnected ho to script block nahi hota — publish karke install command print karta hai.
+- shorebird.bat ka "long paths" warning ignore — success `$LASTEXITCODE` se decide hota hai.
+
+---
+
+## Changelog (kaise dikhe phone par)
+
+- `app/lib/services/update_service.dart` → `latestChangelog` me **`<release>:<patch>`** marker rakho, e.g. `2.0.0+8:0 — ...` (abhi yahi set hai).
+- Device patch number badalne par hi banner dikhata hai (`consumePendingChangelog`). Patch apply hua = changelog naya. Patch apply nahi hua = changelog bhi nahi (downstream symptom).
+- `ship.ps1 -Changelog "..."` yeh marker khud set karta hai.
+
+---
+
+## Verify commands (Sir ke liye)
+
+```powershell
+# Server par kaunsi releases + patches
+& "C:\Users\DELL\.shorebird\bin\shorebird.bat" releases list
+& "C:\Users\DELL\.shorebird\bin\shorebird.bat" patches list --release-version 2.0.0+8
+
+# Phone par actually kaunsa version (device connect hone par)
+$env:PATH = "$env:LOCALAPPDATA\Android\Sdk\platform-tools;$env:PATH"
+adb devices
+adb shell dumpsys package com.repairfully.logger | findstr versionName
+```
+
+**Agar phone ka versionName/build != patch ki release-version → wahi root cause hai. Pehle us release ka APK install karo, tabhi OTA patch dikhega.**
+
+---
+
+## Quick troubleshoot
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Patch publish hua par phone par kuch nahi | Phone us release line par nahi | `dumpsys` se phone version dekho; us version ka APK install ya `-ReleaseVersion` correct karo |
+| `UnpatchableChangeException` (icons) | Release tree-shake ON tha, patch set alag | Us line ka full APK release dobara cut karo `-Mode release` (no-tree-shake), reinstall |
+| Banner nahi dikha par patch laga | last-seen patch already match | normal; sirf naye patch par dikhta hai |

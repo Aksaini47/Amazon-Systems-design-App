@@ -8,12 +8,12 @@
 
 - Lane: Cursor `browser_navigate` with `position: "side"` + `newTab: true`
 - **Not:** Playwright Chromium in background
-- OTP: Telegram `@mahika_arun_bot` (6-digit) + `mahika.cli otp-watch`
+- OTP: Telegram `@mahika_arun_bot` (6-digit) + `mahika.cli otp-watch --force`
 - After OTP: **Badeja Enterprises → India → Select account**
 
 ## Flow reference
 
-- `agent/Graphs & workflows/seller-central-login/MASTER_FLOW_TREE.md`
+- `agent/Graphs & workflows/seller-central-login/FLOW.md`
 - `.cursor/rules/seller-central-login.mdc`
 - `.cursor/rules/cursor-glass-browser.mdc`
 

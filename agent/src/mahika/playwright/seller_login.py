@@ -489,21 +489,6 @@ def run_seller_login(
         clear_all_seller_browser_state()
 
     creds = load_seller_credentials()
-    watcher = None
-    if settings.telegram_configured:
-        from mahika.services.otp_watcher import TelegramOtpWatcher
-
-        watcher = TelegramOtpWatcher()
-    else:
-        log.warning("seller_login: Telegram not configured")
-
-    send_plain_message(
-        "Mahika login (Playwright):\n"
-        "S1 email→pass→OTP picker→3×60s wait\n"
-        "S2 busy: Didn't receive→Call …711\n"
-        "S3: direct OTP picker→Call …711\n"
-        "Sirf 6-digit OTP bhejo."
-    )
 
     signout = (
         "https://www.amazon.in/ap/signin?openid.pape.max_auth_age=0"
@@ -538,6 +523,31 @@ def run_seller_login(
                 context = browser.new_context(viewport={"width": 1280, "height": 900})
                 load_cookies(context)
                 page = context.new_page()
+
+                from mahika.playwright.session import homepage_session_from_cookies
+
+                if homepage_session_from_cookies(page):
+                    save_cookies(context)
+                    send_plain_message(
+                        "Mahika: Seller Central login OK — cookies valid, OTP skipped."
+                    )
+                    return True
+
+            watcher = None
+            if settings.telegram_configured:
+                from mahika.services.otp_watcher import TelegramOtpWatcher
+
+                watcher = TelegramOtpWatcher()
+            else:
+                log.warning("seller_login: Telegram not configured")
+
+            send_plain_message(
+                "Mahika login (Playwright):\n"
+                "S1 email→pass→OTP picker→3×60s wait\n"
+                "S2 busy: Didn't receive→Call …711\n"
+                "S3: direct OTP picker→Call …711\n"
+                "Sirf 6-digit OTP bhejo."
+            )
 
             if ensure_seller_session(
                 page, creds, watcher, timeout_s=timeout_s, fresh=fresh

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../theme/rf_colors.dart';
+import '../theme/rf_glass.dart';
+import '../widgets/rf_logo.dart';
 import 'record_screen.dart';
 import 'scan_screen.dart';
 import 'settings_screen.dart';
@@ -143,12 +145,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: RfColors.bg,
-      appBar: AppBar(
-        backgroundColor: RfColors.card,  // dark header, matches Settings/Gallery
-        elevation: 0,
-        title: const Text('RepairFully', style: TextStyle(fontWeight: FontWeight.bold)),
+    return RfGlassScaffold(
+      appBar: RfGlassAppBar(
+        titleWidget: const RfLogo(size: 34, showLabel: true),
         actions: [
           IconButton(
             icon: const Icon(Icons.photo_library_outlined),
@@ -170,28 +169,22 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.settings_outlined),
             onPressed: () async {
               await Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
-              _checkConnection(); // recheck after returning from settings
+              _checkConnection();
             },
           ),
         ],
       ),
-      body: Stack(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Navy grid pattern background — faded 20% opacity, subtle texture
-          Positioned.fill(
-            child: CustomPaint(painter: _GridPatternPainter(color: RfColors.navy, opacity: 0.20)),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _ConnectionBanner(connected: _connected, discovering: _discovering, onRetry: _checkConnection),
-              const _SyncBanner(),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
+          _ConnectionBanner(connected: _connected, discovering: _discovering, onRetry: _checkConnection),
+          const _SyncBanner(),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                   const SizedBox(height: 16),
                   const Text(
                     'Record a video',
@@ -226,11 +219,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: RfColors.fbaAccent,
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FbaScreen())),
                   ),
-                    ],
-                  ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -281,9 +272,8 @@ class _ConnectionBanner extends StatelessWidget {
     if (connected == true) return const SizedBox.shrink(); // no banner when connected
 
     if (connected == null || discovering) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        color: RfColors.navy,
+      return RfGlassBanner(
+        tint: RfColors.navy.withValues(alpha: 0.35),
         child: Row(
           children: [
             const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: RfColors.textSecondary)),
@@ -298,9 +288,8 @@ class _ConnectionBanner extends StatelessWidget {
     }
 
     // connected == false
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: RfColors.errorBg,
+    return RfGlassBanner(
+      tint: RfColors.errorBg.withValues(alpha: 0.65),
       child: Row(
         children: [
           const Icon(Icons.wifi_off_rounded, color: RfColors.error, size: 16),
@@ -320,7 +309,6 @@ class _ConnectionBanner extends StatelessWidget {
     );
   }
 }
-
 /// Pending-upload banner — visible only when the queue is non-empty.
 /// Live updates via SyncManager.statusStream.
 class _SyncBanner extends StatefulWidget {
@@ -381,9 +369,8 @@ class _SyncBannerState extends State<_SyncBanner> {
     final urgent = oldest != null && oldest.inHours >= 24;
     final bg = urgent ? const Color(0x40FF7B72) : const Color(0x40FFA657);
     final fg = urgent ? const Color(0xFFFF7B72) : const Color(0xFFFFA657);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: bg,
+    return RfGlassBanner(
+      tint: bg,
       child: Row(
         children: [
           Icon(urgent ? Icons.warning_amber_rounded : Icons.cloud_upload_outlined, color: fg, size: 18),
@@ -409,9 +396,12 @@ class _SyncBannerState extends State<_SyncBanner> {
               ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: fg))
               : GestureDetector(
                   onTap: SyncManager.syncNow,
-                  child: Container(
+                  child: RfGlassContainer(
+                    blurEnabled: false,
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(color: fg.withOpacity(0.25), borderRadius: BorderRadius.circular(8)),
+                    radius: RfRadius.chip,
+                    tint: fg.withValues(alpha: 0.18),
+                    borderColor: fg.withValues(alpha: 0.35),
                     child: Text('Sync now', style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w700)),
                   ),
                 ),
@@ -421,40 +411,7 @@ class _SyncBannerState extends State<_SyncBanner> {
   }
 }
 
-/// Faded navy grid lines for subtle background texture on the home screen.
-class _GridPatternPainter extends CustomPainter {
-  final Color color;
-  final double opacity;
-  final double spacing;
-  final double stroke;
-
-  _GridPatternPainter({
-    required this.color,
-    this.opacity = 0.20,
-    this.spacing = 32,
-    this.stroke = 0.6,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color.withOpacity(opacity)
-      ..strokeWidth = stroke
-      ..style = PaintingStyle.stroke;
-
-    for (double x = 0; x <= size.width; x += spacing) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (double y = 0; y <= size.height; y += spacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _GridPatternPainter old) =>
-      old.color != color || old.opacity != opacity || old.spacing != spacing;
-}
-
+/// Mode action card — glass panel with accent icon well.
 class _ActionCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -472,39 +429,35 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return RfGlassContainer(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: RfColors.card,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: RfColors.border),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: color, size: 28),
+      padding: const EdgeInsets.all(20),
+      radius: RfRadius.lg,
+      borderColor: color.withValues(alpha: 0.25),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(RfRadius.card),
+              border: Border.all(color: color.withValues(alpha: 0.35)),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16)),
-                  const SizedBox(height: 4),
-                  Text(subtitle, style: const TextStyle(color: RfColors.textSecondary, fontSize: 13)),
-                ],
-              ),
+            child: Icon(icon, color: color, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16)),
+                const SizedBox(height: 4),
+                Text(subtitle, style: const TextStyle(color: RfColors.textSecondary, fontSize: 13)),
+              ],
             ),
-            const Icon(Icons.chevron_right_rounded, color: RfColors.textSecondary),
-          ],
-        ),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: RfColors.textSecondary),
+        ],
       ),
     );
   }

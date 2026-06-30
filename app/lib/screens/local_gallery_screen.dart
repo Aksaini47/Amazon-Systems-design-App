@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import '../models/capture_session.dart';
 import '../services/local_storage_service.dart';
+import '../utils/debug_session_log.dart';
 import '../services/sync_manager.dart';
 import '../services/upload_service.dart';
 import '../theme/rf_colors.dart';
+import '../theme/rf_glass.dart';
 
 /// Local Gallery — browses videos and photos saved on this device.
 /// Two tabs: Orders (completed sessions) and Drafts (videos saved on stop
@@ -198,6 +200,19 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     final orders = await _storage.listOrders();
     final drafts = await _storage.listDrafts();
     final sessions = _groupDraftsBySession(drafts);
+    // #region agent log
+    DebugSessionLog.log(
+      location: 'local_gallery_screen.dart:_reload',
+      message: 'gallery data loaded',
+      hypothesisId: 'H2-H11',
+      data: {
+        'orderCount': orders.length,
+        'draftFileCount': drafts.length,
+        'draftSessionCount': sessions.length,
+        'draftPaths': drafts.take(5).map((d) => d['path']).toList(),
+      },
+    );
+    // #endregion
     if (!mounted) return;
     setState(() {
       _orders = orders;
@@ -412,8 +427,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: RfColors.bg,
+    return RfGlassScaffold(
       appBar: _selectionMode ? _buildSelectionAppBar() : _buildNormalAppBar(),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: Colors.white38))
@@ -427,12 +441,9 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     );
   }
 
-  AppBar _buildNormalAppBar() {
-    return AppBar(
-      backgroundColor: RfColors.card,
-      title: const Text('Gallery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-      iconTheme: const IconThemeData(color: Colors.white),
-      elevation: 0,
+  PreferredSizeWidget _buildNormalAppBar() {
+    return RfGlassAppBar(
+      title: 'Gallery',
       bottom: TabBar(
         controller: _tabs,
         indicatorColor: RfColors.rtAccent,
@@ -454,21 +465,19 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     );
   }
 
-  AppBar _buildSelectionAppBar() {
+  PreferredSizeWidget _buildSelectionAppBar() {
     final n = _selectedCount;
     final total = _tabs.index == 0 ? _orders.length : _draftSessions.length;
     final allSelected = n == total && total > 0;
-    return AppBar(
-      backgroundColor: RfColors.card,
+    return RfGlassAppBar(
       leading: IconButton(
         icon: const Icon(Icons.close, color: Colors.white),
         onPressed: _exitSelectionMode,
       ),
-      title: Text(
+      titleWidget: Text(
         n == 0 ? 'Select items' : '$n selected',
         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
       ),
-      elevation: 0,
       bottom: TabBar(
         controller: _tabs,
         indicatorColor: RfColors.rtAccent,
@@ -552,11 +561,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
   Widget _buildOrdersStats({required int uploaded, required int pending}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: RfColors.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: RfColors.border),
-      ),
+      decoration: RfGlass.decoration(),
       child: Row(
         children: [
           _statChip(Icons.cloud_done_rounded, '$uploaded uploaded', const Color(0xFF3FB950)),
@@ -644,11 +649,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
   Widget _buildDraftsStats() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: RfColors.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: RfColors.border),
-      ),
+      decoration: RfGlass.decoration(),
       child: Row(children: [
         _statChip(Icons.drafts_outlined, '${_draftSessions.length} session${_draftSessions.length == 1 ? '' : 's'}', const Color(0xFF8B949E)),
         const SizedBox(width: 6),
@@ -1426,13 +1427,9 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     final folderPath = order['folderPath'] as String;
     final isUploaded = order['isUploaded'] as bool? ?? false;
 
-    return Scaffold(
-      backgroundColor: RfColors.bg,
-      appBar: AppBar(
-        backgroundColor: RfColors.card,
-        title: Text(orderId, style: const TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'monospace')),
-        iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 0,
+    return RfGlassScaffold(
+      appBar: RfGlassAppBar(
+        titleWidget: Text(orderId, style: const TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'monospace')),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -1524,11 +1521,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: RfColors.card,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: RfColors.border),
-            ),
+            decoration: RfGlass.decoration(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1556,10 +1549,8 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
           // Backend upload status + retry
           Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: RfColors.card,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: isUploaded ? const Color(0x553FB950) : const Color(0x55FFA657)),
+            decoration: RfGlass.decoration(
+              borderColor: isUploaded ? const Color(0x553FB950) : const Color(0x55FFA657),
             ),
             child: Row(
               children: [
@@ -1829,11 +1820,9 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
     final hasRecovered = session['hasRecovered'] as bool? ?? false;
     final accent = mode == 'PK' ? RfColors.pkAccent : RfColors.rtAccent;
 
-    return Scaffold(
-      backgroundColor: RfColors.bg,
-      appBar: AppBar(
-        backgroundColor: RfColors.card,
-        title: Row(children: [
+    return RfGlassScaffold(
+      appBar: RfGlassAppBar(
+        titleWidget: Row(children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(6)),
@@ -1845,8 +1834,6 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
           const SizedBox(width: 10),
           Text(ts, style: const TextStyle(color: Colors.white70, fontSize: 12)),
         ]),
-        iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
@@ -1966,11 +1953,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: RfColors.card,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: RfColors.border),
-            ),
+            decoration: RfGlass.decoration(radius: RfRadius.button),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

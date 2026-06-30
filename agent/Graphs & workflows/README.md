@@ -1,36 +1,31 @@
-# Graphs & workflows (Mahika agent)
+# Graphs & workflows
 
-Canonical diagrams for Seller Central login and related automation.  
-**Source of truth** for flow graphs — specs and `.cursor/rules` link here.
+Canonical Mahika flow docs. `.cursor/rules` and `AGENTS.md` link here.
 
-| Folder | Topic |
-|--------|--------|
-| [seller-central-login/](seller-central-login/) | Login, OTP, Call 711, account switcher |
-| [create-seller-support-case/](create-seller-support-case/) | Case Log — SP-API / seller support case |
-| [create-seller-support-case/CURSOR_BROWSER_TEACH.md](create-seller-support-case/CURSOR_BROWSER_TEACH.md) | **Cursor browser** — login + Case Log (Sir teaches) |
+## Active workflows
+
+| Folder | Files | Topic |
+|--------|-------|--------|
+| [seller-central-login/](seller-central-login/) | `FLOW.md`, `GRAPHIFY.md` | Login, OTP, Call 711, S7 |
+| [create-seller-support-case/](create-seller-support-case/) | `FLOW.md`, `FORM.md`, `BROWSER.md`, `GRAPHIFY.md` | Case Log path D, SP-API text |
+| [seller-reports/](seller-reports/) | `GUIDE.md` | Manual report download + analyze |
 
 ## Commands
 
 ```powershell
 cd agent
-.\.venv\Scripts\python.exe -m mahika.cli seller-login
+.\.venv\Scripts\python.exe -m mahika.cli seller-login          # cookies save
+.\.venv\Scripts\python.exe -m mahika.cli support-case          # after login
+.\.venv\Scripts\python.exe -m mahika.cli reports analyze       # reports lane
 ```
 
-Test-only reset: `--fresh`
-
-```powershell
-# After login:
-.\.venv\Scripts\python.exe -m mahika.cli support-case
-.\.venv\Scripts\python.exe -m mahika.cli support-case --submit
-```
+Test-only login reset: `seller-login --fresh`
 
 ## Graphify
-
-Regenerate from repo root (scope `agent/` — code + workflow docs):
 
 ```powershell
 cd "C:\Projects\Amazon Systems Design"
 # /graphify agent
 ```
 
-Output: `graphify-out/` at repo root (gitignored). Indexes: `*/GRAPHIFY.md` in each workflow folder.
+Output: repo-root `graphify-out/` (gitignored).

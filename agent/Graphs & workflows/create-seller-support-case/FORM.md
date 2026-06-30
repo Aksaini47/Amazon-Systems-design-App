@@ -1,9 +1,20 @@
-# Case text — plain seller tone (human type)
+# Support case — form text + typing
 
-**Style:** Like Amazon’s Examples box — short lines, simple words, `Label: value`, no jargon, no shouting caps.
-
+**Style:** Plain seller English (Amazon Examples tone) — short lines, no jargon, no shouting caps.  
 **Variant:** `MAHIKA_CASE_TEXT_VARIANT=1` … `5` in `.env`  
 **Code:** `agent/src/mahika/playwright/support_case_text.py`
+
+---
+
+## Typing rules
+
+Sir wants **human-style** entry — not paste / not instant fill.
+
+| Lane | Rule |
+|------|------|
+| **Cursor browser** | Click field → `browser_type` with `slowly: true`, `clear: true` → pause 1–2s between fields |
+| **Iframe (Help Hub)** | iframe `[1]` shadow DOM — click **My issue is not listed** (`#issueNotListedButton`), never preset cards |
+| **Playwright** | `page.type(selector, text, delay=80)` per character |
 
 ---
 

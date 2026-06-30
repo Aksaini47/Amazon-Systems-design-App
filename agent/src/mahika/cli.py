@@ -592,24 +592,13 @@ def cmd_support_case(args: argparse.Namespace) -> int:
 
 def cmd_session_check(_: argparse.Namespace) -> int:
     """Verify saved Seller Central cookies still work (headless)."""
-    from playwright.sync_api import sync_playwright
-
-    from mahika.playwright.session import COOKIE_FILE, load_cookies, session_is_authenticated
-    from mahika.playwright.selectors import URLs
+    from mahika.playwright.session import COOKIE_FILE, probe_saved_cookies_valid
 
     if not COOKIE_FILE.exists():
         print("FAIL: No cookie file — run: mahika.cli seller-login")
         return 1
 
-    with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True)
-        context = browser.new_context()
-        load_cookies(context)
-        page = context.new_page()
-        page.goto(URLs.SAFE_T_LIST, wait_until="domcontentloaded", timeout=60_000)
-        ok = session_is_authenticated(page) and "/ap/signin" not in page.url
-        browser.close()
-
+    ok = probe_saved_cookies_valid(headless=True)
     print(f"Cookie file: {COOKIE_FILE}")
     print("Session valid: YES" if ok else "Session valid: NO — run seller-login")
     return 0 if ok else 1
@@ -637,11 +626,19 @@ def cmd_otp_watch(args: argparse.Namespace) -> int:
         OTP_TELEGRAM_WAIT_S,
         _telegram_wait_round,
     )
+    from mahika.playwright.session import probe_saved_cookies_valid
     from mahika.services.notifier import send_plain_message
 
     if not settings.telegram_configured:
         print("ERROR: MAHIKA_TELEGRAM_* not set", file=sys.stderr)
         return 1
+
+    force = getattr(args, "force", False)
+    if probe_saved_cookies_valid(headless=True) and not force:
+        print("SKIP: cookies valid — Seller Central home OK; OTP watch not needed")
+        print("Hint: Glass browser uses a separate session — rerun with --force")
+        send_plain_message("Mahika: session OK via cookies — OTP watch skipped.")
+        return 0
 
     from mahika.services.otp_watcher import TelegramOtpWatcher
 
@@ -824,6 +821,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_otp_watch.add_argument(
         "--reset", action="store_true", help="Reset prompt/used OTPs (scenario 2 retry)"
+    )
+    p_otp_watch.add_argument(
+        "--force",
+        action="store_true",
+        help="Poll even if Playwright cookies valid (Cursor Glass has separate session)",
     )
     p_otp_watch.set_defaults(func=cmd_otp_watch)
 

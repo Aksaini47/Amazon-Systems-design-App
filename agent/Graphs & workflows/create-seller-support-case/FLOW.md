@@ -23,16 +23,10 @@ flowchart TD
   AUTH -->|Yes| S7
   LOGIN2 --> S7[S7: Badeja → India → Select account]
 
-  S7 --> ENTRY{Case Log entry path}
-
-  ENTRY -->|D — Cursor discovery| D1[Home → ? Help]
-  D1 --> D2{Dropdown}
-  D2 -->|Get help and resources| D3[/help/center Help Hub]
-  D2 -->|Manage support cases| D4[/cu/case-lobby Case Lobby]
+  S7 --> ENTRY{Entry path}
+  ENTRY -->|D — primary| D3[Help Hub Hill — open once]
   D3 --> D5[Create new issue tab]
-  D4 --> D6[Create new issue button]
-  D5 --> IP1
-  D6 --> IP1[IP1 /help/center redirectSource=Hill]
+  D5 --> IP1[IP1 issue picker]
   IP1 --> IP1A[Store India + Service Selling on Amazon]
   IP1A --> NIL[My issue is not listed — ALWAYS]
   NIL --> IP2[IP2 Troubleshoot — free-text form]
@@ -40,10 +34,15 @@ flowchart TD
   IP2 --> F2[Fill steps taken — required]
   IP2 --> SKIP[Skip reference + files]
   SKIP --> CONT[Continue]
-  CONT --> IP3[IP3 Troubleshoot / contact — next screen]
-  IP3 --> FORM[Submit case TBD]
+  CONT --> SUG[Ignore suggestion]
+  SUG --> CHIP[Other account issues]
+  CHIP --> SUBJ[Subject]
+  SUBJ --> EMAIL[Email + phone]
+  EMAIL --> SEND[Send]
+  SEND --> SAVE[Save cookies + screenshot]
+  SAVE --> END([END OK])
 
-  ENTRY -->|A| A1[Seller Central → Develop Apps]
+  ENTRY -.->|deprecated — not used| A1[Develop Apps]
   A1 --> A2{Redirect SPP?}
   A2 -->|Yes| A3[Click Case Log / Launch Case Log]
   A2 -->|No| B1
@@ -53,21 +52,15 @@ flowchart TD
 
   ENTRY -->|C| C1[Direct SPP /support/cases URL]
 
-  A3 --> FORM[Case Log / Create case screen]
-  B2 --> FORM
-  C1 --> FORM
-
-  FORM --> FILL[Fill subject + body + Developer ID + App ID + India]
+  A3 --> OLDFORM[Legacy Case Log form]
+  B2 --> OLDFORM
+  C1 --> OLDFORM
+  OLDFORM --> FILL[Fill subject + body + IDs]
   FILL --> SUB{--submit?}
-
-  SUB -->|No| REVIEW[Browser open 120s — Sir review]
-  SUB -->|Yes| SEND[Click Submit / Create case]
-  REVIEW --> SAVE[Save cookies + screenshot]
-  SEND --> CONFIRM{Case created?}
-  CONFIRM -->|Yes| SAVE
-  CONFIRM -->|Manual| REVIEW
-
-  SAVE --> END([END OK])
+  SUB -->|No| REVIEW[Browser open 120s]
+  SUB -->|Yes| OLDSEND[Submit]
+  REVIEW --> SAVE
+  OLDSEND --> SAVE
 ```
 
 ---
@@ -86,7 +79,7 @@ Home → ? Help
      → IP2: troubleshoot form (help with / steps / reference #s)
 ```
 
-Discovery log: [CASELOG_DISCOVERY_STEPS.md](CASELOG_DISCOVERY_STEPS.md)
+Browser lane: [BROWSER.md](BROWSER.md) · Form text: [FORM.md](FORM.md)
 
 ### A — Ideal (login pehle ho chuka)
 
@@ -159,7 +152,7 @@ Override via env: `AMAZON_SP_API_DEVELOPER_ID`, `AMAZON_SP_API_APP_ID`
 
 | Flow | Link |
 |------|------|
-| Login (prerequisite) | [../seller-central-login/MASTER_FLOW_TREE.md](../seller-central-login/MASTER_FLOW_TREE.md) |
+| Login (prerequisite) | [../seller-central-login/FLOW.md](../seller-central-login/FLOW.md) |
 | SP-API checklist | `agent/scripts/sp_api_registration_checklist.md` |
 
 ---
@@ -172,3 +165,14 @@ Override via env: `AMAZON_SP_API_DEVELOPER_ID`, `AMAZON_SP_API_APP_ID`
 | `src/mahika/playwright/account_switcher.py` | S7 Badeja India |
 | `src/mahika/playwright/seller_login.py` | Login if cookies expired |
 | `scripts/raise_sp_api_production_case.py` | Legacy script (calls same flow) |
+
+---
+
+## Quick reference
+
+```powershell
+cd agent
+.\.venv\Scripts\python.exe -m mahika.cli seller-login
+.\.venv\Scripts\python.exe -m mahika.cli support-case
+.\.venv\Scripts\python.exe -m mahika.cli support-case --submit
+```

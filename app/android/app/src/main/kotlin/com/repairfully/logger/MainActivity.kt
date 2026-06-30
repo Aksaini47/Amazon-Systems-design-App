@@ -7,6 +7,7 @@ import android.media.MediaRecorder
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.provider.Settings
 import android.view.KeyEvent
 import io.flutter.embedding.android.FlutterActivity
@@ -42,6 +43,15 @@ class MainActivity: FlutterActivity() {
                             result.success(true)
                         } else {
                             result.error("INVALID_ARGUMENT", "Directory is required", null)
+                        }
+                    }
+                    "deleteFile" -> {
+                        val path = call.argument<String>("path")
+                        if (path != null) {
+                            val removed = deleteFromMediaStore(path)
+                            result.success(removed)
+                        } else {
+                            result.error("INVALID_ARGUMENT", "Path is required", null)
                         }
                     }
                     else -> result.notImplemented()
@@ -173,6 +183,35 @@ class MainActivity: FlutterActivity() {
             }
         } catch (e: Exception) {
             // Silent fail
+        }
+    }
+
+    /// Remove a file from MediaStore so the Files/Gallery index stops listing it.
+    private fun deleteFromMediaStore(path: String): Boolean {
+        val file = java.io.File(path)
+        var removedFromStore = false
+        try {
+            val resolver = applicationContext.contentResolver
+            val collections = listOf(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                MediaStore.Files.getContentUri("external"),
+            )
+            for (collection in collections) {
+                val deleted = resolver.delete(
+                    collection,
+                    MediaStore.MediaColumns.DATA + "=?",
+                    arrayOf(path),
+                )
+                if (deleted > 0) removedFromStore = true
+            }
+        } catch (e: Exception) {
+            // Fall through — still try to delete the on-disk file below.
+        }
+        return try {
+            if (file.exists()) file.delete() || removedFromStore else removedFromStore
+        } catch (e: Exception) {
+            removedFromStore
         }
     }
 

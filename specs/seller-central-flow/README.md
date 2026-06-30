@@ -2,6 +2,8 @@
 
 Live knowledge capture for graphify. Each step gets a markdown note + screenshot.
 
+**Login playbook (Glass, seamless):** `login-flow.md` — start here for agent sessions.
+
 ## Session log
 
 | Step | File | Status |

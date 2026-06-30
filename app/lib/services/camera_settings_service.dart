@@ -114,6 +114,50 @@ class CameraSettingsService {
     }
   }
 
+  // --- Label scan popup: periodic auto-scan while camera preview is live ---
+  static Future<bool> getAutoLabelScan() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('auto_label_scan') ?? false;
+  }
+
+  static Future<void> setAutoLabelScan(bool val) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('auto_label_scan', val);
+  }
+
+  // --- Label scan popup: auto-pop SAVE when Order ID + AWB lock ---
+  static Future<bool> getAutoLabelSave() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('auto_label_save') ?? true;
+  }
+
+  static Future<void> setAutoLabelSave(bool val) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('auto_label_save', val);
+  }
+
+  // --- RT: require return/claim photos for ALL QC verdicts (incl. OK) ---
+  static Future<bool> getMandatoryReturnImages() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('mandatory_return_images') ?? true;
+  }
+
+  static Future<void> setMandatoryReturnImages(bool val) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('mandatory_return_images', val);
+  }
+
+  // --- RT claim photos: use Photo Countdown setting (was always-on pre v1.0.3+4) ---
+  static Future<bool> getClaimPhotoCountdown() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('claim_photo_countdown') ?? false;
+  }
+
+  static Future<void> setClaimPhotoCountdown(bool val) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('claim_photo_countdown', val);
+  }
+
   // --- Capture countdown seconds (0 = manual capture; 3/5/10 = countdown) ---
   static Future<int> getCaptureCountdown() async {
     final prefs = await SharedPreferences.getInstance();
@@ -129,14 +173,26 @@ class CameraSettingsService {
   //   9/16 = 16:9 portrait (full screen)   ← default
   //   3/4  = 3:4 portrait
   //   1.0  = 1:1 square
+  static const double aspectFull = 9 / 16;
+  static const double aspect34 = 3 / 4;
+  static const double aspect11 = 1.0;
+
+  /// Snap stored prefs to one of the three supported ratios (float drift safe).
+  static double normalizeAspect(double ratio) {
+    if ((ratio - aspect11).abs() < 0.02) return aspect11;
+    if ((ratio - aspect34).abs() < 0.02) return aspect34;
+    return aspectFull;
+  }
+
   static Future<double> getAspectDefault() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getDouble('aspect_default') ?? (9 / 16);
+    final raw = prefs.getDouble('aspect_default') ?? aspectFull;
+    return normalizeAspect(raw);
   }
 
   static Future<void> setAspectDefault(double ratio) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('aspect_default', ratio);
+    await prefs.setDouble('aspect_default', normalizeAspect(ratio));
   }
 
   // --- Restore all defaults ---
@@ -155,6 +211,10 @@ class CameraSettingsService {
     await prefs.remove('use_custom_storage');
     await prefs.remove('capture_countdown');
     await prefs.remove('aspect_default');
+    await prefs.remove('auto_label_scan');
+    await prefs.remove('auto_label_save');
+    await prefs.remove('claim_photo_countdown');
+    await prefs.remove('mandatory_return_images');
   }
 
   // --- Storage Path ---

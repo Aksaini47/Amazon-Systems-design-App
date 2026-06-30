@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../services/api_service.dart';
 import '../services/ocr_service.dart';
 import '../theme/rf_colors.dart';
+import '../theme/rf_glass.dart';
 import '../utils/volume_button_service.dart';
 
 class ScanResult {
@@ -152,22 +153,21 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
 
           // Top bar
           SafeArea(
-            child: Padding(
+            child: RfGlassOverlay(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               child: Row(
                 children: [
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-                    style: IconButton.styleFrom(backgroundColor: Colors.black38),
+                    style: IconButton.styleFrom(backgroundColor: RfColors.glassFill(0.22)),
                   ),
                   const SizedBox(width: 8),
-                  Container(
+                  RfGlassPill(
+                    tint: accentColor.withValues(alpha: 0.55),
+                    borderColor: accentColor.withValues(alpha: 0.45),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: accentColor.withOpacity(0.85),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                    radius: 20,
                     child: Text(
                       isUnpacking ? 'UNPACKING' : 'PACKING',
                       style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8),
@@ -180,7 +180,7 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
                       _torchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded,
                       color: _torchOn ? Colors.amber : Colors.white,
                     ),
-                    style: IconButton.styleFrom(backgroundColor: Colors.black38),
+                    style: IconButton.styleFrom(backgroundColor: RfColors.glassFill(0.22)),
                   ),
                 ],
               ),
@@ -205,12 +205,9 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
           // Processing indicator
           if (_processing)
             Center(
-              child: Container(
+              child: RfGlassPill(
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                radius: RfRadius.lg,
                 child: const Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -227,13 +224,10 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
             Positioned(
               bottom: 200,
               left: 24, right: 24,
-              child: Container(
+              child: RfGlassContainer(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: const Color(0xDD2D1111),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red.withOpacity(0.3)),
-                ),
+                tint: RfColors.errorBg.withValues(alpha: 0.55),
+                borderColor: RfColors.error.withValues(alpha: 0.35),
                 child: Row(
                   children: [
                     const Icon(Icons.error_outline_rounded, color: Color(0xFFFF7B72), size: 20),
@@ -253,14 +247,8 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
           // Bottom action bar
           Positioned(
             bottom: 0, left: 0, right: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.9)],
-                ),
-              ),
+            child: RfGlassOverlay(
+              tint: RfGlass.fillElevated(0.62),
               child: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 40, 24, 16),
@@ -494,13 +482,10 @@ class _ManualEntrySheetState extends State<_ManualEntrySheet> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-        decoration: const BoxDecoration(
-          color: Color(0xFF161B22),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
+      child: RfGlassSheet(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -522,7 +507,7 @@ class _ManualEntrySheetState extends State<_ManualEntrySheet> {
                 hintText: '403-0000000-0000000',
                 hintStyle: TextStyle(color: Colors.white.withOpacity(0.15), fontFamily: 'monospace', fontSize: 18),
                 filled: true,
-                fillColor: RfColors.bg,
+                fillColor: RfColors.glassFill(0.12),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -561,6 +546,7 @@ class _ManualEntrySheetState extends State<_ManualEntrySheet> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

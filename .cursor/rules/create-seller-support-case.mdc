@@ -8,7 +8,7 @@ alwaysApply: false
 **Prerequisite:** `python -m mahika.cli seller-login` OK (cookies saved)  
 **Command:** `python -m mahika.cli support-case`  
 **Account:** Badeja Enterprises → India (S7 — same as login)  
-**Full tree:** `agent/Graphs & workflows/create-seller-support-case/MASTER_FLOW_TREE.md`
+**Full tree:** `agent/Graphs & workflows/create-seller-support-case/FLOW.md`
 
 ## Quick flow
 
@@ -20,7 +20,7 @@ alwaysApply: false
 
 ## Cursor browser (teach / manual)
 
-**Sir sikhata hai:** `agent/Graphs & workflows/create-seller-support-case/CURSOR_BROWSER_TEACH.md`  
+**Sir sikhata hai:** `agent/Graphs & workflows/create-seller-support-case/BROWSER.md`  
 **OTP:** `python -m mahika.cli otp-watch` → `data/mahika/sessions/cursor_otp.txt`  
 **Browser:** `Ctrl+Shift+B` → agent `browser_navigate` with `position: side`, `newTab: true`  
 **Not:** Playwright Chromium for this lane unless Sir asks

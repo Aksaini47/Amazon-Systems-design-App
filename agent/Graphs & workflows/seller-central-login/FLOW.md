@@ -130,3 +130,20 @@ Open SC → (email/account dikha) → Continue
 | `src/mahika/playwright/seller_login.py` | Scenarios, Call 711, fail close |
 | `src/mahika/playwright/account_switcher.py` | S7 |
 | `src/mahika/playwright/amazon_signin_flow.py` | Picker, R8 |
+
+---
+
+## Quick reference
+
+```mermaid
+flowchart TD
+  START([seller-login]) --> LOAD[Load cookies]
+  LOAD --> NAV[Open SC]
+  NAV -->|OK| HOME[Home]
+  NAV -->|sign-in| S1[Mail] --> S2[Pass] --> S4[OTP]
+  S4 --> T3[3x60s Telegram]
+  T3 -->|OTP| S7[Badeja India] --> HOME
+  T3 -->|fail| CALL[Call 711: 120s resubmit 300s x2]
+  CALL -->|OTP| S7
+  CALL -->|fail| LOG[Log + close]
+```

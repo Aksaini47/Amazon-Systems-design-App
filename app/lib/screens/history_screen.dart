@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
 import '../theme/rf_colors.dart';
+import '../theme/rf_glass.dart';
 
 /// A screen showing all previously uploaded videos, grouped by date.
 /// Tapping a video opens a detail sheet with metadata.
@@ -67,13 +68,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: RfColors.bg,
-      appBar: AppBar(
-        backgroundColor: RfColors.card,
-        title: const Text('Recorded Videos', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600)),
-        centerTitle: false,
-        iconTheme: const IconThemeData(color: Colors.white),
+    return RfGlassScaffold(
+      appBar: RfGlassAppBar(
+        title: 'Recorded Videos',
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -128,7 +125,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return RefreshIndicator(
       onRefresh: _loadVideos,
       color: RfColors.navy,
-      backgroundColor: RfColors.surface,
+      backgroundColor: RfColors.glassElevated(0.72),
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: dates.length,
@@ -194,14 +191,9 @@ class _VideoTile extends StatelessWidget {
     final isPacking = video.isPacking;
     return InkWell(
       onTap: () => _showDetail(context),
-      child: Container(
+      child: RfGlassContainer(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: RfColors.navyDeep,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: RfColors.surface),
-        ),
         child: Row(
           children: [
             // Icon badge
@@ -301,11 +293,8 @@ class _VideoTile extends StatelessWidget {
   void _showDetail(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: RfColors.navyDeep,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => _VideoDetail(video: video),
+      backgroundColor: Colors.transparent,
+      builder: (_) => RfGlassSheet(child: _VideoDetail(video: video)),
     );
   }
 }

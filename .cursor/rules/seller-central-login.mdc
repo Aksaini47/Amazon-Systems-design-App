@@ -10,7 +10,7 @@ alwaysApply: true
 **OTP wait:** **3 attempts × 60s** (Scenario 1)  
 **Call 711 (Scenario 2):** submit → **120s** → resubmit → **300s** (×**2** rounds) → fail = log + close  
 **Default command:** `python -m mahika.cli seller-login` — cookies **rakho**  
-**Full family tree:** `agent/Graphs & workflows/seller-central-login/MASTER_FLOW_TREE.md`
+**Full family tree:** `agent/Graphs & workflows/seller-central-login/FLOW.md`
 
 ---
 

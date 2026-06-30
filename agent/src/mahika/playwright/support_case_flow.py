@@ -3,9 +3,10 @@
 Prerequisite: `mahika.cli seller-login` completed (cookies saved).
 
 Entry paths (tried in order):
-  1. Seller Central → Develop Apps → Solution Provider Portal → Case Log
-  2. developer.amazonservices.com/support
-  3. Direct SPP /support/cases URL
+  D. Help Hub → Create new issue → My issue is not listed (primary)
+  A. Seller Central → Develop Apps → Solution Provider Portal → Case Log
+  B. developer.amazonservices.com/support
+  C. Direct SPP /support/cases URL
 """
 from __future__ import annotations
 
@@ -27,6 +28,7 @@ from mahika.playwright.seller_login import (
 )
 from mahika.playwright.session import (
     COOKIE_FILE,
+    homepage_session_from_cookies,
     load_cookies,
     save_cookies,
     session_is_authenticated,
@@ -93,14 +95,13 @@ def _goto_resilient(page: Page, url: str, *, timeout_ms: int = 90_000) -> None:
         log.warning("support_case: goto gave up after retries — url=%s", page.url)
 
 
-def _otp_watcher():
+def _create_otp_watcher():
+    """Telegram OTP watcher — mark_otp_waiting only when OTP screen is shown."""
     if not settings.telegram_configured:
         return None
     from mahika.services.otp_watcher import TelegramOtpWatcher
 
-    w = TelegramOtpWatcher()
-    w.mark_otp_waiting(total_wait_s=600.0)
-    return w
+    return TelegramOtpWatcher()
 
 
 def ensure_badeja_india_context(page: Page) -> bool:
@@ -263,7 +264,9 @@ def run_support_case_flow(
         f"Submit={'yes' if submit else 'review only'}"
     )
 
-    watcher = _otp_watcher()
+    watcher = None
+    if settings.telegram_configured and not skip_login:
+        watcher = _create_otp_watcher()
     settings.storage_root.mkdir(parents=True, exist_ok=True)
     (settings.storage_root / "logs").mkdir(parents=True, exist_ok=True)
 
@@ -273,36 +276,49 @@ def run_support_case_flow(
         load_cookies(context)
         page = context.new_page()
         try:
-            if not skip_login:
+            if skip_login:
+                if not homepage_session_from_cookies(page):
+                    send_plain_message(
+                        "Mahika: support-case — cookies expired. Run seller-login."
+                    )
+                    return False
+            elif not homepage_session_from_cookies(page):
                 if not ensure_seller_session(page, creds, watcher):
                     send_plain_message("Mahika: Support case — login failed.")
                     return False
-                save_cookies(context)
 
             if not session_is_authenticated(page) and not is_account_switcher_page(page):
                 if not ensure_seller_session(page, creds, watcher):
                     return False
-                save_cookies(context)
 
             ensure_badeja_india_context(page)
-            save_cookies(context)
 
-            case_url = open_case_log(page)
-            log.info("support_case: Case Log URL → %s", case_url)
+            from mahika.playwright.help_hub_case_flow import run_help_hub_case_path
 
-            fill_support_case_form(page, case, submit=submit)
-
-            if not headless and review_wait_s > 0:
+            ok_path_d = run_help_hub_case_path(page, case, submit=submit)
+            if not ok_path_d:
+                log.error(
+                    "support_case: path D (Help Hub) failed — "
+                    "no Case Lobby / developer portal fallback"
+                )
+                out = settings.storage_root / "logs" / "support_case_form.png"
+                try:
+                    page.screenshot(path=str(out), full_page=True)
+                except Exception:
+                    pass
+                send_plain_message("Mahika: Help Hub case failed — see support_case_form.png")
+                return False
+            elif not submit and not headless and review_wait_s > 0:
                 log.info("support_case: browser open %.0fs for review", review_wait_s)
                 page.wait_for_timeout(int(review_wait_s * 1000))
 
             send_plain_message(
-                "Mahika: Support case form ready.\n"
-                f"URL: {page.url}\n"
-                f"Submit: {'done' if submit else 'manual review'}"
+                "Mahika: SP-API production case — "
+                + ("submitted." if submit else "ready for review.")
+                + f"\nURL: {page.url}"
             )
             save_cookies(context)
-            return True
+            return ok_path_d
         finally:
             page.close()
             context.close()

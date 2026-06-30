@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shorebird_code_push/shorebird_code_push.dart';
+import '../utils/debug_session_log.dart';
 
 /// Centralized Shorebird code-push wrapper.
 ///
@@ -36,27 +37,22 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '1.0.4+6:0 — RT flow + fixes\n'
-      '• RT: reasons first, then label scan\n'
-      '• Claim photos manual only\n'
-      '• Folders saved as -PK / -RT\n'
-      '• Clearer capture text + skip button\n'
-      '• Update banner fixed';
+      '2.0.0+6:2 — OTA fix + RT camera blank screen\n'
+      '• Fix: Check for updates on Shorebird release builds\n'
+      '• Fix: RT mode camera no longer blank after video save\n'
+      '• RT: return images required for ALL QC verdicts\n'
+      '• Settings revamp + camera black chrome';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
 
-  /// True only on devices where the Shorebird native engine is present
-  /// (release / patched builds). Always false in `flutter run` debug.
-  static Future<bool> get isAvailable async {
-    try {
-      // ShorebirdUpdater throws if the native engine isn't linked.
-      await _updater.readCurrentPatch();
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
+  /// True only when the Shorebird native engine is linked (shorebird release
+  /// APK). False for `flutter run`, `flutter build apk`, and debug builds.
+  ///
+  /// Do NOT use [readCurrentPatch] here — it returns null when no patch is
+  /// installed *and* when the updater is unavailable, which made Settings
+  /// show "Active" while manual check returned unavailable.
+  static Future<bool> get isAvailable async => _updater.isAvailable;
 
   /// Currently-installed patch number (null if none / debug build).
   static Future<int?> currentPatchNumber() async {
@@ -84,8 +80,31 @@ class UpdateService {
   ///
   /// Returns true if a patch is staged for next launch.
   static Future<bool> checkAndDownloadSilently() async {
+    if (!_updater.isAvailable) {
+      debugPrint('UpdateService: Shorebird engine not linked — skip silent check');
+      return false;
+    }
     try {
       final status = await _updater.checkForUpdate();
+      // #region agent log
+      String? installedBuild;
+      try {
+        final info = await PackageInfo.fromPlatform();
+        installedBuild = '${info.version}+${info.buildNumber}';
+      } catch (_) {}
+      final currentPatch = await currentPatchNumber();
+      DebugSessionLog.log(
+        location: 'update_service.dart:checkAndDownloadSilently',
+        message: 'shorebird check result',
+        hypothesisId: 'H1',
+        data: {
+          'status': status.name,
+          'installedBuild': installedBuild,
+          'currentPatch': currentPatch,
+          'nextPatch': await nextPatchNumber(),
+        },
+      );
+      // #endregion
       switch (status) {
         case UpdateStatus.outdated:
           debugPrint('UpdateService: outdated → downloading patch silently');
@@ -100,7 +119,7 @@ class UpdateService {
           debugPrint('UpdateService: patch already downloaded — applies on next launch');
           return true;
         case UpdateStatus.unavailable:
-          debugPrint('UpdateService: updater unavailable (debug build?)');
+          debugPrint('UpdateService: updater unavailable (${_unavailableReason()})');
           return false;
       }
     } catch (e) {
@@ -114,6 +133,12 @@ class UpdateService {
   /// Manual "Check for updates" from the About panel. Same logic as the
   /// silent path, but the caller can show a spinner + toast on outcome.
   static Future<UpdateCheckResult> checkManually() async {
+    if (!_updater.isAvailable) {
+      return UpdateCheckResult(
+        outcome: UpdateOutcome.unavailable,
+        message: await _unavailableMessage(),
+      );
+    }
     try {
       final status = await _updater.checkForUpdate();
       switch (status) {
@@ -138,9 +163,9 @@ class UpdateService {
             message: 'Update ready. Restart the app to apply.',
           );
         case UpdateStatus.unavailable:
-          return const UpdateCheckResult(
+          return UpdateCheckResult(
             outcome: UpdateOutcome.unavailable,
-            message: 'Updates not available in this build.',
+            message: await _unavailableMessage(),
           );
       }
     } catch (e) {
@@ -148,6 +173,24 @@ class UpdateService {
         outcome: UpdateOutcome.failed,
         message: 'Update check failed: $e',
       );
+    }
+  }
+
+  static String _unavailableReason() =>
+      kReleaseMode ? 'not a Shorebird release APK' : 'debug build';
+
+  static Future<String> _unavailableMessage() async {
+    if (!kReleaseMode) {
+      return 'OTA updates work only in release builds (not flutter run / debug).';
+    }
+    try {
+      final info = await PackageInfo.fromPlatform();
+      final installed = '${info.version}+${info.buildNumber}';
+      return 'No Shorebird OTA on this install ($installed). '
+          'Reinstall the Shorebird release APK for this version, then patches apply over-the-air.';
+    } catch (_) {
+      return 'No Shorebird OTA on this install. '
+          'Install the Shorebird release APK, then patches apply over-the-air.';
     }
   }
 
@@ -190,9 +233,35 @@ class UpdateService {
         if (installedBuild != null) {
           await prefs.setString(_kLastSeenBuildKey, installedBuild);
         }
+        // #region agent log
+        DebugSessionLog.log(
+          location: 'update_service.dart:consumePendingChangelog',
+          message: 'changelog will show',
+          hypothesisId: 'H1',
+          data: {
+            'patchUpdated': patchUpdated,
+            'buildUpdated': buildUpdated,
+            'currentPatch': currentPatch,
+            'installedBuild': installedBuild,
+          },
+        );
+        // #endregion
         return latestChangelog;
       }
 
+      // #region agent log
+      DebugSessionLog.log(
+        location: 'update_service.dart:consumePendingChangelog',
+        message: 'no changelog banner',
+        hypothesisId: 'H1',
+        data: {
+          'lastSeenPatch': lastSeenPatch,
+          'currentPatch': currentPatch,
+          'lastSeenBuild': lastSeenBuild,
+          'installedBuild': installedBuild,
+        },
+      );
+      // #endregion
       return null;
     } catch (e) {
       debugPrint('UpdateService: consumePendingChangelog failed — $e');
@@ -207,11 +276,10 @@ class UpdateService {
       final info = await PackageInfo.fromPlatform();
       final installed = '${info.version}+${info.buildNumber}';
       final patch = await currentPatchNumber();
-      final patchLabel = patch == null ? 'base release' : 'patch #$patch';
-      return 'On latest OTA for $installed ($patchLabel). '
-          'New Play builds are not delivered via code-push — install from Play Store.';
+      final patchLabel = patch == null ? 'base release (no patch yet)' : 'patch #$patch';
+      return 'Already on latest OTA for $installed ($patchLabel).';
     } catch (_) {
-      return 'On latest OTA patch. New app versions require a Play Store install.';
+      return 'Already on latest OTA patch for this release.';
     }
   }
 }

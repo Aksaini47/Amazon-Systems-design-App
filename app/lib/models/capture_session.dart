@@ -126,8 +126,8 @@ class CaptureSession {
     if (mode == CaptureMode.pk) {
       return frontPhotoPath != null && backPhotoPath != null;
     }
-    // RT: OK verdict needs no photos. Non-OK (claim) requires label + contents + front + back.
-    if (verdict == null || verdict == QCVerdict.ok) return true;
+    // RT: all verdicts require label + contents + front + back (serial optional).
+    if (verdict == null) return true;
     return labelPhotoPath != null
         && contentsPhotoPath != null
         && frontPhotoPath != null

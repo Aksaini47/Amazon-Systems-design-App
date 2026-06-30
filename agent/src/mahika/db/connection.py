@@ -24,7 +24,8 @@ db_engine: Engine = create_engine(
     pool_recycle=1800,
     pool_size=5,
     max_overflow=10,
-    echo=False,  # flip to True for SQL debugging
+    echo=False,
+    connect_args={"connect_timeout": 3},
 )
 
 _SessionFactory = sessionmaker(bind=db_engine, expire_on_commit=False)

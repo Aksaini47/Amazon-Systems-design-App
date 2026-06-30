@@ -1,7 +1,7 @@
 name: repairfully_camera
 description: RepairFully — Amazon seller video manager mobile app
 publish_to: 'none'
-version: 1.0.4+6
+version: 2.0.0+8
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
@@ -83,8 +83,18 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/branding/app_icon_foreground.png
+  adaptive_icon_background: "#F1641E"
+  adaptive_icon_foreground: assets/branding/app_icon_foreground.png
 
 flutter:
   assets:
     - shorebird.yaml
+    - assets/branding/app_icon_foreground.png
+    - assets/branding/rf_logo.png
   uses-material-design: true

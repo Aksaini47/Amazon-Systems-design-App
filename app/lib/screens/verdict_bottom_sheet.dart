@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/capture_session.dart';
 import '../theme/rf_colors.dart';
+import '../theme/rf_glass.dart';
 
 class VerdictBottomSheet extends StatelessWidget {
   final String? orderId;
@@ -10,14 +11,8 @@ class VerdictBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    // Cap sheet at 85% of screen so it can scroll if content exceeds available space
-    return Container(
-      constraints: BoxConstraints(maxHeight: screenHeight * 0.85),
-      decoration: const BoxDecoration(
-        color: Color(0xFF161B22),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+    return RfGlassSheet(
+      maxHeightFactor: 0.85,
       child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -25,7 +20,7 @@ class VerdictBottomSheet extends StatelessWidget {
             // Drag handle (fixed)
             Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 8),
-              child: Container(width: 36, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
+              child: Container(width: 36, height: 4, decoration: BoxDecoration(color: RfColors.glassBorder(0.35), borderRadius: BorderRadius.circular(2))),
             ),
 
             // Title (fixed)
@@ -82,14 +77,9 @@ class VerdictBottomSheet extends StatelessWidget {
                     const SizedBox(height: 16),
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
-                      child: Container(
-                        width: double.infinity,
+                      child: RfGlassContainer(
+                        blurEnabled: false,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          color: Colors.white10,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.white12),
-                        ),
                         child: const Center(child: Text('Cancel', style: TextStyle(color: Colors.white54, fontSize: 14))),
                       ),
                     ),
@@ -106,10 +96,12 @@ class VerdictBottomSheet extends StatelessWidget {
   void _confirmDifferent(BuildContext context) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: RfColors.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Flag as Fraud?', style: TextStyle(color: Colors.white)),
+      builder: (ctx) => RfGlassDialog(
+        child: AlertDialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
+          title: const Text('Flag as Fraud?', style: TextStyle(color: Colors.white)),
         content: const Text(
           'This will flag the order as potential buyer fraud (swap/different item returned).\n\nSAFE-T claim will be triggered automatically.',
           style: TextStyle(color: Color(0xFF8B949E), fontSize: 13),
@@ -127,6 +119,7 @@ class VerdictBottomSheet extends StatelessWidget {
             child: const Text('Yes, Flag Fraud', style: TextStyle(color: Colors.red)),
           ),
         ],
+      ),
       ),
     );
   }
@@ -191,10 +184,10 @@ class _VerdictButtonState extends State<_VerdictButton> with SingleTickerProvide
         child: Container(
           padding: const EdgeInsets.all(16),
           constraints: const BoxConstraints(minHeight: 72),
-          decoration: BoxDecoration(
-            color: c.withAlpha(25),
-            borderRadius: BorderRadius.circular(RfRadius.card),
-            border: Border.all(color: c.withAlpha(90), width: 1),
+          decoration: RfGlass.decoration(
+            radius: RfRadius.card,
+            tint: c.withValues(alpha: 0.12),
+            borderColor: c.withValues(alpha: 0.45),
           ),
           child: Row(
             children: [

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/capture_session.dart';
+import '../utils/debug_session_log.dart';
 import 'file_naming_service.dart';
 import 'camera_settings_service.dart';
 import 'sync_queue_service.dart';
@@ -237,19 +238,64 @@ class LocalStorageService {
   /// stale "pending upload" for an order whose files no longer exist on disk.
   Future<bool> deleteOrder(String orderId) async {
     try {
+      // #region agent log
+      final folder = await getOrderFolder(orderId);
+      final folderExistsBefore = await folder.exists();
+      final pathsBefore = <String>[];
+      if (folderExistsBefore) {
+        for (final entity in folder.listSync(followLinks: false)) {
+          if (entity is File) pathsBefore.add(entity.path);
+        }
+      }
+      DebugSessionLog.log(
+        location: 'local_storage_service.dart:deleteOrder',
+        message: 'deleteOrder start',
+        hypothesisId: 'H3-H4',
+        data: {
+          'orderId': orderId,
+          'folderPath': folder.path,
+          'folderExistsBefore': folderExistsBefore,
+          'fileCount': pathsBefore.length,
+        },
+      );
+      // #endregion
+
       // Always drop from queue first — even if folder delete fails, the queue
       // entry would be useless anyway (uploadFromFolder would error on the
       // missing folder).
       await SyncQueueService.remove(orderId);
 
-      final folder = await getOrderFolder(orderId);
-      if (await folder.exists()) {
+      if (folderExistsBefore) {
+        for (final path in pathsBefore) {
+          await _removeFromMediaStore(path);
+        }
         await folder.delete(recursive: true);
-        return true;
       }
-      return false;
+
+      final folderExistsAfter = await folder.exists();
+      // #region agent log
+      DebugSessionLog.log(
+        location: 'local_storage_service.dart:deleteOrder',
+        message: 'deleteOrder end',
+        hypothesisId: 'H3-H4',
+        data: {
+          'orderId': orderId,
+          'folderExistsAfter': folderExistsAfter,
+          'deleted': folderExistsBefore && !folderExistsAfter,
+        },
+      );
+      // #endregion
+      return folderExistsBefore && !folderExistsAfter;
     } catch (e) {
       debugPrint('deleteOrder failed: $e');
+      // #region agent log
+      DebugSessionLog.log(
+        location: 'local_storage_service.dart:deleteOrder',
+        message: 'deleteOrder error',
+        hypothesisId: 'H4',
+        data: {'orderId': orderId, 'error': e.toString()},
+      );
+      // #endregion
       return false;
     }
   }
@@ -258,8 +304,36 @@ class LocalStorageService {
   Future<bool> deleteDraft(String draftPath) async {
     try {
       final f = File(draftPath);
-      if (await f.exists()) { await f.delete(); return true; }
-      return false;
+      final existsBefore = await f.exists();
+      // #region agent log
+      DebugSessionLog.log(
+        location: 'local_storage_service.dart:deleteDraft',
+        message: 'deleteDraft start',
+        hypothesisId: 'H2-H3',
+        data: {
+          'draftPath': draftPath,
+          'existsBefore': existsBefore,
+        },
+      );
+      // #endregion
+      if (existsBefore) {
+        await _removeFromMediaStore(draftPath);
+        await f.delete();
+      }
+      final existsAfter = await f.exists();
+      // #region agent log
+      DebugSessionLog.log(
+        location: 'local_storage_service.dart:deleteDraft',
+        message: 'deleteDraft end',
+        hypothesisId: 'H2-H3',
+        data: {
+          'draftPath': draftPath,
+          'existsAfter': existsAfter,
+          'deleted': existsBefore && !existsAfter,
+        },
+      );
+      // #endregion
+      return existsBefore && !existsAfter;
     } catch (e) {
       debugPrint('deleteDraft failed: $e');
       return false;
@@ -368,6 +442,25 @@ class LocalStorageService {
       try { await draftFile.delete(); } catch (_) {}
     }
     await _scanFile(destPath);
+    // #region agent log
+    final draftStillExists = await draftFile.exists();
+    DebugSessionLog.log(
+      location: 'local_storage_service.dart:promoteDraftVideo',
+      message: 'promoteDraftVideo complete',
+      hypothesisId: 'H6',
+      data: {
+        'draftPath': draftPath,
+        'destPath': destPath,
+        'draftStillExists': draftStillExists,
+      },
+    );
+    // #endregion
+    if (draftStillExists) {
+      await _removeFromMediaStore(draftPath);
+      try {
+        await draftFile.delete();
+      } catch (_) {}
+    }
     debugPrint('Draft promoted to order: $draftPath → $destPath');
     return destPath;
   }
@@ -458,6 +551,16 @@ class LocalStorageService {
       await channel.invokeMethod('scanFile', {'path': path});
     } catch (e) {
       debugPrint('MediaScan failed (non-fatal): $e');
+    }
+  }
+
+  /// Remove a deleted file from Android MediaStore / Files app index.
+  Future<void> _removeFromMediaStore(String path) async {
+    try {
+      const channel = MethodChannel('com.repairfully.camera/media_scanner');
+      await channel.invokeMethod('deleteFile', {'path': path});
+    } catch (e) {
+      debugPrint('MediaStore delete failed (non-fatal): $e');
     }
   }
 

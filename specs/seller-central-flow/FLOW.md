@@ -1,6 +1,7 @@
 # Seller Central Login Flow — Verified (Cursor Browser, 2026-05-20)
 
-**Account:** Badeja Enterprises · **Marketplace:** India · **Tool lane:** Cursor discovery → Playwright later
+**Canonical Glass playbook:** `login-flow.md` (Lane A — seamless Cursor built-in browser)  
+**Account:** Badeja Enterprises · **Marketplace:** India · **Tool lane:** Cursor Glass (manual) · Playwright (automation)
 
 ## End-to-end sequence
 

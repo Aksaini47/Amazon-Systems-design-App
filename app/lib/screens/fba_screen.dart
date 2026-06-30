@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../theme/rf_colors.dart';
+import '../theme/rf_glass.dart';
 import '../utils/volume_button_service.dart';
 import 'record_screen.dart';
 
@@ -67,12 +68,8 @@ class _FbaScreenState extends State<FbaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: RfColors.bg,
-      appBar: AppBar(
-        backgroundColor: RfColors.card,
-        title: const Text('FBA Packing'),
-      ),
+    return RfGlassScaffold(
+      appBar: const RfGlassAppBar(title: 'FBA Packing'),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
@@ -116,16 +113,10 @@ class _ShipmentList extends StatelessWidget {
             itemBuilder: (_, i) {
               final s = shipments[i];
               final status = s.shipmentStatus;
-              return GestureDetector(
+              return RfGlassContainer(
                 onTap: () => onSelect(s),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: RfColors.card,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: RfColors.border),
-                  ),
-                  child: Row(
+                padding: const EdgeInsets.all(16),
+                child: Row(
                     children: [
                       Expanded(
                         child: Column(
@@ -152,7 +143,6 @@ class _ShipmentList extends StatelessWidget {
                       ),
                       const Icon(Icons.chevron_right_rounded, color: Color(0xFF8B949E)),
                     ],
-                  ),
                 ),
               );
             },
@@ -260,14 +250,16 @@ class _CounterBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: 52, height: 52,
-        decoration: BoxDecoration(
-          color: onTap != null ? RfColors.card : RfColors.bg,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: RfColors.border),
+      child: RfGlassContainer(
+        blurEnabled: false,
+        padding: EdgeInsets.zero,
+        radius: RfRadius.button,
+        tint: onTap != null ? RfColors.glassFill(0.16) : RfColors.glassFill(0.08),
+        child: SizedBox(
+          width: 52,
+          height: 52,
+          child: Icon(icon, color: onTap != null ? Colors.white : RfColors.border, size: 22),
         ),
-        child: Icon(icon, color: onTap != null ? Colors.white : RfColors.border, size: 22),
       ),
     );
   }

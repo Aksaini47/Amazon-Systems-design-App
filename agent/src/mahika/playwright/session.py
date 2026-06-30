@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
@@ -45,6 +46,13 @@ log = logging.getLogger(__name__)
 COOKIE_DIR = settings.storage_root / "sessions"
 COOKIE_FILE = COOKIE_DIR / "seller_central_cookies.json"
 HOME_LANDING_TIMEOUT_MS = 180_000  # 3 min — Telegram OTP auto-fill needs headroom
+INDIA_PAID_ACCOUNT = os.getenv(
+    "AMAZON_INDIA_PAID_ACCOUNT_ID",
+    "amzn1.pa.d.AB5ZXZYCP3XOLA6T5BVNPV2EXP6A",
+).strip()
+SC_HOME_INDIA = (
+    f"https://sellercentral.amazon.in/home?mons_sel_dir_paid={INDIA_PAID_ACCOUNT}"
+)
 
 
 class NoSessionAvailable(RuntimeError):
@@ -167,6 +175,57 @@ def is_logged_in(page) -> bool:  # type: ignore[no-untyped-def]
         return False
 
 
+def homepage_session_from_cookies(page) -> bool:  # type: ignore[no-untyped-def]
+    """Navigate SC home; True when saved cookies already yield dashboard."""
+    from mahika.playwright.account_switcher import (
+        complete_account_switcher,
+        is_account_switcher_page,
+    )
+    from mahika.playwright.selectors import URLs
+
+    candidates = (
+        SC_HOME_INDIA,
+        f"{URLs.BASE}/home",
+        URLs.BASE,
+    )
+    for url in candidates:
+        page.goto(url, wait_until="domcontentloaded", timeout=60_000)
+        page.wait_for_timeout(2_000)
+        if is_account_switcher_page(page):
+            log.info("session: account switcher after cookie load — completing S7")
+            complete_account_switcher(page)
+        url_now = page.url or ""
+        if "/ap/signin" in url_now or "/ap/mfa" in url_now or "/ap/cvf" in url_now:
+            continue
+        if session_is_authenticated(page):
+            log.info("session: cookies valid — homepage OK via %s", url)
+            return True
+    return False
+
+
+def probe_saved_cookies_valid(*, headless: bool = True) -> bool:
+    """Headless probe: load cookies file and open SC home."""
+    if not COOKIE_FILE.exists():
+        return False
+    from playwright.sync_api import sync_playwright
+
+    try:
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(headless=headless)
+            context = browser.new_context()
+            try:
+                if not load_cookies(context):
+                    return False
+                page = context.new_page()
+                return homepage_session_from_cookies(page)
+            finally:
+                context.close()
+                browser.close()
+    except Exception as exc:
+        log.warning("session: cookie probe failed (%s)", exc)
+        return False
+
+
 # ─── Manual login flow (OTP coordination) ────────────────────────────────
 
 
@@ -222,6 +281,17 @@ def request_manual_login(
             log.warning("session: OTP watcher unavailable (%s)", exc)
 
     try:
+        page.goto(URLs.BASE, wait_until="domcontentloaded", timeout=60_000)
+        page.wait_for_timeout(1_500)
+        if session_is_authenticated(page):
+            save_cookies(context)
+            audit(
+                "session.manual_login_completed",
+                actor="mahika.session",
+                reason="cookies valid on home — OTP skipped",
+            )
+            return True
+
         page.goto(URLs.LOGIN)
         deadline = time.monotonic() + HOME_LANDING_TIMEOUT_MS / 1000.0
         while time.monotonic() < deadline:

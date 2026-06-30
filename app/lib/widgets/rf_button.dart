@@ -173,9 +173,9 @@ class _RfButtonState extends State<RfButton> with SingleTickerProviderStateMixin
         );
       case RfButtonVariant.secondary:
         return (
-          fill: pressed ? Colors.white.withAlpha(25) : Colors.transparent,
+          fill: pressed ? RfColors.glassFill(0.22) : RfColors.glassFill(0.10),
           text: Colors.white,
-          border: Colors.white.withAlpha(140),
+          border: RfColors.glassBorder(pressed ? 0.35 : 0.28),
         );
       case RfButtonVariant.danger:
         return (
@@ -191,9 +191,9 @@ class _RfButtonState extends State<RfButton> with SingleTickerProviderStateMixin
                 border: null,
               )
             : (
-                fill: pressed ? Colors.white.withAlpha(40) : Colors.white.withAlpha(20),
+                fill: pressed ? RfColors.glassFill(0.28) : RfColors.glassFill(0.12),
                 text: Colors.white,
-                border: Colors.white.withAlpha(60),
+                border: RfColors.glassBorder(0.24),
               );
     }
   }
@@ -304,9 +304,9 @@ class _RfChipState extends State<RfChip> with SingleTickerProviderStateMixin {
     final disabled = widget.onPressed == null;
     final fill = widget.active
         ? Colors.white
-        : Colors.white.withAlpha(20);
+        : RfColors.glassFill(0.12);
     final textColor = widget.active ? RfColors.navy : Colors.white;
-    final borderColor = widget.active ? Colors.transparent : Colors.white.withAlpha(60);
+    final borderColor = widget.active ? Colors.transparent : RfColors.glassBorder(0.24);
 
     final visual = Container(
       constraints: BoxConstraints(minWidth: widget.minWidth ?? 0, minHeight: 36),
@@ -390,7 +390,7 @@ class _RfIconButtonState extends State<RfIconButton> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final disabled = widget.onPressed == null;
-    final bg = widget.bgColor ?? RfColors.surface;
+    final bg = widget.bgColor ?? RfColors.glassFill(0.18);
     final fg = widget.color ?? Colors.white;
     final pressedBg = Color.lerp(bg, Colors.black, 0.25)!;
 
@@ -400,7 +400,14 @@ class _RfIconButtonState extends State<RfIconButton> with SingleTickerProviderSt
       decoration: BoxDecoration(
         color: _pressed ? pressedBg : bg,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withAlpha(35), width: 1),
+        border: Border.all(color: RfColors.glassBorder(0.28), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Icon(widget.icon, size: widget.size * 0.5, color: fg.withAlpha(disabled ? 100 : 255)),
     );

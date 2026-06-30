@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
@@ -7,20 +8,17 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:native_camera_sound/native_camera_sound.dart';
 import '../models/capture_session.dart';
 import '../services/awb_classifier.dart';
+import '../services/camera_settings_service.dart';
 import '../services/local_storage_service.dart';
 import '../services/file_naming_service.dart';
 import '../services/ocr_service.dart';
 import '../theme/rf_colors.dart';
-import '../utils/volume_button_service.dart';
+import '../theme/rf_glass.dart';
 import '../widgets/rf_button.dart';
+import '../utils/debug_session_log.dart';
+import '../utils/volume_button_service.dart';
 
-/// Full-screen page that captures both an Amazon AWB barcode and the printed
-/// Order ID from the SAME camera frame.
-///
-/// Manual scan only (auto-scan removed per UX feedback). One tap of SCAN →
-/// captures a still → runs barcode detection + OCR in parallel → fills both
-/// fields. SAVE button lives in the AppBar so it's always at the top, never
-/// requires scrolling.
+/// Full-screen label scan — manual SCAN tap or optional auto-scan (Settings).
 ///
 /// AWB detection logic (also documented in MainActivity DND channel comments):
 ///   - mobile_scanner.analyzeImage(frame) returns ALL barcodes in the image
@@ -69,6 +67,10 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   Set<String> _existingAwbs = {};
   String? _duplicateWarning;
 
+  bool _autoLabelScan = false;
+  bool _autoLabelSave = true;
+  Timer? _autoScanTimer;
+
   @override
   void initState() {
     super.initState();
@@ -78,18 +80,51 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       detectionSpeed: DetectionSpeed.normal,
       facing: CameraFacing.back,
     );
-    _initCamera();
-    _loadExistingOrders();
-    // Volume buttons trigger a manual scan — useful when phone is mounted
-    // and tapping the SCAN button is awkward.
+    _bootstrap();
     VolumeButtonService().registerListener('barcode_popup', (event) {
       if (!mounted) return;
-      // Either volume key fires a scan
       if (event == 1 || event == 2) {
         _scan();
       }
     });
   }
+
+  Future<void> _bootstrap() async {
+    await _loadLabelSettings();
+    await _initCamera();
+    await _loadExistingOrders();
+  }
+
+  Future<void> _loadLabelSettings() async {
+    _autoLabelScan = await CameraSettingsService.getAutoLabelScan();
+    _autoLabelSave = await CameraSettingsService.getAutoLabelSave();
+    DebugSessionLog.log(
+      location: 'barcode_save_popup.dart:_loadLabelSettings',
+      message: 'label settings loaded',
+      hypothesisId: 'H4-settings',
+      data: {
+        'autoLabelScan': _autoLabelScan,
+        'autoLabelSave': _autoLabelSave,
+      },
+    );
+  }
+
+  void _scheduleAutoScanOnce() {
+    _autoScanTimer?.cancel();
+    if (!_autoLabelScan || _autoScanDone) return;
+    _autoScanTimer = Timer(const Duration(milliseconds: 900), () {
+      if (!mounted || _scanning || _isValid || _autoScanDone) return;
+      if (_cam == null || !_camReady) return;
+      _scan(fromAuto: true);
+    });
+  }
+
+  void _stopAutoScanLoop() {
+    _autoScanTimer?.cancel();
+    _autoScanTimer = null;
+  }
+
+  bool _autoScanDone = false;
 
   /// Read every order on disk once at popup-open. Stores the set of orderIds
   /// and AWBs so [_onTextChanged] can flag duplicates without per-keystroke I/O.
@@ -165,6 +200,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
 
   @override
   void dispose() {
+    _stopAutoScanLoop();
     VolumeButtonService().unregisterListener('barcode_popup');
     _cam?.dispose();
     _scanner?.dispose();
@@ -193,6 +229,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       _camReady = true;
       setState(() {});
       await _applyZoom();
+      _scheduleAutoScanOnce();
     } catch (e) {
       debugPrint('Scan camera init failed: $e');
       if (mounted) setState(() => _statusMessage = 'Camera unavailable: $e');
@@ -225,11 +262,13 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   ///      tokens via [CarrierPatterns.findAwbInText]
   ///   6. Order ID is filled from OcrService.extractOrderId (or from a
   ///      barcode whose value matches the 3-7-7 pattern)
-  Future<void> _scan() async {
+  Future<void> _scan({bool fromAuto = false}) async {
     if (_cam == null || !_camReady || _scanning) return;
+    if (fromAuto) _autoScanDone = true;
+    _stopAutoScanLoop();
     setState(() {
       _scanning = true;
-      _statusMessage = 'Scanning…';
+      _statusMessage = fromAuto ? 'Auto scanning…' : 'Scanning…';
     });
 
     try {
@@ -326,6 +365,29 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       });
       // Re-run duplicate check after auto-fill from scan
       _onTextChanged();
+
+      final orderId = _orderIdController.text.trim();
+      final canAutoSave = _autoLabelSave &&
+          _orderIdRegex.hasMatch(orderId) &&
+          _duplicateWarning == null;
+      if (canAutoSave) {
+        // #region agent log
+        DebugSessionLog.log(
+          location: 'barcode_save_popup.dart:_scan',
+          message: 'auto save triggered',
+          hypothesisId: 'H4-settings',
+          data: {'fromAuto': fromAuto, 'orderId': orderId, 'autoScanDone': _autoScanDone},
+        );
+        // #endregion
+        _onSave();
+      } else if (fromAuto) {
+        DebugSessionLog.log(
+          location: 'barcode_save_popup.dart:_scan',
+          message: 'auto scan once complete',
+          hypothesisId: 'H10-auto-once',
+          data: {'orderIdFound': orderIdFound, 'awbFound': awbFound, 'isValid': _isValid},
+        );
+      }
     } catch (e) {
       debugPrint('Scan failed: $e');
       if (mounted) {
@@ -382,11 +444,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0D1117),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF161B22),
-        elevation: 0,
+    return RfGlassScaffold(
+      showMeshOrbs: false,
+      appBar: RfGlassAppBar(
         leadingWidth: 56,
         leading: Padding(
           padding: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
@@ -396,8 +456,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
             onPressed: _onCancel,
           ),
         ),
-        title: const Text('Save Order',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16)),
+        title: 'Save Order',
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),

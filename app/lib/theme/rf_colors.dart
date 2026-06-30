@@ -58,6 +58,20 @@ class RfColors {
   /// Subtle separator — for in-card section dividers.
   static const borderSubtle = Color(0xFF21262D);
 
+  // ─── GLASS TOKENS (frosted UI overlays) ───────────────────────────────
+
+  /// Default frosted panel tint over dark mesh.
+  static Color glassFill([double opacity = 0.14]) =>
+      card.withValues(alpha: opacity);
+
+  /// Elevated glass (app bars, sheets).
+  static Color glassElevated([double opacity = 0.22]) =>
+      surface.withValues(alpha: opacity);
+
+  /// Glass border highlight.
+  static Color glassBorder([double opacity = 0.28]) =>
+      Colors.white.withValues(alpha: opacity);
+
   // ─── TEXT TOKENS ──────────────────────────────────────────────────────
 
   /// Primary text on dark surfaces.
