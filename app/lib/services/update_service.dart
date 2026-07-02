@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.0.0+8:6 — RT claim photo capture fix\n'
+      '2.0.0+8:7 — RT claim photo capture fix\n'
       '• Fix: CAPTURE during RT claim photos no longer starts a new video';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
