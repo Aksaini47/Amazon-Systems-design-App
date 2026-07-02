@@ -1154,7 +1154,8 @@ class _DraftSessionCard extends StatelessWidget {
 
 class _InlineVideoPlayer extends StatefulWidget {
   final String path;
-  const _InlineVideoPlayer({required this.path});
+  final bool pinchZoom;
+  const _InlineVideoPlayer({required this.path, this.pinchZoom = true});
 
   @override
   State<_InlineVideoPlayer> createState() => _InlineVideoPlayerState();
@@ -1165,10 +1166,12 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
   bool _failed = false;
   bool _showControls = true;
   String? _errorMessage;
+  TransformationController? _zoomCtrl;
 
   @override
   void initState() {
     super.initState();
+    if (widget.pinchZoom) _zoomCtrl = TransformationController();
     _init();
   }
 
@@ -1191,8 +1194,24 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
 
   @override
   void dispose() {
+    _zoomCtrl?.dispose();
     _ctrl?.dispose();
     super.dispose();
+  }
+
+  void _resetVideoZoom() {
+    _zoomCtrl?.value = Matrix4.identity();
+  }
+
+  void _toggleVideoZoom() {
+    final ctrl = _zoomCtrl;
+    if (ctrl == null) return;
+    final scale = ctrl.value.getMaxScaleOnAxis();
+    if (scale > 1.01) {
+      ctrl.value = Matrix4.identity();
+    } else {
+      ctrl.value = Matrix4.identity()..scaleByDouble(2.5);
+    }
   }
 
   String _fmt(Duration d) {
@@ -1254,47 +1273,85 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
         ? v.size.height / v.size.width  // 1080/1920 = 0.5625 portrait
         : v.aspectRatio;
 
+    Widget videoSurface = AspectRatio(
+      aspectRatio: effectiveAspect,
+      child: VideoPlayer(_ctrl!),
+    );
+    if (widget.pinchZoom && _zoomCtrl != null) {
+      videoSurface = GestureDetector(
+        onDoubleTap: _toggleVideoZoom,
+        onTap: () => setState(() => _showControls = !_showControls),
+        child: InteractiveViewer(
+          transformationController: _zoomCtrl,
+          minScale: 1.0,
+          maxScale: 5.0,
+          clipBehavior: Clip.hardEdge,
+          child: videoSurface,
+        ),
+      );
+    } else {
+      videoSurface = GestureDetector(
+        onTap: () => setState(() => _showControls = !_showControls),
+        child: videoSurface,
+      );
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: GestureDetector(
-        onTap: () => setState(() => _showControls = !_showControls),
-        child: Stack(
-          children: [
-            Container(
-              constraints: const BoxConstraints(
-                minHeight: 220,
-                maxHeight: 520,
-              ),
-              color: Colors.black,
-              child: Center(
-                child: AspectRatio(
-                  aspectRatio: effectiveAspect,
-                  child: VideoPlayer(_ctrl!),
+      child: Stack(
+        children: [
+          Container(
+            constraints: const BoxConstraints(
+              minHeight: 220,
+              maxHeight: 520,
+            ),
+            color: Colors.black,
+            child: Center(child: videoSurface),
+          ),
+          // Gradient + play/pause — visual overlay only so pinch reaches video
+          if (_showControls || !v.isPlaying)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  opacity: _showControls || !v.isPlaying ? 1 : 0,
+                  duration: const Duration(milliseconds: 250),
+                  child: Container(
+                    decoration: BoxDecoration(gradient: LinearGradient(
+                      begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                      colors: [Colors.black.withAlpha(60), Colors.transparent, Colors.black.withAlpha(140)],
+                    )),
+                  ),
                 ),
               ),
             ),
-            // Tap-anywhere play/pause
-            Positioned.fill(
-              child: AnimatedOpacity(
-                opacity: _showControls || !v.isPlaying ? 1 : 0,
-                duration: const Duration(milliseconds: 250),
-                child: Container(
-                  decoration: BoxDecoration(gradient: LinearGradient(
-                    begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                    colors: [Colors.black.withAlpha(60), Colors.transparent, Colors.black.withAlpha(140)],
-                  )),
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        v.isPlaying ? _ctrl!.pause() : _ctrl!.play();
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
-                        padding: const EdgeInsets.all(14),
-                        child: Icon(v.isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 40),
-                      ),
-                    ),
+          if (_showControls || !v.isPlaying)
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  v.isPlaying ? _ctrl!.pause() : _ctrl!.play();
+                },
+                child: AnimatedOpacity(
+                  opacity: _showControls || !v.isPlaying ? 1 : 0,
+                  duration: const Duration(milliseconds: 250),
+                  child: Container(
+                    decoration: BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                    padding: const EdgeInsets.all(14),
+                    child: Icon(v.isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 40),
                   ),
+                ),
+              ),
+            ),
+          if (widget.pinchZoom && _zoomCtrl != null)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: AnimatedOpacity(
+                opacity: _showControls ? 1 : 0,
+                duration: const Duration(milliseconds: 250),
+                child: IconButton(
+                  icon: const Icon(Icons.zoom_out_map, color: Colors.white70, size: 20),
+                  tooltip: 'Reset zoom',
+                  onPressed: _resetVideoZoom,
                 ),
               ),
             ),
@@ -1330,7 +1387,6 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -1915,16 +1971,52 @@ class _PhotoViewer extends StatefulWidget {
 class _PhotoViewerState extends State<_PhotoViewer> {
   late PageController _ctrl;
   late int _current;
+  late List<TransformationController> _zoomCtrls;
+  bool _zoomed = false;
 
   @override
   void initState() {
     super.initState();
     _current = widget.allPaths.indexOf(widget.initialPath).clamp(0, widget.allPaths.length - 1);
     _ctrl = PageController(initialPage: _current);
+    _zoomCtrls = List.generate(widget.allPaths.length, (_) => TransformationController());
+    _zoomCtrls[_current].addListener(_onZoomChanged);
+  }
+
+  void _onZoomChanged() {
+    final scale = _zoomCtrls[_current].value.getMaxScaleOnAxis();
+    final zoomed = scale > 1.01;
+    if (zoomed != _zoomed) setState(() => _zoomed = zoomed);
+  }
+
+  void _attachZoomListener(int index) {
+    for (var i = 0; i < _zoomCtrls.length; i++) {
+      _zoomCtrls[i].removeListener(_onZoomChanged);
+    }
+    _zoomCtrls[index].addListener(_onZoomChanged);
+    _onZoomChanged();
+  }
+
+  void _resetZoom(int index) {
+    _zoomCtrls[index].value = Matrix4.identity();
+  }
+
+  void _toggleZoom(int index) {
+    final ctrl = _zoomCtrls[index];
+    final scale = ctrl.value.getMaxScaleOnAxis();
+    if (scale > 1.01) {
+      ctrl.value = Matrix4.identity();
+    } else {
+      ctrl.value = Matrix4.identity()..scaleByDouble(2.5);
+    }
   }
 
   @override
   void dispose() {
+    for (final c in _zoomCtrls) {
+      c.removeListener(_onZoomChanged);
+      c.dispose();
+    }
     _ctrl.dispose();
     super.dispose();
   }
@@ -1938,14 +2030,25 @@ class _PhotoViewerState extends State<_PhotoViewer> {
           PageView.builder(
             controller: _ctrl,
             itemCount: widget.allPaths.length,
-            onPageChanged: (i) => setState(() => _current = i),
-            itemBuilder: (_, i) => InteractiveViewer(
-              maxScale: 4.0,
-              child: Center(
-                child: Image.file(
-                  File(widget.allPaths[i]),
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.white24, size: 64),
+            physics: _zoomed ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
+            onPageChanged: (i) {
+              _resetZoom(_current);
+              setState(() => _current = i);
+              _attachZoomListener(i);
+            },
+            itemBuilder: (_, i) => GestureDetector(
+              onDoubleTap: () => _toggleZoom(i),
+              child: InteractiveViewer(
+                transformationController: _zoomCtrls[i],
+                minScale: 1.0,
+                maxScale: 5.0,
+                clipBehavior: Clip.hardEdge,
+                child: Center(
+                  child: Image.file(
+                    File(widget.allPaths[i]),
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.white24, size: 64),
+                  ),
                 ),
               ),
             ),
