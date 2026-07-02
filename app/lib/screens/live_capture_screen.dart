@@ -484,9 +484,15 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   }
 
   void _onCapturePressed() {
+    // RT claim photos: CAPTURE takes a still — never start a new video session.
+    if (_inClaimFlow) {
+      _onManualCaptureTap();
+      return;
+    }
+
     // Manual-photo mode mid-countdown: the bottom button completes the capture.
     // This path is reached if the user has countdown=0 AND _showCountdown is
-    // somehow active (e.g. RT claim flow). PK photo capture below does NOT
+    // somehow active (e.g. legacy overlay). PK photo capture below does NOT
     // enter the overlay state any more.
     if (_showCountdown && _captureCountdownSec <= 0) {
       _countdownTimer?.cancel();
@@ -496,24 +502,13 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
     if (_phase == CapturePhase.stopped && !_isRecording) {
       if (widget.mode == CaptureMode.pk) {
-        // PK direct-capture flow.
-        //
-        // Old flow (removed):  Tap → overlay "Position FRONT facing" + wait
-        //                       → Tap again → photo captures.
-        //
-        // New flow (this method): Tap → photo captures IMMEDIATELY.
-        // The instruction is shown as a persistent banner on the main
-        // screen (see _buildPkInstructionBanner), so the user already knows
-        // which side to capture before tapping.
         if (_captureCountdownSec > 0) {
-          // Legacy: user explicitly chose an auto-countdown in settings →
-          // honor it via the overlay flow.
           _startPhotoSequence();
         } else {
           _capturePkPhotoDirect();
         }
       } else {
-        // RT mode: video starts immediately, no photo sequence
+        // RT idle — tap starts return video recording
         _startRecording();
       }
     }
@@ -672,6 +667,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   bool _startingRecording = false;
 
   Future<void> _startRecording() async {
+    if (_inClaimFlow) return;
     if (_camera == null || !_cameraReady) return;
     if (_isCameraTransitioning) return;  // MUTEX guard
     if (_isRecording) return;            // already recording — block duplicate
