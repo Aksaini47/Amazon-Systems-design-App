@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import '../models/capture_session.dart';
 import '../services/draft_save_service.dart';
+import '../services/file_naming_service.dart';
 import '../services/local_storage_service.dart';
 import '../utils/debug_session_log.dart';
 import '../services/sync_manager.dart';
@@ -725,6 +727,127 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
   }
 }
 
+// ─── Photo edit helpers ───────────────────────────────────────────────
+
+enum _PhotoAction { replace, remove, retag }
+
+Future<_PhotoAction?> _showPhotoActionSheet(
+  BuildContext context, {
+  required String sideLabel,
+  bool showRetag = false,
+}) {
+  return showModalBottomSheet<_PhotoAction>(
+    context: context,
+    backgroundColor: const Color(0xFF161B22),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (ctx) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0x33FFFFFF),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                sideLabel.toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.camera_alt_outlined, color: Color(0xFF58A6FF)),
+            title: const Text('Replace photo', style: TextStyle(color: Colors.white)),
+            subtitle: const Text('Capture a new image', style: TextStyle(color: Color(0xFF8B949E), fontSize: 12)),
+            onTap: () => Navigator.pop(ctx, _PhotoAction.replace),
+          ),
+          if (showRetag)
+            ListTile(
+              leading: const Icon(Icons.label_outline, color: Color(0xFFFFA657)),
+              title: const Text('Re-tag photo', style: TextStyle(color: Colors.white)),
+              subtitle: const Text('Change side label', style: TextStyle(color: Color(0xFF8B949E), fontSize: 12)),
+              onTap: () => Navigator.pop(ctx, _PhotoAction.retag),
+            ),
+          ListTile(
+            leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
+            title: const Text('Remove photo', style: TextStyle(color: Colors.redAccent)),
+            onTap: () => Navigator.pop(ctx, _PhotoAction.remove),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: GestureDetector(
+              onTap: () => Navigator.pop(ctx),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Center(child: Text('Cancel', style: TextStyle(color: Colors.white70))),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Future<bool> _confirmRemovePhoto(BuildContext context, String sideLabel) async {
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      backgroundColor: const Color(0xFF161B22),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Text('Remove photo?', style: TextStyle(color: Colors.white)),
+      content: Text(
+        'Permanently remove the $sideLabel photo?\n\nThis cannot be undone.',
+        style: const TextStyle(color: Color(0xFF8B949E), fontSize: 13),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: const Text('Remove', style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
+  );
+  return ok ?? false;
+}
+
+PhotoSide? _photoSideFromOrderPath(String path) {
+  final filename = path.split(Platform.pathSeparator).last;
+  final base = filename.replaceAll(RegExp(r'\.(jpg|jpeg|png)$', caseSensitive: false), '');
+  final parts = base.split('_');
+  if (parts.length < 3) return null;
+  final sideName = parts.last;
+  for (final side in PhotoSide.values) {
+    if (side.name == sideName) return side;
+  }
+  return null;
+}
+
 // ─── Order card ────────────────────────────────────────────────────────
 
 class _OrderCard extends StatelessWidget {
@@ -1250,20 +1373,138 @@ class _OrderDetailScreen extends StatefulWidget {
 class _OrderDetailScreenState extends State<_OrderDetailScreen> {
   late Map<String, dynamic> order;
   bool _uploading = false;
+  final _storage = LocalStorageService();
 
   @override void initState() {
     super.initState();
     order = Map<String, dynamic>.from(widget.order);
   }
 
+  CaptureMode? get _mode {
+    final modeStr = order['mode'] as String?;
+    if (modeStr == 'pk') return CaptureMode.pk;
+    if (modeStr == 'rt') return CaptureMode.rt;
+    return FileNamingService.modeFromFolder(order['orderId'] as String);
+  }
+
   /// Parse the side tag (front/back/label/contents/serial) out of a photo
   /// filename of the form `{orderId}_{PK|RT}_{side}.jpg`.
   String _sideFromPath(String path) {
-    final filename = path.split(Platform.pathSeparator).last;
-    final base = filename.replaceAll(RegExp(r'\.(jpg|jpeg|png)$', caseSensitive: false), '');
-    final parts = base.split('_');
-    if (parts.length < 3) return '?';
-    return parts.last;
+    return _photoSideFromOrderPath(path)?.name ?? '?';
+  }
+
+  Future<void> _reloadOrder() async {
+    final all = await _storage.listOrders();
+    final fresh = all.firstWhere(
+      (o) => o['orderId'] == order['orderId'],
+      orElse: () => order,
+    );
+    if (!mounted) return;
+    setState(() => order = Map<String, dynamic>.from(fresh));
+  }
+
+  Future<void> _handlePhotoAction(String photoPath) async {
+    final side = _photoSideFromOrderPath(photoPath);
+    final sideLabel = side?.name ?? _sideFromPath(photoPath);
+    final action = await _showPhotoActionSheet(
+      context,
+      sideLabel: sideLabel,
+      showRetag: true,
+    );
+    if (!mounted || action == null) return;
+
+    switch (action) {
+      case _PhotoAction.retag:
+        await _showRenameSheet(photoPath);
+      case _PhotoAction.replace:
+        await _replaceOrderPhoto(photoPath, side);
+      case _PhotoAction.remove:
+        await _removeOrderPhoto(photoPath, side);
+    }
+  }
+
+  Future<void> _replaceOrderPhoto(String currentPath, PhotoSide? side) async {
+    final mode = _mode;
+    if (mode == null) return;
+    final resolvedSide = side ?? _photoSideFromOrderPath(currentPath);
+    if (resolvedSide == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Could not determine photo type'),
+        backgroundColor: Colors.black87,
+      ));
+      return;
+    }
+
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      preferredCameraDevice: CameraDevice.rear,
+      imageQuality: 92,
+    );
+    if (picked == null || !mounted) return;
+
+    final folderKey = order['orderId'] as String;
+    final bareOrderId = order['bareOrderId'] as String? ?? folderKey;
+    final ok = await _storage.updateOrderPhoto(
+      folderKey: folderKey,
+      bareOrderId: bareOrderId,
+      mode: mode,
+      side: resolvedSide,
+      newPhoto: picked,
+    );
+    if (!mounted) return;
+    if (ok) {
+      await _reloadOrder();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('${resolvedSide.name} photo replaced'),
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.black87,
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Replace failed'),
+        backgroundColor: Colors.black87,
+      ));
+    }
+  }
+
+  Future<void> _removeOrderPhoto(String currentPath, PhotoSide? side) async {
+    final mode = _mode;
+    if (mode == null) return;
+    final resolvedSide = side ?? _photoSideFromOrderPath(currentPath);
+    if (resolvedSide == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Could not determine photo type'),
+        backgroundColor: Colors.black87,
+      ));
+      return;
+    }
+
+    final ok = await _confirmRemovePhoto(context, resolvedSide.name);
+    if (!ok || !mounted) return;
+
+    final folderKey = order['orderId'] as String;
+    final bareOrderId = order['bareOrderId'] as String? ?? folderKey;
+    final removed = await _storage.updateOrderPhoto(
+      folderKey: folderKey,
+      bareOrderId: bareOrderId,
+      mode: mode,
+      side: resolvedSide,
+      remove: true,
+    );
+    if (!mounted) return;
+    if (removed) {
+      await _reloadOrder();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('${resolvedSide.name} photo removed'),
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.black87,
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Remove failed'),
+        backgroundColor: Colors.black87,
+      ));
+    }
   }
 
   /// Show a bottom sheet letting the user re-tag this photo to any of the
@@ -1336,6 +1577,21 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     await _renamePhotoFile(currentPath, newSide);
   }
 
+  Future<void> _syncMetaAfterPhotoPaths() async {
+    final mode = _mode;
+    if (mode == null) return;
+    final folderKey = order['orderId'] as String;
+    final bareOrderId = order['bareOrderId'] as String? ?? folderKey;
+    final session = await _storage.sessionFromOrderFolder(
+      folderKey: folderKey,
+      bareOrderId: bareOrderId,
+      mode: mode,
+    );
+    if (session != null) {
+      await _storage.writeMetaJson(session);
+    }
+  }
+
   /// Rename the file from `_oldSide.jpg` → `_newSide.jpg`. Swaps with any
   /// existing photo that already has the target side. Then reloads the order.
   Future<void> _renamePhotoFile(String currentPath, String newSide) async {
@@ -1365,14 +1621,8 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
         await file.rename(newPath);
       }
 
-      // Reload the order from disk so the grid + chips refresh
-      final all = await LocalStorageService().listOrders();
-      final fresh = all.firstWhere(
-        (o) => o['orderId'] == order['orderId'],
-        orElse: () => order,
-      );
-      if (!mounted) return;
-      setState(() => order = Map<String, dynamic>.from(fresh));
+      await _syncMetaAfterPhotoPaths();
+      await _reloadOrder();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Re-tagged to $newSide'),
         duration: const Duration(seconds: 2),
@@ -1469,7 +1719,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
             const _SectionLabel('Photos'),
             const SizedBox(height: 4),
             const Text(
-              'Tap to view · Long-press to retag',
+              'Tap to view · Long-press to edit',
               style: TextStyle(color: Color(0xFF8B949E), fontSize: 11),
             ),
             const SizedBox(height: 8),
@@ -1483,7 +1733,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                 final side = _sideFromPath(p);
                 return GestureDetector(
                   onTap: () => _openPhoto(context, p, photoPaths),
-                  onLongPress: () => _showRenameSheet(p),
+                  onLongPress: () => _handlePhotoAction(p),
                   child: Stack(
                     children: [
                       Positioned.fill(
@@ -1780,6 +2030,84 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
     );
   }
 
+  Future<void> _handleDraftPhotoAction(String photoPath) async {
+    final fileName = photoPath.split(Platform.pathSeparator).last;
+    final side = DraftSaveService.photoSideFromDraftName(fileName);
+    final sideLabel = side != null ? DraftSaveService.labelForSide(side) : 'photo';
+    final action = await _showPhotoActionSheet(context, sideLabel: sideLabel);
+    if (!mounted || action == null) return;
+
+    switch (action) {
+      case _PhotoAction.replace:
+        await _replaceDraftPhoto(photoPath, side);
+      case _PhotoAction.remove:
+        await _removeDraftPhoto(photoPath);
+      case _PhotoAction.retag:
+        break;
+    }
+  }
+
+  Future<void> _replaceDraftPhoto(String oldPath, PhotoSide? side) async {
+    final modeStr = session['mode'] as String;
+    final mode = modeStr == 'RT' ? CaptureMode.rt : CaptureMode.pk;
+    if (side == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Could not determine photo type — remove and recapture instead'),
+        backgroundColor: Colors.black87,
+      ));
+      return;
+    }
+
+    final newPath = await DraftSaveService.captureMissingPhoto(mode, side, _storage);
+    if (newPath == null || !mounted) return;
+
+    await _storage.deleteDraft(oldPath);
+    setState(() {
+      final photos = session['photoPaths'] as List<String>;
+      final drafts = session['draftPaths'] as List<String>;
+      final pIdx = photos.indexOf(oldPath);
+      if (pIdx >= 0) photos[pIdx] = newPath;
+      final dIdx = drafts.indexOf(oldPath);
+      if (dIdx >= 0) drafts[dIdx] = newPath;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('${DraftSaveService.labelForSide(side)} replaced'),
+      duration: const Duration(seconds: 2),
+      backgroundColor: Colors.black87,
+    ));
+  }
+
+  Future<void> _removeDraftPhoto(String path) async {
+    final fileName = path.split(Platform.pathSeparator).last;
+    final side = DraftSaveService.photoSideFromDraftName(fileName);
+    final label = side != null ? DraftSaveService.labelForSide(side) : 'this';
+    final ok = await _confirmRemovePhoto(context, label);
+    if (!ok || !mounted) return;
+
+    if (await _storage.deleteDraft(path)) {
+      setState(() {
+        (session['photoPaths'] as List<String>).remove(path);
+        (session['draftPaths'] as List<String>).remove(path);
+        session['sizeBytes'] = _sumDraftBytes(session['draftPaths'] as List<String>);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Photo removed'),
+        duration: Duration(seconds: 2),
+        backgroundColor: Colors.black87,
+      ));
+    }
+  }
+
+  int _sumDraftBytes(List<String> paths) {
+    var total = 0;
+    for (final p in paths) {
+      try {
+        total += File(p).lengthSync();
+      } catch (_) {}
+    }
+    return total;
+  }
+
   Future<void> _finishSave() async {
     if (_saving) return;
     final modeStr = session['mode'] as String;
@@ -2040,7 +2368,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
             const _SectionLabel('Photos'),
             const SizedBox(height: 4),
             const Text(
-              'Tap to view',
+              'Tap to view · Long-press to edit',
               style: TextStyle(color: Color(0xFF8B949E), fontSize: 11),
             ),
             const SizedBox(height: 8),
@@ -2051,12 +2379,37 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
               mainAxisSpacing: 8,
               crossAxisSpacing: 8,
               children: photoPaths.map((p) {
+                final fileName = p.split(Platform.pathSeparator).last;
+                final side = DraftSaveService.photoSideFromDraftName(fileName);
                 return GestureDetector(
                   onTap: () => _openPhoto(context, p, photoPaths),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.file(File(p), fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(color: Colors.black, child: const Icon(Icons.broken_image, color: Colors.white24))),
+                  onLongPress: () => _handleDraftPhotoAction(p),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.file(File(p), fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(color: Colors.black, child: const Icon(Icons.broken_image, color: Colors.white24))),
+                        ),
+                      ),
+                      if (side != null)
+                        Positioned(
+                          left: 6,
+                          bottom: 6,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withAlpha(180),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              side.name.toUpperCase(),
+                              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 );
               }).toList(),

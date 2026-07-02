@@ -37,10 +37,10 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.0.0+8:2 — Draft save + frame fix\n'
-      '• Cancel after stop keeps video in Gallery Drafts — Finish save there\n'
-      '• Frame no longer jumps when video starts; aspect strip removed\n'
-      '• Stop-recording errors logged to Firebase Crashlytics';
+      '2.0.0+8:3 — Edit photos in Gallery\n'
+      '• Drafts + Orders: long-press a photo to replace or remove it\n'
+      '• Order edits update meta.json on disk\n'
+      '• Re-tag still available on saved orders';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

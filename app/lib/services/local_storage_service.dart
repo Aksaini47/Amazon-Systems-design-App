@@ -622,19 +622,155 @@ class LocalStorageService {
     }
   }
 
-  /// Read existing meta.json. Returns null if not found OR if the file is
-  /// corrupt (logs the corruption so it surfaces in debug builds — silent
-  /// nulls hide bugs that take days to track).
-  Future<Map<String, dynamic>?> readMetaJson(String orderId) async {
-    final folder = await getOrderFolder(orderId);
-    final file = File('${folder.path}/${FileNamingService.metaFileName(orderId)}');
+  /// Read existing meta.json. [folderKey] is the on-disk folder name
+  /// (e.g. `407-xxx-RT`). [bareOrderId] is the Amazon order ID used in
+  /// filenames (e.g. `407-xxx`). When omitted, [folderKey] is used for both.
+  Future<Map<String, dynamic>?> readMetaJson(
+    String folderKey, {
+    String? bareOrderId,
+  }) async {
+    final folder = await getOrderFolder(folderKey);
+    final metaId = bareOrderId ?? folderKey;
+    final file = File('${folder.path}/${FileNamingService.metaFileName(metaId)}');
     if (!await file.exists()) return null;
     try {
       final content = await file.readAsString();
       return jsonDecode(content) as Map<String, dynamic>;
     } catch (e) {
-      debugPrint('readMetaJson: corrupt meta for $orderId — $e');
+      debugPrint('readMetaJson: corrupt meta for $folderKey — $e');
       return null;
+    }
+  }
+
+  /// Rebuild a [CaptureSession] from order folder + meta.json + filesystem.
+  Future<CaptureSession?> sessionFromOrderFolder({
+    required String folderKey,
+    required String bareOrderId,
+    required CaptureMode mode,
+  }) async {
+    final folder = await getOrderFolder(folderKey);
+    final meta = await readMetaJson(folderKey, bareOrderId: bareOrderId);
+
+    String? videoPath;
+    DateTime? videoStartedAt;
+    DateTime? videoStoppedAt;
+    int? videoDurationSeconds;
+    if (meta?['video'] is Map) {
+      final v = meta!['video'] as Map<String, dynamic>;
+      videoPath = v['file'] as String?;
+      if (v['started_at'] != null) {
+        videoStartedAt = DateTime.tryParse(v['started_at'] as String);
+      }
+      if (v['stopped_at'] != null) {
+        videoStoppedAt = DateTime.tryParse(v['stopped_at'] as String);
+      }
+      videoDurationSeconds = v['duration_seconds'] as int?;
+    }
+    if (videoPath == null || !await File(videoPath).exists()) {
+      for (final entity in folder.listSync(followLinks: false)) {
+        if (entity is File && entity.path.toLowerCase().endsWith('.mp4')) {
+          videoPath = entity.path;
+          break;
+        }
+      }
+    }
+
+    Future<String?> resolvePhoto(PhotoSide side) async {
+      final modeKey = mode.name;
+      final photosRoot = meta?['photos'];
+      if (photosRoot is Map) {
+        final modePhotos = photosRoot[modeKey] as Map<String, dynamic>?;
+        final entry = modePhotos?[side.name];
+        if (entry is Map) {
+          final path = entry['file'] as String?;
+          if (path != null && await File(path).exists()) return path;
+        }
+      }
+      final expected = '${folder.path}/${FileNamingService.photoFileName(bareOrderId, mode, side)}';
+      if (await File(expected).exists()) return expected;
+      return null;
+    }
+
+    QCVerdict? verdict;
+    final verdictStr = meta?['verdict'] as String?;
+    if (verdictStr != null) {
+      for (final v in QCVerdict.values) {
+        if (v.name == verdictStr) {
+          verdict = v;
+          break;
+        }
+      }
+    }
+
+    DateTime sessionStartedAt = DateTime.now();
+    if (meta?['session_started_at'] != null) {
+      sessionStartedAt =
+          DateTime.tryParse(meta!['session_started_at'] as String) ?? sessionStartedAt;
+    }
+
+    return CaptureSession(
+      orderId: bareOrderId,
+      awb: meta?['awb'] as String?,
+      mode: mode,
+      sessionStartedAt: sessionStartedAt,
+      videoStartedAt: videoStartedAt,
+      videoStoppedAt: videoStoppedAt,
+      videoDurationSeconds: videoDurationSeconds,
+      videoPath: videoPath,
+      frontPhotoPath: await resolvePhoto(PhotoSide.front),
+      backPhotoPath: await resolvePhoto(PhotoSide.back),
+      labelPhotoPath: await resolvePhoto(PhotoSide.label),
+      contentsPhotoPath: await resolvePhoto(PhotoSide.contents),
+      serialPhotoPath: await resolvePhoto(PhotoSide.serial),
+      verdict: verdict,
+      productTitle: meta?['product_title'] as String?,
+    );
+  }
+
+  /// Replace or remove one photo in a saved order. Rewrites meta.json.
+  Future<bool> updateOrderPhoto({
+    required String folderKey,
+    required String bareOrderId,
+    required CaptureMode mode,
+    required PhotoSide side,
+    XFile? newPhoto,
+    bool remove = false,
+  }) async {
+    try {
+      final session = await sessionFromOrderFolder(
+        folderKey: folderKey,
+        bareOrderId: bareOrderId,
+        mode: mode,
+      );
+      if (session == null) return false;
+
+      final oldPath = session.photoPathFor(side);
+      if (remove) {
+        if (oldPath != null) {
+          await _removeFromMediaStore(oldPath);
+          try {
+            await File(oldPath).delete();
+          } catch (_) {}
+        }
+        await writeMetaJson(session.withPhotoSide(side, null));
+        return true;
+      }
+
+      if (newPhoto == null) return false;
+
+      if (oldPath != null) {
+        await _removeFromMediaStore(oldPath);
+        try {
+          await File(oldPath).delete();
+        } catch (_) {}
+      }
+
+      final newPath = await savePhoto(bareOrderId, newPhoto, mode, side);
+      await writeMetaJson(session.withPhotoSide(side, newPath));
+      return true;
+    } catch (e) {
+      debugPrint('updateOrderPhoto failed: $e');
+      return false;
     }
   }
 
@@ -671,6 +807,8 @@ class LocalStorageService {
         'back': {'captured_at': DateTime.now().toIso8601String(), 'file': session.backPhotoPath},
       if (session.labelPhotoPath != null)
         'label': {'captured_at': DateTime.now().toIso8601String(), 'file': session.labelPhotoPath},
+      if (session.contentsPhotoPath != null)
+        'contents': {'captured_at': DateTime.now().toIso8601String(), 'file': session.contentsPhotoPath},
       if (session.serialPhotoPath != null)
         'serial': {'captured_at': DateTime.now().toIso8601String(), 'file': session.serialPhotoPath},
     };

@@ -58,6 +58,8 @@ class CaptureSession {
     this.productTitle,
   });
 
+  static const _unset = Object();
+
   CaptureSession copyWith({
     String? orderId,
     String? awb,
@@ -65,11 +67,11 @@ class CaptureSession {
     DateTime? videoStoppedAt,
     int? videoDurationSeconds,
     String? videoPath,
-    String? frontPhotoPath,
-    String? backPhotoPath,
-    String? labelPhotoPath,
-    String? contentsPhotoPath,
-    String? serialPhotoPath,
+    Object? frontPhotoPath = _unset,
+    Object? backPhotoPath = _unset,
+    Object? labelPhotoPath = _unset,
+    Object? contentsPhotoPath = _unset,
+    Object? serialPhotoPath = _unset,
     QCVerdict? verdict,
     String? productTitle,
   }) {
@@ -82,14 +84,54 @@ class CaptureSession {
       videoStoppedAt: videoStoppedAt ?? this.videoStoppedAt,
       videoDurationSeconds: videoDurationSeconds ?? this.videoDurationSeconds,
       videoPath: videoPath ?? this.videoPath,
-      frontPhotoPath: frontPhotoPath ?? this.frontPhotoPath,
-      backPhotoPath: backPhotoPath ?? this.backPhotoPath,
-      labelPhotoPath: labelPhotoPath ?? this.labelPhotoPath,
-      contentsPhotoPath: contentsPhotoPath ?? this.contentsPhotoPath,
-      serialPhotoPath: serialPhotoPath ?? this.serialPhotoPath,
+      frontPhotoPath: identical(frontPhotoPath, _unset)
+          ? this.frontPhotoPath
+          : frontPhotoPath as String?,
+      backPhotoPath: identical(backPhotoPath, _unset)
+          ? this.backPhotoPath
+          : backPhotoPath as String?,
+      labelPhotoPath: identical(labelPhotoPath, _unset)
+          ? this.labelPhotoPath
+          : labelPhotoPath as String?,
+      contentsPhotoPath: identical(contentsPhotoPath, _unset)
+          ? this.contentsPhotoPath
+          : contentsPhotoPath as String?,
+      serialPhotoPath: identical(serialPhotoPath, _unset)
+          ? this.serialPhotoPath
+          : serialPhotoPath as String?,
       verdict: verdict ?? this.verdict,
       productTitle: productTitle ?? this.productTitle,
     );
+  }
+
+  String? photoPathFor(PhotoSide side) {
+    switch (side) {
+      case PhotoSide.front:
+        return frontPhotoPath;
+      case PhotoSide.back:
+        return backPhotoPath;
+      case PhotoSide.label:
+        return labelPhotoPath;
+      case PhotoSide.contents:
+        return contentsPhotoPath;
+      case PhotoSide.serial:
+        return serialPhotoPath;
+    }
+  }
+
+  CaptureSession withPhotoSide(PhotoSide side, String? path) {
+    switch (side) {
+      case PhotoSide.front:
+        return copyWith(frontPhotoPath: path);
+      case PhotoSide.back:
+        return copyWith(backPhotoPath: path);
+      case PhotoSide.label:
+        return copyWith(labelPhotoPath: path);
+      case PhotoSide.contents:
+        return copyWith(contentsPhotoPath: path);
+      case PhotoSide.serial:
+        return copyWith(serialPhotoPath: path);
+    }
   }
 
   Map<String, dynamic> toJson() {
