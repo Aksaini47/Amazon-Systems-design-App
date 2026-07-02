@@ -123,12 +123,10 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   static const double _aspect11 = CameraSettingsService.aspect11;
   double _aspectRatio = _aspectFull;
   bool get _isAspectCropped =>
-      (_aspectRatio - _aspectFull).abs() > 0.001 && !_isRecording;
+      (_aspectRatio - _aspectFull).abs() > 0.001;
 
-  /// OverflowBox crop preview goes black on Android after immersive recording
-  /// UI or stopVideoRecording. Use full-bleed until camera is released for modals.
+  /// Full-bleed only during claim re-init or while a draft video is still in session.
   bool get _useFullBleedPreview =>
-      _isRecording ||
       _inClaimFlow ||
       (_session['videoPath'] != null && _camera != null);
 
@@ -889,6 +887,15 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       final tooShort = _stopwatch.elapsed.inMilliseconds < 1000;
       if (fileSize < 50000 || tooShort) {
         debugPrint('Recording too short / empty (${fileSize}B, ${_stopwatch.elapsed.inMilliseconds}ms) — discarding');
+        await CrashReporting.setCaptureContext(
+          mode: widget.mode,
+          phase: 'stop_too_short',
+        );
+        await CrashReporting.recordNonFatal(
+          Exception('recording_too_short'),
+          StackTrace.current,
+          reason: 'stop_recording_too_short size=$fileSize ms=${_stopwatch.elapsed.inMilliseconds}',
+        );
         try { await tempFile.delete(); } catch (_) {}
         // ROLLBACK PK PHOTOS — the user's front/back photos were captured
         // BEFORE recording started. If we keep them while discarding the
@@ -963,7 +970,12 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         await _disposeCameraForModal();
         _openBarcodePopup();
       }
-    } catch (e) {
+    } catch (e, st) {
+      await CrashReporting.setCaptureContext(
+        mode: widget.mode,
+        phase: 'stop_failed',
+      );
+      await CrashReporting.recordNonFatal(e, st, reason: 'stop_recording_failed');
       _setError('Failed to stop recording: $e');
     }
   }
@@ -1121,28 +1133,36 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   // ─── Barcode popup ─────────────────────────────────────────────────────
 
-  /// User cancelled save — remove draft video/photos so Gallery stays clean.
-  Future<void> _cleanupCancelledCapture() async {
-    final videoPath = _session['videoPath'] as String?;
-    var removed = 0;
-    if (videoPath != null) {
-      if (await _localStorage.deleteDraft(videoPath)) removed++;
-    }
-    for (final p in _tempPhotoPaths.values.toList()) {
-      if (await _localStorage.deleteDraft(p)) removed++;
-    }
+  /// User cancelled save flow — draft files stay on disk for Gallery → Drafts.
+  Future<void> _retainDraftOnCancel() async {
+    final hadVideo = _session['videoPath'] != null;
     _tempPhotoPaths.clear();
     _nextPhotoSide = PhotoSide.front;
-    _session.remove('videoPath');
+    _session.clear();
     _session['isDraft'] = false;
-    // #region agent log
     DebugSessionLog.log(
-      location: 'live_capture_screen.dart:_cleanupCancelledCapture',
-      message: 'cancelled capture cleaned',
+      location: 'live_capture_screen.dart:_retainDraftOnCancel',
+      message: 'save flow cancelled — draft retained',
       hypothesisId: 'H2',
-      data: {'videoPath': videoPath, 'removedCount': removed},
+      data: {'hadVideo': hadVideo},
     );
-    // #endregion
+    if (hadVideo) {
+      _logActivity('draft_retained');
+    }
+    if (mounted && hadVideo) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Row(children: [
+          Icon(Icons.drafts_outlined, color: Color(0xFFFFA657), size: 18),
+          SizedBox(width: 8),
+          Expanded(child: Text('Saved to Drafts — finish save from Gallery')),
+        ]),
+        duration: Duration(milliseconds: 3200),
+        backgroundColor: Colors.black87,
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.fromLTRB(16, 0, 16, 100),
+      ));
+    }
   }
 
   void _openBarcodePopup() async {
@@ -1155,7 +1175,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     );
 
     if (result == null || result['orderId'] == null) {
-      await _cleanupCancelledCapture();
+      await _retainDraftOnCancel();
       // User cancelled — wait 500ms for hardware to fully release, then reinit
       if (mounted) setState(() => _phase = CapturePhase.stopped);
       await Future.delayed(const Duration(milliseconds: 500));
@@ -1181,7 +1201,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     );
 
     if (verdict == null) {
-      await _cleanupCancelledCapture();
+      await _retainDraftOnCancel();
       await _disposeCameraForModal();
       if (mounted) setState(() => _phase = CapturePhase.stopped);
       await Future.delayed(const Duration(milliseconds: 500));
@@ -1201,7 +1221,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     );
 
     if (result == null || result['orderId'] == null) {
-      await _cleanupCancelledCapture();
+      await _retainDraftOnCancel();
       await _disposeCameraForModal();
       if (mounted) setState(() => _phase = CapturePhase.stopped);
       await Future.delayed(const Duration(milliseconds: 500));
@@ -1698,8 +1718,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
             // Phase badge
             _buildPhaseBadge(accent),
 
-            // Aspect ratio info — only when non-default ratio selected
-            if (_isAspectCropped) _buildAspectInfo(),
+            // Aspect ratio info — removed (frame guides only, no top strip)
 
             // REC indicator
             if (_isRecording) _buildRecIndicator(),
@@ -1809,9 +1828,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         final availW = constraints.maxWidth;
         final availH = constraints.maxHeight;
 
-        // During recording, the saved video is full 16:9 sensor — disable
-        // visual crop so what the user sees == what gets saved.
-        final effectiveCropped = _isAspectCropped && !_isRecording;
+        // Keep the same on-screen frame during recording as in photo idle.
+        final effectiveCropped = _isAspectCropped;
 
         // On-screen viewport rect (the cropped area visible to the user).
         double vpW;
@@ -1984,38 +2002,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   /// preview during recording (since video is always recorded at native
   /// 16:9 by the camera plugin — see [_buildCroppedPreview] comment).
   Future<void> _onAspectTap(String label, double ratio) async {
-    debugPrint('AspectButton: tap label=$label ratio=$ratio (current=$_aspectRatio, isRecording=$_isRecording)');
-    // During recording, frames don't apply (video is always 16:9). Show a
-    // notice instead of changing state — keeps preview === recorded output.
-    if (_isRecording) {
-      ScaffoldMessenger.of(context)
-        ..removeCurrentSnackBar()
-        ..showSnackBar(SnackBar(
-          content: const Text(
-            'Frame applies to photos only. Video records at 16:9 portrait.',
-            style: TextStyle(fontSize: 12),
-          ),
-          duration: const Duration(milliseconds: 1500),
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.only(bottom: 220, left: 40, right: 40),
-          backgroundColor: Colors.black.withAlpha(220),
-        ));
-      return;
-    }
+    if (_isRecording) return;
     final normalized = CameraSettingsService.normalizeAspect(ratio);
-    if ((_aspectRatio - normalized).abs() < 0.001) return;  // no-op tap
+    if ((_aspectRatio - normalized).abs() < 0.001) return;
     setState(() => _aspectRatio = normalized);
     await CameraSettingsService.setAspectDefault(normalized);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..removeCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        content: Text('Frame: $label', style: const TextStyle(fontSize: 12)),
-        duration: const Duration(milliseconds: 900),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(bottom: 220, left: 40, right: 40),
-        backgroundColor: Colors.black.withAlpha(220),
-      ));
   }
 
   Widget _buildRtInstructionBanner(Color accent) {
@@ -2132,29 +2123,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
           decoration: BoxDecoration(color: Colors.black.withAlpha(150), borderRadius: BorderRadius.circular(16)),
           child: Text(text, style: TextStyle(color: accent, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
-        ),
-      ),
-    );
-  }
-
-  // ─── Aspect info banner ──────────────────────────────────────────────
-
-  Widget _buildAspectInfo() {
-    final ratioLabel = _aspectRatio == _aspect11 ? '1:1' : '3:4';
-    return Positioned(
-      top: 90,
-      left: 0, right: 0,
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.black.withAlpha(140),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Text(
-            'Photos $ratioLabel  ·  Video 16:9',
-            style: const TextStyle(color: Colors.white60, fontSize: 10, fontWeight: FontWeight.w500),
-          ),
         ),
       ),
     );

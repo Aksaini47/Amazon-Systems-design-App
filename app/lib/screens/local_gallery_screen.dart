@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import '../models/capture_session.dart';
+import '../services/draft_save_service.dart';
 import '../services/local_storage_service.dart';
 import '../utils/debug_session_log.dart';
 import '../services/sync_manager.dart';
 import '../services/upload_service.dart';
 import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
+import '../widgets/rf_button.dart';
+import 'barcode_save_popup.dart';
+import 'verdict_bottom_sheet.dart';
 
 /// Local Gallery — browses videos and photos saved on this device.
 /// Two tabs: Orders (completed sessions) and Drafts (videos saved on stop
@@ -665,7 +669,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
 
   Widget _buildDraftsList() {
     if (_draftSessions.isEmpty) {
-      return _buildEmpty('No drafts', 'Stopped recordings before a full save will appear here.');
+      return _buildEmpty('No drafts', 'Cancel after stop keeps the video here — tap Finish save to add Order ID.');
     }
     return RefreshIndicator(
       onRefresh: _reload,
@@ -1759,6 +1763,8 @@ class _DraftDetailScreen extends StatefulWidget {
 
 class _DraftDetailScreenState extends State<_DraftDetailScreen> {
   late Map<String, dynamic> session;
+  bool _saving = false;
+  final _storage = LocalStorageService();
 
   @override
   void initState() {
@@ -1772,6 +1778,109 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
       barrierColor: Colors.black,
       builder: (_) => _PhotoViewer(initialPath: path, allPaths: all),
     );
+  }
+
+  Future<void> _finishSave() async {
+    if (_saving) return;
+    final modeStr = session['mode'] as String;
+    final mode = modeStr == 'RT' ? CaptureMode.rt : CaptureMode.pk;
+    final videoPath = session['videoPath'] as String?;
+    if (videoPath == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('This draft has no video to save'),
+        backgroundColor: Colors.black87,
+      ));
+      return;
+    }
+
+    QCVerdict? verdict;
+    if (mode == CaptureMode.rt) {
+      verdict = await showModalBottomSheet<QCVerdict>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => const VerdictBottomSheet(),
+      );
+      if (verdict == null || !mounted) return;
+    }
+
+    final barcode = await Navigator.of(context).push<Map<String, String?>>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => BarcodeSavePopup(mode: mode),
+      ),
+    );
+    if (barcode == null || barcode['orderId'] == null || !mounted) return;
+
+    var photos = DraftSaveService.mapDraftPhotos(
+      (session['photoPaths'] as List).cast<String>(),
+    );
+
+    var missing = DraftSaveService.missingRequiredPhotos(
+      mode,
+      photos: photos,
+      verdict: verdict,
+    );
+
+    while (missing.isNotEmpty && mounted) {
+      final side = missing.first;
+      final capture = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: const Color(0xFF161B22),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Add photo', style: TextStyle(color: Colors.white)),
+          content: Text(
+            'Capture ${DraftSaveService.labelForSide(side)} for this ${modeStr} shipment.',
+            style: const TextStyle(color: Color(0xFF8B949E), fontSize: 13),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Capture')),
+          ],
+        ),
+      );
+      if (capture != true || !mounted) return;
+      final path = await DraftSaveService.captureMissingPhoto(mode, side, _storage);
+      if (path == null) return;
+      photos = {...photos, side: path};
+      (session['photoPaths'] as List<String>).add(path);
+      (session['draftPaths'] as List<String>).add(path);
+      missing = DraftSaveService.missingRequiredPhotos(
+        mode,
+        photos: photos,
+        verdict: verdict,
+      );
+    }
+
+    setState(() => _saving = true);
+    try {
+      await DraftSaveService.promoteDraftSession(
+        orderId: barcode['orderId']!,
+        awb: barcode['awb'],
+        mode: mode,
+        videoPath: videoPath,
+        photosBySide: photos,
+        verdict: verdict,
+        storage: _storage,
+      );
+      if (!mounted) return;
+      Navigator.pop(context, true);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Saved order ${barcode['orderId']}'),
+        backgroundColor: Colors.black87,
+      ));
+      // ignore: unawaited_futures
+      SyncManager.syncNow();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Save failed: $e'),
+        backgroundColor: Colors.black87,
+      ));
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   Future<void> _deleteAll() async {
@@ -1876,6 +1985,13 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
               ]),
             ),
           ],
+          const SizedBox(height: 16),
+
+          RfButton.primary(
+            label: _saving ? 'Saving...' : 'Finish save',
+            icon: Icons.save_alt_rounded,
+            onPressed: (_saving || videoPath == null) ? null : _finishSave,
+          ),
           const SizedBox(height: 16),
 
           // ── Video player ──────────────────────────────────────────────

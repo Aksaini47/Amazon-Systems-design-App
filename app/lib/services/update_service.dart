@@ -37,10 +37,10 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.0.0+8:1 — RT camera reset + activity log\n'
-      '• Fix: RT camera ready for next video after save (no stuck 0/instruction)\n'
-      '• RT: return images always required for QC OK shipments\n'
-      '• New: day-wise activity log (60 days) in Settings';
+      '2.0.0+8:2 — Draft save + frame fix\n'
+      '• Cancel after stop keeps video in Gallery Drafts — Finish save there\n'
+      '• Frame no longer jumps when video starts; aspect strip removed\n'
+      '• Stop-recording errors logged to Firebase Crashlytics';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
