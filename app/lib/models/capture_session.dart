@@ -168,8 +168,12 @@ class CaptureSession {
     if (mode == CaptureMode.pk) {
       return frontPhotoPath != null && backPhotoPath != null;
     }
-    // RT: all verdicts require label + contents + front + back (serial optional).
     if (verdict == null) return true;
+    // RT QC OK: front + back only (serial optional).
+    if (verdict == QCVerdict.ok) {
+      return frontPhotoPath != null && backPhotoPath != null;
+    }
+    // RT damaged / different / etc.: label + contents + front + back (serial optional).
     return labelPhotoPath != null
         && contentsPhotoPath != null
         && frontPhotoPath != null

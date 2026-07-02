@@ -37,9 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.0.0+8:4 - Pinch zoom in gallery photos and video\n'
-      '• Pinch to zoom photos in fullscreen viewer\n'
-      '• Pinch to zoom inline video in order and draft detail';
+      '2.0.0+8:5 - QC OK skips label and contents photos';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

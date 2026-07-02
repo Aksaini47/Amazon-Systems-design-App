@@ -1191,7 +1191,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   // ─── RT post-video: verdict → order-ID scan → claim photos ───────────
 
   /// RT only. User picks QC verdict, scans return label / order ID,
-  /// then captures claim photos (all verdicts when mandatory setting is on).
+  /// then captures claim photos (QC OK: front/back; others: full set).
   Future<void> _openRtPostVideoFlow() async {
     final verdict = await showModalBottomSheet<QCVerdict>(
       context: context,
@@ -1269,10 +1269,13 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
     _inClaimFlow = true;
     try {
-      // 5-step sequence. (side, instruction)
-      const sequence = <(PhotoSide, String)>[
-        (PhotoSide.label, 'Position RETURN LABEL in frame'),
-        (PhotoSide.contents, 'Position package CONTENTS in frame'),
+      final verdict = _session['verdict'] as QCVerdict?;
+      // QC OK: front, back, serial (optional). Others: full 5-step sequence.
+      final sequence = <(PhotoSide, String)>[
+        if (verdict != QCVerdict.ok) ...[
+          (PhotoSide.label, 'Position RETURN LABEL in frame'),
+          (PhotoSide.contents, 'Position package CONTENTS in frame'),
+        ],
         (PhotoSide.front, 'Position product FRONT facing up'),
         (PhotoSide.back, 'Position product BACK facing up'),
         (PhotoSide.serial, 'Capture SERIAL / FPC closeup (optional)'),

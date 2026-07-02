@@ -43,6 +43,14 @@ class DraftSaveService {
       ];
     }
     if (verdict == null) return const [];
+    // RT QC OK: front + back only (serial optional).
+    if (verdict == QCVerdict.ok) {
+      return [
+        if (!photos.containsKey(PhotoSide.front)) PhotoSide.front,
+        if (!photos.containsKey(PhotoSide.back)) PhotoSide.back,
+      ];
+    }
+    // RT damaged / different / etc.: label + contents + front + back.
     return [
       if (!photos.containsKey(PhotoSide.label)) PhotoSide.label,
       if (!photos.containsKey(PhotoSide.contents)) PhotoSide.contents,

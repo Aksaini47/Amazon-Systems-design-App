@@ -249,8 +249,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 10),
               _buildSettingToggle(
                 icon: Icons.photo_camera_back_rounded,
-                label: 'Return images for all QC',
-                subtitle: 'Always required: label + contents + front/back for every RT shipment',
+                label: 'Return images by QC',
+                subtitle: 'QC OK: front/back only. Damaged/different: label + contents + front/back',
                 value: true,
                 onChanged: null,
               ),
