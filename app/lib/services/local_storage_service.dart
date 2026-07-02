@@ -9,6 +9,7 @@ import '../utils/debug_session_log.dart';
 import 'file_naming_service.dart';
 import 'camera_settings_service.dart';
 import 'sync_queue_service.dart';
+import 'activity_log_service.dart';
 import '../utils/image_processing.dart';
 
 /// Core local storage — handles all file I/O for orders.
@@ -600,6 +601,14 @@ class LocalStorageService {
     try {
       await file.writeAsString(encoder.convert(merged), flush: true);
       debugPrint('Meta saved: ${file.path}');
+      await ActivityLogService.log(
+        event: 'meta_written',
+        mode: session.mode,
+        orderId: session.orderId,
+        awb: session.awb,
+        qc: session.verdict?.name,
+        extra: {'folder': folder.path},
+      );
     } catch (e) {
       debugPrint('Failed to write meta.json: $e');
       // Try cache fallback

@@ -15,6 +15,7 @@ import '../services/ocr_service.dart';
 import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
 import '../widgets/rf_button.dart';
+import '../services/activity_log_service.dart';
 import '../utils/debug_session_log.dart';
 import '../utils/volume_button_service.dart';
 
@@ -434,9 +435,17 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
 
   void _onSave() {
     if (!_isValid) return;
+    final orderId = _orderIdController.text.trim();
+    final awb = _awbController.text.trim();
+    ActivityLogService.log(
+      event: 'barcode_saved',
+      mode: widget.mode,
+      orderId: orderId,
+      awb: awb.isEmpty ? null : awb,
+    );
     Navigator.pop(context, {
-      'orderId': _orderIdController.text.trim(),
-      'awb': _awbController.text.trim().isEmpty ? null : _awbController.text.trim(),
+      'orderId': orderId,
+      'awb': awb.isEmpty ? null : awb,
     });
   }
 

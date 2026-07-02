@@ -136,15 +136,14 @@ class CameraSettingsService {
     await prefs.setBool('auto_label_save', val);
   }
 
-  // --- RT: require return/claim photos for ALL QC verdicts (incl. OK) ---
+  // --- RT: require return/claim photos for ALL QC verdicts (always on) ---
   static Future<bool> getMandatoryReturnImages() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('mandatory_return_images') ?? true;
+    return true;
   }
 
   static Future<void> setMandatoryReturnImages(bool val) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('mandatory_return_images', val);
+    await prefs.setBool('mandatory_return_images', true);
   }
 
   // --- RT claim photos: use Photo Countdown setting (was always-on pre v1.0.3+4) ---

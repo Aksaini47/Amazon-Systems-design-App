@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../screens/activity_log_screen.dart';
 import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
 import '../services/api_service.dart';
@@ -35,7 +36,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _autoLabelScan = false;
   bool _autoLabelSave = true;
   bool _claimPhotoCountdown = false;
-  bool _mandatoryReturnImages = true;
   bool _aspectPickerEnabled = false;
   // New: capture countdown (0=manual, 3/5/10=seconds)
   int _captureCountdown = 3;
@@ -71,7 +71,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _autoLabelScan = await CameraSettingsService.getAutoLabelScan();
     _autoLabelSave = await CameraSettingsService.getAutoLabelSave();
     _claimPhotoCountdown = await CameraSettingsService.getClaimPhotoCountdown();
-    _mandatoryReturnImages = await CameraSettingsService.getMandatoryReturnImages();
     _aspectPickerEnabled = await CameraSettingsService.getAspectEnabled();
     _selectedStoragePath = await CameraSettingsService.getStoragePath();
     _customStoragePath = _selectedStoragePath;
@@ -251,12 +250,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingToggle(
                 icon: Icons.photo_camera_back_rounded,
                 label: 'Return images for all QC',
-                subtitle: 'Require label + contents + front/back photos even when QC is OK',
-                value: _mandatoryReturnImages,
-                onChanged: (v) {
-                  setState(() => _mandatoryReturnImages = v);
-                  CameraSettingsService.setMandatoryReturnImages(v);
-                },
+                subtitle: 'Always required: label + contents + front/back for every RT shipment',
+                value: true,
+                onChanged: null,
               ),
               const SizedBox(height: 10),
               _buildSettingToggle(
@@ -347,6 +343,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       const Icon(Icons.chevron_right, color: Color(0xFF8B949E), size: 22),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const ActivityLogScreen()),
+                  );
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: RfGlassContainer(
+                  blurEnabled: false,
+                  padding: const EdgeInsets.all(14),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.article_outlined, color: Color(0xFF8B949E), size: 22),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Activity log',
+                              style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                            ),
+                            SizedBox(height: 3),
+                            Text(
+                              'Last 60 days — shipment events by day',
+                              style: TextStyle(color: Color(0xFF8B949E), fontSize: 11),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(Icons.chevron_right, color: Color(0xFF8B949E), size: 22),
                     ],
                   ),
                 ),
@@ -644,7 +676,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required String label,
     required String subtitle,
     required bool value,
-    required ValueChanged<bool> onChanged,
+    ValueChanged<bool>? onChanged,
   }) {
     return RfGlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),

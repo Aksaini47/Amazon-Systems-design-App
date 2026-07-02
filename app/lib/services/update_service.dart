@@ -37,11 +37,10 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.0.0+6:2 — OTA fix + RT camera blank screen\n'
-      '• Fix: Check for updates on Shorebird release builds\n'
-      '• Fix: RT mode camera no longer blank after video save\n'
-      '• RT: return images required for ALL QC verdicts\n'
-      '• Settings revamp + camera black chrome';
+      '2.0.0+8:1 — RT camera reset + activity log\n'
+      '• Fix: RT camera ready for next video after save (no stuck 0/instruction)\n'
+      '• RT: return images always required for QC OK shipments\n'
+      '• New: day-wise activity log (60 days) in Settings';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

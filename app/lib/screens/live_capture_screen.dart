@@ -20,6 +20,7 @@ import '../services/sync_manager.dart';
 import '../services/dnd_service.dart';
 import '../services/file_naming_service.dart';
 import '../services/crash_reporting.dart';
+import '../services/activity_log_service.dart';
 import '../utils/volume_button_service.dart';
 import '../utils/image_processing.dart';
 import '../widgets/rf_button.dart';
@@ -134,7 +135,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   // Capture countdown duration from settings. 0 = manual capture mode.
   int _captureCountdownSec = 3;
   bool _claimCountdownEnabled = true;
-  bool _mandatoryReturnImages = true;
   String? _lastLoggedBuildBranch;
 
   // ─── RT claim-photo flow state ────────────────────────────────────────
@@ -171,7 +171,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _timestampOnPhotos = await CameraSettingsService.getTimestampImage();
     _captureCountdownSec = await CameraSettingsService.getCaptureCountdown();
     _claimCountdownEnabled = await CameraSettingsService.getClaimPhotoCountdown();
-    _mandatoryReturnImages = await CameraSettingsService.getMandatoryReturnImages();
     _aspectRatio = await CameraSettingsService.getAspectDefault();
     if (mounted) setState(() {});
     _initCamera();
@@ -460,6 +459,32 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     setState(() { _phase = CapturePhase.stopped; });
   }
 
+  void _logActivity(String event, {Map<String, String>? extra}) {
+    final verdict = _session['verdict'] as QCVerdict?;
+    ActivityLogService.log(
+      event: event,
+      mode: widget.mode,
+      orderId: _session['orderId'] as String?,
+      awb: _session['awb'] as String?,
+      qc: verdict?.name,
+      extra: extra,
+    );
+  }
+
+  /// Clears countdown / claim-flow UI so the next RT video starts on a clean camera.
+  void _clearCaptureOverlayState() {
+    _countdownTimer?.cancel();
+    _skipCurrentClaimPhoto = false;
+    _inClaimFlow = false;
+    _nextPhotoSide = PhotoSide.front;
+    if (_manualCaptureCompleter != null && !_manualCaptureCompleter!.isCompleted) {
+      _manualCaptureCompleter!.complete(false);
+    }
+    _manualCaptureCompleter = null;
+    _showCountdown = false;
+    _countdownSeconds = 0;
+  }
+
   void _onCapturePressed() {
     // Manual-photo mode mid-countdown: the bottom button completes the capture.
     // This path is reached if the user has countdown=0 AND _showCountdown is
@@ -664,6 +689,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       if (!shouldProceed || !mounted) return;
 
       _session['videoStartedAt'] = DateTime.now();
+      _logActivity('video_start');
       _stopwatch.reset();
       _stopwatch.start();
       _timerTick?.cancel();
@@ -850,6 +876,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       final xfile = await _camera!.stopVideoRecording();
       _session['videoStoppedAt'] = DateTime.now();
       _session['videoDurationSeconds'] = _stopwatch.elapsed.inSeconds;
+      _logActivity('video_stop', extra: {
+        'duration_sec': '${_stopwatch.elapsed.inSeconds}',
+      });
 
       // Validate the recording before saving as a draft — a tap-START + immediate-tap-STOP
       // produces a 0-byte file that clutters drafts/ and breaks save later. Treat as failed
@@ -1161,6 +1190,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     }
 
     _session['verdict'] = verdict;
+    _logActivity('qc_verdict', extra: {'qc': verdict.name});
 
     await _disposeCameraForModal();
     final result = await Navigator.of(context).push<Map<String, String?>>(
@@ -1182,12 +1212,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _session['orderId'] = result['orderId'];
     _session['awb'] = result['awb'];
 
-    final needsClaimPhotos =
-        _mandatoryReturnImages || verdict != QCVerdict.ok;
-    if (needsClaimPhotos) {
-      await _runClaimPhotoSequence();
-      if (!mounted) return;
-    }
+    await _runClaimPhotoSequence();
+    if (!mounted) return;
     _saveSession();
   }
 
@@ -1237,7 +1263,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         await _captureClaimPhoto(side);
       }
     } finally {
-      _inClaimFlow = false;
+      if (mounted) {
+        setState(() => _clearCaptureOverlayState());
+      } else {
+        _clearCaptureOverlayState();
+      }
     }
   }
 
@@ -1302,6 +1332,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       final xFile = await _camera!.takePicture();
       final savedPath = await _processAndSaveTempPhoto(xFile);
       _tempPhotoPaths[side] = savedPath;
+      _logActivity('photo_saved', extra: {'type': side.name});
       debugPrint('Claim photo captured: ${side.name} → $savedPath');
     } catch (e) {
       debugPrint('Claim photo capture failed for ${side.name}: $e');
@@ -1459,11 +1490,14 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         // Success: silent — Gallery shows the "Uploaded" badge.
       });
 
+      _logActivity('shipment_saved', extra: {'path': savedVideoPath});
+
       if (mounted) {
         _showSavedToast(orderId);
         await _resetForNextCapture();
       }
     } catch (e, st) {
+      _logActivity('shipment_save_failed', extra: {'error': '$e'});
       debugPrint('Save failed: $e');
       debugPrint('Stack trace: $st');
       await CrashReporting.setCaptureContext(
@@ -1512,19 +1546,18 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _timerTick?.cancel();
     _countdownTimer?.cancel();
     _stopwatch.reset();
+    _clearCaptureOverlayState();
     setState(() {
       _session.clear();
       _tempPhotoPaths.clear();
       _isRecording = false;
       _isSaving = false;
-      _showCountdown = false;
-      _countdownSeconds = 5;
-      _nextPhotoSide = PhotoSide.front;
       _errorMessage = null;
       _camera = null;
       _cameraReady = false;
       _phase = CapturePhase.loading;
     });
+    _logActivity('capture_reset');
     await _initCamera();
   }
 
@@ -1985,6 +2018,37 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       ));
   }
 
+  Widget _buildRtInstructionBanner(Color accent) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: RfGlassPill(
+        tint: accent.withValues(alpha: 0.45),
+        borderColor: accent.withValues(alpha: 0.55),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        radius: 14,
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.videocam_rounded, color: Colors.white, size: 22),
+            SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                'Tap to record return video',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                  shadows: [Shadow(color: Color(0x88000000), blurRadius: 2, offset: Offset(0, 1))],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ─── PK instruction banner ────────────────────────────────────────────
   //
   // Sits ABOVE the capture button in the bottom controls. Shows the user
@@ -2169,7 +2233,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         // manual capture, so the UI is uniform across modes.
         Center(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            if (_captureCountdownSec > 0)
+            if (_countdownSeconds > 0)
               Text(
                 '$_countdownSeconds',
                 style: TextStyle(
@@ -2277,8 +2341,18 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           if (!_isRecording
               && widget.mode == CaptureMode.pk
               && _captureCountdownSec <= 0
-              && _phase == CapturePhase.stopped)
+              && _phase == CapturePhase.stopped
+              && !_showCountdown
+              && !_inClaimFlow)
             _buildPkInstructionBanner(accent),
+
+          if (!_isRecording
+              && widget.mode == CaptureMode.rt
+              && _phase == CapturePhase.stopped
+              && _session['videoPath'] == null
+              && !_showCountdown
+              && !_inClaimFlow)
+            _buildRtInstructionBanner(accent),
 
           // Mode instructions during recording
           if (_isRecording)
