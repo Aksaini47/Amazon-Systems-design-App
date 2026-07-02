@@ -1210,7 +1210,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
     if (scale > 1.01) {
       ctrl.value = Matrix4.identity();
     } else {
-      ctrl.value = Matrix4.identity()..scaleByDouble(2.5);
+      ctrl.value = Matrix4.diagonal3Values(2.5, 2.5, 1.0);
     }
   }
 
@@ -2007,7 +2007,7 @@ class _PhotoViewerState extends State<_PhotoViewer> {
     if (scale > 1.01) {
       ctrl.value = Matrix4.identity();
     } else {
-      ctrl.value = Matrix4.identity()..scaleByDouble(2.5);
+      ctrl.value = Matrix4.diagonal3Values(2.5, 2.5, 1.0);
     }
   }
 
