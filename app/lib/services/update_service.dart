@@ -37,10 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.0.0+8:3 — Edit photos in Gallery\n'
-      '• Drafts + Orders: long-press a photo to replace or remove it\n'
-      '• Order edits update meta.json on disk\n'
-      '• Re-tag still available on saved orders';
+      '2.0.0+8:3 - Edit/replace/remove photos in Drafts and Orders';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
