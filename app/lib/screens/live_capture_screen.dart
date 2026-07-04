@@ -14,9 +14,6 @@ import '../theme/rf_glass.dart';
 import '../services/camera_settings_service.dart';
 import '../services/local_storage_service.dart';
 import '../utils/debug_session_log.dart';
-import '../services/upload_service.dart';
-import '../services/sync_queue_service.dart';
-import '../services/sync_manager.dart';
 import '../services/dnd_service.dart';
 import '../services/file_naming_service.dart';
 import '../services/crash_reporting.dart';
@@ -1457,58 +1454,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
       await _localStorage.writeMetaJson(session);
 
-      // Enqueue to persistent queue FIRST — this is the source of truth.
-      // If the immediate upload below succeeds, SyncManager / UploadService
-      // will remove it on success. If it fails (offline, network blip, app
-      // killed mid-upload), the queue retries via SyncManager every 2 min
-      // and on next app open.
-      final orderFolder = await _localStorage.getOrderFolder(orderId, mode: widget.mode);
-      final storageKey = orderFolder.path.split(Platform.pathSeparator).last;
-      await SyncQueueService.enqueue(storageKey, orderFolder.path);
-
-      // Kick off immediate upload — fire-and-forget. Does not block the save
-      // flow; user goes straight back to the camera. Result surfaces via
-      // a second toast (offline / failed). Success is silent.
-      // ignore: unawaited_futures
-      UploadService.uploadSession(session: session, orderFolderPath: orderFolder.path)
-          .then((r) async {
-        if (r.status == UploadStatus.success) {
-          await SyncQueueService.remove(storageKey);
-        }
-        // Trigger a SyncManager status emit so banners refresh
-        // ignore: unawaited_futures
-        SyncManager.syncNow();
-        if (!mounted) return;
-        if (r.status == UploadStatus.offline) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: const Row(children: [
-              Icon(Icons.wifi_off, color: Color(0xFFFF7B72), size: 18),
-              SizedBox(width: 8),
-              Expanded(child: Text('Backend offline — saved locally, upload pending')),
-            ]),
-            duration: const Duration(milliseconds: 2200),
-            backgroundColor: Colors.black87,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ));
-        } else if (r.status == UploadStatus.failed) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Row(children: [
-              const Icon(Icons.error_outline, color: Color(0xFFFF7B72), size: 18),
-              const SizedBox(width: 8),
-              Expanded(child: Text('Upload failed — retry from Gallery. ${r.error ?? ''}', maxLines: 2, overflow: TextOverflow.ellipsis)),
-            ]),
-            duration: const Duration(milliseconds: 3000),
-            backgroundColor: Colors.black87,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ));
-        }
-        // Success: silent — Gallery shows the "Uploaded" badge.
-      });
-
       _logActivity('shipment_saved', extra: {'path': savedVideoPath});
 
       if (mounted) {
@@ -1585,6 +1530,13 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   String get _elapsedLabel {
     final s = _stopwatch.elapsed.inSeconds;
     return '${(s ~/ 60).toString().padLeft(2, '0')}:${(s % 60).toString().padLeft(2, '0')}';
+  }
+
+  String get _selectedAspectLabel {
+    if (_isRecording) return 'Recording — frame locked';
+    if ((_aspectRatio - _aspect11).abs() < 0.001) return '1:1 square';
+    if ((_aspectRatio - _aspect34).abs() < 0.001) return '3:4 portrait';
+    return '16:9 fullscreen';
   }
 
   String get _countdownInstruction {
@@ -1686,12 +1638,14 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
             // Camera preview — only shown when active
             if (showPreview)
               Positioned.fill(
-                child: GestureDetector(
-                  onScaleUpdate: _handleScaleUpdate,
-                  onTapUp: _onTapFocus,
-                  child: _useFullBleedPreview
-                      ? _buildRecordingPreview()
-                      : _buildCroppedPreview(),
+                child: RepaintBoundary(
+                  child: GestureDetector(
+                    onScaleUpdate: _handleScaleUpdate,
+                    onTapUp: _onTapFocus,
+                    child: _useFullBleedPreview
+                        ? _buildRecordingPreview()
+                        : _buildCroppedPreview(),
+                  ),
                 ),
               ),
 
@@ -1902,9 +1856,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   Widget _buildFrameGuides(double vpW, double vpH, double availW, double availH) {
     final left = (availW - vpW) / 2;
     final top = (availH - vpH) / 2;
-    const len = 22.0;
-    const stroke = 2.0;
-    const color = Colors.white70;
+    const len = 26.0;
+    const stroke = 2.5;
+    const color = Colors.white;
 
     Widget corner(Alignment align) {
       return Align(
@@ -1926,6 +1880,23 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       height: vpH,
       child: Stack(
         children: [
+          if (!_isRecording)
+            Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                margin: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.white24),
+                ),
+                child: Text(
+                  _selectedAspectLabel,
+                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
           corner(Alignment.topLeft),
           corner(Alignment.topRight),
           corner(Alignment.bottomLeft),
@@ -2199,44 +2170,49 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         // feedback — the bottom button now handles both PK and RT claim
         // manual capture, so the UI is uniform across modes.
         Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            if (_countdownSeconds > 0)
-              Text(
-                '$_countdownSeconds',
-                style: TextStyle(
-                  fontSize: 140,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [Shadow(color: accent, blurRadius: 40)],
-                ),
-              ),
-            const SizedBox(height: 20),
-            Text(
-              instruction,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: instructionColor,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                shadows: const [
-                  Shadow(color: Colors.black87, blurRadius: 12),
-                  Shadow(color: Colors.black54, blurRadius: 4),
-                ],
-              ),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.white24),
             ),
-            if (_captureCountdownSec <= 0 || _inClaimFlow) ...[
-              const SizedBox(height: 8),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              if (_countdownSeconds > 0)
+                Text(
+                  '$_countdownSeconds',
+                  style: TextStyle(
+                    fontSize: 120,
+                    fontWeight: FontWeight.bold,
+                    color: RfColors.textPrimary,
+                    height: 1,
+                  ),
+                ),
+              if (_countdownSeconds > 0) const SizedBox(height: 12),
               Text(
-                'Tap CAPTURE below',
+                instruction,
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: RfColors.textSecondary,
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
-                  shadows: const [Shadow(color: Colors.black87, blurRadius: 8)],
+                  color: instructionColor.withValues(alpha: 0.95),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  height: 1.25,
                 ),
               ),
-            ],
-          ]),
+              if (_captureCountdownSec <= 0 || _inClaimFlow) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Tap CAPTURE below',
+                  style: TextStyle(
+                    color: RfColors.textSecondary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ]),
+          ),
         ),
 
         // (The RT claim Skip button is rendered inside _buildBottomControls,
@@ -2392,18 +2368,19 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
                   Container(width: 1, height: 28, color: Colors.white24),
                   const SizedBox(width: 8),
 
-                  // Aspect ratio chips — dimmed during recording (video can
-                  // only be saved at native 16:9; the toggle still surfaces
-                  // a notice but doesn't change the preview).
+                  // Aspect ratio chips — disabled during recording (frame locked).
                   Opacity(
-                    opacity: _isRecording ? 0.45 : 1.0,
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      RfChip(label: '1:1', active: !_isRecording && (_aspectRatio - _aspect11).abs() < 0.001, onPressed: () => _onAspectTap('1:1', _aspect11)),
-                      const SizedBox(width: 4),
-                      RfChip(label: '3:4', active: !_isRecording && (_aspectRatio - _aspect34).abs() < 0.001, onPressed: () => _onAspectTap('3:4', _aspect34)),
-                      const SizedBox(width: 4),
-                      RfChip(label: '16:9', active: _isRecording || (_aspectRatio - _aspectFull).abs() < 0.001, onPressed: () => _onAspectTap('16:9', _aspectFull)),
-                    ]),
+                    opacity: _isRecording ? 0.35 : 1.0,
+                    child: IgnorePointer(
+                      ignoring: _isRecording,
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        RfChip(label: '1:1', active: (_aspectRatio - _aspect11).abs() < 0.001, onPressed: () => _onAspectTap('1:1', _aspect11)),
+                        const SizedBox(width: 4),
+                        RfChip(label: '3:4', active: (_aspectRatio - _aspect34).abs() < 0.001, onPressed: () => _onAspectTap('3:4', _aspect34)),
+                        const SizedBox(width: 4),
+                        RfChip(label: '16:9', active: (_aspectRatio - _aspectFull).abs() < 0.001, onPressed: () => _onAspectTap('16:9', _aspectFull)),
+                      ]),
+                    ),
                   ),
 
                   const SizedBox(width: 8),
@@ -2419,6 +2396,15 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
                   ),
                 ],
               ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Frame · $_selectedAspectLabel',
+            style: TextStyle(
+              color: _isRecording ? RfColors.textSecondary : RfColors.textPrimary,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ]);

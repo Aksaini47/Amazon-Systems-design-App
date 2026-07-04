@@ -7,8 +7,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../screens/activity_log_screen.dart';
 import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
-import '../services/api_service.dart';
-import '../services/discovery_service.dart';
 import '../services/camera_settings_service.dart';
 import '../services/local_storage_service.dart';
 import '../services/update_service.dart';
@@ -21,14 +19,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final _ctrl = TextEditingController();
-  bool _testing = false;
-  bool _discovering = false;
-  String? _pingResult;
-
   // Camera settings
   ResolutionPreset _resolution = ResolutionPreset.veryHigh;
-  int _fps = 30;
+  int _fps = 60;
   bool _sound = true;
   bool _timestampImage = false;
   // Default mic state when entering camera
@@ -41,8 +34,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _captureCountdown = 3;
   // New: aspect ratio default (9/16 = 16:9 portrait, 3/4 = 3:4, 1.0 = 1:1)
   double _aspectDefault = 9 / 16;
-  // Backend info (populated when /api/config responds)
-  Map<String, dynamic>? _backendInfo;
   // Storage path settings
   String _selectedStoragePath = CameraSettingsService.storageDefault;
   String _customStoragePath = '';
@@ -50,14 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    ApiService.getBaseUrl().then((url) => _ctrl.text = url);
     _loadCameraSettings();
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
   }
 
   Future<void> _loadCameraSettings() async {
@@ -75,35 +59,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _selectedStoragePath = await CameraSettingsService.getStoragePath();
     _customStoragePath = _selectedStoragePath;
     if (mounted) setState(() {});
-  }
-
-  Future<void> _save() async {
-    await ApiService.setBaseUrl(_ctrl.text.trim());
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Backend URL saved')));
-  }
-
-  Future<void> _ping() async {
-    setState(() { _testing = true; _pingResult = null; _backendInfo = null; });
-    final ok = await ApiService.ping();
-    final info = ok ? await ApiService.getConfig() : null;
-    setState(() {
-      _testing = false;
-      _pingResult = ok ? 'Connected!' : 'Cannot reach backend. Check URL and ensure server is running.';
-      _backendInfo = info;
-    });
-  }
-
-  Future<void> _autoDiscover() async {
-    setState(() { _discovering = true; _pingResult = null; });
-    final url = await DiscoveryService.discover();
-    if (!mounted) return;
-    if (url != null) {
-      await ApiService.setBaseUrl(url);
-      _ctrl.text = url;
-      setState(() { _discovering = false; _pingResult = 'Found backend at $url'; });
-    } else {
-      setState(() { _discovering = false; _pingResult = 'No backend found on WiFi.'; });
-    }
   }
 
   Future<void> _restoreDefaults() async {
@@ -181,7 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingToggle(
                 icon: Icons.aspect_ratio_rounded,
                 label: 'Aspect ratio picker',
-                subtitle: 'Show ratio toggle on FBA / legacy record screen',
+                subtitle: 'Show frame ratio chips on the capture screen',
                 value: _aspectPickerEnabled,
                 onChanged: (v) {
                   setState(() => _aspectPickerEnabled = v);
@@ -383,46 +338,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
-            ]),
-
-            const SizedBox(height: 24),
-
-            // ══ BACKEND ══════════════════════════════════════════════════
-            _buildSectionHeader(Icons.cloud_outlined, 'Backend'),
-            const SizedBox(height: 10),
-            _buildSectionCard(children: [
-              _buildTextField(
-                controller: _ctrl,
-                hint: 'http://192.168.1.X:3001',
-                icon: Icons.link_rounded,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(child: _buildPrimaryButton('Save URL', _save)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _testing
-                        ? _buildSecondaryButton(null, _buildSpinner())
-                        : _buildSecondaryButton(_ping, const Text('Test', style: TextStyle(color: Colors.white, fontSize: 14))),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              _buildTertiaryButton(
-                iconData: Icons.wifi_find_outlined,
-                label: _discovering ? 'Searching…' : 'Auto-discover on Wi‑Fi',
-                onPressed: _discovering ? null : _autoDiscover,
-                color: RfColors.success,
-              ),
-              if (_pingResult != null) ...[
-                const SizedBox(height: 12),
-                _buildStatusBanner(_pingResult!),
-              ],
-              if (_backendInfo != null) ...[
-                const SizedBox(height: 12),
-                _buildBackendInfoCard(_backendInfo!),
-              ],
             ]),
 
             const SizedBox(height: 24),

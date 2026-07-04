@@ -8,8 +8,6 @@ import '../services/draft_save_service.dart';
 import '../services/file_naming_service.dart';
 import '../services/local_storage_service.dart';
 import '../utils/debug_session_log.dart';
-import '../services/sync_manager.dart';
-import '../services/upload_service.dart';
 import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
 import '../widgets/rf_button.dart';
@@ -28,6 +26,8 @@ class LocalGalleryScreen extends StatefulWidget {
 
 class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTickerProviderStateMixin {
   late TabController _tabs;
+  final ScrollController _ordersScrollCtrl = ScrollController();
+  final ScrollController _draftsScrollCtrl = ScrollController();
   List<Map<String, dynamic>> _orders = [];
   List<Map<String, dynamic>> _drafts = [];
   // Drafts grouped by session (mode + time proximity). Each entry is a map:
@@ -109,56 +109,19 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     if (n == 0) return;
     final kind = _tabs.index == 0 ? 'order${n == 1 ? '' : 's'}' : 'draft${n == 1 ? '' : 's'}';
 
-    // Count selected items that haven't been uploaded yet (Orders tab only —
-    // drafts by definition aren't uploaded).
-    int notUploaded = 0;
-    if (_tabs.index == 0) {
-      for (final o in _orders) {
-        if (_selectedOrders.contains(o['orderId']) && !(o['isUploaded'] as bool? ?? false)) {
-          notUploaded++;
-        }
-      }
-    } else {
-      notUploaded = n;  // all drafts are by definition not uploaded
-    }
-
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF161B22),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Delete $n $kind?', style: const TextStyle(color: Colors.white)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('This cannot be undone.', style: TextStyle(color: Color(0xFF8B949E), fontSize: 13)),
-            if (notUploaded > 0) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0x33FF7B72),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFFF7B72)),
-                ),
-                child: Row(children: [
-                  const Icon(Icons.warning_amber_rounded, color: Color(0xFFFF7B72), size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '$notUploaded NOT yet uploaded to backend. Agent will not have this data for SAFE-T claims.',
-                      style: const TextStyle(color: Color(0xFFFF7B72), fontSize: 12, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ]),
-              ),
-            ],
-          ],
+        content: const Text(
+          'This cannot be undone.',
+          style: TextStyle(color: Color(0xFF8B949E), fontSize: 13),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(notUploaded > 0 ? 'Delete anyway' : 'Delete', style: const TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -184,7 +147,6 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
       }
     }
     _exitSelectionMode();
-    await SyncManager.refreshStatus();
     await _reload();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -197,6 +159,8 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
 
   @override
   void dispose() {
+    _ordersScrollCtrl.dispose();
+    _draftsScrollCtrl.dispose();
     _tabs.dispose();
     super.dispose();
   }
@@ -327,47 +291,16 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
   }
 
   /// Generic confirmation dialog.
-  /// [warnNotUploaded] adds a red warning block when the item hasn't been
-  /// uploaded yet — prevents accidental loss of un-backed-up data.
-  Future<bool> _confirmDelete(String label, {bool warnNotUploaded = false}) async {
+  Future<bool> _confirmDelete(String label) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF161B22),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Delete?', style: TextStyle(color: Colors.white)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Permanently delete $label?\n\nThis cannot be undone.',
-              style: const TextStyle(color: Color(0xFF8B949E), fontSize: 13),
-            ),
-            if (warnNotUploaded) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0x33FF7B72),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFFF7B72)),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.warning_amber_rounded, color: Color(0xFFFF7B72), size: 18),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'NOT yet uploaded to backend. Deleting will permanently lose this data — agent will not have it for SAFE-T claim.',
-                        style: TextStyle(color: Color(0xFFFF7B72), fontSize: 12, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ],
+        content: Text(
+          'Permanently delete $label?\n\nThis cannot be undone.',
+          style: const TextStyle(color: Color(0xFF8B949E), fontSize: 13),
         ),
         actions: [
           TextButton(
@@ -376,10 +309,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              warnNotUploaded ? 'Delete anyway' : 'Delete',
-              style: const TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -388,17 +318,11 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
   }
 
   Future<void> _deleteOrder(Map<String, dynamic> order) async {
-    final isUploaded = order['isUploaded'] as bool? ?? false;
-    final ok = await _confirmDelete(
-      'order ${order['orderId']}',
-      warnNotUploaded: !isUploaded,
-    );
+    final id = order['orderId'] as String;
+    final ok = await _confirmDelete('order $id');
     if (!ok) return;
     final deleted = await _storage.deleteOrder(order['orderId'] as String);
     if (deleted && mounted) {
-      // Push a fresh status emit so the home banner reflects the now-smaller
-      // queue immediately (deleteOrder already dropped the queue entry).
-      await SyncManager.refreshStatus();
       _reload();
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Order deleted'),
@@ -520,20 +444,18 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     if (_orders.isEmpty) {
       return _buildEmpty('No saved orders yet', 'Complete a PK or RT session to see it here.');
     }
-    final uploaded = _orders.where((o) => o['isUploaded'] as bool? ?? false).length;
-    final pending = _orders.length - uploaded;
     return RefreshIndicator(
       onRefresh: _reload,
       color: RfColors.rtAccent,
       child: ListView.separated(
+        controller: _ordersScrollCtrl,
+        primary: false,
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
-        // +1 for the stats card at index 0
-        itemCount: _orders.length + 1,
+        itemCount: _orders.length,
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (_, i) {
-          if (i == 0) return _buildOrdersStats(uploaded: uploaded, pending: pending);
-          final idx = i - 1;
-          final o = _orders[idx];
+          final o = _orders[i];
           final id = o['orderId'] as String;
           final selected = _selectedOrders.contains(id);
           return _OrderCard(
@@ -562,96 +484,6 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     );
   }
 
-  /// Compact stats card for the Orders tab — counts synced vs pending.
-  /// Tap "Sync all" to push every pending order through the upload pipeline.
-  Widget _buildOrdersStats({required int uploaded, required int pending}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: RfGlass.decoration(),
-      child: Row(
-        children: [
-          _statChip(Icons.cloud_done_rounded, '$uploaded uploaded', const Color(0xFF3FB950)),
-          const SizedBox(width: 8),
-          _statChip(Icons.cloud_off_rounded, '$pending pending', pending == 0 ? const Color(0xFF8B949E) : const Color(0xFFFFA657)),
-          const Spacer(),
-          if (pending > 0)
-            GestureDetector(
-              onTap: _syncAllPending,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0x33FFA657),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0x66FFA657)),
-                ),
-                child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.cloud_upload_outlined, color: Color(0xFFFFA657), size: 14),
-                  SizedBox(width: 4),
-                  Text('Sync all', style: TextStyle(color: Color(0xFFFFA657), fontSize: 11, fontWeight: FontWeight.w700)),
-                ]),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _statChip(IconData icon, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withAlpha(30),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, color: color, size: 13),
-        const SizedBox(width: 4),
-        Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
-      ]),
-    );
-  }
-
-  /// Push every pending order through the upload pipeline. Uses the same
-  /// retry-from-folder method that the Order Detail "Upload" button uses.
-  Future<void> _syncAllPending() async {
-    final pending = _orders.where((o) => !(o['isUploaded'] as bool? ?? false)).toList();
-    if (pending.isEmpty) return;
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Row(children: [
-        const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFFFA657))),
-        const SizedBox(width: 10),
-        Text('Syncing ${pending.length} order${pending.length == 1 ? '' : 's'}…'),
-      ]),
-      duration: const Duration(seconds: 30),
-      backgroundColor: Colors.black87,
-    ));
-    int ok = 0;
-    int failed = 0;
-    for (final o in pending) {
-      final result = await UploadService.uploadFromFolder(
-        orderId: o['orderId'] as String,
-        folderPath: o['folderPath'] as String,
-      );
-      if (result.status == UploadStatus.success) {
-        ok++;
-      } else {
-        failed++;
-      }
-    }
-    if (!mounted) return;
-    await SyncManager.refreshStatus();
-    await _reload();
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(failed == 0
-          ? 'All $ok synced'
-          : '$ok synced, $failed still pending (backend offline or error)'),
-      duration: const Duration(seconds: 3),
-      backgroundColor: Colors.black87,
-    ));
-  }
-
   Widget _buildDraftsStats() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -669,6 +501,21 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     );
   }
 
+  static Widget _statChip(IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withAlpha(30),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, color: color, size: 13),
+        const SizedBox(width: 4),
+        Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
+      ]),
+    );
+  }
+
   Widget _buildDraftsList() {
     if (_draftSessions.isEmpty) {
       return _buildEmpty('No drafts', 'Cancel after stop keeps the video here — tap Finish save to add Order ID.');
@@ -677,8 +524,10 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
       onRefresh: _reload,
       color: RfColors.rtAccent,
       child: ListView.separated(
+        controller: _draftsScrollCtrl,
+        primary: false,
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
-        // +1 for stats card
         itemCount: _draftSessions.length + 1,
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (_, i) {
@@ -910,7 +759,7 @@ class _OrderCard extends StatelessWidget {
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: photoPaths.isNotEmpty
-                    ? Image.file(File(photoPaths.first), fit: BoxFit.cover,
+                    ? Image.file(File(photoPaths.first), fit: BoxFit.cover, cacheWidth: 200,
                         errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.white24))
                     : Icon(hasVideo ? Icons.videocam : Icons.folder, color: Colors.white38, size: 28),
               ),
@@ -943,11 +792,6 @@ class _OrderCard extends StatelessWidget {
                       _chip(Icons.videocam, hasVideo ? 'Video' : 'No video', hasVideo ? const Color(0xFF3FB950) : const Color(0xFF8B949E)),
                       _chip(Icons.photo, '${photoPaths.length} photo${photoPaths.length == 1 ? '' : 's'}', const Color(0xFF8B949E)),
                       _chip(Icons.sd_storage, '${sizeMb} MB', const Color(0xFF8B949E)),
-                      _chip(
-                        (order['isUploaded'] as bool? ?? false) ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
-                        (order['isUploaded'] as bool? ?? false) ? 'Uploaded' : 'Pending upload',
-                        (order['isUploaded'] as bool? ?? false) ? const Color(0xFF3FB950) : const Color(0xFFFFA657),
-                      ),
                     ]),
                   ],
                 ),
@@ -1028,7 +872,7 @@ class _DraftSessionCard extends StatelessWidget {
 
     // Thumbnail: first photo if available, else video icon
     final Widget thumbnail = photoPaths.isNotEmpty
-        ? Image.file(File(photoPaths.first), fit: BoxFit.cover,
+        ? Image.file(File(photoPaths.first), fit: BoxFit.cover, cacheWidth: 200,
             errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.white24))
         : Stack(alignment: Alignment.center, children: [
             Icon(
@@ -1428,7 +1272,7 @@ class _OrderDetailScreen extends StatefulWidget {
 
 class _OrderDetailScreenState extends State<_OrderDetailScreen> {
   late Map<String, dynamic> order;
-  bool _uploading = false;
+  bool _savingEdit = false;
   final _storage = LocalStorageService();
 
   @override void initState() {
@@ -1696,36 +1540,166 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     }
   }
 
-  Future<void> _retryUpload() async {
-    setState(() => _uploading = true);
-    final result = await UploadService.uploadFromFolder(
-      orderId: order['orderId'] as String,
-      folderPath: order['folderPath'] as String,
-    );
-    if (!mounted) return;
-    setState(() {
-      _uploading = false;
-      if (result.status == UploadStatus.success) {
-        order['isUploaded'] = true;
-        order['uploadedAt'] = DateTime.now().toIso8601String();
+  Future<void> _showEditOrderSheet() async {
+    final folderKey = order['orderId'] as String;
+    final bareId = order['bareOrderId'] as String? ?? FileNamingService.bareOrderIdFromFolder(folderKey);
+    final mode = _mode;
+    if (mode == null) return;
+
+    final meta = await _storage.readMetaJson(folderKey, bareOrderId: bareId);
+    QCVerdict? currentVerdict;
+    final verdictStr = meta?['verdict'] as String?;
+    if (verdictStr != null) {
+      for (final v in QCVerdict.values) {
+        if (v.name == verdictStr) {
+          currentVerdict = v;
+          break;
+        }
       }
-    });
-    final msg = switch (result.status) {
-      UploadStatus.success => 'Uploaded — video + ${result.photosUploaded} photo${result.photosUploaded == 1 ? '' : 's'}',
-      UploadStatus.offline => 'Backend offline. Try again when on same WiFi as PC.',
-      UploadStatus.failed  => 'Upload failed: ${result.error ?? ''}',
-    };
-    final icon = result.status == UploadStatus.success ? Icons.cloud_done : Icons.error_outline;
-    final color = result.status == UploadStatus.success ? const Color(0xFF3FB950) : const Color(0xFFFF7B72);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Row(children: [
-        Icon(icon, color: color, size: 18),
-        const SizedBox(width: 8),
-        Expanded(child: Text(msg, maxLines: 2, overflow: TextOverflow.ellipsis)),
-      ]),
-      duration: const Duration(seconds: 3),
-      backgroundColor: Colors.black87,
-    ));
+    }
+
+    final orderCtrl = TextEditingController(text: bareId);
+    final awbCtrl = TextEditingController(text: meta?['awb'] as String? ?? '');
+    QCVerdict? selectedVerdict = currentVerdict;
+
+    final saved = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF161B22),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: StatefulBuilder(
+            builder: (ctx, setSheetState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Edit order',
+                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: orderCtrl,
+                    style: const TextStyle(color: Colors.white, fontFamily: 'monospace'),
+                    decoration: const InputDecoration(
+                      labelText: 'Order ID',
+                      labelStyle: TextStyle(color: Color(0xFF8B949E)),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF30363D))),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.navy)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: awbCtrl,
+                    style: const TextStyle(color: Colors.white, fontFamily: 'monospace'),
+                    decoration: const InputDecoration(
+                      labelText: 'AWB / tracking (optional)',
+                      labelStyle: TextStyle(color: Color(0xFF8B949E)),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF30363D))),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.navy)),
+                    ),
+                  ),
+                  if (mode == CaptureMode.rt) ...[
+                    const SizedBox(height: 16),
+                    const Text('QC verdict', style: TextStyle(color: Color(0xFF8B949E), fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: QCVerdict.values.map((v) {
+                        final active = selectedVerdict == v;
+                        return ChoiceChip(
+                          label: Text(v.name, style: TextStyle(color: active ? Colors.white : const Color(0xFF8B949E), fontSize: 12)),
+                          selected: active,
+                          selectedColor: RfColors.rtAccent.withValues(alpha: 0.35),
+                          backgroundColor: const Color(0xFF21262D),
+                          onSelected: (_) => setSheetState(() => selectedVerdict = v),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(ctx, null),
+                          child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _savingEdit
+                              ? null
+                              : () async {
+                                  setSheetState(() => _savingEdit = true);
+                                  try {
+                                    final newPath = await _storage.updateOrderMetadata(
+                                      folderKey: folderKey,
+                                      newBareOrderId: orderCtrl.text.trim(),
+                                      awb: awbCtrl.text.trim(),
+                                      verdict: mode == CaptureMode.rt ? selectedVerdict : null,
+                                    );
+                                    if (ctx.mounted) Navigator.pop(ctx, newPath);
+                                  } catch (e) {
+                                    setSheetState(() => _savingEdit = false);
+                                    if (ctx.mounted) {
+                                      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+                                        content: Text('$e'),
+                                        backgroundColor: Colors.black87,
+                                      ));
+                                    }
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(backgroundColor: RfColors.navy),
+                          child: _savingEdit
+                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : const Text('Save'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+
+    orderCtrl.dispose();
+    awbCtrl.dispose();
+
+    if (saved != null && mounted) {
+      final newKey = saved.split(Platform.pathSeparator).last;
+      final all = await _storage.listOrders();
+      final fresh = all.firstWhere(
+        (o) => o['orderId'] == newKey,
+        orElse: () => order,
+      );
+      setState(() {
+        order = Map<String, dynamic>.from(fresh);
+        _savingEdit = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Order updated'),
+        duration: Duration(seconds: 2),
+        backgroundColor: Colors.black87,
+      ));
+    } else if (mounted) {
+      setState(() => _savingEdit = false);
+    }
   }
 
   @override
@@ -1735,15 +1709,45 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     final photoPaths = (order['photoPaths'] as List).cast<String>();
     final sizeMb = ((order['sizeBytes'] as int) / (1024 * 1024)).toStringAsFixed(1);
     final folderPath = order['folderPath'] as String;
-    final isUploaded = order['isUploaded'] as bool? ?? false;
+    final bareId = order['bareOrderId'] as String? ?? orderId;
 
     return RfGlassScaffold(
       appBar: RfGlassAppBar(
         titleWidget: Text(orderId, style: const TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'monospace')),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Edit order',
+            onPressed: _showEditOrderSheet,
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: RfGlass.decoration(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Order ID', style: TextStyle(color: RfColors.textSecondary, fontSize: 11)),
+                const SizedBox(height: 4),
+                Text(bareId, style: const TextStyle(color: Colors.white, fontSize: 15, fontFamily: 'monospace', fontWeight: FontWeight.w600)),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _showEditOrderSheet,
+                  icon: const Icon(Icons.edit_outlined, size: 16),
+                  label: const Text('Edit order ID, AWB, QC'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: RfColors.rtAccent,
+                    side: BorderSide(color: RfColors.rtAccent.withValues(alpha: 0.5)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           // Video player
           if (videoPath != null) ...[
             const _SectionLabel('Video'),
@@ -1854,51 +1858,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 24),
-
-          // Backend upload status + retry
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: RfGlass.decoration(
-              borderColor: isUploaded ? const Color(0x553FB950) : const Color(0x55FFA657),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  isUploaded ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
-                  color: isUploaded ? const Color(0xFF3FB950) : const Color(0xFFFFA657),
-                  size: 22,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isUploaded ? 'Uploaded to backend' : 'Pending upload',
-                        style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        isUploaded
-                            ? 'Server copy exists. Local files kept as backup.'
-                            : 'Backend was offline or upload failed. Tap retry to upload now.',
-                        style: const TextStyle(color: Color(0xFF8B949E), fontSize: 11),
-                      ),
-                    ],
-                  ),
-                ),
-                if (!isUploaded)
-                  _uploading
-                      ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFFFA657)))
-                      : TextButton(
-                          onPressed: _retryUpload,
-                          child: const Text('Upload', style: TextStyle(color: Color(0xFFFFA657), fontWeight: FontWeight.w600)),
-                        ),
-              ],
-            ),
-          ),
-
           const SizedBox(height: 32),
 
           // Delete
@@ -1931,7 +1890,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                 final storage = LocalStorageService();
                 final deleted = await storage.deleteOrder(orderId);
                 if (deleted && context.mounted) {
-                  await SyncManager.refreshStatus();
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Order deleted'),
@@ -2301,8 +2259,6 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
         content: Text('Saved order ${barcode['orderId']}'),
         backgroundColor: Colors.black87,
       ));
-      // ignore: unawaited_futures
-      SyncManager.syncNow();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -2398,7 +2354,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
-                  'Draft — no Order ID assigned yet. Will not auto-upload until promoted to an order.',
+                  'Draft — no Order ID assigned yet. Tap Finish save to promote to a saved order.',
                   style: TextStyle(color: Color(0xFFFFA657), fontSize: 12, fontWeight: FontWeight.w500),
                 ),
               ),

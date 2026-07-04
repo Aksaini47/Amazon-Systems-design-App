@@ -8,7 +8,6 @@ import '../models/capture_session.dart';
 import '../utils/debug_session_log.dart';
 import 'file_naming_service.dart';
 import 'camera_settings_service.dart';
-import 'sync_queue_service.dart';
 import 'activity_log_service.dart';
 import '../utils/image_processing.dart';
 
@@ -163,13 +162,6 @@ class LocalStorageService {
         for (final f in files) {
           try { totalBytes += await f.length(); } catch (_) {}
         }
-        // Check for upload marker — written by UploadService.uploadSession on success
-        final uploadedMarker = File('${entity.path}/.uploaded');
-        final isUploaded = await uploadedMarker.exists();
-        String? uploadedAt;
-        if (isUploaded) {
-          try { uploadedAt = await uploadedMarker.readAsString(); } catch (_) {}
-        }
         out.add({
           'orderId': name,
           'bareOrderId': FileNamingService.bareOrderIdFromFolder(name),
@@ -180,8 +172,6 @@ class LocalStorageService {
           'metaPath': meta?.path,
           'modifiedAt': stat.modified.toIso8601String(),
           'sizeBytes': totalBytes,
-          'isUploaded': isUploaded,
-          'uploadedAt': uploadedAt,
         });
       } catch (e) {
         debugPrint('listOrders: skipped ${entity.path} ($e)');
@@ -234,9 +224,7 @@ class LocalStorageService {
     return out;
   }
 
-  /// Delete an entire order folder AND remove any matching entry from the
-  /// upload queue. Otherwise the home-screen banner would keep showing a
-  /// stale "pending upload" for an order whose files no longer exist on disk.
+  /// Delete an entire order folder.
   Future<bool> deleteOrder(String orderId) async {
     try {
       // #region agent log
@@ -260,11 +248,6 @@ class LocalStorageService {
         },
       );
       // #endregion
-
-      // Always drop from queue first — even if folder delete fails, the queue
-      // entry would be useless anyway (uploadFromFolder would error on the
-      // missing folder).
-      await SyncQueueService.remove(orderId);
 
       if (folderExistsBefore) {
         for (final path in pathsBefore) {
@@ -772,6 +755,100 @@ class LocalStorageService {
       debugPrint('updateOrderPhoto failed: $e');
       return false;
     }
+  }
+
+  /// Update saved order metadata — order ID, AWB, RT QC verdict.
+  /// Renames folder + files when order ID changes. Returns new folder path.
+  Future<String> updateOrderMetadata({
+    required String folderKey,
+    required String newBareOrderId,
+    String? awb,
+    QCVerdict? verdict,
+  }) async {
+    final trimmed = newBareOrderId.trim();
+    if (trimmed.isEmpty) {
+      throw ArgumentError('Order ID is required');
+    }
+
+    final mode = FileNamingService.modeFromFolder(folderKey);
+    if (mode == null) {
+      throw StateError('Invalid order folder: $folderKey');
+    }
+
+    final oldBareId = FileNamingService.bareOrderIdFromFolder(folderKey);
+    final safeNewId = trimmed.replaceAll(RegExp(r'[^\w\-.]'), '_');
+    final newFolderKey = FileNamingService.orderFolderName(trimmed, mode);
+
+    final oldFolder = await getOrderFolder(folderKey);
+    if (!await oldFolder.exists()) {
+      throw StateError('Order folder not found');
+    }
+
+    if (folderKey != newFolderKey) {
+      final ordersDir = await _ordersDir();
+      if (Directory('${ordersDir.path}/$newFolderKey').existsSync()) {
+        throw StateError('Order already exists for ${mode.name.toUpperCase()} mode');
+      }
+    }
+
+    if (safeNewId != oldBareId) {
+      for (final entity in oldFolder.listSync(followLinks: false)) {
+        if (entity is! File) continue;
+        final name = entity.path.split(Platform.pathSeparator).last;
+        String? newName;
+        if (name.toLowerCase().endsWith('.mp4')) {
+          newName = FileNamingService.videoFileName(safeNewId, mode);
+        } else if (name.endsWith('_meta.json')) {
+          newName = FileNamingService.metaFileName(safeNewId);
+        } else {
+          for (final side in PhotoSide.values) {
+            if (name.contains('_${side.name}.')) {
+              newName = FileNamingService.photoFileName(safeNewId, mode, side);
+              break;
+            }
+          }
+        }
+        if (newName != null && newName != name) {
+          await entity.rename('${oldFolder.path}/$newName');
+        }
+      }
+    }
+
+    Directory targetFolder = oldFolder;
+    if (folderKey != newFolderKey) {
+      final ordersDir = await _ordersDir();
+      final newPath = '${ordersDir.path}/$newFolderKey';
+      await oldFolder.rename(newPath);
+      targetFolder = Directory(newPath);
+    }
+
+    final session = await sessionFromOrderFolder(
+      folderKey: newFolderKey,
+      bareOrderId: safeNewId,
+      mode: mode,
+    );
+    if (session == null) {
+      throw StateError('Failed to reload order after update');
+    }
+
+    final normalizedAwb = awb?.trim();
+    final updated = session.copyWith(
+      orderId: safeNewId,
+      awb: (normalizedAwb == null || normalizedAwb.isEmpty) ? null : normalizedAwb,
+      verdict: mode == CaptureMode.rt ? (verdict ?? session.verdict) : session.verdict,
+    );
+    await writeMetaJson(updated);
+
+    await ActivityLogService.log(
+      event: 'order_metadata_updated',
+      mode: mode,
+      orderId: safeNewId,
+      awb: updated.awb,
+      qc: updated.verdict?.name,
+      extra: {'folder': targetFolder.path, 'previousId': oldBareId},
+    );
+
+    return targetFolder.path;
   }
 
   /// Merge partial session into existing meta.

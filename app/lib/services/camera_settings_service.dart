@@ -25,7 +25,7 @@ class CameraSettingsService {
   // --- FPS ---
   static Future<int> getFps() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('camera_fps') ?? 30;
+    return prefs.getInt('camera_fps') ?? 60;
   }
 
   static Future<void> setFps(int fps) async {

@@ -33,10 +33,6 @@ dependencies:
   # Permissions
   permission_handler: ^11.3.1
 
-  # Networking
-  http: ^1.2.2
-  bonsoir: ^5.0.1
-
   # Storage & settings
   shared_preferences: ^2.3.2
 

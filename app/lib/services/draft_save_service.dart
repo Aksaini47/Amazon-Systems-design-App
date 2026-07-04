@@ -7,8 +7,6 @@ import '../utils/image_processing.dart';
 import 'activity_log_service.dart';
 import 'camera_settings_service.dart';
 import 'local_storage_service.dart';
-import 'sync_queue_service.dart';
-import 'upload_service.dart';
 
 /// Promote a grouped draft session (video + photos) into a saved order.
 class DraftSaveService {
@@ -43,14 +41,12 @@ class DraftSaveService {
       ];
     }
     if (verdict == null) return const [];
-    // RT QC OK: front + back only (serial optional).
     if (verdict == QCVerdict.ok) {
       return [
         if (!photos.containsKey(PhotoSide.front)) PhotoSide.front,
         if (!photos.containsKey(PhotoSide.back)) PhotoSide.back,
       ];
     }
-    // RT damaged / different / etc.: label + contents + front + back.
     return [
       if (!photos.containsKey(PhotoSide.label)) PhotoSide.label,
       if (!photos.containsKey(PhotoSide.contents)) PhotoSide.contents,
@@ -74,7 +70,6 @@ class DraftSaveService {
     }
   }
 
-  /// Capture one missing photo with the device camera and save to drafts/.
   static Future<String?> captureMissingPhoto(
     CaptureMode mode,
     PhotoSide side,
@@ -89,7 +84,6 @@ class DraftSaveService {
     return storage.saveDraftPhoto(File(picked.path), mode, side);
   }
 
-  /// Promote draft files into an order folder, write meta, enqueue upload.
   static Future<CaptureSession> promoteDraftSession({
     required String orderId,
     String? awb,
@@ -157,9 +151,6 @@ class DraftSaveService {
     await local.writeMetaJson(session);
 
     final orderFolder = await local.getOrderFolder(orderId, mode: mode);
-    final storageKey = orderFolder.path.split(Platform.pathSeparator).last;
-    await SyncQueueService.enqueue(storageKey, orderFolder.path);
-
     await ActivityLogService.log(
       event: 'draft_promoted',
       mode: mode,
@@ -168,15 +159,6 @@ class DraftSaveService {
       qc: verdict?.name,
       extra: {'folder': orderFolder.path},
     );
-
-    // Fire-and-forget upload
-    // ignore: unawaited_futures
-    UploadService.uploadSession(session: session, orderFolderPath: orderFolder.path)
-        .then((r) async {
-      if (r.status == UploadStatus.success) {
-        await SyncQueueService.remove(storageKey);
-      }
-    });
 
     return session;
   }
