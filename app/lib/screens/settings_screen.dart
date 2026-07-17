@@ -29,7 +29,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _autoLabelScan = false;
   bool _autoLabelSave = true;
   bool _claimPhotoCountdown = false;
-  bool _aspectPickerEnabled = false;
   // New: capture countdown (0=manual, 3/5/10=seconds)
   int _captureCountdown = 3;
   // New: aspect ratio default (9/16 = 16:9 portrait, 3/4 = 3:4, 1.0 = 1:1)
@@ -54,7 +53,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _autoLabelScan = await CameraSettingsService.getAutoLabelScan();
     _autoLabelSave = await CameraSettingsService.getAutoLabelSave();
     _claimPhotoCountdown = await CameraSettingsService.getClaimPhotoCountdown();
-    _aspectPickerEnabled = await CameraSettingsService.getAspectEnabled();
     _selectedStoragePath = await CameraSettingsService.getStoragePath();
     if (mounted) setState(() {});
   }
@@ -129,17 +127,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     CameraSettingsService.setAspectDefault(v);
                   },
                 ),
-              ),
-              const SizedBox(height: 10),
-              _buildSettingToggle(
-                icon: Icons.aspect_ratio_rounded,
-                label: 'Aspect ratio picker',
-                subtitle: 'Show frame ratio chips on the capture screen',
-                value: _aspectPickerEnabled,
-                onChanged: (v) {
-                  setState(() => _aspectPickerEnabled = v);
-                  CameraSettingsService.setAspectEnabled(v);
-                },
               ),
               const SizedBox(height: 10),
               _buildSettingToggle(

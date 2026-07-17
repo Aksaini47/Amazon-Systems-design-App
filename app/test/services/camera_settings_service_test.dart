@@ -7,14 +7,6 @@ void main() {
 
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  test('aspect picker defaults OFF and round-trips', () async {
-    // The capture screen hides the 1:1/3:4/16:9 chip row on this flag —
-    // regression for the dead-switch bug where nothing ever read it.
-    expect(await CameraSettingsService.getAspectEnabled(), isFalse);
-    await CameraSettingsService.setAspectEnabled(true);
-    expect(await CameraSettingsService.getAspectEnabled(), isTrue);
-  });
-
   test('claim photo countdown round-trips', () async {
     final initial = await CameraSettingsService.getClaimPhotoCountdown();
     await CameraSettingsService.setClaimPhotoCountdown(!initial);

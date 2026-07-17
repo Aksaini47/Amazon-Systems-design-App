@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
@@ -116,8 +117,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   static const double _aspect34 = CameraSettingsService.aspect34;
   static const double _aspect11 = CameraSettingsService.aspect11;
   double _aspectRatio = _aspectFull;
-  // Settings > "Aspect ratio picker" — hides the 1:1/3:4/16:9 chip row when off.
-  bool _aspectPickerEnabled = false;
+  // Collapsible ratio control (Samsung-style): collapsed shows the current
+  // ratio, tap expands into the option strip. See _buildRatioControl.
+  bool _aspectStripExpanded = false;
   bool get _isAspectCropped =>
       (_aspectRatio - _aspectFull).abs() > 0.001;
 
@@ -151,6 +153,14 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     SystemChrome.setPreferredOrientations(const [
       DeviceOrientation.portraitUp,
     ]);
+    // Engage immersive layout for the WHOLE screen lifetime, not just while
+    // recording. Previously this only happened at the instant recording
+    // started (_enableRecordingMode), which hid the status/nav bars right
+    // as the record button was tapped — the available layout size changed
+    // at that exact moment, so the on-screen frame visibly jumped/resized.
+    // Setting it once here means idle and recording render in identical
+    // screen real estate; see dispose() for the matching restore.
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _focusAnimCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
     _focusAnim = Tween(begin: 1.2, end: 0.9).animate(CurvedAnimation(parent: _focusAnimCtrl, curve: Curves.easeOut));
     _loadSettings();
@@ -166,7 +176,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _captureCountdownSec = await CameraSettingsService.getCaptureCountdown();
     _claimCountdownEnabled = await CameraSettingsService.getClaimPhotoCountdown();
     _aspectRatio = await CameraSettingsService.getAspectDefault();
-    _aspectPickerEnabled = await CameraSettingsService.getAspectEnabled();
     if (mounted) setState(() {});
     unawaited(_initCamera());
   }
@@ -178,13 +187,15 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _focusAnimCtrl.dispose();
     _detachCameraListener();
     _camera?.dispose();
-    // Always release wakelock + restore system UI on exit, in case the
-    // user backed out mid-recording without going through _stopRecording.
+    // Always release wakelock + restore DND on exit, in case the user
+    // backed out mid-recording without going through _stopRecording.
     _disableRecordingMode();
     VolumeButtonService().unregisterListener('live_capture_screen');
     // Restore all orientations so other app screens (gallery, settings)
     // remain free to rotate.
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+    // Leaving the screen — drop the immersive layout engaged in initState().
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
 
@@ -692,8 +703,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         _logPreviewState('live_capture_screen.dart:_startRecording', extra: {
           'step': 'afterStartVideoRecording',
         });
-        // Engage recording guards before preview rebuild — immersive resize can
-        // blank the OverflowBox crop path on some Android CameraX builds.
+        // Engage recording guards (wakelock + DND) before the preview
+        // rebuild. Immersive layout is already engaged (initState), so this
+        // no longer resizes the OverflowBox crop path.
         await _enableRecordingMode();
         if (!mounted) return;
         setState(() { _isRecording = true; _phase = CapturePhase.recording; });
@@ -794,15 +806,16 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   /// Engage all recording-time guards so the user isn't interrupted:
   ///   - Wakelock — prevents screen-off / sleep
-  ///   - Immersive sticky — hides status + nav bars
   ///   - DND (priority mode) — silences notifications, ringer, and non-priority
   ///     calls during recording. Saves the previous DND state so we can restore
   ///     it exactly when recording stops. Silently no-ops if user hasn't
   ///     granted DND permission yet (offered as one-time prompt elsewhere).
+  ///
+  /// Immersive layout is engaged once for the whole screen in initState(),
+  /// not here — see the comment there for why.
   Future<void> _enableRecordingMode() async {
     try {
       await WakelockPlus.enable();
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
       // Save current filter so _disableRecordingMode can restore it exactly,
       // then switch to priority-only (silences notifications + ringer but
@@ -821,10 +834,12 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   }
 
   /// Release recording-mode guards. Called from _stopRecording and dispose().
+  /// Does NOT touch the system UI mode — the screen stays immersive for its
+  /// whole lifetime (see initState()); reverting here would cause the same
+  /// visual jump on stop that this fix removes on start.
   Future<void> _disableRecordingMode() async {
     try {
       await WakelockPlus.disable();
-      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
       if (_previousDndFilter != null) {
         await DndService.setFilter(_previousDndFilter!);
@@ -1515,11 +1530,13 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     return '${(s ~/ 60).toString().padLeft(2, '0')}:${(s % 60).toString().padLeft(2, '0')}';
   }
 
+  /// Short label for the collapsed ratio button — matches the option text
+  /// used in the expanded strip (Samsung reference: plain "3:4"/"9:16" etc.,
+  /// not a descriptive sentence).
   String get _selectedAspectLabel {
-    if (_isRecording) return 'Recording — frame locked';
-    if ((_aspectRatio - _aspect11).abs() < 0.001) return '1:1 square';
-    if ((_aspectRatio - _aspect34).abs() < 0.001) return '3:4 portrait';
-    return '16:9 fullscreen';
+    if ((_aspectRatio - _aspect11).abs() < 0.001) return '1:1';
+    if ((_aspectRatio - _aspect34).abs() < 0.001) return '3:4';
+    return '16:9';
   }
 
   String get _countdownInstruction {
@@ -1694,15 +1711,19 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   /// it a SizedBox that matches the camera's natural ratio, so AspectRatio
   /// fills the SizedBox completely with no letterboxing.
   ///
-  /// IMPORTANT: During active video recording, aspect cropping is FORCED OFF
-  /// in the preview. The camera plugin records at the sensor's native
-  /// resolution (16:9) and there is no in-plugin way to crop video on the
-  /// fly — so showing a 1:1 / 3:4 preview during recording would lie to the
-  /// user about what's actually being recorded. The user reported exactly
-  /// this: "jaise hi video start hota hai yeh 16:9 pe switch karke video
-  /// record karta hai". This guard keeps preview === recorded output.
-  /// Full-bleed preview while recording. Avoids the OverflowBox crop path,
-  /// which can render a black texture on Android after immersive UI + record start.
+  /// NOTE: the crop is intentionally kept IDENTICAL during idle and active
+  /// recording (`_buildCroppedPreview`'s `effectiveCropped` does not check
+  /// `_isRecording`) — the user previously saw the frame change shape the
+  /// instant they hit record; this widget's job is to hold that steady.
+  /// The camera plugin still records native 16:9 regardless of the crop
+  /// shown here — the crop is preview-only chrome, applied to captured
+  /// photos separately (see `ImageProcessingUtils.cropToAspectRatio`).
+  ///
+  /// `_buildRecordingPreview` below is a SEPARATE full-bleed fallback used
+  /// only for claim-flow re-init and the post-stop draft state (see
+  /// `_useFullBleedPreview`) — not for ordinary active recording — because
+  /// the OverflowBox crop path can render a black texture on Android right
+  /// after a camera re-init in those specific states.
   Widget _buildRecordingPreview() {
     return ColoredBox(
       color: Colors.black,
@@ -1852,23 +1873,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       height: vpH,
       child: Stack(
         children: [
-          if (!_isRecording)
-            Align(
-              alignment: Alignment.topCenter,
-              child: Container(
-                margin: const EdgeInsets.only(top: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.65),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: Text(
-                  _selectedAspectLabel,
-                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
-                ),
-              ),
-            ),
+          // Ratio label moved to the bottom collapsible control
+          // (_buildRatioControl) — no need to duplicate it here too.
           corner(Alignment.topLeft),
           corner(Alignment.topRight),
           corner(Alignment.bottomLeft),
@@ -1880,23 +1886,33 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   // ─── Top bar ─────────────────────────────────────────────────────────
 
-  /// Solid black camera chrome — no frosted blur over the live preview.
+  /// Frosted camera chrome (top status bar, bottom control panel).
+  /// Translucent + blurred so the live preview stays perceptible behind it
+  /// — matches the Samsung reference (floating glass chrome, not a solid
+  /// opaque band eating into the frame) and is what made the "9:16 frame"
+  /// look pre-cropped: a fixed opaque black zone here shrank the visible
+  /// frame in every ratio, not just non-Full ones.
   Widget _cameraChromeBar({
     required Widget child,
     EdgeInsetsGeometry padding = EdgeInsets.zero,
     bool showBottomBorder = false,
     bool showTopBorder = false,
   }) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Colors.black,
-        border: showBottomBorder
-            ? const Border(bottom: BorderSide(color: Colors.white12))
-            : showTopBorder
-                ? const Border(top: BorderSide(color: Colors.white12))
-                : null,
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: RfGlass.blurLight, sigmaY: RfGlass.blurLight),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.45),
+            border: showBottomBorder
+                ? Border(bottom: BorderSide(color: RfGlass.border(0.14)))
+                : showTopBorder
+                    ? Border(top: BorderSide(color: RfGlass.border(0.14)))
+                    : null,
+          ),
+          child: Padding(padding: padding, child: child),
+        ),
       ),
-      child: Padding(padding: padding, child: child),
     );
   }
 
@@ -1936,9 +1952,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       ],
     );
   }
-
-  // (Legacy _buildZoomButton + _buildAspectButton removed — replaced by the
-  //  skeuomorphic RfChip widget from lib/widgets/rf_button.dart.)
 
   /// Aspect button tap handler. Persists the choice but is a NO-OP for the
   /// preview during recording (since video is always recorded at native
@@ -2142,14 +2155,12 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         // feedback — the bottom button now handles both PK and RT claim
         // manual capture, so the UI is uniform across modes.
         Center(
-          child: Container(
+          child: RfGlassContainer(
             margin: const EdgeInsets.symmetric(horizontal: 24),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.72),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white24),
-            ),
+            radius: 14,
+            tint: RfGlass.fill(0.4),
+            borderColor: RfGlass.border(0.2),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               if (_countdownSeconds > 0)
                 Text(
@@ -2177,7 +2188,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
                 Text(
                   'Tap CAPTURE below',
                   style: TextStyle(
-                    color: RfColors.textSecondary,
+                    color: Colors.white.withValues(alpha: 0.85),
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -2226,19 +2237,25 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
                   borderRadius: BorderRadius.circular(RfRadius.button),
                   child: RfGlassPill(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    borderColor: RfColors.textSecondary.withValues(alpha: 0.45),
+                    borderColor: RfGlass.border(0.24),
+                    // White + shadow, not textSecondary grey — this pill sits
+                    // directly over the live, brightness-varying camera feed;
+                    // dim grey washes out unreadable on bright backgrounds.
+                    // Matches the PK/RT instruction banners' pattern.
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.skip_next_rounded, color: RfColors.textSecondary, size: 18),
+                        Icon(Icons.skip_next_rounded, color: Colors.white, size: 18,
+                            shadows: [Shadow(color: Colors.black54, blurRadius: 2, offset: Offset(0, 1))]),
                         SizedBox(width: 8),
                         Text(
                           'SKIP THIS PHOTO',
                           style: TextStyle(
-                            color: RfColors.textSecondary,
+                            color: Colors.white,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.4,
+                            shadows: [Shadow(color: Colors.black54, blurRadius: 2, offset: Offset(0, 1))],
                           ),
                         ),
                       ],
@@ -2296,17 +2313,14 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           // banner above already convey the action; a label below adds
           // noise.
           if (_isRecording)
-            Container(
+            RfGlassPill(
               padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.black.withAlpha(180),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withAlpha(40)),
-              ),
+              borderColor: RfColors.recording.withValues(alpha: 0.5),
+              radius: 18,
               child: const Text(
                 'TAP TO STOP',
                 style: TextStyle(
-                  color: Colors.red,
+                  color: RfColors.recording,
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.5,
@@ -2314,74 +2328,96 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
               ),
             ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
-          // Camera controls row — skeuomorphic chips (zoom + aspect + mic).
-          // FittedBox prevents overflow on narrow screens.
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.black.withAlpha(160),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Zoom buttons — always visible (PK, RT, all phases incl. claim photo)
-                  RfChip(label: '1×', active: _currentZoomIndex == 0, onPressed: () => _setZoomByIndex(0)),
-                  const SizedBox(width: 4),
-                  RfChip(label: '2×', active: _currentZoomIndex == 1, onPressed: () => _setZoomByIndex(1)),
-                  const SizedBox(width: 4),
-                  RfChip(label: '3×', active: _currentZoomIndex == 2, onPressed: () => _setZoomByIndex(2)),
+          // Frame-ratio control — collapsible, Samsung-style plain-text
+          // strip (see _buildRatioControl).
+          _buildRatioControl(accent),
 
-                  // Aspect ratio chips — gated by the Settings "Aspect ratio
-                  // picker" toggle; disabled during recording (frame locked).
-                  if (_aspectPickerEnabled) ...[
-                    const SizedBox(width: 8),
-                    Container(width: 1, height: 28, color: Colors.white24),
-                    const SizedBox(width: 8),
-                    Opacity(
-                      opacity: _isRecording ? 0.35 : 1.0,
-                      child: IgnorePointer(
-                        ignoring: _isRecording,
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          RfChip(label: '1:1', active: (_aspectRatio - _aspect11).abs() < 0.001, onPressed: () => _onAspectTap('1:1', _aspect11)),
-                          const SizedBox(width: 4),
-                          RfChip(label: '3:4', active: (_aspectRatio - _aspect34).abs() < 0.001, onPressed: () => _onAspectTap('3:4', _aspect34)),
-                          const SizedBox(width: 4),
-                          RfChip(label: '16:9', active: (_aspectRatio - _aspectFull).abs() < 0.001, onPressed: () => _onAspectTap('16:9', _aspectFull)),
-                        ]),
-                      ),
-                    ),
-                  ],
+          const SizedBox(height: 10),
 
-                  const SizedBox(width: 8),
-                  Container(width: 1, height: 28, color: Colors.white24),
-                  const SizedBox(width: 8),
-
-                  // Mic toggle — skeuomorphic icon button. Disabled during
-                  // camera transitions to avoid the audio-state race bug.
-                  _MicToggleButton(
-                    enabled: _micEnabled,
-                    disabled: _isCameraTransitioning,
-                    onTap: _isCameraTransitioning ? null : _toggleMic,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Frame · $_selectedAspectLabel',
-            style: TextStyle(
-              color: _isRecording ? RfColors.textSecondary : RfColors.textPrimary,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          // Zoom + mic — same plain-text-in-glass-pill visual language as
+          // the ratio control above.
+          _buildZoomMicPill(accent),
         ]);
+  }
+
+  /// Shared plain-text pill option for the ratio strip and zoom row —
+  /// active option in the mode accent color, inactive in white. No
+  /// per-option box/border, matching the Samsung reference screenshots.
+  Widget _pillOption(String label, bool active, Color accent, VoidCallback onTap, {double fontSize = 14}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: active ? accent : Colors.white,
+            fontSize: fontSize,
+            fontWeight: active ? FontWeight.w800 : FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Collapsible frame-ratio control. Collapsed: a single pill showing the
+  /// active ratio. Tap → expands into the 3:4 / 1:1 / 16:9 option strip;
+  /// tapping an option applies it and collapses back. Hidden while
+  /// recording — the frame is locked during capture.
+  Widget _buildRatioControl(Color accent) {
+    if (_isRecording) return const SizedBox.shrink();
+
+    if (!_aspectStripExpanded) {
+      return RfGlassContainer(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        radius: 18,
+        onTap: () => setState(() => _aspectStripExpanded = true),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.crop_free_rounded, color: Colors.white, size: 15),
+          const SizedBox(width: 6),
+          Text(_selectedAspectLabel, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+        ]),
+      );
+    }
+
+    void select(String label, double ratio) {
+      _onAspectTap(label, ratio);
+      setState(() => _aspectStripExpanded = false);
+    }
+
+    return RfGlassContainer(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      radius: 22,
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        _pillOption('3:4', (_aspectRatio - _aspect34).abs() < 0.001, accent, () => select('3:4', _aspect34), fontSize: 15),
+        _pillOption('1:1', (_aspectRatio - _aspect11).abs() < 0.001, accent, () => select('1:1', _aspect11), fontSize: 15),
+        _pillOption('16:9', (_aspectRatio - _aspectFull).abs() < 0.001, accent, () => select('16:9', _aspectFull), fontSize: 15),
+      ]),
+    );
+  }
+
+  /// Zoom (1×/2×/3×) + mic toggle, in the same glass pill language as the
+  /// ratio control. Zoom stays visible in every phase, including claim photo.
+  Widget _buildZoomMicPill(Color accent) {
+    return RfGlassContainer(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      radius: 20,
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        _pillOption('1×', _currentZoomIndex == 0, accent, () => _setZoomByIndex(0)),
+        _pillOption('2×', _currentZoomIndex == 1, accent, () => _setZoomByIndex(1)),
+        _pillOption('3×', _currentZoomIndex == 2, accent, () => _setZoomByIndex(2)),
+        const SizedBox(width: 6),
+        Container(width: 1, height: 20, color: RfGlass.border(0.2)),
+        const SizedBox(width: 6),
+        _MicToggleButton(
+          enabled: _micEnabled,
+          disabled: _isCameraTransitioning,
+          onTap: _isCameraTransitioning ? null : _toggleMic,
+        ),
+      ]),
+    );
   }
 
   // ─── Saving overlay ──────────────────────────────────────────────────

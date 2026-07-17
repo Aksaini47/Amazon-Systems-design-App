@@ -88,17 +88,6 @@ class CameraSettingsService {
     await prefs.setBool('timestamp_image', val);
   }
 
-  // --- Aspect ratio selection enabled ---
-  static Future<bool> getAspectEnabled() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('aspect') ?? false;
-  }
-
-  static Future<void> setAspectEnabled(bool val) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('aspect', val);
-  }
-
   // --- File prefix (kept in SharedPreferences for backward compat, but no UI) ---
   static Future<String?> getPrefixOption() async {
     final prefs = await SharedPreferences.getInstance();
