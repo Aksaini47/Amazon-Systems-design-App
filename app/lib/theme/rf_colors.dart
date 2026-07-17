@@ -112,6 +112,14 @@ class RfColors {
   /// Information links / secondary actions.
   static const info = Color(0xFF388BFD);
 
+  /// Amber highlight — drafts, pending states, soft attention accents.
+  /// (Promoted 2026-07-17: was 17 raw `0xFFFFA657` literals across screens.)
+  static const amber = Color(0xFFFFA657);
+
+  /// Recording indicator — the universal vivid "REC" red. Deliberately NOT
+  /// the softer [error] token: while recording, the dot must be unmissable.
+  static const recording = Color(0xFFFF3B30);
+
   // ─── LEGACY ALIASES (kept until migration complete) ───────────────────
   @Deprecated('Use RfColors.action')
   static const orange = action;
@@ -152,7 +160,37 @@ class RfDuration {
   RfDuration._();
   static const press = Duration(milliseconds: 200);
   static const fade = Duration(milliseconds: 150);
+  static const controlsFade = Duration(milliseconds: 250);
   static const slide = Duration(milliseconds: 300);
   static const pulse = Duration(milliseconds: 1000);
   static const pageTransition = Duration(milliseconds: 400);
+
+  /// Standard curves — enter decelerates, exit accelerates, press eases out.
+  static const enter = Curves.easeOutCubic;
+  static const exit = Curves.easeInCubic;
+  static const pressCurve = Curves.easeOut;
+}
+
+/// Spacing scale — 4pt grid. Use these instead of ad-hoc EdgeInsets values
+/// when writing NEW layout code; existing screens migrate opportunistically.
+class RfSpace {
+  RfSpace._();
+  static const xs = 4.0;
+  static const sm = 8.0;
+  static const md = 12.0;
+  static const lg = 16.0;
+  static const xl = 20.0;
+  static const xxl = 24.0;
+}
+
+/// Type scale — sizes/weights the screens already converge on, named.
+/// Wired into ThemeData.textTheme (main.dart) so unstyled Text inherits it.
+class RfType {
+  RfType._();
+  static const title = TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
+  static const heading = TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold);
+  static const label = TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600);
+  static const body = TextStyle(color: RfColors.textPrimary, fontSize: 14);
+  static const caption = TextStyle(color: RfColors.textSecondary, fontSize: 12, height: 1.3);
+  static const mono = TextStyle(color: RfColors.textPrimary, fontSize: 12, fontFamily: 'monospace');
 }

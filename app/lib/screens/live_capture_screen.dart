@@ -732,10 +732,10 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       final choice = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          backgroundColor: const Color(0xFF161B22),
+          backgroundColor: RfColors.card,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Row(children: [
-            Icon(Icons.do_not_disturb_on_rounded, color: Color(0xFFFFA657), size: 22),
+            Icon(Icons.do_not_disturb_on_rounded, color: RfColors.amber, size: 22),
             SizedBox(width: 10),
             Text('Silence interruptions?', style: TextStyle(color: Colors.white)),
           ]),
@@ -744,7 +744,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
             'ringer, and non-urgent calls while you\'re recording. Auto-restores '
             'your previous settings when you stop.\n\n'
             'You can change this anytime in your phone\'s settings.',
-            style: TextStyle(color: Color(0xFF8B949E), fontSize: 13),
+            style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
           ),
           actions: [
             TextButton(
@@ -753,7 +753,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Grant', style: TextStyle(color: Color(0xFFFFA657), fontWeight: FontWeight.bold)),
+              child: const Text('Grant', style: TextStyle(color: RfColors.amber, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -769,7 +769,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: const Row(children: [
-              Icon(Icons.touch_app, color: Color(0xFFFFA657), size: 18),
+              Icon(Icons.touch_app, color: RfColors.amber, size: 18),
               SizedBox(width: 8),
               Expanded(child: Text('Toggle RepairFully ON in DND access, then come back and tap record')),
             ]),
@@ -897,7 +897,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: const Row(children: [
-              Icon(Icons.error_outline, color: Color(0xFFFF7B72), size: 18),
+              Icon(Icons.error_outline, color: RfColors.error, size: 18),
               SizedBox(width: 8),
               Expanded(child: Text('Recording too short — re-capture from the beginning')),
             ]),
@@ -1130,7 +1130,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Row(children: [
-          Icon(Icons.drafts_outlined, color: Color(0xFFFFA657), size: 18),
+          Icon(Icons.drafts_outlined, color: RfColors.amber, size: 18),
           SizedBox(width: 8),
           Expanded(child: Text('Saved to Drafts — finish save from Gallery')),
         ]),
@@ -1475,7 +1475,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     messenger.clearSnackBars();
     messenger.showSnackBar(SnackBar(
       content: Row(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.check_circle, color: Color(0xFF3FB950), size: 18),
+        const Icon(Icons.check_circle, color: RfColors.successLight, size: 18),
         const SizedBox(width: 10),
         Text('Saved · $orderId', style: const TextStyle(color: Colors.white, fontSize: 13)),
       ]),
@@ -1972,7 +1972,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.2,
-                  shadows: [Shadow(color: Color(0x88000000), blurRadius: 2, offset: Offset(0, 1))],
+                  shadows: [Shadow(color: Colors.black54, blurRadius: 2, offset: Offset(0, 1))],
                 ),
               ),
             ),
@@ -2026,7 +2026,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.2,
-                  shadows: [Shadow(color: Color(0x88000000), blurRadius: 2, offset: Offset(0, 1))],
+                  shadows: [Shadow(color: Colors.black54, blurRadius: 2, offset: Offset(0, 1))],
                 ),
                 textAlign: TextAlign.left,
               ),
@@ -2102,7 +2102,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         const SizedBox(width: 8),
         // Animated pulse dot per Mahika §V #4. 1.0 → 1.1 cycle, 1000ms,
         // easeInOut. Draws the eye without being distracting.
-        const RfRecordingPulse(size: 10, color: Color(0xFFFF3B30)),
+        const RfRecordingPulse(size: 10, color: RfColors.recording),
         const SizedBox(width: 6),
         Text(
           _elapsedLabel,

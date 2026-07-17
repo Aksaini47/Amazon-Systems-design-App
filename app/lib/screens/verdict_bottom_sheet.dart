@@ -31,7 +31,7 @@ class VerdictBottomSheet extends StatelessWidget {
                   const Text('QC VERDICT', style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   if (orderId != null)
-                    Text('Order: $orderId', style: const TextStyle(color: Color(0xFF8B949E), fontSize: 12, fontFamily: 'monospace')),
+                    Text('Order: $orderId', style: const TextStyle(color: RfColors.textSecondary, fontSize: 12, fontFamily: 'monospace')),
                   const SizedBox(height: 16),
                 ],
               ),
@@ -71,7 +71,7 @@ class VerdictBottomSheet extends StatelessWidget {
                       icon: Icons.broken_image_outlined,
                       label: 'DAMAGED + DIFFERENT',
                       description: 'Both damaged AND different item returned',
-                      color: const Color(0xFFDA3633),
+                      color: RfColors.error,
                       onTap: () => Navigator.pop(context, QCVerdict.damagedDifferent),
                     ),
                     const SizedBox(height: 16),
@@ -104,7 +104,7 @@ class VerdictBottomSheet extends StatelessWidget {
           title: const Text('Flag as Fraud?', style: TextStyle(color: Colors.white)),
         content: const Text(
           'This will flag the order as potential buyer fraud (swap/different item returned).\n\nSAFE-T claim will be triggered automatically.',
-          style: TextStyle(color: Color(0xFF8B949E), fontSize: 13),
+          style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
         ),
         actions: [
           TextButton(
@@ -205,7 +205,7 @@ class _VerdictButtonState extends State<_VerdictButton> with SingleTickerProvide
                   children: [
                     Text(widget.label, style: TextStyle(color: c, fontSize: 15, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 2),
-                    Text(widget.description, style: const TextStyle(color: Color(0xFF8B949E), fontSize: 11)),
+                    Text(widget.description, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11)),
                   ],
                 ),
               ),

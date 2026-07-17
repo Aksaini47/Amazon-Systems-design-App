@@ -113,12 +113,12 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161B22),
+        backgroundColor: RfColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Delete $n $kind?', style: const TextStyle(color: Colors.white)),
         content: const Text(
           'This cannot be undone.',
-          style: TextStyle(color: Color(0xFF8B949E), fontSize: 13),
+          style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
@@ -296,12 +296,12 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161B22),
+        backgroundColor: RfColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Delete?', style: TextStyle(color: Colors.white)),
         content: Text(
           'Permanently delete $label?\n\nThis cannot be undone.',
-          style: const TextStyle(color: Color(0xFF8B949E), fontSize: 13),
+          style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
         ),
         actions: [
           TextButton(
@@ -493,12 +493,12 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: RfGlass.decoration(),
       child: Row(children: [
-        _statChip(Icons.drafts_outlined, '${_draftSessions.length} session${_draftSessions.length == 1 ? '' : 's'}', const Color(0xFF8B949E)),
+        _statChip(Icons.drafts_outlined, '${_draftSessions.length} session${_draftSessions.length == 1 ? '' : 's'}', RfColors.textSecondary),
         const SizedBox(width: 6),
         const Expanded(
           child: Text(
             'Capture sessions saved before order ID was assigned — tap to view video + photos',
-            style: TextStyle(color: Color(0xFF8B949E), fontSize: 11),
+            style: TextStyle(color: RfColors.textSecondary, fontSize: 11),
           ),
         ),
       ]),
@@ -568,11 +568,11 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.inbox_outlined, color: Color(0xFF4D5565), size: 56),
+            const Icon(Icons.inbox_outlined, color: RfColors.textMuted, size: 56),
             const SizedBox(height: 16),
             Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
-            Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF8B949E), fontSize: 13)),
+            Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: RfColors.textSecondary, fontSize: 13)),
           ],
         ),
       ),
@@ -591,7 +591,7 @@ Future<_PhotoAction?> _showPhotoActionSheet(
 }) {
   return showModalBottomSheet<_PhotoAction>(
     context: context,
-    backgroundColor: const Color(0xFF161B22),
+    backgroundColor: RfColors.card,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -605,7 +605,7 @@ Future<_PhotoAction?> _showPhotoActionSheet(
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: const Color(0x33FFFFFF),
+                color: RfColors.glassBorder(0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -625,16 +625,16 @@ Future<_PhotoAction?> _showPhotoActionSheet(
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.camera_alt_outlined, color: Color(0xFF58A6FF)),
+            leading: const Icon(Icons.camera_alt_outlined, color: RfColors.rtAccent),
             title: const Text('Replace photo', style: TextStyle(color: Colors.white)),
-            subtitle: const Text('Capture a new image', style: TextStyle(color: Color(0xFF8B949E), fontSize: 12)),
+            subtitle: const Text('Capture a new image', style: TextStyle(color: RfColors.textSecondary, fontSize: 12)),
             onTap: () => Navigator.pop(ctx, _PhotoAction.replace),
           ),
           if (showRetag)
             ListTile(
-              leading: const Icon(Icons.label_outline, color: Color(0xFFFFA657)),
+              leading: const Icon(Icons.label_outline, color: RfColors.amber),
               title: const Text('Re-tag photo', style: TextStyle(color: Colors.white)),
-              subtitle: const Text('Change side label', style: TextStyle(color: Color(0xFF8B949E), fontSize: 12)),
+              subtitle: const Text('Change side label', style: TextStyle(color: RfColors.textSecondary, fontSize: 12)),
               onTap: () => Navigator.pop(ctx, _PhotoAction.retag),
             ),
           ListTile(
@@ -667,12 +667,12 @@ Future<bool> _confirmRemovePhoto(BuildContext context, String sideLabel) async {
   final ok = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      backgroundColor: const Color(0xFF161B22),
+      backgroundColor: RfColors.card,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: const Text('Remove photo?', style: TextStyle(color: Colors.white)),
       content: Text(
         'Permanently remove the $sideLabel photo?\n\nThis cannot be undone.',
-        style: const TextStyle(color: Color(0xFF8B949E), fontSize: 13),
+        style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
       ),
       actions: [
         TextButton(
@@ -730,7 +730,7 @@ class _OrderCard extends StatelessWidget {
                '${modified.hour.toString().padLeft(2, '0')}:${modified.minute.toString().padLeft(2, '0')}';
 
     return Material(
-      color: selected ? const Color(0x402F81F7) : RfColors.card,
+      color: selected ? RfColors.rtAccent.withValues(alpha: 0.25) : RfColors.card,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -740,7 +740,7 @@ class _OrderCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: selected ? const Color(0xFF2F81F7) : RfColors.border, width: selected ? 1.5 : 1),
+            border: Border.all(color: selected ? RfColors.rtAccent : RfColors.border, width: selected ? 1.5 : 1),
           ),
           child: Row(
             children: [
@@ -748,7 +748,7 @@ class _OrderCard extends StatelessWidget {
               if (selectionMode) ...[
                 Icon(
                   selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: selected ? const Color(0xFF2F81F7) : Colors.white38,
+                  color: selected ? RfColors.rtAccent : Colors.white38,
                   size: 22,
                 ),
                 const SizedBox(width: 10),
@@ -782,7 +782,7 @@ class _OrderCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(ts, style: const TextStyle(color: Color(0xFF8B949E), fontSize: 11)),
+                    Text(ts, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11)),
                     const SizedBox(height: 4),
                     Wrap(spacing: 8, runSpacing: 4, children: [
                       if (order['mode'] != null)
@@ -790,12 +790,12 @@ class _OrderCard extends StatelessWidget {
                           Icons.label_outline,
                           (order['mode'] as String).toUpperCase(),
                           (order['mode'] as String) == 'pk'
-                              ? const Color(0xFFE86C2B)
-                              : const Color(0xFF388BFD),
+                              ? RfColors.pkAccent
+                              : RfColors.rtAccent,
                         ),
-                      _chip(Icons.videocam, hasVideo ? 'Video' : 'No video', hasVideo ? const Color(0xFF3FB950) : const Color(0xFF8B949E)),
-                      _chip(Icons.photo, '${photoPaths.length} photo${photoPaths.length == 1 ? '' : 's'}', const Color(0xFF8B949E)),
-                      _chip(Icons.sd_storage, '$sizeMb MB', const Color(0xFF8B949E)),
+                      _chip(Icons.videocam, hasVideo ? 'Video' : 'No video', hasVideo ? RfColors.successLight : RfColors.textSecondary),
+                      _chip(Icons.photo, '${photoPaths.length} photo${photoPaths.length == 1 ? '' : 's'}', RfColors.textSecondary),
+                      _chip(Icons.sd_storage, '$sizeMb MB', RfColors.textSecondary),
                     ]),
                   ],
                 ),
@@ -894,7 +894,7 @@ class _DraftSessionCard extends StatelessWidget {
     final accent = mode == 'PK' ? RfColors.pkAccent : RfColors.rtAccent;
 
     return Material(
-      color: selected ? const Color(0x402F81F7) : RfColors.card,
+      color: selected ? RfColors.rtAccent.withValues(alpha: 0.25) : RfColors.card,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -906,7 +906,7 @@ class _DraftSessionCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: selected
-                  ? const Color(0xFF2F81F7)
+                  ? RfColors.rtAccent
                   : (hasRecovered ? Colors.amber.withAlpha(120) : RfColors.border),
               width: selected ? 1.5 : 1,
             ),
@@ -916,7 +916,7 @@ class _DraftSessionCard extends StatelessWidget {
               if (selectionMode) ...[
                 Icon(
                   selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: selected ? const Color(0xFF2F81F7) : Colors.white38,
+                  color: selected ? RfColors.rtAccent : Colors.white38,
                   size: 22,
                 ),
                 const SizedBox(width: 10),
@@ -951,18 +951,18 @@ class _DraftSessionCard extends StatelessWidget {
                       const Flexible(
                         child: Text(
                           'No order ID yet',
-                          style: TextStyle(color: Color(0xFF8B949E), fontSize: 11, fontStyle: FontStyle.italic),
+                          style: TextStyle(color: RfColors.textSecondary, fontSize: 11, fontStyle: FontStyle.italic),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ]),
                     const SizedBox(height: 4),
-                    Text(ts, style: const TextStyle(color: Color(0xFF8B949E), fontSize: 11)),
+                    Text(ts, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11)),
                     const SizedBox(height: 4),
                     Wrap(spacing: 8, runSpacing: 4, children: [
-                      _chip(Icons.videocam, hasVideo ? 'Video' : 'No video', hasVideo ? const Color(0xFF3FB950) : const Color(0xFF8B949E)),
-                      _chip(Icons.photo, '${photoPaths.length} photo${photoPaths.length == 1 ? '' : 's'}', const Color(0xFF8B949E)),
-                      _chip(Icons.sd_storage, '$sizeMb MB', const Color(0xFF8B949E)),
+                      _chip(Icons.videocam, hasVideo ? 'Video' : 'No video', hasVideo ? RfColors.successLight : RfColors.textSecondary),
+                      _chip(Icons.photo, '${photoPaths.length} photo${photoPaths.length == 1 ? '' : 's'}', RfColors.textSecondary),
+                      _chip(Icons.sd_storage, '$sizeMb MB', RfColors.textSecondary),
                       if (hasRecovered)
                         _chip(Icons.restore_rounded, 'Recovered', Colors.amber),
                     ]),
@@ -1222,7 +1222,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
                           _ctrl!,
                           allowScrubbing: true,
                           colors: const VideoProgressColors(
-                            playedColor: Color(0xFFFF7B00),
+                            playedColor: RfColors.pkAccent,
                             bufferedColor: Colors.white24,
                             backgroundColor: Colors.white10,
                           ),
@@ -1394,7 +1394,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     const sides = ['label', 'contents', 'front', 'back', 'serial'];
     final newSide = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: const Color(0xFF161B22),
+      backgroundColor: RfColors.card,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1404,7 +1404,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 12),
-              child: Container(width: 36, height: 4, decoration: BoxDecoration(color: const Color(0x33FFFFFF), borderRadius: BorderRadius.circular(2))),
+              child: Container(width: 36, height: 4, decoration: BoxDecoration(color: RfColors.glassBorder(0.2), borderRadius: BorderRadius.circular(2))),
             ),
             const Padding(
               padding: EdgeInsets.fromLTRB(20, 16, 20, 4),
@@ -1417,7 +1417,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
               padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('If another photo already uses this tag, the two will be swapped.', style: TextStyle(color: Color(0xFF8B949E), fontSize: 12)),
+                child: Text('If another photo already uses this tag, the two will be swapped.', style: TextStyle(color: RfColors.textSecondary, fontSize: 12)),
               ),
             ),
             ...sides.map((s) {
@@ -1425,10 +1425,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
               return ListTile(
                 leading: Icon(
                   isCurrent ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                  color: isCurrent ? const Color(0xFFFFA657) : Colors.white54,
+                  color: isCurrent ? RfColors.amber : Colors.white54,
                 ),
-                title: Text(s.toUpperCase(), style: TextStyle(color: isCurrent ? const Color(0xFFFFA657) : Colors.white, fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal)),
-                trailing: isCurrent ? const Text('current', style: TextStyle(color: Color(0xFF8B949E), fontSize: 11)) : null,
+                title: Text(s.toUpperCase(), style: TextStyle(color: isCurrent ? RfColors.amber : Colors.white, fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal)),
+                trailing: isCurrent ? const Text('current', style: TextStyle(color: RfColors.textSecondary, fontSize: 11)) : null,
                 onTap: isCurrent ? null : () => Navigator.pop(ctx, s),
               );
             }),
@@ -1546,7 +1546,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     final saved = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF161B22),
+      backgroundColor: RfColors.card,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1574,8 +1574,8 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                     style: const TextStyle(color: Colors.white, fontFamily: 'monospace'),
                     decoration: const InputDecoration(
                       labelText: 'Order ID',
-                      labelStyle: TextStyle(color: Color(0xFF8B949E)),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF30363D))),
+                      labelStyle: TextStyle(color: RfColors.textSecondary),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.border)),
                       focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.navy)),
                     ),
                   ),
@@ -1585,14 +1585,14 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                     style: const TextStyle(color: Colors.white, fontFamily: 'monospace'),
                     decoration: const InputDecoration(
                       labelText: 'AWB / tracking (optional)',
-                      labelStyle: TextStyle(color: Color(0xFF8B949E)),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF30363D))),
+                      labelStyle: TextStyle(color: RfColors.textSecondary),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.border)),
                       focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.navy)),
                     ),
                   ),
                   if (mode == CaptureMode.rt) ...[
                     const SizedBox(height: 16),
-                    const Text('QC verdict', style: TextStyle(color: Color(0xFF8B949E), fontSize: 12)),
+                    const Text('QC verdict', style: TextStyle(color: RfColors.textSecondary, fontSize: 12)),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -1600,10 +1600,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                       children: QCVerdict.values.map((v) {
                         final active = selectedVerdict == v;
                         return ChoiceChip(
-                          label: Text(v.name, style: TextStyle(color: active ? Colors.white : const Color(0xFF8B949E), fontSize: 12)),
+                          label: Text(v.name, style: TextStyle(color: active ? Colors.white : RfColors.textSecondary, fontSize: 12)),
                           selected: active,
                           selectedColor: RfColors.rtAccent.withValues(alpha: 0.35),
-                          backgroundColor: const Color(0xFF21262D),
+                          backgroundColor: RfColors.surface,
                           onSelected: (_) => setSheetState(() => selectedVerdict = v),
                         );
                       }).toList(),
@@ -1762,7 +1762,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
             const SizedBox(height: 4),
             const Text(
               'Tap to view · Long-press to edit',
-              style: TextStyle(color: Color(0xFF8B949E), fontSize: 11),
+              style: TextStyle(color: RfColors.textSecondary, fontSize: 11),
             ),
             const SizedBox(height: 8),
             GridView.count(
@@ -1795,7 +1795,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Row(mainAxisSize: MainAxisSize.min, children: [
-                            const Icon(Icons.label_outline, color: Color(0xFFFFA657), size: 11),
+                            const Icon(Icons.label_outline, color: RfColors.amber, size: 11),
                             const SizedBox(width: 4),
                             Text(
                               side.toUpperCase(),
@@ -1821,9 +1821,9 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(folderPath, style: const TextStyle(color: Color(0xFF8B949E), fontSize: 11, fontFamily: 'monospace')),
+                Text(folderPath, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11, fontFamily: 'monospace')),
                 const SizedBox(height: 6),
-                Text('Total: $sizeMb MB', style: const TextStyle(color: Color(0xFF8B949E), fontSize: 11)),
+                Text('Total: $sizeMb MB', style: const TextStyle(color: RfColors.textSecondary, fontSize: 11)),
                 const SizedBox(height: 8),
                 TextButton.icon(
                   icon: const Icon(Icons.copy, size: 14, color: Colors.white54),
@@ -1855,12 +1855,12 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
               final ok = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  backgroundColor: const Color(0xFF161B22),
+                  backgroundColor: RfColors.card,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   title: const Text('Delete order?', style: TextStyle(color: Colors.white)),
                   content: Text(
                     'Permanently delete order $orderId\n(video + ${photoPaths.length} photos)?\n\nThis cannot be undone.',
-                    style: const TextStyle(color: Color(0xFF8B949E), fontSize: 13),
+                    style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
                   ),
                   actions: [
                     TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
@@ -2032,7 +2032,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text.toUpperCase(),
-      style: const TextStyle(color: Color(0xFF8B949E), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2),
+      style: const TextStyle(color: RfColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2),
     );
   }
 }
@@ -2200,12 +2200,12 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
       final capture = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          backgroundColor: const Color(0xFF161B22),
+          backgroundColor: RfColors.card,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text('Add photo', style: TextStyle(color: Colors.white)),
           content: Text(
             'Capture ${DraftSaveService.labelForSide(side)} for this $modeStr shipment.',
-            style: const TextStyle(color: Color(0xFF8B949E), fontSize: 13),
+            style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
           ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
@@ -2259,12 +2259,12 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161B22),
+        backgroundColor: RfColors.card,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Delete this draft?', style: TextStyle(color: Colors.white)),
         content: Text(
           'Permanently delete all ${paths.length} file${paths.length == 1 ? '' : 's'} in this draft session?\n\nThis cannot be undone.',
-          style: const TextStyle(color: Color(0xFF8B949E), fontSize: 13),
+          style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
@@ -2329,17 +2329,17 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0x33FFA657),
+              color: RfColors.amber.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFFFA657).withAlpha(120)),
+              border: Border.all(color: RfColors.amber.withAlpha(120)),
             ),
             child: Row(children: [
-              const Icon(Icons.warning_amber_rounded, color: Color(0xFFFFA657), size: 18),
+              const Icon(Icons.warning_amber_rounded, color: RfColors.amber, size: 18),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
                   'Draft — no Order ID assigned yet. Tap Finish save to promote to a saved order.',
-                  style: TextStyle(color: Color(0xFFFFA657), fontSize: 12, fontWeight: FontWeight.w500),
+                  style: TextStyle(color: RfColors.amber, fontSize: 12, fontWeight: FontWeight.w500),
                 ),
               ),
             ]),
@@ -2412,7 +2412,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
             const SizedBox(height: 4),
             const Text(
               'Tap to view · Long-press to edit',
-              style: TextStyle(color: Color(0xFF8B949E), fontSize: 11),
+              style: TextStyle(color: RfColors.textSecondary, fontSize: 11),
             ),
             const SizedBox(height: 8),
             GridView.count(
@@ -2473,13 +2473,13 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text(
                     p.split(Platform.pathSeparator).last,
-                    style: const TextStyle(color: Color(0xFF8B949E), fontSize: 10, fontFamily: 'monospace'),
+                    style: const TextStyle(color: RfColors.textSecondary, fontSize: 10, fontFamily: 'monospace'),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '$sizeMb MB total · ${draftPaths.length} file${draftPaths.length == 1 ? '' : 's'}',
-                  style: const TextStyle(color: Color(0xFF6E7681), fontSize: 11),
+                  style: const TextStyle(color: RfColors.textMuted, fontSize: 11),
                 ),
               ],
             ),

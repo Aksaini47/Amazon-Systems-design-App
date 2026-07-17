@@ -41,14 +41,14 @@ class _HomeScreenState extends State<HomeScreen> {
     if (notes == null || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       duration: const Duration(seconds: 8),
-      backgroundColor: const Color(0xFF161B22),
+      backgroundColor: RfColors.card,
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       content: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.system_update_outlined, color: Color(0xFF3FB950), size: 22),
+          const Icon(Icons.system_update_outlined, color: RfColors.successLight, size: 22),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 4),
                 Text(
                   notes,
-                  style: const TextStyle(color: Color(0xFFE6EDF3), fontSize: 12, height: 1.35),
+                  style: const TextStyle(color: RfColors.textPrimary, fontSize: 12, height: 1.35),
                   maxLines: 6,
                   overflow: TextOverflow.ellipsis,
                 ),

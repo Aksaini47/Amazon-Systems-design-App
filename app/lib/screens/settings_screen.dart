@@ -271,7 +271,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: RfColors.glassBorder(0.18)),
                         ),
-                        child: const Icon(Icons.folder_outlined, color: Color(0xFF8B949E), size: 20),
+                        child: const Icon(Icons.folder_outlined, color: RfColors.textSecondary, size: 20),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -285,14 +285,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             const SizedBox(height: 3),
                             Text(
                               _selectedStoragePath.isNotEmpty ? _selectedStoragePath : 'Tap to select folder',
-                              style: const TextStyle(color: Color(0xFF8B949E), fontSize: 11),
+                              style: const TextStyle(color: RfColors.textSecondary, fontSize: 11),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
                       ),
-                      const Icon(Icons.chevron_right, color: Color(0xFF8B949E), size: 22),
+                      const Icon(Icons.chevron_right, color: RfColors.textSecondary, size: 22),
                     ],
                   ),
                 ),
@@ -310,7 +310,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   padding: const EdgeInsets.all(14),
                   child: const Row(
                     children: [
-                      Icon(Icons.article_outlined, color: Color(0xFF8B949E), size: 22),
+                      Icon(Icons.article_outlined, color: RfColors.textSecondary, size: 22),
                       SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -323,12 +323,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             SizedBox(height: 3),
                             Text(
                               'Last 60 days — shipment events by day',
-                              style: TextStyle(color: Color(0xFF8B949E), fontSize: 11),
+                              style: TextStyle(color: RfColors.textSecondary, fontSize: 11),
                             ),
                           ],
                         ),
                       ),
-                      Icon(Icons.chevron_right, color: Color(0xFF8B949E), size: 22),
+                      Icon(Icons.chevron_right, color: RfColors.textSecondary, size: 22),
                     ],
                   ),
                 ),
@@ -375,7 +375,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Text(
           label.toUpperCase(),
           style: const TextStyle(
-            color: Color(0xFFC9D1D9),
+            color: RfColors.textPrimary,
             fontSize: 12,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.0,
@@ -413,7 +413,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Text(
                   label.toUpperCase(),
                   style: const TextStyle(
-                    color: Color(0xFF8B949E),
+                    color: RfColors.textSecondary,
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.8,
@@ -469,13 +469,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Text(
                   label,
                   style: TextStyle(
-                    color: value ? Colors.white : const Color(0xFFC9D1D9),
+                    color: value ? Colors.white : RfColors.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 3),
-                Text(subtitle, style: const TextStyle(color: Color(0xFF8B949E), fontSize: 12, height: 1.3)),
+                Text(subtitle, style: const TextStyle(color: RfColors.textSecondary, fontSize: 12, height: 1.3)),
               ],
             ),
           ),
@@ -489,7 +489,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               trackColor: WidgetStateProperty.resolveWith((states) {
                 if (states.contains(WidgetState.selected)) return RfColors.success;
-                return const Color(0xFF30363D);
+                return RfColors.border;
               }),
               thumbColor: WidgetStateProperty.all(Colors.white),
               trackOutlineColor: WidgetStateProperty.resolveWith((states) {
@@ -541,7 +541,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
             ),
             const SizedBox(width: 4),
-            const Icon(Icons.expand_more, color: Color(0xFF8B949E), size: 18),
+            const Icon(Icons.expand_more, color: RfColors.textSecondary, size: 18),
           ],
         ),
       ),
@@ -558,7 +558,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Text(
                   e.value,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Color(0xFF8B949E),
+                    color: isSelected ? Colors.white : RfColors.textSecondary,
                     fontSize: 13,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
@@ -613,7 +613,7 @@ class _AboutCardState extends State<_AboutCard> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Row(children: [
-          const Icon(Icons.info_outline, color: Color(0xFFFFA657), size: 18),
+          const Icon(Icons.info_outline, color: RfColors.amber, size: 18),
           const SizedBox(width: 8),
           Expanded(child: Text(r.message)),
         ]),
@@ -635,9 +635,9 @@ class _AboutCardState extends State<_AboutCard> {
       UpdateOutcome.failed => Icons.error_outline,
     };
     final color = switch (r.outcome) {
-      UpdateOutcome.failed => const Color(0xFFFF7B72),
-      UpdateOutcome.unavailable => const Color(0xFFFFA657),
-      _ => const Color(0xFF3FB950),
+      UpdateOutcome.failed => RfColors.error,
+      UpdateOutcome.unavailable => RfColors.amber,
+      _ => RfColors.successLight,
     };
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Row(children: [
@@ -659,14 +659,14 @@ class _AboutCardState extends State<_AboutCard> {
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
           title: const Row(children: [
-          Icon(Icons.history_rounded, color: Color(0xFF388BFD), size: 22),
+          Icon(Icons.history_rounded, color: RfColors.rtAccent, size: 22),
           SizedBox(width: 10),
           Text('What\'s new', style: TextStyle(color: Colors.white)),
         ]),
         content: SingleChildScrollView(
           child: Text(
             UpdateService.latestChangelog,
-            style: const TextStyle(color: Color(0xFFE6EDF3), fontSize: 13, height: 1.4),
+            style: const TextStyle(color: RfColors.textPrimary, fontSize: 13, height: 1.4),
           ),
         ),
         actions: [
@@ -707,8 +707,8 @@ class _AboutCardState extends State<_AboutCard> {
                     'assets/branding/rf_logo.png',
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      color: const Color(0xFFE86C2B).withAlpha(40),
-                      child: const Icon(Icons.camera_outlined, color: Color(0xFFE86C2B), size: 22),
+                      color: RfColors.pkAccent.withAlpha(40),
+                      child: const Icon(Icons.camera_outlined, color: RfColors.pkAccent, size: 22),
                     ),
                   ),
                 ),
@@ -722,14 +722,14 @@ class _AboutCardState extends State<_AboutCard> {
                         style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 2),
                     Text('v$version',
-                        style: const TextStyle(color: Color(0xFF8B949E), fontSize: 12, fontFamily: 'monospace')),
+                        style: const TextStyle(color: RfColors.textSecondary, fontSize: 12, fontFamily: 'monospace')),
                   ],
                 ),
               ),
             ]),
           ),
 
-          const Divider(height: 1, color: Color(0x33FFFFFF)),
+          Divider(height: 1, color: RfColors.glassBorder(0.2)),
 
           // Detail rows
           _row(Icons.tag_outlined, 'Package', packageName, monospace: true),
@@ -737,7 +737,7 @@ class _AboutCardState extends State<_AboutCard> {
             Icons.cloud_outlined,
             'Crashlytics',
             firebaseUp ? 'Connected (rf-logger)' : 'Not connected',
-            valueColor: firebaseUp ? const Color(0xFF3FB950) : const Color(0xFFFF7B72),
+            valueColor: firebaseUp ? RfColors.successLight : RfColors.error,
           ),
           _row(
             Icons.system_update_outlined,
@@ -749,18 +749,18 @@ class _AboutCardState extends State<_AboutCard> {
                 : (kReleaseMode
                     ? 'Inactive — not a Shorebird release APK'
                     : 'Inactive — debug / flutter run'),
-            valueColor: _shorebirdAvailable ? const Color(0xFF3FB950) : const Color(0xFF8B949E),
+            valueColor: _shorebirdAvailable ? RfColors.successLight : RfColors.textSecondary,
           ),
           if (_nextPatch != null)
             _row(
               Icons.download_for_offline_outlined,
               'Staged update',
               'Patch #$_nextPatch — applies on next launch',
-              valueColor: const Color(0xFFFFA657),
+              valueColor: RfColors.amber,
             ),
-          _row(Icons.security_outlined, 'Signed by', 'repairfully-dev.jks', monospace: true),
+          _row(Icons.security_outlined, 'Signed by', 'debug keystore (deliberate — see build.gradle)', monospace: true),
 
-          const Divider(height: 1, color: Color(0x33FFFFFF)),
+          Divider(height: 1, color: RfColors.glassBorder(0.2)),
 
           // Action buttons
           Padding(
@@ -774,19 +774,19 @@ class _AboutCardState extends State<_AboutCard> {
                       : const Icon(Icons.refresh_rounded, size: 18),
                   label: Text(_checking ? 'Checking…' : 'Check for updates'),
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF388BFD),
+                    foregroundColor: RfColors.rtAccent,
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
               ),
-              Container(width: 1, height: 22, color: const Color(0xFF30363D)),
+              Container(width: 1, height: 22, color: RfColors.border),
               Expanded(
                 child: TextButton.icon(
                   onPressed: _showChangelog,
                   icon: const Icon(Icons.history_rounded, size: 18),
                   label: const Text('What\'s new'),
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFFE86C2B),
+                    foregroundColor: RfColors.pkAccent,
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
@@ -803,9 +803,9 @@ class _AboutCardState extends State<_AboutCard> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Row(children: [
-        Icon(icon, color: const Color(0xFF8B949E), size: 16),
+        Icon(icon, color: RfColors.textSecondary, size: 16),
         const SizedBox(width: 10),
-        Text(label, style: const TextStyle(color: Color(0xFF8B949E), fontSize: 12)),
+        Text(label, style: const TextStyle(color: RfColors.textSecondary, fontSize: 12)),
         const Spacer(),
         Flexible(
           child: Text(

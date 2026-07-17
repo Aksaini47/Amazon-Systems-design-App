@@ -97,6 +97,13 @@ class RepairfullyApp extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: RfColors.bg,
         canvasColor: RfColors.bg,
+        textTheme: const TextTheme(
+          titleLarge: RfType.title,
+          titleMedium: RfType.heading,
+          labelLarge: RfType.label,
+          bodyMedium: RfType.body,
+          bodySmall: RfType.caption,
+        ),
         dialogTheme: DialogThemeData(
           backgroundColor: RfColors.glassElevated(0.75),
           shape: RoundedRectangleBorder(

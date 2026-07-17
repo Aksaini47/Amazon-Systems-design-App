@@ -498,8 +498,8 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
                   _statusMessage ?? 'Place the label inside the box, then tap SCAN',
                   style: TextStyle(
                     color: (_foundAwb && _foundOrderId)
-                        ? const Color(0xFF3FB950)
-                        : const Color(0xFF8B949E),
+                        ? RfColors.successLight
+                        : RfColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -542,17 +542,17 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0x33FF7B72),
+                      color: RfColors.error.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFFF7B72)),
+                      border: Border.all(color: RfColors.error),
                     ),
                     child: Row(children: [
-                      const Icon(Icons.warning_amber_rounded, color: Color(0xFFFF7B72), size: 16),
+                      const Icon(Icons.warning_amber_rounded, color: RfColors.error, size: 16),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Duplicate — $_duplicateWarning',
-                          style: const TextStyle(color: Color(0xFFFF7B72), fontSize: 12, fontWeight: FontWeight.w600),
+                          style: const TextStyle(color: RfColors.error, fontSize: 12, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ]),
@@ -589,7 +589,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   /// preview IS the box (cover-cropped); no surrounding letterbox.
   Widget _buildCameraBox() {
     final locked = _foundAwb && _foundOrderId;
-    final accent = locked ? const Color(0xFF3FB950) : const Color(0xFFFFA657);
+    final accent = locked ? RfColors.successLight : RfColors.amber;
     return LayoutBuilder(
       builder: (context, constraints) {
         // Pick the largest 4:6 box that fits in available space
@@ -673,7 +673,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     );
   }
 
-  List<Widget> _cornerBrackets({Color color = const Color(0xFFFFA657)}) {
+  List<Widget> _cornerBrackets({Color color = RfColors.amber}) {
     const length = 18.0;
     const thickness = 2.5;
     Widget corner({double? top, double? bottom, double? left, double? right, required BoxBorder border}) {
@@ -702,12 +702,12 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   }) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
-        Text(label, style: const TextStyle(color: Color(0xFF8B949E), fontSize: 11, fontWeight: FontWeight.w600)),
+        Text(label, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
         if (detected) ...[
           const SizedBox(width: 6),
-          const Icon(Icons.auto_awesome, color: Color(0xFF3FB950), size: 10),
+          const Icon(Icons.auto_awesome, color: RfColors.successLight, size: 10),
           const SizedBox(width: 3),
-          const Text('auto', style: TextStyle(color: Color(0xFF3FB950), fontSize: 9, fontStyle: FontStyle.italic)),
+          const Text('auto', style: TextStyle(color: RfColors.successLight, fontSize: 9, fontStyle: FontStyle.italic)),
         ],
       ]),
       const SizedBox(height: 4),
@@ -721,10 +721,10 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
           fillColor: RfColors.bg,
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF30363D))),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF30363D))),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF1F6FEB), width: 1.5)),
-          suffixIcon: isValid ? const Icon(Icons.check_circle, color: Color(0xFF3FB950), size: 18) : null,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.border)),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.border)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.rtAccent, width: 1.5)),
+          suffixIcon: isValid ? const Icon(Icons.check_circle, color: RfColors.successLight, size: 18) : null,
           suffixIconConstraints: const BoxConstraints(minWidth: 28, minHeight: 28),
         ),
         keyboardType: TextInputType.text,
