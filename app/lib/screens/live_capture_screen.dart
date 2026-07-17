@@ -60,7 +60,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   // ─── Session state ─────────────────────────────────────────────────────
   CapturePhase _phase = CapturePhase.loading;
-  final Map<String, dynamic> _session = {};
+  _LiveSession _session = _LiveSession();
 
   // ─── Countdown ───────────────────────────────────────────────────────
   bool _showCountdown = false;
@@ -124,7 +124,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   /// Full-bleed only during claim re-init or while a draft video is still in session.
   bool get _useFullBleedPreview =>
       _inClaimFlow ||
-      (_session['videoPath'] != null && _camera != null);
+      (_session.videoPath != null && _camera != null);
 
   // Capture countdown duration from settings. 0 = manual capture mode.
   int _captureCountdownSec = 3;
@@ -230,7 +230,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       if (_isRecording ||
           _camera!.value.isRecordingVideo ||
           _inClaimFlow ||
-          _session['videoPath'] != null) {
+          _session.videoPath != null) {
         setState(() {});
       }
     };
@@ -275,7 +275,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         'cameraNull': _camera == null,
         'cameraReady': _cameraReady,
         'isRecording': _isRecording,
-        'hasVideoDraft': _session['videoPath'] != null,
+        'hasVideoDraft': _session.videoPath != null,
         'showCountdown': _showCountdown,
         'inClaimFlow': _inClaimFlow,
       },
@@ -291,7 +291,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       location: 'live_capture_screen.dart:_disposeCameraForModal',
       message: 'camera disposed for modal',
       hypothesisId: 'H1',
-      data: {'phase': _phase.name, 'hasVideoDraft': _session['videoPath'] != null},
+      data: {'phase': _phase.name, 'hasVideoDraft': _session.videoPath != null},
     );
   }
 
@@ -440,18 +440,18 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   // ─── Session start ───────────────────────────────────────────────────
 
   void _startSession() {
-    _session['sessionStartedAt'] = DateTime.now();
+    _session.sessionStartedAt = DateTime.now();
     // Don't auto-start — wait for user to tap capture button
     setState(() { _phase = CapturePhase.stopped; });
   }
 
   void _logActivity(String event, {Map<String, String>? extra}) {
-    final verdict = _session['verdict'] as QCVerdict?;
+    final verdict = _session.verdict;
     ActivityLogService.log(
       event: event,
       mode: widget.mode,
-      orderId: _session['orderId'] as String?,
-      awb: _session['awb'] as String?,
+      orderId: _session.orderId,
+      awb: _session.awb,
       qc: verdict?.name,
       extra: extra,
     );
@@ -670,7 +670,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       final shouldProceed = await _maybePromptDndPermission();
       if (!shouldProceed || !mounted) return;
 
-      _session['videoStartedAt'] = DateTime.now();
+      _session.videoStartedAt = DateTime.now();
       _logActivity('video_start');
       _stopwatch.reset();
       _stopwatch.start();
@@ -855,8 +855,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         return;
       }
       final xfile = await _camera!.stopVideoRecording();
-      _session['videoStoppedAt'] = DateTime.now();
-      _session['videoDurationSeconds'] = _stopwatch.elapsed.inSeconds;
+      _session.videoStoppedAt = DateTime.now();
+      _session.videoDurationSeconds = _stopwatch.elapsed.inSeconds;
       _logActivity('video_stop', extra: {
         'duration_sec': '${_stopwatch.elapsed.inSeconds}',
       });
@@ -915,8 +915,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       // (which gets cleaned up). _saveSession() promotes the draft to the
       // order folder once the order ID is known.
       final draftPath = await _localStorage.saveDraftVideo(xfile, widget.mode);
-      _session['videoPath'] = draftPath;
-      _session['isDraft'] = true;
+      _session.videoPath = draftPath;
+      _session.isDraft = true;
       debugPrint('Video saved to drafts: $draftPath');
       // #region agent log
       DebugSessionLog.log(
@@ -1112,11 +1112,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   /// User cancelled save flow — draft files stay on disk for Gallery → Drafts.
   Future<void> _retainDraftOnCancel() async {
-    final hadVideo = _session['videoPath'] != null;
+    final hadVideo = _session.videoPath != null;
     _tempPhotoPaths.clear();
     _nextPhotoSide = PhotoSide.front;
-    _session.clear();
-    _session['isDraft'] = false;
+    _session = _LiveSession();
+    _session.isDraft = false;
     DebugSessionLog.log(
       location: 'live_capture_screen.dart:_retainDraftOnCancel',
       message: 'save flow cancelled — draft retained',
@@ -1161,8 +1161,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       return;
     }
 
-    _session['orderId'] = result['orderId'];
-    _session['awb'] = result['awb'];
+    _session.orderId = result['orderId'];
+    _session.awb = result['awb'];
     unawaited(_saveSession());
   }
 
@@ -1187,7 +1187,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       return;
     }
 
-    _session['verdict'] = verdict;
+    _session.verdict = verdict;
     _logActivity('qc_verdict', extra: {'qc': verdict.name});
 
     await _disposeCameraForModal();
@@ -1208,8 +1208,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       return;
     }
 
-    _session['orderId'] = result['orderId'];
-    _session['awb'] = result['awb'];
+    _session.orderId = result['orderId'];
+    _session.awb = result['awb'];
 
     await _runClaimPhotoSequence();
     if (!mounted) return;
@@ -1234,7 +1234,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         data: {
           'cameraNull': _camera == null,
           'cameraReady': _cameraReady,
-          'orderId': _session['orderId'],
+          'orderId': _session.orderId,
         },
       );
       return;
@@ -1243,12 +1243,12 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       location: 'live_capture_screen.dart:_runClaimPhotoSequence',
       message: 'claim camera ready',
       hypothesisId: 'H9-claim-blank',
-      data: {'orderId': _session['orderId']},
+      data: {'orderId': _session.orderId},
     );
 
     _inClaimFlow = true;
     try {
-      final verdict = _session['verdict'] as QCVerdict?;
+      final verdict = _session.verdict;
       // QC OK: front, back, serial (optional). Others: full 5-step sequence.
       final sequence = <(PhotoSide, String)>[
         if (verdict != QCVerdict.ok) ...[
@@ -1351,10 +1351,10 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     setState(() { _isSaving = true; _phase = CapturePhase.saving; });
 
     try {
-      final orderId = _session['orderId'] as String?;
+      final orderId = _session.orderId;
       if (orderId == null) throw Exception('No order ID - barcode not captured');
 
-      final videoPath = _session['videoPath'] as String?;
+      final videoPath = _session.videoPath;
       if (videoPath == null) throw Exception('No video recorded');
 
       // Check if video file exists
@@ -1375,7 +1375,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       // Most paths produce a draft (see _stopRecording) — promote it via rename.
       // Legacy path: fall back to the copy-based saveVideo if no draft marker.
       String savedVideoPath;
-      final isDraft = _session['isDraft'] as bool? ?? false;
+      final isDraft = _session.isDraft;
       try {
         if (isDraft) {
           savedVideoPath = await _localStorage.promoteDraftVideo(
@@ -1420,19 +1420,19 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       // Build session
       final session = CaptureSession(
         orderId: orderId,
-        awb: _session['awb'] as String?,
+        awb: _session.awb,
         mode: widget.mode,
-        sessionStartedAt: _session['sessionStartedAt'] as DateTime? ?? DateTime.now(),
-        videoStartedAt: _session['videoStartedAt'] as DateTime?,
-        videoStoppedAt: _session['videoStoppedAt'] as DateTime?,
-        videoDurationSeconds: _session['videoDurationSeconds'] as int?,
+        sessionStartedAt: _session.sessionStartedAt ?? DateTime.now(),
+        videoStartedAt: _session.videoStartedAt,
+        videoStoppedAt: _session.videoStoppedAt,
+        videoDurationSeconds: _session.videoDurationSeconds,
         videoPath: savedVideoPath,
         frontPhotoPath: finalPaths[PhotoSide.front],
         backPhotoPath: finalPaths[PhotoSide.back],
         labelPhotoPath: finalPaths[PhotoSide.label],
         contentsPhotoPath: finalPaths[PhotoSide.contents],
         serialPhotoPath: finalPaths[PhotoSide.serial],
-        verdict: _session['verdict'] as QCVerdict?,
+        verdict: _session.verdict,
       );
 
       await _localStorage.writeMetaJson(session);
@@ -1449,7 +1449,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       debugPrint('Stack trace: $st');
       await CrashReporting.setCaptureContext(
         mode: widget.mode,
-        orderId: _session['orderId'] as String?,
+        orderId: _session.orderId,
         phase: 'save_failed',
       );
       await CrashReporting.recordNonFatal(e, st, reason: 'save_session');
@@ -1495,7 +1495,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _stopwatch.reset();
     _clearCaptureOverlayState();
     setState(() {
-      _session.clear();
+      _session = _LiveSession();
       _tempPhotoPaths.clear();
       _isRecording = false;
       _isSaving = false;
@@ -1583,8 +1583,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     // Camera-loading / handoff — never show draft shell during claim re-init
     if (_camera == null || !_cameraReady) {
       final waitingForLabel =
-          _session['videoPath'] != null &&
-          _session['orderId'] == null &&
+          _session.videoPath != null &&
+          _session.orderId == null &&
           _phase == CapturePhase.stopped;
       if (waitingForLabel) {
         _logBuildBranch('post_stop_draft_shell');
@@ -2264,7 +2264,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           if (!_isRecording
               && widget.mode == CaptureMode.rt
               && _phase == CapturePhase.stopped
-              && _session['videoPath'] == null
+              && _session.videoPath == null
               && !_showCountdown
               && !_inClaimFlow)
             _buildRtInstructionBanner(accent),
@@ -2662,4 +2662,18 @@ class _FrameCornerPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _FrameCornerPainter old) =>
       old.align != align || old.color != color;
+}
+
+/// Mutable working state of one capture session — typed so a mistyped field
+/// is a compile error, not a silent runtime null (was an untyped map).
+class _LiveSession {
+  String? orderId;
+  String? awb;
+  QCVerdict? verdict;
+  String? videoPath;
+  bool isDraft = false;
+  DateTime? sessionStartedAt;
+  DateTime? videoStartedAt;
+  DateTime? videoStoppedAt;
+  int? videoDurationSeconds;
 }
