@@ -1,6 +1,6 @@
 # Graphs & workflows
 
-Canonical Mahika flow docs. `.cursor/rules` and `AGENTS.md` link here.
+Canonical Mahika flow docs. `.claude/skills/` and `AGENTS.md` link here.
 
 ## Active workflows
 
@@ -9,6 +9,14 @@ Canonical Mahika flow docs. `.cursor/rules` and `AGENTS.md` link here.
 | [seller-central-login/](seller-central-login/) | `FLOW.md`, `GRAPHIFY.md` | Login, OTP, Call 711, S7 |
 | [create-seller-support-case/](create-seller-support-case/) | `FLOW.md`, `FORM.md`, `BROWSER.md`, `GRAPHIFY.md` | Case Log path D, SP-API text |
 | [seller-reports/](seller-reports/) | `GUIDE.md` | Manual report download + analyze |
+| [bulk-listing-create/](bulk-listing-create/) | `FLOW.md`, `GRAPHIFY.md` | PHONE_ACCESSORY template cols, C/L dropdowns, bulk upload, stock match gaps |
+
+## Status snapshots
+
+| File | Covers |
+|--------|--------|
+| [PROGRESS_2026-07-17.md](PROGRESS_2026-07-17.md) | Snapshot — **superseded in 4 places**, see below |
+| [CHAT_MIGRATION_ANALYSIS_2026-07-17.md](CHAT_MIGRATION_ANALYSIS_2026-07-17.md) | Cursor chat migration analysis + disk-verified state. **Batch 50001020639 verified FAILED (0/25 live).** Read this before trusting the snapshot above. |
 
 ## Commands
 

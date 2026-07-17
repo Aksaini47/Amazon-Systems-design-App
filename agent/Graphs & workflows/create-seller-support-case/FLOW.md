@@ -67,7 +67,7 @@ flowchart TD
 
 ## Sir recap (4 branches)
 
-### D — Help menu (Cursor browser — **discovered May 2026**)
+### D — Help menu (visible browser — **discovered May 2026**)
 
 ```
 Home → ? Help

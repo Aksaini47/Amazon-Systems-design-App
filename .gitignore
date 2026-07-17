@@ -99,3 +99,5 @@ catalog-builder/dist/
 # Graphify build cache (keep graph.json local only if large)
 graphify-out/cache/
 graphify-out/*.py
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json

@@ -1,6 +1,6 @@
-# Case Log — Cursor browser lane
+# Case Log — visible browser lane
 
-**Lane:** Cursor built-in browser only (Playwright = alag session, cookies share nahi).  
+**Lane:** Browser pane (`mcp__Claude_Browser__*`) or Claude in Chrome (`mcp__claude-in-chrome__*`) — Sir must see the window. Playwright = alag session, cookies share nahi.  
 **OTP:** Telegram `@mahika_arun_bot` + `python -m mahika.cli otp-watch`  
 **Prerequisite:** Login OK → Badeja Enterprises | India  
 **Rule:** **Never** pick 8 preset issue cards — always **My issue is not listed**.
@@ -9,7 +9,7 @@
 
 ## Setup (ek baar)
 
-1. **`Ctrl+Shift+B`** — Browser side panel kholo.
+1. Browser pane kholo — `mcp__Claude_Browser__preview_start` with the sign-in URL.
 2. Terminal:
 
 ```powershell
@@ -17,7 +17,7 @@ cd "C:\Projects\Amazon Systems Design\agent"
 .\.venv\Scripts\python.exe -m mahika.cli otp-watch --round-label caselog
 ```
 
-3. Black panel fix: `specs/cursor-browser-troubleshooting.md`
+3. Continue button: DOM is `input#continue`, not a `button` — if a click fails, use `form.requestSubmit()` via the JS tool (see `CLAUDE.md`).
 
 ---
 
@@ -25,7 +25,7 @@ cd "C:\Projects\Amazon Systems Design\agent"
 
 | Step | Kya |
 |------|-----|
-| S0 | Agent `browser_navigate` sign-in URL, `position: side`, `newTab: true` |
+| S0 | Agent navigates to the sign-in URL in the visible Browser pane |
 | S1–S2 | Email → Password |
 | S3 | Send OTP (default radio — WhatsApp re-click mat) |
 | R8 | **60s** cooldown after Send OTP |

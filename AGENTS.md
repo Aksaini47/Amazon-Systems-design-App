@@ -4,9 +4,9 @@
 
 ## Current goal
 
-**Successful Seller Central login** in **Cursor browser** (side panel, always visible).
+**Successful Seller Central login** in a **visible browser** — Sir must be able to watch it.
 
-- Lane: Cursor `browser_navigate` with `position: "side"` + `newTab: true`
+- Lane: Browser pane (`mcp__Claude_Browser__*`) or Claude in Chrome (`mcp__claude-in-chrome__*`)
 - **Not:** Playwright Chromium in background
 - OTP: Telegram `@mahika_arun_bot` (6-digit) + `mahika.cli otp-watch --force`
 - After OTP: **Badeja Enterprises → India → Select account**
@@ -14,8 +14,8 @@
 ## Flow reference
 
 - `agent/Graphs & workflows/seller-central-login/FLOW.md`
-- `.cursor/rules/seller-central-login.mdc`
-- `.cursor/rules/cursor-glass-browser.mdc`
+- `.claude/skills/seller-central-login/SKILL.md`
+- `CLAUDE.md` — "Browser — must be visible" section
 
 ## Success criteria
 

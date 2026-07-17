@@ -5,7 +5,7 @@
 | Doc | Role |
 |-----|------|
 | [FLOW.md](FLOW.md) | Master tree + Playwright |
-| [BROWSER.md](BROWSER.md) | Cursor browser lane |
+| [BROWSER.md](BROWSER.md) | Visible browser lane |
 | [FORM.md](FORM.md) | Case text + typing |
 
 ## Graph outputs (project root)

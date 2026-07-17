@@ -12,7 +12,7 @@ Sir wants **human-style** entry — not paste / not instant fill.
 
 | Lane | Rule |
 |------|------|
-| **Cursor browser** | Click field → `browser_type` with `slowly: true`, `clear: true` → pause 1–2s between fields |
+| **Visible browser** | Click field → type slowly, clear first → pause 1–2s between fields |
 | **Iframe (Help Hub)** | iframe `[1]` shadow DOM — click **My issue is not listed** (`#issueNotListedButton`), never preset cards |
 | **Playwright** | `page.type(selector, text, delay=80)` per character |
 
