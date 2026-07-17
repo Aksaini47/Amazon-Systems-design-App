@@ -1,0 +1,29 @@
+name: app-ci
+
+# RF Logger quality gate — analyze + test on every push/PR that touches app/.
+# The Shorebird release itself stays manual (ship.ps1); this only guards code health.
+
+on:
+  push:
+    branches: [main]
+    paths: ['app/**', '.github/workflows/app-ci.yml']
+  pull_request:
+    paths: ['app/**', '.github/workflows/app-ci.yml']
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          # Match the Shorebird-bundled Flutter (shorebird 1.6.105).
+          flutter-version: '3.44.0'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
