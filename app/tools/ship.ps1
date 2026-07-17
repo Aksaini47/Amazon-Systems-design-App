@@ -197,7 +197,14 @@ function Get-ApkPath {
 function Set-Changelog([string]$marker, [string]$text) {
   if (-not (Test-Path $UpdateSvc)) { Write-Warn2 "update_service.dart nahi mila; changelog skip."; return $false }
   $c  = Get-Content $UpdateSvc -Raw
-  $rx = [regex]'(?s)(static const String latestChangelog\s*=\s*).*?;'
+  # Quote-aware match: consume whole '...' literals (with \-escapes) one or
+  # more times, only then the terminating ';'. A naive '.*?;' non-greedy
+  # match stops at the FIRST ';' anywhere — including one that's just text
+  # inside an existing changelog bullet (e.g. "fade smoothly; aspect-ratio
+  # picker...") — which truncates the replacement mid-string and leaves the
+  # old tail dangling as orphaned tokens. Caught by the analyze-gate below,
+  # but silently no-ops instead of updating the changelog. Fixed 2026-07-18.
+  $rx = [regex]"(?s)(static const String latestChangelog\s*=\s*)(?:\s*'(?:[^'\\]|\\.)*'\s*)+;"
   if (-not $rx.IsMatch($c)) { Write-Warn2 "latestChangelog locate nahi hua; manually update karo."; return $false }
 
   # -Changelog ki pehli line = summary, baaki = bullets.

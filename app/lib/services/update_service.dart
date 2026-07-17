@@ -37,11 +37,11 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+9:0 — Quality release: fixes, polish, lighter app\n'
-      '• DAMAGED + DIFFERENT verdict now correctly flags a SAFE-T claim\n'
-      '• meta.json records the real app version\n'
-      '• Video controls fade smoothly; aspect-ratio picker setting works\n'
-      '• Unified colors, leaner app (~700 lines of dead code removed)';
+      '2.1.0+9:2 — Camera: fixed frame + glass UI\n'
+      '• Frame no longer jumps when you tap record\n'
+      '• Full/9:16 preview now shows edge-to-edge, not pre-cropped\n'
+      '• New frame-ratio picker — tap to pick 3:4 / 1:1 / 16:9, Samsung-style\n'
+      '• Frosted glass camera controls; brighter, readable microcopy';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
