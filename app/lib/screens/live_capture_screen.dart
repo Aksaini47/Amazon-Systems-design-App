@@ -1560,10 +1560,15 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Discard recording?'),
-          content: const Text('Recording is in progress. Close anyway?'),
+          backgroundColor: RfColors.card,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Discard recording?', style: TextStyle(color: Colors.white)),
+          content: const Text(
+            'Recording is in progress. Close anyway?',
+            style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
+          ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
             TextButton(
               onPressed: () { Navigator.pop(ctx); Navigator.pop(context); },
               child: const Text('Discard', style: TextStyle(color: Colors.red)),

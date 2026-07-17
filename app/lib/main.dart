@@ -110,6 +110,11 @@ class RepairfullyApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(RfRadius.lg),
             side: BorderSide(color: RfColors.glassBorder(0.22)),
           ),
+          // Safety net for any dialog that forgets its own title/content
+          // colors (found one: the "Discard recording?" confirm dialog had
+          // neither, silently inheriting Material's unverified default).
+          titleTextStyle: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+          contentTextStyle: const TextStyle(color: RfColors.textSecondary, fontSize: 14),
         ),
         snackBarTheme: SnackBarThemeData(
           backgroundColor: RfColors.glassElevated(0.85),
@@ -118,6 +123,12 @@ class RepairfullyApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(RfRadius.card),
             side: BorderSide(color: RfColors.glassBorder(0.18)),
           ),
+          // Explicit — without this, SnackBar falls back to Material 3's
+          // onSurfaceVariant default, which was never tuned against this
+          // app's dark backgrounds and several call sites' own backgroundColor
+          // overrides (e.g. Colors.black87). White is safe against all of them.
+          contentTextStyle: const TextStyle(color: Colors.white, fontSize: 14),
+          actionTextColor: RfColors.amber,
         ),
         bottomSheetTheme: BottomSheetThemeData(
           backgroundColor: RfColors.glassElevated(0.72),
