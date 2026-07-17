@@ -3,10 +3,8 @@ package com.repairfully.logger
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.media.MediaRecorder
 import android.media.MediaScannerConnection
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
 import android.provider.Settings
 import android.view.KeyEvent
@@ -36,15 +34,6 @@ class MainActivity: FlutterActivity() {
                             result.error("INVALID_ARGUMENT", "Path is required", null)
                         }
                     }
-                    "scanDirectory" -> {
-                        val dir = call.argument<String>("dir")
-                        if (dir != null) {
-                            scanDirectoryModern(dir)
-                            result.success(true)
-                        } else {
-                            result.error("INVALID_ARGUMENT", "Directory is required", null)
-                        }
-                    }
                     "deleteFile" -> {
                         val path = call.argument<String>("path")
                         if (path != null) {
@@ -53,17 +42,6 @@ class MainActivity: FlutterActivity() {
                         } else {
                             result.error("INVALID_ARGUMENT", "Path is required", null)
                         }
-                    }
-                    else -> result.notImplemented()
-                }
-            }
-
-        // Video codec info channel
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.repairfully.camera/video_codec")
-            .setMethodCallHandler { call, result ->
-                when (call.method) {
-                    "isH265Supported" -> {
-                        result.success(isH265HardwareEncoderSupported())
                     }
                     else -> result.notImplemented()
                 }
@@ -120,29 +98,6 @@ class MainActivity: FlutterActivity() {
             }
     }
 
-    /// Check if H.265/HEVC hardware encoder is supported
-    private fun isH265HardwareEncoderSupported(): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return false
-
-        try {
-            val codecList = android.media.MediaCodecList(android.media.MediaCodecList.REGULAR_CODECS)
-            for (codecInfo in codecList.codecInfos) {
-                if (codecInfo.isEncoder) {
-                    for (mimeType in codecInfo.supportedTypes) {
-                        if (mimeType.equals("video/hevc", ignoreCase = true) ||
-                            mimeType.equals("video/h265", ignoreCase = true)) {
-                            // Found HEVC encoder
-                            return true
-                        }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            // Silent fail
-        }
-        return false
-    }
-
     /// Modern MediaScanner using MediaScannerConnection
     /// This properly adds files to MediaStore so they appear in Files app
     private fun scanFileModern(path: String) {
@@ -162,27 +117,6 @@ class MainActivity: FlutterActivity() {
             } catch (e2: Exception) {
                 // Silent fail
             }
-        }
-    }
-
-    /// Scan entire directory
-    private fun scanDirectoryModern(dirPath: String) {
-        try {
-            val dir = java.io.File(dirPath)
-            if (dir.exists() && dir.isDirectory) {
-                val files = dir.listFiles()
-                if (files != null && files.isNotEmpty()) {
-                    val paths = files.map { it.absolutePath }.toTypedArray()
-                    MediaScannerConnection.scanFile(
-                        applicationContext,
-                        paths,
-                        arrayOf("video/*", "image/*"),
-                        null
-                    )
-                }
-            }
-        } catch (e: Exception) {
-            // Silent fail
         }
     }
 

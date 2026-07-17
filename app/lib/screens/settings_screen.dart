@@ -36,7 +36,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   double _aspectDefault = 9 / 16;
   // Storage path settings
   String _selectedStoragePath = CameraSettingsService.storageDefault;
-  String _customStoragePath = '';
 
   @override
   void initState() {
@@ -57,7 +56,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _claimPhotoCountdown = await CameraSettingsService.getClaimPhotoCountdown();
     _aspectPickerEnabled = await CameraSettingsService.getAspectEnabled();
     _selectedStoragePath = await CameraSettingsService.getStoragePath();
-    _customStoragePath = _selectedStoragePath;
     if (mounted) setState(() {});
   }
 
@@ -205,9 +203,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingToggle(
                 icon: Icons.photo_camera_back_rounded,
                 label: 'Return images by QC',
-                subtitle: 'QC OK: front/back only. Damaged/different: label + contents + front/back',
+                subtitle: 'QC OK: front/back only. Damaged/different: label + contents + front/back. Fixed by design.',
                 value: true,
-                onChanged: null,
+                info: true,
               ),
               const SizedBox(height: 10),
               _buildSettingToggle(
@@ -252,13 +250,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildSectionCard(children: [
               InkWell(
                 onTap: () async {
-                  String? selectedDir = await FilePicker.platform.getDirectoryPath();
+                  final selectedDir = await FilePicker.platform.getDirectoryPath();
                   if (selectedDir != null) {
-                    setState(() {
-                      _selectedStoragePath = selectedDir;
-                      _customStoragePath = selectedDir;
-                    });
-                    CameraSettingsService.setStoragePath(selectedDir);
+                    setState(() => _selectedStoragePath = selectedDir);
+                    await CameraSettingsService.setStoragePath(selectedDir);
                     LocalStorageService.clearCache();
                   }
                 },
@@ -306,7 +301,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               InkWell(
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const ActivityLogScreen()),
+                    MaterialPageRoute<void>(builder: (_) => const ActivityLogScreen()),
                   );
                 },
                 borderRadius: BorderRadius.circular(12),
@@ -401,157 +396,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-  }) {
-    return RfGlassContainer(
-      blurEnabled: false,
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              border: Border(right: BorderSide(color: RfColors.glassBorder(0.12))),
-            ),
-            child: Icon(icon, color: RfColors.textSecondary, size: 20),
-          ),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              style: const TextStyle(color: Colors.white, fontFamily: 'monospace', fontSize: 14),
-              decoration: InputDecoration(
-                hintText: hint,
-                hintStyle: const TextStyle(color: Color(0xFF4D5565)),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPrimaryButton(String label, VoidCallback? onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: RfColors.navy,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        elevation: 0,
-      ),
-      child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-    );
-  }
-
-  Widget _buildSecondaryButton(VoidCallback? onPressed, Widget child) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        side: const BorderSide(color: Color(0xFF30363D)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-      child: child,
-    );
-  }
-
-  Widget _buildTertiaryButton({
-    required IconData iconData,
-    required String label,
-    required VoidCallback? onPressed,
-    required Color color,
-  }) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: color,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        side: BorderSide(color: color.withOpacity(0.5)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-      icon: Icon(iconData, size: 18, color: color),
-      label: Text(label, style: TextStyle(color: color, fontSize: 13)),
-    );
-  }
-
-  /// Card showing backend details after a successful Test:
-  ///   - Where files land on the desktop (storage_root)
-  ///   - All local IPs the backend is reachable at (helps when phone hotspot)
-  Widget _buildBackendInfoCard(Map<String, dynamic> info) {
-    final storageRoot = info['storage_root'] as String? ?? 'unknown';
-    final ordersPath = info['orders_path'] as String? ?? '$storageRoot/orders';
-    final port = info['port'];
-    final ips = (info['local_ips'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-    final hostname = info['hostname'] as String? ?? '';
-
-    return RfGlassContainer(
-      padding: const EdgeInsets.all(14),
-      borderColor: const Color(0x553FB950),
-      tint: RfColors.successBg.withValues(alpha: 0.35),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(children: [
-            const Icon(Icons.folder_open, color: Color(0xFF3FB950), size: 18),
-            const SizedBox(width: 8),
-            const Text('Backend storage', style: TextStyle(color: Color(0xFF3FB950), fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1)),
-          ]),
-          const SizedBox(height: 8),
-          Text(ordersPath, style: const TextStyle(color: Colors.white, fontSize: 12, fontFamily: 'monospace')),
-          const SizedBox(height: 4),
-          Text('on $hostname', style: const TextStyle(color: Color(0xFF8B949E), fontSize: 11)),
-          if (ips.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            const Text('Reachable at', style: TextStyle(color: Color(0xFF8B949E), fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1)),
-            const SizedBox(height: 4),
-            ...ips.map((e) => Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Text(
-                    'http://${e['ip']}:$port  (${e['interface']})',
-                    style: const TextStyle(color: Colors.white70, fontSize: 11, fontFamily: 'monospace'),
-                  ),
-                )),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusBanner(String message) {
-    final isSuccess = message.startsWith('Connected') || message.startsWith('Found');
-    return RfGlassContainer(
-      padding: const EdgeInsets.all(12),
-      tint: isSuccess ? RfColors.successBg.withValues(alpha: 0.45) : RfColors.errorBg.withValues(alpha: 0.45),
-      borderColor: isSuccess ? RfColors.successBorder : RfColors.errorBorder,
-      radius: RfRadius.button,
-      child: Row(
-        children: [
-          Icon(
-            isSuccess ? Icons.check_circle_outline : Icons.error_outline,
-            color: isSuccess ? RfColors.success : RfColors.error,
-            size: 18,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: isSuccess ? RfColors.success : RfColors.error,
-                fontSize: 13,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   /// Stacked tile — icon+label on top row, dropdown on full-width row below.
   /// Avoids label truncation when laid out in a narrow Expanded column.
   Widget _buildSettingTile({required IconData icon, required String label, required Widget child}) {
@@ -586,12 +430,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  /// [info] renders a lock glyph instead of a Switch — for behaviour that is
+  /// fixed by design (the row documents it, nothing toggles it).
   Widget _buildSettingToggle({
     required IconData icon,
     required String label,
     required String subtitle,
     required bool value,
     ValueChanged<bool>? onChanged,
+    bool info = false,
   }) {
     return RfGlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -633,20 +480,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            trackColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) return RfColors.success;
-              return const Color(0xFF30363D);
-            }),
-            thumbColor: WidgetStateProperty.all(Colors.white),
-            trackOutlineColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) return RfColors.success.withValues(alpha: 0.6);
-              return RfColors.border;
-            }),
-          ),
+          if (info)
+            const Icon(Icons.lock_outline_rounded, size: 18, color: RfColors.textSecondary)
+          else
+            Switch(
+              value: value,
+              onChanged: onChanged,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              trackColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) return RfColors.success;
+                return const Color(0xFF30363D);
+              }),
+              thumbColor: WidgetStateProperty.all(Colors.white),
+              trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) return RfColors.success.withValues(alpha: 0.6);
+                return RfColors.border;
+              }),
+            ),
         ],
       ),
     );
@@ -721,13 +571,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSpinner({double size = 16}) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: const CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF8B949E)),
-    );
-  }
 }
 
 // ─── About card ──────────────────────────────────────────────────────────
@@ -808,7 +651,7 @@ class _AboutCardState extends State<_AboutCard> {
   }
 
   void _showChangelog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => RfGlassDialog(
         child: AlertDialog(

@@ -32,7 +32,7 @@ class UpdateService {
   static final _updater = ShorebirdUpdater();
 
   /// Bumped each time Sir cuts a `shorebird patch` push. Format:
-  ///   '<release-version>:<patch-number> — <short summary>\n• bullet 1\n• bullet 2'
+  ///   `<release-version>:<patch-number> — <short summary>\n• bullet 1\n• bullet 2`
   /// The patch-number portion is what the device uses to detect "did this
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
@@ -48,7 +48,7 @@ class UpdateService {
   /// True only when the Shorebird native engine is linked (shorebird release
   /// APK). False for `flutter run`, `flutter build apk`, and debug builds.
   ///
-  /// Do NOT use [readCurrentPatch] here — it returns null when no patch is
+  /// Do NOT use `readCurrentPatch` here — it returns null when no patch is
   /// installed *and* when the updater is unavailable, which made Settings
   /// show "Active" while manual check returned unavailable.
   static Future<bool> get isAvailable async => _updater.isAvailable;

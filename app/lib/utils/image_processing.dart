@@ -156,7 +156,7 @@ class ImageProcessingUtils {
       fontSize: baseFontSize,
       fontWeight: FontWeight.bold,
       fontFamily: 'monospace',
-      shadows: const [Shadow(offset: Offset(1, 1), blurRadius: 3, color: Colors.black)],
+      shadows: const [Shadow(offset: Offset(1, 1), blurRadius: 3)],
     );
 
     // Line 1: Order ID (larger, bold)
@@ -215,7 +215,7 @@ class ImageProcessingUtils {
       color: const Color.fromARGB(255, 12, 215, 19),
       fontSize: fontSize,
       fontWeight: FontWeight.bold,
-      shadows: const [Shadow(offset: Offset(1, 1), blurRadius: 3, color: Colors.black)],
+      shadows: const [Shadow(offset: Offset(1, 1), blurRadius: 3)],
     );
 
     final textSpan = TextSpan(text: text, style: textStyle);

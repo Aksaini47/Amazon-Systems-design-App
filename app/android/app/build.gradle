@@ -40,13 +40,12 @@ android {
 
     defaultConfig {
         applicationId "com.repairfully.logger"
-        // Camera package requires minSdk 21; mDNS / bonsoir requires 21+
+        // Camera package requires minSdk 21
         minSdkVersion = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Required for large video uploads without OOM
         multiDexEnabled true
     }
 
@@ -66,9 +65,12 @@ android {
 
     buildTypes {
         release {
-            // Use the release keystore if it's configured, else fall back
-            // to debug signing so local builds still work for non-signing
-            // contributors. Production CI must always have key.properties.
+            // DELIBERATE (2026-07-17): key.properties does not exist, so release
+            // builds sign with the machine's debug keystore. This is the shipped
+            // signature on the single production phone — changing it would force
+            // an uninstall (wiping captured media). The debug keystore is backed
+            // up at C:\RF-Logger-Backups\. If a Play Store path ever opens,
+            // create a real keystore + key.properties and plan a migration.
             signingConfig = keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
             // Keep R8 off for now — many Flutter plugins (camera, ML Kit,
             // mobile_scanner) need proguard rules we haven't audited yet.
@@ -82,9 +84,3 @@ android {
 flutter {
     source "../.."
 }
-
-// ─── Firebase Crashlytics dependencies (Crashlytics plugin enabled later) ─
-// dependencies block disabled until google-services.json is in place; the
-// firebase_core / firebase_crashlytics Flutter packages still ship via
-// Flutter's plugin system once added to pubspec.yaml. The native AGP
-// google-services plugin is what fails compile without the JSON.

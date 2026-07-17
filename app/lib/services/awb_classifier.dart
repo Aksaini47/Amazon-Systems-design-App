@@ -18,9 +18,9 @@
 ///   India Post   → UPU S10 format: 2-letter prefix + 9 digits + "IN" (13 chars)
 ///
 /// Use:
-///   - [classify] — single value → best-match carrier (or null)
-///   - [detectCarrierFromText] — scan OCR full text for carrier-name keywords
-///   - [pickAwbFromBarcodes] — given list of barcode values + (optional) detected
+///   - `classify` — single value → best-match carrier (or null)
+///   - `detectCarrierFromText` — scan OCR full text for carrier-name keywords
+///   - `pickAwbFromBarcodes` — given list of barcode values + (optional) detected
 ///                            carrier hint, return the best AWB candidate
 library;
 

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:native_camera_sound/native_camera_sound.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,7 +14,6 @@ import '../services/camera_settings_service.dart';
 import '../services/local_storage_service.dart';
 import '../utils/debug_session_log.dart';
 import '../services/dnd_service.dart';
-import '../services/file_naming_service.dart';
 import '../services/crash_reporting.dart';
 import '../services/activity_log_service.dart';
 import '../utils/volume_button_service.dart';
@@ -37,7 +35,6 @@ enum CapturePhase {
   recording,
   stopped,
   saving,
-  complete,
   error,
 }
 
@@ -119,6 +116,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   static const double _aspect34 = CameraSettingsService.aspect34;
   static const double _aspect11 = CameraSettingsService.aspect11;
   double _aspectRatio = _aspectFull;
+  // Settings > "Aspect ratio picker" — hides the 1:1/3:4/16:9 chip row when off.
+  bool _aspectPickerEnabled = false;
   bool get _isAspectCropped =>
       (_aspectRatio - _aspectFull).abs() > 0.001;
 
@@ -167,8 +166,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _captureCountdownSec = await CameraSettingsService.getCaptureCountdown();
     _claimCountdownEnabled = await CameraSettingsService.getClaimPhotoCountdown();
     _aspectRatio = await CameraSettingsService.getAspectDefault();
+    _aspectPickerEnabled = await CameraSettingsService.getAspectEnabled();
     if (mounted) setState(() {});
-    _initCamera();
+    unawaited(_initCamera());
   }
 
   @override
@@ -200,7 +200,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         debugPrint('VolumeButtons: ignored — live_capture not current route');
         return;
       }
-      if (_isSaving || _phase == CapturePhase.complete) return;
+      if (_isSaving) return;
       if (event == 1) {
         // Volume up: skip countdown or stop recording
         if (_showCountdown) {
@@ -320,7 +320,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       // Android camera hardware needs time to fully release after dispose().
       // Without this delay, availableCameras() returns stale list and initialize()
       // throws CameraException — causing the camera loop bug.
-      await Future.delayed(const Duration(milliseconds: 300));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
       if (!mounted) return;
 
       _cameras = await availableCameras();
@@ -375,15 +375,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     }
   }
 
-  Future<void> _reinitCamera() async {
-    if (_isCameraTransitioning) return;  // MUTEX guard
-    _timerTick?.cancel();
-    _detachCameraListener();
-    await _camera?.dispose();
-    setState(() { _cameraReady = false; _isRecording = false; });
-    await _initCamera();
-  }
-
   /// Re-initialize camera with a specific audio setting.
   /// Used after modal closes to restore camera with the same audio setting
   /// that was used during recording.
@@ -396,7 +387,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _isCameraTransitioning = true;
 
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
       if (!mounted) return;
 
       _cameras = await availableCameras();
@@ -506,7 +497,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         }
       } else {
         // RT idle — tap starts return video recording
-        _startRecording();
+        unawaited(_startRecording());
       }
     }
   }
@@ -528,7 +519,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     final hasBack = _tempPhotoPaths.containsKey(PhotoSide.back);
     if (hasFront && hasBack) {
       // Both photos done — third tap = start video
-      _startRecording();
+      unawaited(_startRecording());
       return;
     }
     _photoCaptureInProgress = true;
@@ -588,8 +579,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   }
 
   Future<void> _onPhotoCountdownComplete() async {
-    HapticFeedback.mediumImpact();
-    if (_soundEnabled) NativeCameraSound.playShutter();
+    unawaited(HapticFeedback.mediumImpact());
+    if (_soundEnabled) unawaited(NativeCameraSound.playShutter());
 
     // Direct-tap mode = user has countdown=0 AND we're not in the RT claim
     // photo flow (which has its own manual handling). In direct mode the
@@ -686,7 +677,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       _timerTick?.cancel();
       _timerTick = Timer.periodic(const Duration(seconds: 1), (_) { if (mounted) setState(() {}); });
 
-      if (_soundEnabled) NativeCameraSound.playStartRecord();
+      if (_soundEnabled) unawaited(NativeCameraSound.playStartRecord());
 
       try {
         // Save audio setting for re-init after modal closes
@@ -740,7 +731,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       if (!mounted) return true;
       final choice = await showDialog<bool>(
         context: context,
-        barrierDismissible: true,
         builder: (ctx) => AlertDialog(
           backgroundColor: const Color(0xFF161B22),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -851,7 +841,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _timerTick?.cancel();
     _stopwatch.stop();
     _countdownTimer?.cancel();
-    if (_soundEnabled) NativeCameraSound.playStopRecord();
+    if (_soundEnabled) unawaited(NativeCameraSound.playStopRecord());
 
     try {
       // Guard against camera disposal racing with the stop call. If the
@@ -958,7 +948,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       if (widget.mode == CaptureMode.rt) {
         // RT: keep camera alive through verdict sheet so user does not see
         // a black "Starting camera..." screen while choosing QC reasons.
-        _openRtPostVideoFlow();
+        unawaited(_openRtPostVideoFlow());
       } else {
         await _disposeCameraForModal();
         _openBarcodePopup();
@@ -1070,12 +1060,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _applyZoom();
   }
 
-  /// Cycle through zoom levels
-  void _cycleZoom() {
-    _currentZoomIndex = (_currentZoomIndex + 1) % _zoomLevels.length;
-    _applyZoom();
-  }
-
   /// Apply current zoom level to camera
   void _applyZoom() {
     if (_camera == null || !_cameraReady) return;
@@ -1120,7 +1104,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     } catch (_) {}
 
     setState(() { _showFocus = true; _focusX = details.localPosition.dx; _focusY = details.localPosition.dy; });
-    _focusAnimCtrl.forward(from: 0);
+    unawaited(_focusAnimCtrl.forward(from: 0));
     Future.delayed(const Duration(seconds: 2), () { if (mounted) setState(() => _showFocus = false); });
   }
 
@@ -1160,6 +1144,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   void _openBarcodePopup() async {
     await _disposeCameraForModal();
+    if (!mounted) return;
     final result = await Navigator.of(context).push<Map<String, String?>>(
       MaterialPageRoute(
         fullscreenDialog: true,
@@ -1171,14 +1156,14 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       await _retainDraftOnCancel();
       // User cancelled — wait 500ms for hardware to fully release, then reinit
       if (mounted) setState(() => _phase = CapturePhase.stopped);
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
       await _initCameraWithAudio(_audioUsedForRecording);
       return;
     }
 
     _session['orderId'] = result['orderId'];
     _session['awb'] = result['awb'];
-    _saveSession();
+    unawaited(_saveSession());
   }
 
   // ─── RT post-video: verdict → order-ID scan → claim photos ───────────
@@ -1197,7 +1182,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       await _retainDraftOnCancel();
       await _disposeCameraForModal();
       if (mounted) setState(() => _phase = CapturePhase.stopped);
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
       await _initCameraWithAudio(_audioUsedForRecording);
       return;
     }
@@ -1206,6 +1191,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _logActivity('qc_verdict', extra: {'qc': verdict.name});
 
     await _disposeCameraForModal();
+    if (!mounted) return;
     final result = await Navigator.of(context).push<Map<String, String?>>(
       MaterialPageRoute(
         fullscreenDialog: true,
@@ -1217,7 +1203,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       await _retainDraftOnCancel();
       await _disposeCameraForModal();
       if (mounted) setState(() => _phase = CapturePhase.stopped);
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
       await _initCameraWithAudio(_audioUsedForRecording);
       return;
     }
@@ -1227,7 +1213,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
     await _runClaimPhotoSequence();
     if (!mounted) return;
-    _saveSession();
+    unawaited(_saveSession());
   }
 
   // ─── RT claim-photo flow ─────────────────────────────────────────────
@@ -1236,7 +1222,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   Future<void> _runClaimPhotoSequence() async {
     if (mounted) setState(() => _phase = CapturePhase.stopped);
     // Let barcode popup release the camera hardware before we re-open it.
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     await _initCameraWithAudio(false);
     if (!mounted) return;
     if (_camera == null || !_cameraReady) {
@@ -1280,7 +1266,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       }
     } finally {
       if (mounted) {
-        setState(() => _clearCaptureOverlayState());
+        setState(_clearCaptureOverlayState);
       } else {
         _clearCaptureOverlayState();
       }
@@ -1326,7 +1312,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     for (int i = _captureCountdownSec; i > 0; i--) {
       if (!mounted || _skipCurrentClaimPhoto) break;
       setState(() => _countdownSeconds = i);
-      await Future.delayed(const Duration(seconds: 1));
+      await Future<void>.delayed(const Duration(seconds: 1));
     }
 
     if (!mounted) return;
@@ -1341,8 +1327,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   }
 
   Future<void> _persistClaimPhoto(PhotoSide side) async {
-    HapticFeedback.mediumImpact();
-    if (_soundEnabled) NativeCameraSound.playShutter();
+    unawaited(HapticFeedback.mediumImpact());
+    if (_soundEnabled) unawaited(NativeCameraSound.playShutter());
 
     try {
       final xFile = await _camera!.takePicture();
@@ -1354,7 +1340,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       debugPrint('Claim photo capture failed for ${side.name}: $e');
     }
 
-    if (mounted) await Future.delayed(const Duration(milliseconds: 600));
+    if (mounted) await Future<void>.delayed(const Duration(milliseconds: 600));
   }
 
   // ─── Save ─────────────────────────────────────────────────────────────
@@ -1370,9 +1356,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
       final videoPath = _session['videoPath'] as String?;
       if (videoPath == null) throw Exception('No video recorded');
-
-      // Use XFile for video file operations
-      final videoXFile = XFile(videoPath);
 
       // Check if video file exists
       final videoFile = File(videoPath);
@@ -1557,7 +1540,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   void _close() {
     if (_isRecording) {
-      showDialog(
+      showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('Discard recording?'),
@@ -1588,12 +1571,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       return Scaffold(
         backgroundColor: Colors.black,
         body: SafeArea(child: Stack(children: [_buildSavingOverlay()])),
-      );
-    }
-    if (_phase == CapturePhase.complete) {
-      return Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(child: Stack(children: [_buildCompleteOverlay(accent)])),
       );
     }
     if (_phase == CapturePhase.error) {
@@ -1682,9 +1659,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
             // Saving overlay
             if (_phase == CapturePhase.saving) _buildSavingOverlay(),
 
-            // Complete overlay
-            if (_phase == CapturePhase.complete) _buildCompleteOverlay(accent),
-
             // Error overlay
             if (_phase == CapturePhase.error) _buildErrorOverlay(),
 
@@ -1696,8 +1670,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
             // RT claim manual is now treated identically to PK manual — the
             // bottom START button is the capture trigger, the giant center
             // button has been removed.
-            if (_phase != CapturePhase.complete
-                && _phase != CapturePhase.saving
+            if (_phase != CapturePhase.saving
                 && !(_showCountdown && _captureCountdownSec > 0 && !_inClaimFlow))
               _buildBottomControls(accent),
           ],
@@ -1838,7 +1811,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
                       maxWidth: previewW,
                       minHeight: previewH,
                       maxHeight: previewH,
-                      alignment: Alignment.center,
                       child: CameraPreview(_camera!),
                     ),
                   ),
@@ -2068,7 +2040,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   // ─── Phase badge ──────────────────────────────────────────────────────
 
   Widget _buildPhaseBadge(Color accent) {
-    if (_phase == CapturePhase.complete || _phase == CapturePhase.loading) return const SizedBox.shrink();
+    if (_phase == CapturePhase.loading) return const SizedBox.shrink();
 
     String text;
     switch (_phase) {
@@ -2329,7 +2301,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
               decoration: BoxDecoration(
                 color: Colors.black.withAlpha(180),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withAlpha(40), width: 1),
+                border: Border.all(color: Colors.white.withAlpha(40)),
               ),
               child: const Text(
                 'TAP TO STOP',
@@ -2364,24 +2336,26 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
                   const SizedBox(width: 4),
                   RfChip(label: '3×', active: _currentZoomIndex == 2, onPressed: () => _setZoomByIndex(2)),
 
-                  const SizedBox(width: 8),
-                  Container(width: 1, height: 28, color: Colors.white24),
-                  const SizedBox(width: 8),
-
-                  // Aspect ratio chips — disabled during recording (frame locked).
-                  Opacity(
-                    opacity: _isRecording ? 0.35 : 1.0,
-                    child: IgnorePointer(
-                      ignoring: _isRecording,
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        RfChip(label: '1:1', active: (_aspectRatio - _aspect11).abs() < 0.001, onPressed: () => _onAspectTap('1:1', _aspect11)),
-                        const SizedBox(width: 4),
-                        RfChip(label: '3:4', active: (_aspectRatio - _aspect34).abs() < 0.001, onPressed: () => _onAspectTap('3:4', _aspect34)),
-                        const SizedBox(width: 4),
-                        RfChip(label: '16:9', active: (_aspectRatio - _aspectFull).abs() < 0.001, onPressed: () => _onAspectTap('16:9', _aspectFull)),
-                      ]),
+                  // Aspect ratio chips — gated by the Settings "Aspect ratio
+                  // picker" toggle; disabled during recording (frame locked).
+                  if (_aspectPickerEnabled) ...[
+                    const SizedBox(width: 8),
+                    Container(width: 1, height: 28, color: Colors.white24),
+                    const SizedBox(width: 8),
+                    Opacity(
+                      opacity: _isRecording ? 0.35 : 1.0,
+                      child: IgnorePointer(
+                        ignoring: _isRecording,
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          RfChip(label: '1:1', active: (_aspectRatio - _aspect11).abs() < 0.001, onPressed: () => _onAspectTap('1:1', _aspect11)),
+                          const SizedBox(width: 4),
+                          RfChip(label: '3:4', active: (_aspectRatio - _aspect34).abs() < 0.001, onPressed: () => _onAspectTap('3:4', _aspect34)),
+                          const SizedBox(width: 4),
+                          RfChip(label: '16:9', active: (_aspectRatio - _aspectFull).abs() < 0.001, onPressed: () => _onAspectTap('16:9', _aspectFull)),
+                        ]),
+                      ),
                     ),
-                  ),
+                  ],
 
                   const SizedBox(width: 8),
                   Container(width: 1, height: 28, color: Colors.white24),
@@ -2421,43 +2395,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
             CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
             SizedBox(height: 16),
             Text('Saving files...', style: TextStyle(color: Colors.white70, fontSize: 14)),
-          ]),
-        ),
-      ),
-    );
-  }
-
-  // ─── Complete overlay ─────────────────────────────────────────────────
-
-  Widget _buildCompleteOverlay(Color accent) {
-    return Positioned.fill(
-      child: Container(
-        color: Colors.black.withAlpha(220),
-        child: Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Icon(Icons.check_circle_rounded, color: Colors.green.shade400, size: 64),
-            const SizedBox(height: 16),
-            const Text('Saved!', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(
-              widget.mode == CaptureMode.pk ? 'PK session complete' : 'RT session complete',
-              style: const TextStyle(color: Colors.white54, fontSize: 13),
-            ),
-            const SizedBox(height: 24),
-            Row(mainAxisSize: MainAxisSize.min, children: [
-              RfButton.primary(
-                label: 'CAPTURE NEXT',
-                icon: Icons.replay_rounded,
-                size: RfButtonSize.large,
-                onPressed: _resetForNextCapture,
-              ),
-              const SizedBox(width: 12),
-              RfButton.secondary(
-                label: 'EXIT',
-                size: RfButtonSize.large,
-                onPressed: () => Navigator.pop(context, true),
-              ),
-            ]),
           ]),
         ),
       ),
@@ -2507,7 +2444,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
               RfButton.primary(
                 label: 'RETRY',
                 icon: Icons.refresh_rounded,
-                size: RfButtonSize.medium,
                 onPressed: () {
                   setState(() {
                     _phase = CapturePhase.loading;
@@ -2522,14 +2458,12 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
                 RfButton.service(
                   label: 'OPEN SETTINGS',
                   icon: Icons.settings_outlined,
-                  size: RfButtonSize.medium,
                   onPressed: () async {
                     await openAppSettings();
                   },
                 ),
               RfButton.secondary(
                 label: 'CLOSE',
-                size: RfButtonSize.medium,
                 onPressed: () => Navigator.pop(context),
               ),
             ]),
@@ -2673,7 +2607,6 @@ class _MicToggleButtonState extends State<_MicToggleButton> with SingleTickerPro
               borderRadius: BorderRadius.circular(RfRadius.chip),
               border: Border.all(
                 color: widget.enabled ? Colors.transparent : Colors.white.withAlpha(60),
-                width: 1,
               ),
             ),
             child: Row(

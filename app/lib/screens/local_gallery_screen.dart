@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -205,8 +206,8 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
   ///   sessionId       — deterministic key (mode + earliest timestamp ms)
   ///   mode            — 'PK' or 'RT'
   ///   videoPath       — String? (null if photo-only session)
-  ///   photoPaths      — List<String>
-  ///   draftPaths      — List<String> of ALL files (used for delete-all)
+  ///   photoPaths      — `List<String>`
+  ///   draftPaths      — `List<String>` of ALL files (used for delete-all)
   ///   modifiedAt      — most recent file's modified time (ISO string)
   ///   sizeBytes       — sum of all file sizes
   ///   hasRecovered    — true if any file starts with RECOVERED_
@@ -323,7 +324,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     if (!ok) return;
     final deleted = await _storage.deleteOrder(order['orderId'] as String);
     if (deleted && mounted) {
-      _reload();
+      unawaited(_reload());
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Order deleted'),
         duration: Duration(seconds: 2),
@@ -346,7 +347,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
       if (await _storage.deleteDraft(p)) deleted++;
     }
     if (mounted) {
-      _reload();
+      unawaited(_reload());
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Deleted $deleted file${deleted == 1 ? '' : 's'}'),
         duration: const Duration(seconds: 2),
@@ -422,8 +423,11 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
         TextButton(
           onPressed: total == 0 ? null : (allSelected ? () {
             setState(() {
-              if (_tabs.index == 0) _selectedOrders.clear();
-              else _selectedDrafts.clear();
+              if (_tabs.index == 0) {
+                _selectedOrders.clear();
+              } else {
+                _selectedDrafts.clear();
+              }
             });
           } : _selectAll),
           child: Text(
@@ -469,9 +473,9 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
               }
               await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => _OrderDetailScreen(order: o)),
+                MaterialPageRoute<void>(builder: (_) => _OrderDetailScreen(order: o)),
               );
-              _reload();
+              unawaited(_reload());
             },
             onLongPress: () {
               if (!_selectionMode) _enterSelectionMode();
@@ -541,9 +545,9 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
             selectionMode: _selectionMode,
             selected: selected,
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(
+              unawaited(Navigator.push(context, MaterialPageRoute<void>(
                 builder: (_) => _DraftDetailScreen(session: s),
-              )).then((_) => _reload());
+              )).then((_) => _reload()));
             },
             onTapInSelectionMode: () => _toggleSelectDraft(sid),
             onLongPress: () {
@@ -791,7 +795,7 @@ class _OrderCard extends StatelessWidget {
                         ),
                       _chip(Icons.videocam, hasVideo ? 'Video' : 'No video', hasVideo ? const Color(0xFF3FB950) : const Color(0xFF8B949E)),
                       _chip(Icons.photo, '${photoPaths.length} photo${photoPaths.length == 1 ? '' : 's'}', const Color(0xFF8B949E)),
-                      _chip(Icons.sd_storage, '${sizeMb} MB', const Color(0xFF8B949E)),
+                      _chip(Icons.sd_storage, '$sizeMb MB', const Color(0xFF8B949E)),
                     ]),
                   ],
                 ),
@@ -998,8 +1002,7 @@ class _DraftSessionCard extends StatelessWidget {
 
 class _InlineVideoPlayer extends StatefulWidget {
   final String path;
-  final bool pinchZoom;
-  const _InlineVideoPlayer({required this.path, this.pinchZoom = true});
+  const _InlineVideoPlayer({required this.path});
 
   @override
   State<_InlineVideoPlayer> createState() => _InlineVideoPlayerState();
@@ -1015,7 +1018,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
   @override
   void initState() {
     super.initState();
-    if (widget.pinchZoom) _zoomCtrl = TransformationController();
+    _zoomCtrl = TransformationController();
     _init();
   }
 
@@ -1121,7 +1124,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
       aspectRatio: effectiveAspect,
       child: VideoPlayer(_ctrl!),
     );
-    if (widget.pinchZoom && _zoomCtrl != null) {
+    if (_zoomCtrl != null) {
       videoSurface = GestureDetector(
         onDoubleTap: _toggleVideoZoom,
         onTap: () => setState(() => _showControls = !_showControls),
@@ -1129,7 +1132,6 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
           transformationController: _zoomCtrl,
           minScale: 1.0,
           maxScale: 5.0,
-          clipBehavior: Clip.hardEdge,
           child: videoSurface,
         ),
       );
@@ -1152,24 +1154,26 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
             color: Colors.black,
             child: Center(child: videoSurface),
           ),
-          // Gradient + play/pause — visual overlay only so pinch reaches video
-          if (_showControls || !v.isPlaying)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: AnimatedOpacity(
-                  opacity: _showControls || !v.isPlaying ? 1 : 0,
-                  duration: const Duration(milliseconds: 250),
-                  child: Container(
-                    decoration: BoxDecoration(gradient: LinearGradient(
-                      begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                      colors: [Colors.black.withAlpha(60), Colors.transparent, Colors.black.withAlpha(140)],
-                    )),
-                  ),
+          // Gradient + play/pause fade with the controls (250ms), matching the
+          // scrubber below — no unmount-guard, or the fade could never run.
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedOpacity(
+                opacity: _showControls || !v.isPlaying ? 1 : 0,
+                duration: const Duration(milliseconds: 250),
+                child: Container(
+                  decoration: BoxDecoration(gradient: LinearGradient(
+                    begin: Alignment.topCenter, end: Alignment.bottomCenter,
+                    colors: [Colors.black.withAlpha(60), Colors.transparent, Colors.black.withAlpha(140)],
+                  )),
                 ),
               ),
             ),
-          if (_showControls || !v.isPlaying)
-            Center(
+          ),
+          Center(
+            // When faded out the button must not eat the "show controls" tap.
+            child: IgnorePointer(
+              ignoring: !(_showControls || !v.isPlaying),
               child: GestureDetector(
                 onTap: () {
                   v.isPlaying ? _ctrl!.pause() : _ctrl!.play();
@@ -1178,14 +1182,15 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
                   opacity: _showControls || !v.isPlaying ? 1 : 0,
                   duration: const Duration(milliseconds: 250),
                   child: Container(
-                    decoration: BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
                     padding: const EdgeInsets.all(14),
                     child: Icon(v.isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 40),
                   ),
                 ),
               ),
             ),
-          if (widget.pinchZoom && _zoomCtrl != null)
+          ),
+          if (_zoomCtrl != null)
             Positioned(
               top: 8,
               right: 8,
@@ -1231,33 +1236,6 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
             ),
           ],
         ),
-    );
-  }
-}
-
-// ─── Fullscreen video player (for drafts) ─────────────────────────────
-
-class _FullscreenVideoPlayer extends StatelessWidget {
-  final String path;
-  final String title;
-  const _FullscreenVideoPlayer({required this.path, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black87,
-        elevation: 0,
-        title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 12, fontFamily: 'monospace'), overflow: TextOverflow.ellipsis),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: _InlineVideoPlayer(path: path),
-        ),
-      ),
     );
   }
 }
@@ -1337,7 +1315,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
 
     final picked = await ImagePicker().pickImage(
       source: ImageSource.camera,
-      preferredCameraDevice: CameraDevice.rear,
       imageQuality: 92,
     );
     if (picked == null || !mounted) return;
@@ -1354,6 +1331,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     if (!mounted) return;
     if (ok) {
       await _reloadOrder();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('${resolvedSide.name} photo replaced'),
         duration: const Duration(seconds: 2),
@@ -1394,6 +1372,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     if (!mounted) return;
     if (removed) {
       await _reloadOrder();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('${resolvedSide.name} photo removed'),
         duration: const Duration(seconds: 2),
@@ -1523,6 +1502,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
 
       await _syncMetaAfterPhotoPaths();
       await _reloadOrder();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Re-tagged to $newSide'),
         duration: const Duration(seconds: 2),
@@ -1562,6 +1542,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     final awbCtrl = TextEditingController(text: meta?['awb'] as String? ?? '');
     QCVerdict? selectedVerdict = currentVerdict;
 
+    if (!mounted) return;
     final saved = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -1633,7 +1614,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => Navigator.pop(ctx, null),
+                          onPressed: () => Navigator.pop(ctx),
                           child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
                         ),
                       ),
@@ -1692,6 +1673,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
         order = Map<String, dynamic>.from(fresh);
         _savingEdit = false;
       });
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Order updated'),
         duration: Duration(seconds: 2),
@@ -1907,7 +1889,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
   }
 
   void _openPhoto(BuildContext context, String path, List<String> all) {
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierColor: Colors.black,
       builder: (_) => _PhotoViewer(initialPath: path, allPaths: all),
@@ -2000,8 +1982,7 @@ class _PhotoViewerState extends State<_PhotoViewer> {
                 transformationController: _zoomCtrls[i],
                 minScale: 1.0,
                 maxScale: 5.0,
-                clipBehavior: Clip.hardEdge,
-                child: Center(
+                      child: Center(
                   child: Image.file(
                     File(widget.allPaths[i]),
                     fit: BoxFit.contain,
@@ -2084,7 +2065,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
   }
 
   void _openPhoto(BuildContext ctx, String path, List<String> all) {
-    showDialog(
+    showDialog<void>(
       context: ctx,
       barrierColor: Colors.black,
       builder: (_) => _PhotoViewer(initialPath: path, allPaths: all),
@@ -2123,6 +2104,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
     if (newPath == null || !mounted) return;
 
     await _storage.deleteDraft(oldPath);
+    if (!mounted) return;
     setState(() {
       final photos = session['photoPaths'] as List<String>;
       final drafts = session['draftPaths'] as List<String>;
@@ -2146,6 +2128,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
     if (!ok || !mounted) return;
 
     if (await _storage.deleteDraft(path)) {
+      if (!mounted) return;
       setState(() {
         (session['photoPaths'] as List<String>).remove(path);
         (session['draftPaths'] as List<String>).remove(path);
@@ -2211,7 +2194,8 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
       verdict: verdict,
     );
 
-    while (missing.isNotEmpty && mounted) {
+    while (missing.isNotEmpty) {
+      if (!mounted) return;
       final side = missing.first;
       final capture = await showDialog<bool>(
         context: context,
@@ -2220,7 +2204,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text('Add photo', style: TextStyle(color: Colors.white)),
           content: Text(
-            'Capture ${DraftSaveService.labelForSide(side)} for this ${modeStr} shipment.',
+            'Capture ${DraftSaveService.labelForSide(side)} for this $modeStr shipment.',
             style: const TextStyle(color: Color(0xFF8B949E), fontSize: 13),
           ),
           actions: [

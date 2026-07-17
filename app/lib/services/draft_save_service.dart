@@ -77,7 +77,6 @@ class DraftSaveService {
   ) async {
     final picked = await ImagePicker().pickImage(
       source: ImageSource.camera,
-      preferredCameraDevice: CameraDevice.rear,
       imageQuality: 92,
     );
     if (picked == null) return null;

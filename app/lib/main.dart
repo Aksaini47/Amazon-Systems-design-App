@@ -3,8 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'models/capture_session.dart';
 import 'theme/rf_colors.dart';
-import 'theme/rf_glass.dart';
 import 'screens/home_screen.dart';
 import 'services/update_service.dart';
 import 'utils/volume_button_service.dart';
@@ -18,8 +19,17 @@ Future<void> main() async {
   // runZonedGuarded captures async errors that Flutter's framework can't
   // see (e.g. Future errors that never get awaited). Without this, those
   // crashes would silently lost.
-  runZonedGuarded<Future<void>>(() async {
+  unawaited(runZonedGuarded<Future<void>>(() async {
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Real installed version for meta.json provenance (never crash the boot
+    // over it — the fallback 'unknown' is visible and honest).
+    try {
+      final info = await PackageInfo.fromPlatform();
+      CaptureSession.appVersion = '${info.version}+${info.buildNumber}';
+    } catch (e) {
+      debugPrint('PackageInfo failed, meta.json keeps app_version=unknown: $e');
+    }
 
     // Try Firebase. If google-services.json isn't present at build time
     // OR the runtime native init fails, we just skip Crashlytics — the
@@ -67,7 +77,7 @@ Future<void> main() async {
     if (Firebase.apps.isNotEmpty) {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     }
-  });
+  }));
 }
 
 class RepairfullyApp extends StatelessWidget {

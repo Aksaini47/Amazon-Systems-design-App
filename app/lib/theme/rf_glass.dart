@@ -116,12 +116,7 @@ class RfGlassBackground extends StatelessWidget {
           ),
         ],
         if (showGrid)
-          CustomPaint(
-            painter: _GlassGridPainter(
-              color: RfColors.navy,
-              opacity: 0.14,
-            ),
-          ),
+          CustomPaint(painter: _GlassGridPainter(color: RfColors.navy)),
         if (child != null) child!,
       ],
     );
@@ -147,78 +142,31 @@ class RfGlassBackground extends StatelessWidget {
 }
 
 class _GlassGridPainter extends CustomPainter {
-  final Color color;
-  final double opacity;
-  final double spacing;
-  final double stroke;
+  static const _opacity = 0.14;
+  static const _spacing = 32.0;
+  static const _stroke = 0.5;
 
-  _GlassGridPainter({
-    required this.color,
-    this.opacity = 0.14,
-    this.spacing = 32,
-    this.stroke = 0.5,
-  });
+  final Color color;
+
+  _GlassGridPainter({required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color.withValues(alpha: opacity)
-      ..strokeWidth = stroke
+      ..color = color.withValues(alpha: _opacity)
+      ..strokeWidth = _stroke
       ..style = PaintingStyle.stroke;
 
-    for (double x = 0; x <= size.width; x += spacing) {
+    for (double x = 0; x <= size.width; x += _spacing) {
       canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
     }
-    for (double y = 0; y <= size.height; y += spacing) {
+    for (double y = 0; y <= size.height; y += _spacing) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant _GlassGridPainter old) =>
-      old.color != color || old.opacity != opacity;
-}
-
-/// Frosted overlay for camera chrome (top/bottom bars over live preview).
-class RfGlassOverlay extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-  final BorderRadius borderRadius;
-  final double blur;
-  final Color? tint;
-  final bool showBottomBorder;
-
-  const RfGlassOverlay({
-    super.key,
-    required this.child,
-    this.padding,
-    this.borderRadius = BorderRadius.zero,
-    this.blur = RfGlass.blurStandard,
-    this.tint,
-    this.showBottomBorder = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: tint ?? RfGlass.fillElevated(0.48),
-            border: showBottomBorder
-                ? Border(bottom: BorderSide(color: RfGlass.border(0.14)))
-                : null,
-          ),
-          child: Padding(
-            padding: padding ?? EdgeInsets.zero,
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
+  bool shouldRepaint(covariant _GlassGridPainter old) => old.color != color;
 }
 
 /// Frosted pill / toast over camera or modal content.
@@ -290,7 +238,7 @@ class RfGlassContainer extends StatelessWidget {
       child: BackdropFilter(
         filter: blurEnabled
             ? ImageFilter.blur(sigmaX: blur, sigmaY: blur)
-            : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+            : ImageFilter.blur(),
         child: DecoratedBox(
           decoration: RfGlass.decoration(
             radius: radius,
@@ -410,40 +358,6 @@ class RfGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
           shape: Border(
             bottom: BorderSide(color: RfGlass.border(0.12)),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Horizontal status banner with glass tint.
-class RfGlassBanner extends StatelessWidget {
-  final Widget child;
-  final Color? tint;
-  final EdgeInsetsGeometry padding;
-
-  const RfGlassBanner({
-    super.key,
-    required this.child,
-    this.tint,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: RfGlass.blurLight, sigmaY: RfGlass.blurLight),
-        child: Container(
-          width: double.infinity,
-          padding: padding,
-          decoration: BoxDecoration(
-            color: (tint ?? RfGlass.fill(0.20)).withValues(alpha: 0.85),
-            border: Border(
-              bottom: BorderSide(color: RfGlass.border(0.10)),
-            ),
-          ),
-          child: child,
         ),
       ),
     );

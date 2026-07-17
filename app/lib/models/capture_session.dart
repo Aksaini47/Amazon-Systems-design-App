@@ -10,7 +10,11 @@ enum QCVerdict {
   /// Fraud/swap detected — buyer returned a different item.
   different,
   /// Both damaged AND different item returned.
-  damagedDifferent,
+  damagedDifferent;
+
+  /// Single source of truth for meta.json's claim_trigger: every non-OK
+  /// verdict flags a claim (damagedDifferent included — the worst case).
+  bool get triggersClaim => this != QCVerdict.ok;
 }
 
 /// Side / type of the product in a photo.
@@ -154,14 +158,18 @@ class CaptureSession {
         },
       if (verdict != null) 'verdict': verdict!.name,
       if (productTitle != null) 'product_title': productTitle,
-      'claim_trigger': verdict == QCVerdict.damaged || verdict == QCVerdict.different || verdict == QCVerdict.damagedDifferent,
-      'app_version': '1.0.0',
+      'claim_trigger': verdict?.triggersClaim ?? false,
+      'app_version': appVersion,
     };
   }
 
-  /// True when RT verdict is Damaged or Different — triggers composite generation.
-  bool get triggersClaim =>
-      verdict == QCVerdict.damaged || verdict == QCVerdict.different;
+  /// Real installed version ("2.1.0+9"), set once at boot from
+  /// package_info_plus (see main.dart). Fallback shows up in meta.json if
+  /// boot init ever fails — better an honest 'unknown' than a stale lie.
+  static String appVersion = 'unknown';
+
+  /// True for any non-OK RT verdict — triggers composite generation.
+  bool get triggersClaim => verdict?.triggersClaim ?? false;
 
   /// Check if all required photos for this mode are captured.
   bool get isPhotoComplete {

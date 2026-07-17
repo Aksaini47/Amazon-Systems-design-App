@@ -27,7 +27,8 @@ import '../theme/rf_colors.dart';
 ///   - [RfButton.service]   — navy fill, white text (ACCEPT / VIEW)
 ///   - [RfButton.secondary] — transparent + 1px white border (CANCEL / BACK / SKIP)
 ///   - [RfButton.danger]    — error red fill, white text (DELETE / FLAG)
-///   - [RfButton.tonal]     — small chip-style toggle (zoom/aspect rows)
+///
+/// For chip-style toggles (zoom/aspect rows) use [RfChip], not RfButton.
 class RfButton extends StatefulWidget {
   final String label;
   final IconData? icon;
@@ -35,7 +36,6 @@ class RfButton extends StatefulWidget {
   final RfButtonVariant variant;
   final RfButtonSize size;
   final bool fullWidth;
-  final bool active;  // for tonal toggles
 
   const RfButton({
     super.key,
@@ -45,7 +45,6 @@ class RfButton extends StatefulWidget {
     this.variant = RfButtonVariant.primary,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
-    this.active = false,
   });
 
   const RfButton.primary({
@@ -55,7 +54,6 @@ class RfButton extends StatefulWidget {
     this.onPressed,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
-    this.active = false,
   }) : variant = RfButtonVariant.primary;
 
   const RfButton.service({
@@ -65,7 +63,6 @@ class RfButton extends StatefulWidget {
     this.onPressed,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
-    this.active = false,
   }) : variant = RfButtonVariant.service;
 
   const RfButton.secondary({
@@ -75,7 +72,6 @@ class RfButton extends StatefulWidget {
     this.onPressed,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
-    this.active = false,
   }) : variant = RfButtonVariant.secondary;
 
   const RfButton.danger({
@@ -85,24 +81,13 @@ class RfButton extends StatefulWidget {
     this.onPressed,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
-    this.active = false,
   }) : variant = RfButtonVariant.danger;
-
-  const RfButton.tonal({
-    super.key,
-    required this.label,
-    this.icon,
-    this.onPressed,
-    this.size = RfButtonSize.small,
-    this.fullWidth = false,
-    this.active = false,
-  }) : variant = RfButtonVariant.tonal;
 
   @override
   State<RfButton> createState() => _RfButtonState();
 }
 
-enum RfButtonVariant { primary, service, secondary, danger, tonal }
+enum RfButtonVariant { primary, service, secondary, danger }
 
 enum RfButtonSize { small, medium, large }
 
@@ -114,12 +99,7 @@ class _RfButtonState extends State<RfButton> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: RfDuration.press,
-      lowerBound: 0.0,
-      upperBound: 1.0,
-    );
+    _ctrl = AnimationController(vsync: this, duration: RfDuration.press);
     // 1.0 → 0.95 on press, matching Mahika §V #1 spec.
     _scale = Tween<double>(begin: 1.0, end: 0.95)
         .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
@@ -183,18 +163,6 @@ class _RfButtonState extends State<RfButton> with SingleTickerProviderStateMixin
           text: Colors.white,
           border: null,
         );
-      case RfButtonVariant.tonal:
-        return widget.active
-            ? (
-                fill: pressed ? const Color(0xFFE5E7EB) : Colors.white,
-                text: RfColors.navy,
-                border: null,
-              )
-            : (
-                fill: pressed ? RfColors.glassFill(0.28) : RfColors.glassFill(0.12),
-                text: Colors.white,
-                border: RfColors.glassBorder(0.24),
-              );
     }
   }
 
@@ -210,7 +178,7 @@ class _RfButtonState extends State<RfButton> with SingleTickerProviderStateMixin
       decoration: BoxDecoration(
         color: palette.fill,
         borderRadius: BorderRadius.circular(RfRadius.button),
-        border: palette.border != null ? Border.all(color: palette.border!, width: 1) : null,
+        border: palette.border != null ? Border.all(color: palette.border!) : null,
       ),
       child: Row(
         mainAxisSize: widget.fullWidth ? MainAxisSize.max : MainAxisSize.min,
@@ -314,7 +282,7 @@ class _RfChipState extends State<RfChip> with SingleTickerProviderStateMixin {
       decoration: BoxDecoration(
         color: fill,
         borderRadius: BorderRadius.circular(RfRadius.chip),
-        border: Border.all(color: borderColor, width: 1),
+        border: Border.all(color: borderColor),
       ),
       child: Center(
         child: Text(
@@ -400,7 +368,7 @@ class _RfIconButtonState extends State<RfIconButton> with SingleTickerProviderSt
       decoration: BoxDecoration(
         color: _pressed ? pressedBg : bg,
         shape: BoxShape.circle,
-        border: Border.all(color: RfColors.glassBorder(0.28), width: 1),
+        border: Border.all(color: RfColors.glassBorder()),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.2),

@@ -94,7 +94,7 @@ class VerdictBottomSheet extends StatelessWidget {
   }
 
   void _confirmDifferent(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => RfGlassDialog(
         child: AlertDialog(
@@ -185,7 +185,6 @@ class _VerdictButtonState extends State<_VerdictButton> with SingleTickerProvide
           padding: const EdgeInsets.all(16),
           constraints: const BoxConstraints(minHeight: 72),
           decoration: RfGlass.decoration(
-            radius: RfRadius.card,
             tint: c.withValues(alpha: 0.12),
             borderColor: c.withValues(alpha: 0.45),
           ),

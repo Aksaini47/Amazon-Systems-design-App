@@ -17,7 +17,9 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 ///
 /// Returns null if no candidate passes the 3-7-7 numeric check.
 class OcrService {
-  static final _recognizer = TextRecognizer(script: TextRecognitionScript.latin);
+  /// App-lifetime singleton, intentionally never closed — the OS reclaims it
+  /// at process death, and closing between scans would re-pay model init.
+  static final _recognizer = TextRecognizer();
 
   // ─── Patterns ─────────────────────────────────────────────────────────
 
@@ -111,8 +113,8 @@ class OcrService {
   }
 
   /// Combined scan: returns the Order ID AND the full recognized text in one
-  /// pass. The caller can use [fullText] to detect courier-name keywords
-  /// (DELHIVERY / BLUE DART / etc.) and feed [CarrierPatterns.findAwbInText]
+  /// pass. The caller can use `fullText` to detect courier-name keywords
+  /// (DELHIVERY / BLUE DART / etc.) and feed `CarrierPatterns.findAwbInText`
   /// as a fallback when no barcode is decoded.
   static Future<OcrScanResult> scanAll(String imagePath) async {
     final inputImage = InputImage.fromFilePath(imagePath);
@@ -142,8 +144,6 @@ class OcrService {
     }
     return null;
   }
-
-  static void dispose() => _recognizer.close();
 }
 
 class OcrScanResult {

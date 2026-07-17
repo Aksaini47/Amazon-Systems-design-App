@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _maybeShowChangelog() async {
-    await Future.delayed(const Duration(milliseconds: 800));
+    await Future<void>.delayed(const Duration(milliseconds: 800));
     final notes = await UpdateService.consumePendingChangelog();
     if (notes == null || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -76,7 +76,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _recoverOrphanVideos() async {
     try {
-      final recovered = await LocalStorageService().recoverOrphanVideos();
+      final storage = LocalStorageService();
+      await storage.sweepJunkDrafts();
+      final recovered = await storage.recoverOrphanVideos();
       if (recovered > 0 && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Row(children: [
@@ -110,14 +112,14 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: 'Local Gallery',
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const LocalGalleryScreen()),
+              MaterialPageRoute<void>(builder: (_) => const LocalGalleryScreen()),
             ),
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
             ),
           ),
         ],
@@ -164,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!cameraOk) {
       final results = await PermissionService.requestCameraPermissions();
       if (!results[Permission.camera]!.isGranted) {
-        if (!mounted) return;
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Camera permission required'),
@@ -180,11 +182,11 @@ class _HomeScreenState extends State<HomeScreen> {
       await PermissionService.requestStoragePermission();
     }
 
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-    Navigator.push(context, MaterialPageRoute(
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    if (!context.mounted) return;
+    unawaited(Navigator.push(context, MaterialPageRoute<bool>(
       builder: (_) => LiveCaptureScreen(mode: mode),
-    ));
+    )));
   }
 }
 

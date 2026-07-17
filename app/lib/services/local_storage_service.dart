@@ -68,19 +68,30 @@ class LocalStorageService {
     return '$storagePath/orders';
   }
 
-  /// Get or create the folder for a specific order.
+  /// Get or create the folder for a specific order — WRITE paths only.
   ///
   /// With [mode]: creates `{orderId}-PK` or `{orderId}-RT`.
   /// Without [mode]: [orderId] is treated as the on-disk folder key (gallery /
   /// delete paths that already include the suffix).
   Future<Directory> getOrderFolder(String orderId, {CaptureMode? mode}) async {
+    final folder = await _orderFolderRef(orderId, mode: mode);
+    if (!await folder.exists()) await folder.create(recursive: true);
+    return folder;
+  }
+
+  /// Locate an order folder without creating it — READ paths. Returns null
+  /// when absent so existence checks stay meaningful.
+  Future<Directory?> findOrderFolder(String orderId, {CaptureMode? mode}) async {
+    final folder = await _orderFolderRef(orderId, mode: mode);
+    return await folder.exists() ? folder : null;
+  }
+
+  Future<Directory> _orderFolderRef(String orderId, {CaptureMode? mode}) async {
     final base = await _ordersDir();
     final folderName = mode != null
         ? FileNamingService.orderFolderName(orderId, mode)
         : orderId.replaceAll(RegExp(r'[^\w\-.]'), '_');
-    final folder = Directory('${base.path}/$folderName');
-    if (!await folder.exists()) await folder.create(recursive: true);
-    return folder;
+    return Directory('${base.path}/$folderName');
   }
 
   // ─── Crash recovery + listing + delete ─────────────────────────────────
@@ -181,17 +192,54 @@ class LocalStorageService {
     return out;
   }
 
-  /// List drafts (both videos and photos). Returns list of maps:
-  ///   path, fileName, sizeBytes, modifiedAt, kind ('video' | 'photo')
-  ///
-  /// Auto-purges junk files (videos < 50KB, photos < 5KB) on the fly — these
-  /// are usually leftover from too-short recordings or capture failures and
-  /// have no recoverable content.
+  // Junk thresholds: below these a draft has no recoverable content
+  // (too-short recording / failed capture).
+  static const _minVideoBytes = 50000;
+  static const _minPhotoBytes = 5000;
+
+  /// List drafts (both videos and photos) — pure read, no side effects.
+  /// Junk-sized files are hidden from the list; [sweepJunkDrafts] deletes them.
+  /// Returns list of maps: path, fileName, sizeBytes, modifiedAt, kind.
   Future<List<Map<String, dynamic>>> listDrafts() async {
+    final out = <Map<String, dynamic>>[];
+    for (final (file, stat, isVideo) in await _draftFiles()) {
+      if (stat.size < (isVideo ? _minVideoBytes : _minPhotoBytes)) continue;
+      out.add({
+        'path': file.path,
+        'fileName': file.path.split(Platform.pathSeparator).last,
+        'sizeBytes': stat.size,
+        'modifiedAt': stat.modified.toIso8601String(),
+        'kind': isVideo ? 'video' : 'photo',
+      });
+    }
+    out.sort((a, b) => (b['modifiedAt'] as String).compareTo(a['modifiedAt'] as String));
+    return out;
+  }
+
+  /// Delete junk-sized drafts. Called once at boot (main.dart), not from
+  /// read paths. Returns the number of files deleted; failures are logged.
+  Future<int> sweepJunkDrafts() async {
+    var purged = 0;
+    for (final (file, stat, isVideo) in await _draftFiles()) {
+      if (stat.size >= (isVideo ? _minVideoBytes : _minPhotoBytes)) continue;
+      try {
+        await file.delete();
+        purged++;
+      } catch (e) {
+        debugPrint('sweepJunkDrafts: could not delete ${file.path} — $e');
+      }
+    }
+    if (purged > 0) debugPrint('sweepJunkDrafts: purged $purged junk file(s)');
+    return purged;
+  }
+
+  /// Shared draft-folder scan: media files with their stat + video flag.
+  /// Unreadable entries are logged and skipped so one bad file can't hide
+  /// the rest of the list.
+  Future<List<(File, FileStat, bool)>> _draftFiles() async {
     final draftsDir = await getDraftsFolder();
     if (!await draftsDir.exists()) return [];
-    final out = <Map<String, dynamic>>[];
-    int purged = 0;
+    final out = <(File, FileStat, bool)>[];
     for (final entity in draftsDir.listSync(followLinks: false)) {
       if (entity is! File) continue;
       final p = entity.path.toLowerCase();
@@ -199,28 +247,11 @@ class LocalStorageService {
       final isImage = p.endsWith('.jpg') || p.endsWith('.jpeg') || p.endsWith('.png');
       if (!isVideo && !isImage) continue;
       try {
-        final stat = await entity.stat();
-        // Purge junk: tiny / empty files
-        final minSize = isVideo ? 50000 : 5000;
-        if (stat.size < minSize) {
-          try { await entity.delete(); purged++; } catch (_) {}
-          continue;
-        }
-        out.add({
-          'path': entity.path,
-          'fileName': entity.path.split(Platform.pathSeparator).last,
-          'sizeBytes': stat.size,
-          'modifiedAt': stat.modified.toIso8601String(),
-          'kind': isVideo ? 'video' : 'photo',
-        });
+        out.add((entity, await entity.stat(), isVideo));
       } catch (e) {
-        // Log so we don't silently lose a draft from the list — a permission
-        // error or filesystem race here would otherwise be invisible.
-        debugPrint('listDrafts: skipped ${entity.path} — $e');
+        debugPrint('draft scan: skipped ${entity.path} — $e');
       }
     }
-    if (purged > 0) debugPrint('listDrafts: auto-purged $purged junk file(s)');
-    out.sort((a, b) => (b['modifiedAt'] as String).compareTo(a['modifiedAt'] as String));
     return out;
   }
 
@@ -228,7 +259,7 @@ class LocalStorageService {
   Future<bool> deleteOrder(String orderId) async {
     try {
       // #region agent log
-      final folder = await getOrderFolder(orderId);
+      final folder = await _orderFolderRef(orderId);
       final folderExistsBefore = await folder.exists();
       final pathsBefore = <String>[];
       if (folderExistsBefore) {
@@ -484,9 +515,9 @@ class LocalStorageService {
 
   // ─── Photos ───────────────────────────────────────────────────────────
 
-  /// Save a photo file. Returns the saved file path.
-  /// Uses XFile.saveTo() for reliable copy.
-  /// Applies timestamp watermark with order ID and datetime (always, no setting toggle).
+  /// Save a photo into the order folder, normalising orientation and adding
+  /// the order-ID/timestamp watermark IF the Photo Timestamp setting is on.
+  /// Returns the saved file path.
   Future<String> savePhoto(
     String orderId,
     XFile photoFile,
@@ -498,8 +529,6 @@ class LocalStorageService {
     final destPath = '${folder.path}/$fileName';
 
     try {
-      // Apply watermark only if user has Photo Timestamp setting enabled
-      var fileToSave = photoFile;
       final prefix = mode == CaptureMode.pk ? 'PK' : 'RT';
       final addTimestamp = await CameraSettingsService.getTimestampImage();
       final watermarked = await ImageProcessingUtils.processPhoto(
@@ -545,16 +574,6 @@ class LocalStorageService {
       await channel.invokeMethod('deleteFile', {'path': path});
     } catch (e) {
       debugPrint('MediaStore delete failed (non-fatal): $e');
-    }
-  }
-
-  /// Scan entire order directory into MediaStore
-  Future<void> _scanDirectory(String dirPath) async {
-    try {
-      const channel = MethodChannel('com.repairfully.camera/media_scanner');
-      await channel.invokeMethod('scanDirectory', {'dir': dirPath});
-    } catch (e) {
-      debugPrint('Directory scan failed (non-fatal): $e');
     }
   }
 
@@ -612,7 +631,7 @@ class LocalStorageService {
     String folderKey, {
     String? bareOrderId,
   }) async {
-    final folder = await getOrderFolder(folderKey);
+    final folder = await _orderFolderRef(folderKey);
     final metaId = bareOrderId ?? folderKey;
     final file = File('${folder.path}/${FileNamingService.metaFileName(metaId)}');
     if (!await file.exists()) return null;
@@ -631,7 +650,8 @@ class LocalStorageService {
     required String bareOrderId,
     required CaptureMode mode,
   }) async {
-    final folder = await getOrderFolder(folderKey);
+    final folder = await findOrderFolder(folderKey);
+    if (folder == null) return null;
     final meta = await readMetaJson(folderKey, bareOrderId: bareOrderId);
 
     String? videoPath;
@@ -779,8 +799,8 @@ class LocalStorageService {
     final safeNewId = trimmed.replaceAll(RegExp(r'[^\w\-.]'), '_');
     final newFolderKey = FileNamingService.orderFolderName(trimmed, mode);
 
-    final oldFolder = await getOrderFolder(folderKey);
-    if (!await oldFolder.exists()) {
+    final oldFolder = await findOrderFolder(folderKey);
+    if (oldFolder == null) {
       throw StateError('Order folder not found');
     }
 
@@ -860,7 +880,7 @@ class LocalStorageService {
     merged['awb'] = session.awb ?? existing['awb'];
     merged['mode'] = mode;
     merged['session_started_at'] = session.sessionStartedAt.toIso8601String();
-    merged['app_version'] = '1.0.3';
+    merged['app_version'] = CaptureSession.appVersion;
     merged['storage_key'] = FileNamingService.orderFolderName(
       session.orderId!,
       session.mode,
@@ -893,7 +913,7 @@ class LocalStorageService {
 
     if (session.verdict != null) {
       merged['verdict'] = session.verdict!.name;
-      merged['claim_trigger'] = session.verdict == QCVerdict.damaged || session.verdict == QCVerdict.different;
+      merged['claim_trigger'] = session.verdict!.triggersClaim;
     }
 
     if (session.productTitle != null) {
@@ -916,8 +936,8 @@ class LocalStorageService {
   }
 
   Future<List<FileSystemEntity>> getOrderFiles(String orderId) async {
-    final folder = await getOrderFolder(orderId);
-    return folder.listSync();
+    final folder = await findOrderFolder(orderId);
+    return folder?.listSync() ?? [];
   }
 
   Future<bool> orderFolderExists(String orderId) async {

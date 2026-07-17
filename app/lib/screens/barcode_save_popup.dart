@@ -77,10 +77,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     super.initState();
     _orderIdController.addListener(_onTextChanged);
     _awbController.addListener(_onTextChanged);
-    _scanner = MobileScannerController(
-      detectionSpeed: DetectionSpeed.normal,
-      facing: CameraFacing.back,
-    );
+    _scanner = MobileScannerController();
     _bootstrap();
     VolumeButtonService().registerListener('barcode_popup', (event) {
       if (!mounted) return;
@@ -419,10 +416,10 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   Future<void> _playLockFeedback() async {
     debugPrint('Lock feedback: firing haptic + shutter beep');
     try {
-      HapticFeedback.heavyImpact();
+      await HapticFeedback.heavyImpact();
       // Wait a beat so the double-pulse is perceptible.
-      await Future.delayed(const Duration(milliseconds: 90));
-      HapticFeedback.vibrate();
+      await Future<void>.delayed(const Duration(milliseconds: 90));
+      await HapticFeedback.vibrate();
     } catch (e) {
       debugPrint('Lock haptic failed: $e');
     }
@@ -449,7 +446,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     });
   }
 
-  void _onCancel() => Navigator.pop(context, null);
+  void _onCancel() => Navigator.pop(context);
 
   @override
   Widget build(BuildContext context) {
@@ -472,7 +469,6 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
             child: RfButton.primary(
               label: 'SAVE',
               icon: Icons.check_rounded,
-              size: RfButtonSize.medium,
               onPressed: _isValid ? _onSave : null,
             ),
           ),
@@ -720,7 +716,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         style: const TextStyle(color: Colors.white, fontFamily: 'monospace', fontSize: 14, letterSpacing: 0.5),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.15), fontFamily: 'monospace', fontSize: 14),
+          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.15), fontFamily: 'monospace', fontSize: 14),
           filled: true,
           fillColor: RfColors.bg,
           isDense: true,

@@ -12,9 +12,9 @@ class VolumeButtonService {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
 
-  final Map<String, Function(int)> _listeners = {};
+  final Map<String, void Function(int)> _listeners = {};
 
-  void registerListener(String key, Function(int) listener) {
+  void registerListener(String key, void Function(int) listener) {
     _listeners[key] = listener;
   }
 
@@ -24,8 +24,8 @@ class VolumeButtonService {
 
   Future<void> _handleMethodCall(MethodCall call) async {
     if (call.method == 'volume_button_pressed') {
-      int event = call.arguments as int;
-      for (var listener in _listeners.values) {
+      final event = call.arguments as int;
+      for (final listener in _listeners.values) {
         listener(event);
       }
     }
