@@ -61,8 +61,9 @@ param(
 $ErrorActionPreference = 'Continue'
 
 # --- Fixed environment (project setup ke hisaab se) -----------------------
-$ShorebirdBat = 'C:\Users\DELL\.shorebird\bin\shorebird.bat'
-$FlutterBat   = 'C:\Projects\apps\flutter_sdk\bin\flutter.bat'
+# Env vars override for a second machine; defaults match Sir's rig.
+$ShorebirdBat = if ($env:RF_SHOREBIRD_BAT) { $env:RF_SHOREBIRD_BAT } else { 'C:\Users\DELL\.shorebird\bin\shorebird.bat' }
+$FlutterBat   = if ($env:RF_FLUTTER_BAT)   { $env:RF_FLUTTER_BAT }   else { 'C:\Projects\apps\flutter_sdk\bin\flutter.bat' }
 $AppDir       = Split-Path -Parent $PSScriptRoot          # ...\app\tools -> ...\app
 $Pubspec      = Join-Path $AppDir 'pubspec.yaml'
 $UpdateSvc    = Join-Path $AppDir 'lib\services\update_service.dart'
@@ -160,7 +161,9 @@ function Step-BumpBuild {
 # git changes dekh kar decide: native/asset/dep change hai? (auto mode)
 function Test-NeedsRelease {
   $changed = @()
-  $changed += (& git -C $AppDir diff --name-only HEAD 2>$null)
+  # '-- .' scopes the diff to app/ — without it, tracked changes anywhere in
+  # the monorepo could force an unnecessary full release.
+  $changed += (& git -C $AppDir diff --name-only HEAD -- . 2>$null)
   $changed += (& git -C $AppDir ls-files --others --exclude-standard 2>$null)
   foreach ($f in $changed) {
     if ([string]::IsNullOrWhiteSpace($f)) { continue }
@@ -198,13 +201,15 @@ function Set-Changelog([string]$marker, [string]$text) {
   if (-not $rx.IsMatch($c)) { Write-Warn2 "latestChangelog locate nahi hua; manually update karo."; return $false }
 
   # -Changelog ki pehli line = summary, baaki = bullets.
+  # User text ko PEHLE escape karo, PHIR '\n- ' separator jodo — warna
+  # separator ka backslash bhi double ho jata hai aur phone par literal
+  # "\n" dikhta hai (Dart string me newline ki jagah).
   $parts   = $text -split "`r?`n"
-  $summary = $parts[0].Trim()
+  function Escape-DartSingle([string]$s) { ($s -replace '\\', '\\' -replace "'", "\'") }
+  $summary = Escape-DartSingle $parts[0].Trim()
   $bullets = $parts | Select-Object -Skip 1 | Where-Object { $_.Trim() -ne '' }
-  $payload = "$marker - $summary"
-  foreach ($b in $bullets) { $payload += '\n- ' + ($b.Trim() -replace '^[-*]\s*', '') }
-  # Dart single-quoted string ke liye escape (backslash + quote).
-  $esc = $payload -replace '\\', '\\' -replace "'", "\'"
+  $esc = "$marker - $summary"
+  foreach ($b in $bullets) { $esc += '\n- ' + (Escape-DartSingle (($b.Trim()) -replace '^[-*]\s*', '')) }
 
   $eval = [System.Text.RegularExpressions.MatchEvaluator] {
     param($m) $m.Groups[1].Value + "'$esc';"
@@ -259,7 +264,8 @@ function Show-InstallStep([string]$apk) {
 $banner = "RF Logger ship.ps1 - Mode=$Mode"
 if ($DryRun) { $banner += ' (DRY-RUN)' }
 Write-Host $banner -ForegroundColor Magenta
-if (-not (Test-Path $ShorebirdBat)) { Die "shorebird.bat nahi mila: $ShorebirdBat" }
+if (-not (Test-Path $ShorebirdBat)) { Die "shorebird.bat nahi mila: $ShorebirdBat (env RF_SHOREBIRD_BAT se override karo)" }
+if (-not (Test-Path $FlutterBat))   { Die "flutter.bat nahi mila: $FlutterBat (env RF_FLUTTER_BAT se override karo)" }
 if (-not (Test-Path $AppDir))       { Die "App dir nahi mila: $AppDir" }
 
 # auto -> patch/release decide
@@ -325,13 +331,23 @@ try {
       Write-Ok 'Dry-run complete - kuch upload nahi hua.'
       return
     }
+    # Bump se pehle pubspec backup — failed build par version line wapas
+    # roll hoti hai, warna kabhi-publish-na-hui bump silently commit ho
+    # sakti hai (same .bak pattern jo Set-Changelog use karta hai).
+    Copy-Item $Pubspec "$Pubspec.bak" -Force
     $ver = Step-BumpBuild
     $marker = "$($ver.New):0"
     if ($Changelog) { [void](Set-Changelog $marker $Changelog) }
     else { Write-Note "Changelog marker suggestion: $marker" }
 
     $code = Invoke-ShorebirdBuild @('release', 'android', '--artifact', 'apk')
-    if ($code -ne 0) { Die "Release fail (code $code)." }
+    if ($code -ne 0) {
+      Copy-Item "$Pubspec.bak" $Pubspec -Force
+      Remove-Item "$Pubspec.bak" -Force -ErrorAction SilentlyContinue
+      Write-Warn2 "pubspec bump ($($ver.Old) -> $($ver.New)) revert ho gaya."
+      Die "Release fail (code $code)."
+    }
+    Remove-Item "$Pubspec.bak" -Force -ErrorAction SilentlyContinue
 
     Write-Step 'DONE (release)'
     Write-Ok "Release $($ver.New) publish ho gayi (--no-tree-shake-icons)."

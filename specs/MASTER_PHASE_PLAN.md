@@ -125,6 +125,12 @@ flowchart TB
 
 ### PHASE 2 — Capture app alignment (1–2 weeks)
 
+> **SUPERSEDED 2026-07-04 by commit `ea343c1` (app is local-only).** Task 2.3
+> "Direct sync" and this phase's exit gate are DESCOPED: the app deliberately
+> removed all backend/WiFi sync in 2.0.0 patch 8 and saves to the phone only.
+> The version in 2.6 is also stale — app is 2.1.0+9-era now. Backend/dashboard
+> (2.7) are DORMANT, kept as reference. See `app/README.md` for current state.
+
 **Goal:** Phone se evidence seedha Mahika folder mein, human verdict authoritative.
 
 | ID | Task | Priority | Notes |

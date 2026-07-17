@@ -1,3 +1,9 @@
+# dashboard — DORMANT
+
+> **Status: DORMANT since May 2026.** Talks only to `backend/` (also
+> dormant); the app it visualised went local-only in 2.0.0 patch 8
+> (commit `ea343c1`). Kept as reference; do not build new features here.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

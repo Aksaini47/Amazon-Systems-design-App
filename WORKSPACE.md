@@ -43,7 +43,7 @@ Amazon Systems Design/
 
 Git repo: `Amazon-Systems-design-App` (root). Mobile folder repo mein `mobile/` tha; ab disk pe `app/` — same app.
 
-**Target architecture (Mahika spec):** phone → `data/mahika/orders/` direct. Abhi legacy backend sync bhi chal sakta hai.
+**Current architecture (since 2.0.0 patch 8, commit `ea343c1`):** app is **local-only** — media saves on the phone, koi backend/WiFi sync nahi. `backend/` + `dashboard/` DORMANT hain (frozen May 2026, reference only). Direct `data/mahika/orders/` sync descoped — revisit only if a real need returns.
 
 ---
 
