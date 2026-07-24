@@ -115,7 +115,6 @@ class DraftSaveService {
             File(draftPath),
             orientation: CustomOrientation.portraitUp,
             addTimestamp: true,
-            prefix: '${mode.name.toUpperCase()}-$orderId',
           );
         }
         finalPaths[entry.key] = await local.promoteDraftPhoto(

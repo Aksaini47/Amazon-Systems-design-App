@@ -198,7 +198,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingToggle(
                 icon: Icons.access_time_rounded,
                 label: 'Photo timestamp',
-                subtitle: 'Overlay order ID + date/time on saved photos',
+                subtitle: 'Overlay date/time on saved photos',
                 value: _timestampImage,
                 onChanged: (v) {
                   setState(() => _timestampImage = v);

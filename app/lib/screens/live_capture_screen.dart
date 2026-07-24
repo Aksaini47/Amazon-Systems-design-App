@@ -876,15 +876,36 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         'duration_sec': '${_stopwatch.elapsed.inSeconds}',
       });
 
-      // Validate the recording before saving as a draft — a tap-START + immediate-tap-STOP
-      // produces a 0-byte file that clutters drafts/ and breaks save later. Treat as failed
-      // recording, discard the temp file, show user a toast, stay on camera screen.
+      // Validate the recording before saving as a draft. Two independent
+      // signals decide this, and they are NOT interchangeable:
+      //   - `tooShort` (stopwatch, measured BEFORE the stopVideoRecording()
+      //     await above) is a reliable read of what the user actually did —
+      //     a tap-START + immediate-tap-STOP with nothing worth keeping.
+      //   - `fileSize` is a size probe on CameraX's (camera_android_camerax)
+      //     raw temp output, read immediately after its stop call resolves.
+      //     CameraX finalizes the MP4 (flushing buffered frames, writing the
+      //     moov atom) asynchronously relative to that Future resolving, so
+      //     a LONGER recording (more data to flush) can transiently
+      //     under-report its size right at this instant — the opposite of
+      //     what a naive size check assumes. Treating a small read here as
+      //     proof of failure and deleting the only copy is how a fully
+      //     recorded unpack video gets silently destroyed on "some
+      //     shipments". Re-stat with a few short retries before trusting a
+      //     small number, and never delete on that signal alone.
       final tempFile = File(xfile.path);
-      int fileSize = 0;
-      try { fileSize = await tempFile.length(); } catch (_) {}
       final tooShort = _stopwatch.elapsed.inMilliseconds < 1000;
-      if (fileSize < 50000 || tooShort) {
-        debugPrint('Recording too short / empty (${fileSize}B, ${_stopwatch.elapsed.inMilliseconds}ms) — discarding');
+      int fileSize = 0;
+      for (var attempt = 0; attempt < 5; attempt++) {
+        try { fileSize = await tempFile.length(); } catch (_) { fileSize = 0; }
+        if (fileSize >= 50000 || attempt == 4) break;
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      }
+      final looksSmall = fileSize < 50000;
+
+      if (tooShort) {
+        // Genuinely near-instant tap — nothing of value was recorded. Safe
+        // to discard: there is no evidence here to lose.
+        debugPrint('Recording too short (${_stopwatch.elapsed.inMilliseconds}ms, ${fileSize}B) — discarding');
         await CrashReporting.setCaptureContext(
           mode: widget.mode,
           phase: 'stop_too_short',
@@ -923,6 +944,19 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         return;  // stay on camera, user can retry
       }
 
+      if (looksSmall) {
+        // A real recording happened (stopwatch agrees) but the file still
+        // looks small after retries. Never destroy the only copy on this
+        // signal alone — keep it and let it flow into drafts like any other
+        // recording so the evidence survives for manual review.
+        debugPrint('Recording finished (${_stopwatch.elapsed.inMilliseconds}ms) but file size still low (${fileSize}B) after retries — keeping, saving to drafts');
+        await CrashReporting.recordNonFatal(
+          Exception('recording_small_file_kept'),
+          StackTrace.current,
+          reason: 'stop_recording_small_but_kept size=$fileSize ms=${_stopwatch.elapsed.inMilliseconds}',
+        );
+      }
+
       // CRITICAL: Save valid video to drafts folder IMMEDIATELY.
       // The video file must NEVER be lost — even if the user cancels the save
       // flow, the app crashes, or storage runs out later. The draft is in the
@@ -943,6 +977,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           'draftPath': draftPath,
           'durationSec': _stopwatch.elapsed.inSeconds,
           'fileSize': fileSize,
+          'looksSmall': looksSmall,
         },
       );
       // #endregion
@@ -959,6 +994,15 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         'step': 'afterDraftSaved',
         'rtKeepsCamera': widget.mode == CaptureMode.rt,
       });
+
+      if (looksSmall && mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Video file looked smaller than expected — saved to Drafts, please double-check it'),
+          duration: Duration(milliseconds: 3000),
+          backgroundColor: Colors.black87,
+        ));
+      }
 
       if (widget.mode == CaptureMode.rt) {
         // RT: keep camera alive through verdict sheet so user does not see
@@ -1378,9 +1422,12 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         throw Exception('Video file missing at: $videoPath');
       }
 
-      // Sanity check — should never trigger now that _stopRecording rejects
-      // sub-50KB recordings up front, but keep as a defense-in-depth check
-      // in case something corrupts a draft between save-stop and save-promote.
+      // Sanity check — _stopRecording only rejects genuinely-instant taps
+      // (<1s) up front; a real recording whose file size still looked low
+      // after retries is deliberately kept and reaches here instead of
+      // being deleted (see _stopRecording). Unlike that earlier gate, this
+      // one only throws — the draft file is untouched, so it stays
+      // recoverable from Drafts even if this fires.
       final videoSize = await videoFile.length();
       if (videoSize < 50000) {
         throw Exception('Video recording was empty. Please re-record');
@@ -1414,12 +1461,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         final draftPhotoPath = _tempPhotoPaths[side]!;
         if (await File(draftPhotoPath).exists()) {
           try {
-            // Apply watermark (order ID + datetime) — respects user setting
+            // Apply datetime watermark — respects user setting
             await ImageProcessingUtils.processPhoto(
               File(draftPhotoPath),
               orientation: CustomOrientation.portraitUp,
               addTimestamp: _timestampOnPhotos,
-              prefix: '${widget.mode.name.toUpperCase()}-$orderId',
             );
             // Promote (rename) to order folder
             finalPaths[side] = await _localStorage.promoteDraftPhoto(

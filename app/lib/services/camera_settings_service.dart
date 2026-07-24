@@ -55,17 +55,6 @@ class CameraSettingsService {
     await prefs.setBool('mic_default', val);
   }
 
-  // --- Timestamp on photos (Phase 2: default OFF) ---
-  static Future<bool> getTimestampOnPhotos() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('timestamp_on_photos') ?? false;
-  }
-
-  static Future<void> setTimestampOnPhotos(bool val) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('timestamp_on_photos', val);
-  }
-
   // --- Shutter/Record sounds ---
   static Future<bool> getSound() async {
     final prefs = await SharedPreferences.getInstance();
@@ -184,7 +173,6 @@ class CameraSettingsService {
     await prefs.remove('aspect');
     await prefs.remove('pref_option');
     await prefs.remove('mic_default');
-    await prefs.remove('timestamp_on_photos');
     await prefs.remove('storage_path');
     await prefs.remove('use_custom_storage');
     await prefs.remove('capture_countdown');

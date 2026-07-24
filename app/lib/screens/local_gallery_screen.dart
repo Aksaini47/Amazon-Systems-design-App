@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
 import '../models/capture_session.dart';
 import '../services/draft_save_service.dart';
@@ -1541,6 +1542,9 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     final orderCtrl = TextEditingController(text: bareId);
     final awbCtrl = TextEditingController(text: meta?['awb'] as String? ?? '');
     QCVerdict? selectedVerdict = currentVerdict;
+    final originalStartedAt =
+        DateTime.tryParse(meta?['session_started_at'] as String? ?? '') ?? DateTime.now();
+    DateTime selectedStartedAt = originalStartedAt;
 
     if (!mounted) return;
     final saved = await showModalBottomSheet<String>(
@@ -1590,6 +1594,50 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                       focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.navy)),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Text('Capture date & time', style: TextStyle(color: RfColors.textSecondary, fontSize: 12)),
+                  const SizedBox(height: 6),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () async {
+                      final pickedDate = await showDatePicker(
+                        context: ctx,
+                        initialDate: selectedStartedAt,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(),
+                      );
+                      if (pickedDate == null || !ctx.mounted) return;
+                      final pickedTime = await showTimePicker(
+                        context: ctx,
+                        initialTime: TimeOfDay.fromDateTime(selectedStartedAt),
+                      );
+                      if (pickedTime == null) return;
+                      setSheetState(() {
+                        selectedStartedAt = DateTime(
+                          pickedDate.year, pickedDate.month, pickedDate.day,
+                          pickedTime.hour, pickedTime.minute,
+                        );
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: RfColors.border),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              DateFormat('dd MMM yyyy, HH:mm').format(selectedStartedAt),
+                              style: const TextStyle(color: Colors.white, fontFamily: 'monospace'),
+                            ),
+                          ),
+                          const Icon(Icons.edit_calendar_outlined, size: 16, color: RfColors.textSecondary),
+                        ],
+                      ),
+                    ),
+                  ),
                   if (mode == CaptureMode.rt) ...[
                     const SizedBox(height: 16),
                     const Text('QC verdict', style: TextStyle(color: RfColors.textSecondary, fontSize: 12)),
@@ -1631,6 +1679,9 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                                       newBareOrderId: orderCtrl.text.trim(),
                                       awb: awbCtrl.text.trim(),
                                       verdict: mode == CaptureMode.rt ? selectedVerdict : null,
+                                      newSessionStartedAt: selectedStartedAt == originalStartedAt
+                                          ? null
+                                          : selectedStartedAt,
                                     );
                                     if (ctx.mounted) Navigator.pop(ctx, newPath);
                                   } catch (e) {

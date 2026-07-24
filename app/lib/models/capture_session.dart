@@ -67,6 +67,7 @@ class CaptureSession {
   CaptureSession copyWith({
     String? orderId,
     Object? awb = _unset,
+    DateTime? sessionStartedAt,
     DateTime? videoStartedAt,
     DateTime? videoStoppedAt,
     int? videoDurationSeconds,
@@ -83,7 +84,7 @@ class CaptureSession {
       orderId: orderId ?? this.orderId,
       awb: identical(awb, _unset) ? this.awb : awb as String?,
       mode: mode,
-      sessionStartedAt: sessionStartedAt,
+      sessionStartedAt: sessionStartedAt ?? this.sessionStartedAt,
       videoStartedAt: videoStartedAt ?? this.videoStartedAt,
       videoStoppedAt: videoStoppedAt ?? this.videoStoppedAt,
       videoDurationSeconds: videoDurationSeconds ?? this.videoDurationSeconds,

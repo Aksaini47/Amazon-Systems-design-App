@@ -19,7 +19,6 @@ class ImageProcessingUtils {
     required CustomOrientation orientation,
     double? aspectRatio,
     bool addTimestamp = false,
-    String? prefix,
   }) async {
     var result = file;
 
@@ -37,19 +36,8 @@ class ImageProcessingUtils {
     // size is calculated against the final resolution.
     result = await resizeToMax(result, maxOutputDimension);
 
-    // Add 2-line watermark: Line 1 = order ID, Line 2 = datetime
     if (addTimestamp) {
-      // prefix is in format "PK-{orderId}" or "RT-{orderId}"
-      String orderId = prefix ?? '';
-      if (orderId.contains('-')) {
-        // Extract order ID from "PK-407-1234567-1234567" → "407-1234567-1234567"
-        final parts = orderId.split('-');
-        if (parts.length >= 3) {
-          orderId = parts.sublist(1).join('-'); // skip mode prefix
-        }
-      }
-      final dt = DateTime.now();
-      result = await addTimestampWatermark(result, orderId, dt);
+      result = await addTimestampWatermark(result, DateTime.now());
     }
 
     return result;
@@ -130,10 +118,14 @@ class ImageProcessingUtils {
     return file;
   }
 
-  /// Add 2-line watermark at bottom-left of image:
-  ///   Line 1: order ID (e.g. "407-1234567-1234567")
-  ///   Line 2: datetime (e.g. "14/05/2026 10:30:45")
-  static Future<File> addTimestampWatermark(File file, String orderId, DateTime dt) async {
+  /// Add a single-line date/time watermark at bottom-left of image, e.g.
+  /// "14/05/2026 10:30:45". Order ID is deliberately NOT printed here — it
+  /// comes from OCR on a shipping label, which can misread a faded label,
+  /// and a wrong ID burned into the evidence photo can't be corrected later
+  /// (no clean pre-watermark copy is kept). The date/time has no such risk,
+  /// so only it gets stamped onto the pixels; the order ID lives solely in
+  /// meta.json, where it's editable (see LocalStorageService.updateOrderMetadata).
+  static Future<File> addTimestampWatermark(File file, DateTime dt) async {
     final bytes = await file.readAsBytes();
     final codec = await ui.instantiateImageCodec(Uint8List.fromList(bytes));
     final frame = await codec.getNextFrame();
@@ -146,89 +138,27 @@ class ImageProcessingUtils {
     // Draw original image
     canvas.drawImage(original, Offset.zero, Paint());
 
-    // 2-line watermark text
-    final line1 = 'Order id: $orderId'; // e.g. "Order id: 407-1234567-1234567"
-    final line2 = DateFormat('dd/MM/yyyy HH:mm:ss').format(dt); // e.g. "14/05/2026 10:30:45"
+    final text = DateFormat('dd/MM/yyyy HH:mm:ss').format(dt); // e.g. "14/05/2026 10:30:45"
 
-    final baseFontSize = size.height * 0.016; // 1.6% — ~60px on 4K, ~30px on 1080p (2x previous)
+    final fontSize = size.height * 0.018;
     final textStyle = TextStyle(
       color: const Color.fromARGB(255, 12, 215, 19),
-      fontSize: baseFontSize,
+      fontSize: fontSize,
       fontWeight: FontWeight.bold,
       fontFamily: 'monospace',
       shadows: const [Shadow(offset: Offset(1, 1), blurRadius: 3)],
     );
 
-    // Line 1: Order ID (larger, bold)
-    final ts1 = TextStyle(color: textStyle.color, fontSize: baseFontSize * 1.2, fontWeight: FontWeight.bold, fontFamily: 'monospace', shadows: textStyle.shadows);
-    final tp1 = TextPainter(text: TextSpan(text: line1, style: ts1), textDirection: ui.TextDirection.ltr);
-    tp1.layout();
+    final tp = TextPainter(text: TextSpan(text: text, style: textStyle), textDirection: ui.TextDirection.ltr);
+    tp.layout();
 
-    // Line 2: Datetime (smaller)
-    final ts2 = TextStyle(color: textStyle.color, fontSize: baseFontSize * 0.9, fontWeight: FontWeight.normal, fontFamily: 'monospace', shadows: textStyle.shadows);
-    final tp2 = TextPainter(text: TextSpan(text: line2, style: ts2), textDirection: ui.TextDirection.ltr);
-    tp2.layout();
-
-    final totalHeight = tp1.height + tp2.height + 4; // 4px gap between lines
-    final startY = size.height * 0.92 - totalHeight;
-    final offset = Offset(size.width * 0.03, startY);
-
-    tp1.paint(canvas, offset);
-    tp2.paint(canvas, Offset(offset.dx, offset.dy + tp1.height + 4));
+    final offset = Offset(size.width * 0.03, size.height * 0.92 - tp.height);
+    tp.paint(canvas, offset);
 
     final picture = recorder.endRecording();
     final uiImage = await picture.toImage(original.width, original.height);
     // Encode as JPEG to match .jpg file extension
     final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
-    if (byteData != null) {
-      // Convert PNG bytes to JPEG using the image package
-      final pngBytes = byteData.buffer.asUint8List();
-      final decodedImg = img.decodeImage(pngBytes);
-      if (decodedImg != null) {
-        final jpegBytes = img.encodeJpg(decodedImg, quality: 90);
-        await file.writeAsBytes(jpegBytes);
-      } else {
-        await file.writeAsBytes(pngBytes);
-      }
-    }
-
-    original.dispose();
-    uiImage.dispose();
-    return file;
-  }
-
-  /// Legacy single-line watermark (kept for compatibility)
-  static Future<File> addTimestampWatermarkLegacy(File file, String text) async {
-    final bytes = await file.readAsBytes();
-    final codec = await ui.instantiateImageCodec(Uint8List.fromList(bytes));
-    final frame = await codec.getNextFrame();
-    final original = frame.image;
-
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-    final size = Size(original.width.toDouble(), original.height.toDouble());
-
-    canvas.drawImage(original, Offset.zero, Paint());
-
-    final fontSize = size.height * 0.025;
-    final textStyle = TextStyle(
-      color: const Color.fromARGB(255, 12, 215, 19),
-      fontSize: fontSize,
-      fontWeight: FontWeight.bold,
-      shadows: const [Shadow(offset: Offset(1, 1), blurRadius: 3)],
-    );
-
-    final textSpan = TextSpan(text: text, style: textStyle);
-    final textPainter = TextPainter(text: textSpan, textDirection: ui.TextDirection.ltr);
-    textPainter.layout();
-
-    final offset = Offset(size.width * 0.03, size.height * 0.92 - textPainter.height);
-    textPainter.paint(canvas, offset);
-
-    final picture = recorder.endRecording();
-    final uiImage = await picture.toImage(original.width, original.height);
-    final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
-
     if (byteData != null) {
       // Convert PNG bytes to JPEG using the image package
       final pngBytes = byteData.buffer.asUint8List();

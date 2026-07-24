@@ -529,13 +529,11 @@ class LocalStorageService {
     final destPath = '${folder.path}/$fileName';
 
     try {
-      final prefix = mode == CaptureMode.pk ? 'PK' : 'RT';
       final addTimestamp = await CameraSettingsService.getTimestampImage();
       final watermarked = await ImageProcessingUtils.processPhoto(
         File(photoFile.path),
         orientation: CustomOrientation.portraitUp,
         addTimestamp: addTimestamp,
-        prefix: '$prefix-$orderId',
       );
       // Write watermarked bytes to dest directly to preserve watermark
       await watermarked.readAsBytes().then(
@@ -777,13 +775,15 @@ class LocalStorageService {
     }
   }
 
-  /// Update saved order metadata — order ID, AWB, RT QC verdict.
-  /// Renames folder + files when order ID changes. Returns new folder path.
+  /// Update saved order metadata — order ID, AWB, RT QC verdict, capture
+  /// timestamp. Renames folder + files when order ID changes. Returns new
+  /// folder path.
   Future<String> updateOrderMetadata({
     required String folderKey,
     required String newBareOrderId,
     String? awb,
     QCVerdict? verdict,
+    DateTime? newSessionStartedAt,
   }) async {
     final trimmed = newBareOrderId.trim();
     if (trimmed.isEmpty) {
@@ -852,10 +852,12 @@ class LocalStorageService {
     }
 
     final normalizedAwb = awb?.trim();
+    final previousStartedAt = session.sessionStartedAt;
     final updated = session.copyWith(
       orderId: safeNewId,
       awb: (normalizedAwb == null || normalizedAwb.isEmpty) ? null : normalizedAwb,
       verdict: mode == CaptureMode.rt ? (verdict ?? session.verdict) : session.verdict,
+      sessionStartedAt: newSessionStartedAt,
     );
     await writeMetaJson(updated);
 
@@ -865,7 +867,14 @@ class LocalStorageService {
       orderId: safeNewId,
       awb: updated.awb,
       qc: updated.verdict?.name,
-      extra: {'folder': targetFolder.path, 'previousId': oldBareId},
+      extra: {
+        'folder': targetFolder.path,
+        'previousId': oldBareId,
+        if (newSessionStartedAt != null) ...{
+          'previousTimestamp': previousStartedAt.toIso8601String(),
+          'newTimestamp': updated.sessionStartedAt.toIso8601String(),
+        },
+      },
     );
 
     return targetFolder.path;
