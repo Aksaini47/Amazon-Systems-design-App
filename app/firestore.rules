@@ -1,0 +1,36 @@
+rules_version = '2';
+
+// RF Logger demo-trial gate. Source of truth — paste into Firebase console
+// (project "rf-logger") → Firestore Database → Rules tab → Publish.
+// See app/android/app/src/demo/README.md for the console setup this pairs with,
+// and lib/services/trial_service.dart for the client that reads/writes this.
+//
+// Design: one doc per device (`demo_trials/{deviceId}`, deviceId = Android ID,
+// see MainActivity.kt's device_id channel). `installedAt` can be set exactly
+// once, and only to the server's own request time — the client can never
+// backdate it or edit it afterward. `lastSeenAt` can only ever be bumped
+// forward to the server's request time. No Firebase Auth is used (keeps this
+// on the free Spark plan, no Cloud Functions needed) — the ceiling this
+// implies is "create-once, append-only lastSeenAt", which is exactly the
+// property the trial check needs.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /demo_trials/{deviceId} {
+      allow get: if true;
+
+      allow create: if request.resource.data.keys().hasAll(['installedAt', 'lastSeenAt'])
+                    && request.resource.data.installedAt == request.time
+                    && request.resource.data.lastSeenAt == request.time;
+
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastSeenAt'])
+                    && request.resource.data.lastSeenAt == request.time
+                    && request.resource.data.installedAt == resource.data.installedAt;
+
+      allow delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

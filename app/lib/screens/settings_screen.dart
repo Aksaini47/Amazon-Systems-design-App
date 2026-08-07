@@ -10,6 +10,7 @@ import '../theme/rf_glass.dart';
 import '../services/camera_settings_service.dart';
 import '../services/local_storage_service.dart';
 import '../services/update_service.dart';
+import 'tour_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -774,6 +775,18 @@ class _AboutCardState extends State<_AboutCard> {
                   label: const Text('What\'s new'),
                   style: TextButton.styleFrom(
                     foregroundColor: RfColors.pkAccent,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                ),
+              ),
+              Container(width: 1, height: 22, color: RfColors.border),
+              Expanded(
+                child: TextButton.icon(
+                  onPressed: () => TourDialog.show(context),
+                  icon: const Icon(Icons.help_outline_rounded, size: 18),
+                  label: const Text('Replay tour'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: RfColors.rtAccent,
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),

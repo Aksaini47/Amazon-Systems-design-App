@@ -96,6 +96,24 @@ class MainActivity: FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        // Device ID channel — demo-trial anchor (see lib/services/trial_service.dart).
+        // Settings.Secure.ANDROID_ID is scoped per app-signing-key + user + device
+        // and survives app uninstall/reinstall (unlike SharedPreferences), which is
+        // the whole point of using it as the trial anchor. device_info_plus does NOT
+        // expose this — its `id` field returns Build.ID (the OS firmware build,
+        // identical across every device on that build) since androidId was dropped
+        // from that package in v4.0.0. Hence a dedicated channel here.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.repairfully.camera/device_id")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getAndroidId" -> {
+                        val id = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                        result.success(id)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
     }
 
     /// Modern MediaScanner using MediaScannerConnection
@@ -152,11 +170,19 @@ class MainActivity: FlutterActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         return when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_UP -> {
-                sendVolumeEvent(1)
+                // Android re-fires onKeyDown repeatedly while a key is HELD
+                // (key-repeat) — event.repeatCount > 0 on those repeats.
+                // Forwarding every repeat let one physical long-press send
+                // multiple stop-recording events to Dart (see
+                // live_capture_screen.dart's _stoppingRecording guard for
+                // the other half of this fix). Only forward the initial
+                // press; still consume every repeat (return true) so the
+                // system volume UI doesn't reappear mid-recording.
+                if (event.repeatCount == 0) sendVolumeEvent(1)
                 true
             }
             KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                sendVolumeEvent(2)
+                if (event.repeatCount == 0) sendVolumeEvent(2)
                 true
             }
             else -> super.onKeyDown(keyCode, event)

@@ -4,18 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'config/app_config.dart';
 import 'models/capture_session.dart';
 import 'theme/rf_colors.dart';
 import 'screens/home_screen.dart';
+import 'screens/trial_gate.dart';
 import 'services/update_service.dart';
 import 'utils/volume_button_service.dart';
+import 'widgets/demo_watermark_overlay.dart';
+
+/// Prod entrypoint — demo entrypoint is lib/main_demo.dart, which calls the
+/// same bootstrap() with isDemo: true. Both share this one Dart app; only
+/// AppConfig.isDemo (set below) and the Gradle flavor's applicationId differ.
+Future<void> main() => bootstrap(isDemo: false);
 
 /// Bootstraps the app inside a Zone so uncaught async errors funnel through
 /// Crashlytics. Firebase initialization is GATED on whether the platform
 /// can find `google-services.json` — when Sir hasn't dropped the file yet,
 /// `Firebase.initializeApp` throws and we fall back to a no-Crashlytics
 /// mode so the app still boots normally.
-Future<void> main() async {
+Future<void> bootstrap({required bool isDemo}) async {
+  AppConfig.isDemo = isDemo;
   // runZonedGuarded captures async errors that Flutter's framework can't
   // see (e.g. Future errors that never get awaited). Without this, those
   // crashes would silently lost.
@@ -159,7 +168,27 @@ class RepairfullyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const HomeScreen(),
+      // Demo build: one global tiled "DEMO" overlay covering every screen —
+      // Home, Settings, Gallery, camera preview, dialogs (incl. the tour),
+      // everything. builder wraps the Navigator's output, so it survives
+      // route pushes/pops for free.
+      //
+      // MUST be Positioned.fill, not a bare Stack child — a bare child gets
+      // loose constraints sized to its own preferred size, and
+      // DemoWatermarkOverlay's CustomPaint(size: Size.infinite) collapses
+      // to zero size under loose constraints instead of filling the
+      // screen (confirmed on-device: the overlay was invisible without
+      // this wrapper).
+      builder: (context, child) {
+        if (!AppConfig.isDemo || child == null) return child ?? const SizedBox.shrink();
+        return Stack(
+          children: [
+            child,
+            const Positioned.fill(child: DemoWatermarkOverlay()),
+          ],
+        );
+      },
+      home: AppConfig.isDemo ? const TrialGate() : const HomeScreen(),
     );
   }
 }

@@ -1,17 +1,22 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
 import '../widgets/rf_logo.dart';
+import '../config/app_config.dart';
 import 'settings_screen.dart';
 import 'live_capture_screen.dart';
 import 'local_gallery_screen.dart';
+import 'tour_dialog.dart';
 import '../models/capture_session.dart';
 import '../services/local_storage_service.dart';
 import '../services/permission_service.dart';
 import '../services/update_service.dart';
 import '../utils/volume_button_service.dart';
+
+const _kHasSeenTourKey = 'has_seen_tour_v1';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _recoverOrphanVideos();
     _maybeShowChangelog();
+    _maybeShowTour();
     VolumeButtonService().registerListener('home_screen', (event) {
       if (!mounted) return;
       final route = ModalRoute.of(context);
@@ -72,6 +78,25 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     ));
+  }
+
+  /// Auto-popup is demo-flavor only — prod (Sir's own phone) never needs
+  /// it. Manual replay (Settings, AppBar "?" icon) works on both flavors so
+  /// Sir can preview exactly what a prospect sees without installing the
+  /// demo build separately.
+  Future<void> _maybeShowTour() async {
+    if (!AppConfig.isDemo) return;
+    await Future<void>.delayed(const Duration(milliseconds: 800));
+    if (!mounted) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool(_kHasSeenTourKey) == true) return;
+      await prefs.setBool(_kHasSeenTourKey, true);
+      if (!mounted) return;
+      await TourDialog.show(context);
+    } catch (e) {
+      debugPrint('_maybeShowTour failed (non-fatal): $e');
+    }
   }
 
   Future<void> _recoverOrphanVideos() async {
@@ -121,6 +146,11 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.help_outline_rounded),
+            tooltip: 'How to use RF Logger',
+            onPressed: () => TourDialog.show(context),
           ),
         ],
       ),

@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:intl/intl.dart';
+import '../config/app_config.dart';
 
 enum CustomOrientation { portraitUp, portraitDown, landscapeRight, landscapeLeft }
 
@@ -38,6 +40,10 @@ class ImageProcessingUtils {
 
     if (addTimestamp) {
       result = await addTimestampWatermark(result, DateTime.now());
+    }
+
+    if (AppConfig.isDemo) {
+      result = await addDemoWatermark(result);
     }
 
     return result;
@@ -161,6 +167,79 @@ class ImageProcessingUtils {
     final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
     if (byteData != null) {
       // Convert PNG bytes to JPEG using the image package
+      final pngBytes = byteData.buffer.asUint8List();
+      final decodedImg = img.decodeImage(pngBytes);
+      if (decodedImg != null) {
+        final jpegBytes = img.encodeJpg(decodedImg, quality: 90);
+        await file.writeAsBytes(jpegBytes);
+      } else {
+        await file.writeAsBytes(pngBytes);
+      }
+    }
+
+    original.dispose();
+    uiImage.dispose();
+    return file;
+  }
+
+  /// Tiled, rotated "DEMO" watermark across the full frame — burned into
+  /// every evidence photo in the demo build so a file pulled straight off
+  /// the device (bypassing the app entirely) still can't be used for a real
+  /// SAFE-T claim. Deliberately tiled rather than one line/band: a single
+  /// band is trivially cropped out of a photo, a full tile is not.
+  ///
+  /// Kept as its own function rather than a bool param on
+  /// [addTimestampWatermark] — the two watermarks have unrelated rationales
+  /// (evidence integrity vs. demo licensing), and coupling them risked the
+  /// demo stamp silently inheriting the user-facing "Photo timestamp"
+  /// setting toggle. Called unconditionally from [processPhoto] when
+  /// [AppConfig.isDemo] is true, regardless of that setting.
+  static Future<File> addDemoWatermark(File file) async {
+    final bytes = await file.readAsBytes();
+    final codec = await ui.instantiateImageCodec(Uint8List.fromList(bytes));
+    final frame = await codec.getNextFrame();
+    final original = frame.image;
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final size = Size(original.width.toDouble(), original.height.toDouble());
+
+    canvas.drawImage(original, Offset.zero, Paint());
+
+    const text = 'DEMO';
+    final textStyle = TextStyle(
+      color: Colors.white.withValues(alpha: 0.34),
+      fontSize: size.width * 0.11,
+      fontWeight: FontWeight.w800,
+      letterSpacing: 2,
+    );
+    final tp = TextPainter(
+      text: TextSpan(text: text, style: textStyle),
+      textDirection: ui.TextDirection.ltr,
+    )..layout();
+
+    // Rotate the whole tile grid ~-28° around the image center, then paint
+    // "DEMO" repeatedly on a grid wide/tall enough to still cover every
+    // corner once rotated (hence the generous overflow margin below).
+    canvas.save();
+    canvas.translate(size.width / 2, size.height / 2);
+    canvas.rotate(-28 * math.pi / 180);
+    canvas.translate(-size.width / 2, -size.height / 2);
+
+    final stepX = tp.width * 1.8;
+    final stepY = tp.height * 3.0;
+    final overflow = size.width + size.height;
+    for (double y = -overflow; y < size.height + overflow; y += stepY) {
+      for (double x = -overflow; x < size.width + overflow; x += stepX) {
+        tp.paint(canvas, Offset(x, y));
+      }
+    }
+    canvas.restore();
+
+    final picture = recorder.endRecording();
+    final uiImage = await picture.toImage(original.width, original.height);
+    final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData != null) {
       final pngBytes = byteData.buffer.asUint8List();
       final decodedImg = img.decodeImage(pngBytes);
       if (decodedImg != null) {

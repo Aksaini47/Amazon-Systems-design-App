@@ -49,6 +49,29 @@ android {
         multiDexEnabled true
     }
 
+    // ─── Demo/trial flavor (2026-08) ───────────────────────────────────────
+    // "prod" is the untouched production app — applicationId intentionally
+    // NOT overridden here, stays byte-identical to "com.repairfully.logger"
+    // (the signature/package already installed on the production phone).
+    // "demo" gets its own applicationId so it installs side-by-side without
+    // ever touching the prod install. See lib/main_demo.dart + AppConfig.isDemo
+    // for the Dart-side counterpart — Flutter's --flavor flag only selects
+    // this Gradle flavor, it does NOT select a Dart entrypoint, so builds
+    // must always pass both: --flavor demo -t lib/main_demo.dart
+    flavorDimensions "distribution"
+    productFlavors {
+        prod {
+            dimension "distribution"
+            manifestPlaceholders = [appLabel: "RF Logger"]
+        }
+        demo {
+            dimension "distribution"
+            applicationId "com.repairfully.logger.demo"
+            versionNameSuffix "-demo"
+            manifestPlaceholders = [appLabel: "RF Logger (Demo)"]
+        }
+    }
+
     signingConfigs {
         release {
             // The Kotlin DSL version of build.gradle uses the same lookup;

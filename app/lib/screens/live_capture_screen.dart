@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
@@ -20,6 +19,7 @@ import '../services/activity_log_service.dart';
 import '../utils/volume_button_service.dart';
 import '../utils/image_processing.dart';
 import '../widgets/rf_button.dart';
+import '../config/app_config.dart';
 import 'barcode_save_popup.dart';
 import 'verdict_bottom_sheet.dart';
 
@@ -851,8 +851,24 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     }
   }
 
+  /// Re-entrancy guard for [_stopRecording] — mirrors [_startingRecording].
+  /// Two undebounced triggers can both call this while `_isRecording` is
+  /// still true (it isn't cleared until deep in the async success path,
+  /// well after the native stopVideoRecording() call): the on-screen
+  /// capture button (no debounce) and the hardware volume-up key (Android
+  /// re-fires onKeyDown on key-repeat while held — see MainActivity.kt's
+  /// repeatCount guard). Without this flag, the second concurrent call
+  /// reaches `_camera!.stopVideoRecording()` a second time and either hits
+  /// the plugin's `!value.isRecordingVideo` guard (CameraException "No
+  /// video is recording") or races the plugin's shared unlocked output-path
+  /// state, producing a PathNotFoundException when saveDraftVideo() tries
+  /// to copy a temp file that's already gone.
+  bool _stoppingRecording = false;
+
   Future<void> _stopRecording() async {
     if (!_isRecording) return;
+    if (_stoppingRecording) return;
+    _stoppingRecording = true;
     _timerTick?.cancel();
     _stopwatch.stop();
     _countdownTimer?.cancel();
@@ -1019,6 +1035,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       );
       await CrashReporting.recordNonFatal(e, st, reason: 'stop_recording_failed');
       _setError('Failed to stop recording: $e');
+    } finally {
+      _stoppingRecording = false;
     }
   }
 
@@ -1081,6 +1099,15 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     if (_isAspectCropped) {
       await ImageProcessingUtils.cropToAspectRatio(draft, _aspectRatio);
     }
+
+    // Demo build: stamp here too, not just at promotion time. A session
+    // abandoned before it ever gets an order ID (never reaches
+    // LocalStorageService.savePhoto()) would otherwise sit in Gallery ->
+    // Drafts fully clean.
+    if (AppConfig.isDemo) {
+      await ImageProcessingUtils.addDemoWatermark(draft);
+    }
+
     return draft.path;
   }
 
@@ -1526,7 +1553,16 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   void _setError(String msg) {
     debugPrint(msg);
-    if (mounted) setState(() { _errorMessage = msg; _phase = CapturePhase.error; _isSaving = false; });
+    // _isRecording reset here too: whichever call site reached _setError,
+    // the native controller is provably no longer recording — either it
+    // never started (init/permission failures), or _stopRecording's own
+    // catch fired, which only happens once stopVideoRecording() itself has
+    // already resolved (successfully or not) — so the real underlying
+    // camera state is always "not recording" by this point. Without this,
+    // the error-overlay's RETRY button re-inits a fresh CameraController
+    // but the capture button stays wired to _stopRecording (isRecording
+    // still true), reproducing the identical error on every retry.
+    if (mounted) setState(() { _errorMessage = msg; _phase = CapturePhase.error; _isSaving = false; _isRecording = false; });
   }
 
   /// Brief, non-blocking confirmation that save completed.
@@ -1937,42 +1973,46 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   // ─── Top bar ─────────────────────────────────────────────────────────
 
-  /// Frosted camera chrome (top status bar, bottom control panel).
-  /// Translucent + blurred so the live preview stays perceptible behind it
-  /// — matches the Samsung reference (floating glass chrome, not a solid
-  /// opaque band eating into the frame) and is what made the "9:16 frame"
-  /// look pre-cropped: a fixed opaque black zone here shrank the visible
-  /// frame in every ratio, not just non-Full ones.
-  Widget _cameraChromeBar({
+  /// No-blur "floating" chrome — solid fill + border + shadow, same visual
+  /// language as [RfIconButton] (no `BackdropFilter` anywhere). Replaces
+  /// the old blurred `_cameraChromeBar`/`RfGlassPill`/`RfGlassContainer`
+  /// panels on this screen: a shared translucent bar reads as heavy chrome
+  /// over a live camera preview, so each control now floats on its own
+  /// solid pill instead. Tint alpha is intentionally higher than the old
+  /// glass pills' (~0.22) since there's no blur left to soften a busy
+  /// moving background behind low-opacity text.
+  Widget _floatingPill({
     required Widget child,
-    EdgeInsetsGeometry padding = EdgeInsets.zero,
-    bool showBottomBorder = false,
-    bool showTopBorder = false,
+    EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    Color? tint,
+    Color? borderColor,
+    double radius = RfRadius.button,
+    VoidCallback? onTap,
   }) {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: RfGlass.blurLight, sigmaY: RfGlass.blurLight),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.45),
-            border: showBottomBorder
-                ? Border(bottom: BorderSide(color: RfGlass.border(0.14)))
-                : showTopBorder
-                    ? Border(top: BorderSide(color: RfGlass.border(0.14)))
-                    : null,
-          ),
-          child: Padding(padding: padding, child: child),
-        ),
+    final pill = Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: tint ?? RfColors.card.withValues(alpha: 0.82),
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: borderColor ?? RfGlass.border()),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
       ),
+      child: child,
+    );
+    if (onTap == null) return pill;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(onTap: onTap, borderRadius: BorderRadius.circular(radius), child: pill),
     );
   }
 
   Widget _buildTopBar(Color accent) {
     return Positioned(
       top: 0, left: 0, right: 0,
-      child: _cameraChromeBar(
+      child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        showBottomBorder: true,
         child: _buildTopBarRow(accent),
       ),
     );
@@ -1981,18 +2021,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   Widget _buildTopBarRow(Color accent) {
     return Row(
       children: [
-        GestureDetector(
-          onTap: _close,
-          child: RfGlassPill(
-            padding: const EdgeInsets.all(7),
-            radius: RfRadius.chip,
-            child: const Icon(Icons.close, color: Colors.white, size: 20),
-          ),
-        ),
+        RfIconButton(icon: Icons.close_rounded, size: 38, onPressed: _close),
         const SizedBox(width: 6),
-        RfGlassPill(
-          tint: accent.withValues(alpha: 0.55),
-          borderColor: accent.withValues(alpha: 0.4),
+        _floatingPill(
+          tint: accent.withValues(alpha: 0.85),
+          borderColor: accent.withValues(alpha: 0.6),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           radius: 12,
           child: Text(
@@ -2018,9 +2051,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   Widget _buildRtInstructionBanner(Color accent) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: RfGlassPill(
-        tint: accent.withValues(alpha: 0.45),
-        borderColor: accent.withValues(alpha: 0.55),
+      child: _floatingPill(
+        tint: accent.withValues(alpha: 0.85),
+        borderColor: accent.withValues(alpha: 0.6),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         radius: 14,
         child: const Row(
@@ -2060,9 +2093,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     final stepN = !hasFront ? 1 : (!hasBack ? 2 : 3);
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: RfGlassPill(
-        tint: accent.withValues(alpha: 0.45),
-        borderColor: accent.withValues(alpha: 0.55),
+      child: _floatingPill(
+        tint: accent.withValues(alpha: 0.85),
+        borderColor: accent.withValues(alpha: 0.6),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         radius: 14,
         child: Row(
@@ -2263,9 +2296,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   Widget _buildBottomControls(Color accent) {
     return Positioned(
       bottom: 0, left: 0, right: 0,
-      child: _cameraChromeBar(
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 36),
-        showTopBorder: true,
         child: _buildBottomControlsColumn(accent),
       ),
     );
@@ -2281,37 +2313,30 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           if (_inClaimFlow)
             Padding(
               padding: const EdgeInsets.only(bottom: 14),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: _onSkipManualCapture,
-                  borderRadius: BorderRadius.circular(RfRadius.button),
-                  child: RfGlassPill(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    borderColor: RfGlass.border(0.24),
-                    // White + shadow, not textSecondary grey — this pill sits
-                    // directly over the live, brightness-varying camera feed;
-                    // dim grey washes out unreadable on bright backgrounds.
-                    // Matches the PK/RT instruction banners' pattern.
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.skip_next_rounded, color: Colors.white, size: 18,
-                            shadows: [Shadow(color: Colors.black54, blurRadius: 2, offset: Offset(0, 1))]),
-                        SizedBox(width: 8),
-                        Text(
-                          'SKIP THIS PHOTO',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.4,
-                            shadows: [Shadow(color: Colors.black54, blurRadius: 2, offset: Offset(0, 1))],
-                          ),
-                        ),
-                      ],
+              child: _floatingPill(
+                onTap: _onSkipManualCapture,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                // White + shadow, not textSecondary grey — this pill sits
+                // directly over the live, brightness-varying camera feed;
+                // dim grey washes out unreadable on bright backgrounds.
+                // Matches the PK/RT instruction banners' pattern.
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.skip_next_rounded, color: Colors.white, size: 18,
+                        shadows: [Shadow(color: Colors.black54, blurRadius: 2, offset: Offset(0, 1))]),
+                    SizedBox(width: 8),
+                    Text(
+                      'SKIP THIS PHOTO',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.4,
+                        shadows: [Shadow(color: Colors.black54, blurRadius: 2, offset: Offset(0, 1))],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -2337,16 +2362,22 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
               && !_inClaimFlow)
             _buildRtInstructionBanner(accent),
 
-          // Mode instructions during recording
+          // Mode instructions during recording — small solid pill (not bare
+          // text) so it stays legible floating directly over moving video,
+          // now that there's no shared bottom-bar background behind it.
           if (_isRecording)
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: Text(
-                widget.mode == CaptureMode.pk
-                    ? 'Pack the product. Tap STOP when done.'
-                    : 'Inspect the return. Tap STOP when done.',
-                style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                textAlign: TextAlign.center,
+              child: _floatingPill(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                radius: 14,
+                child: Text(
+                  widget.mode == CaptureMode.pk
+                      ? 'Pack the product. Tap STOP when done.'
+                      : 'Inspect the return. Tap STOP when done.',
+                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
 
@@ -2364,9 +2395,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           // banner above already convey the action; a label below adds
           // noise.
           if (_isRecording)
-            RfGlassPill(
+            _floatingPill(
               padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
-              borderColor: RfColors.recording.withValues(alpha: 0.5),
+              borderColor: RfColors.recording.withValues(alpha: 0.6),
               radius: 18,
               child: const Text(
                 'TAP TO STOP',
@@ -2421,7 +2452,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     if (_isRecording) return const SizedBox.shrink();
 
     if (!_aspectStripExpanded) {
-      return RfGlassContainer(
+      return _floatingPill(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         radius: 18,
         onTap: () => setState(() => _aspectStripExpanded = true),
@@ -2438,7 +2469,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       setState(() => _aspectStripExpanded = false);
     }
 
-    return RfGlassContainer(
+    return _floatingPill(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       radius: 22,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -2452,7 +2483,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   /// Zoom (1×/2×/3×) + mic toggle, in the same glass pill language as the
   /// ratio control. Zoom stays visible in every phase, including claim photo.
   Widget _buildZoomMicPill(Color accent) {
-    return RfGlassContainer(
+    return _floatingPill(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       radius: 20,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
