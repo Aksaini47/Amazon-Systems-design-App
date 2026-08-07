@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+9:4 - Fix: recording could be lost as \'too short\' on stop even after a full unpack video - rn kept & saved to drafts instead of deleted.\n- Add: capture date/time is now editable in Gallery Edit-order sheet.\n- Fix: Order ID removed from photo watermark (date/time only) - OCR misreads can no longer print wrong figures onto evidence photos.';
+      '2.1.0+10:0 - New app icon, cleaner camera screen, fixed video-save crash\n- New launcher icon (box/clock/return-arrow)\n- Camera screen: removed blur from top/bottom bars, floating buttons instead\n- Fixed rare \'Failed to stop recording\' crash on video stop (RT/PK especially)';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

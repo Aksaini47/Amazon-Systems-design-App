@@ -114,6 +114,18 @@ function Invoke-ShorebirdBuild([string[]]$sbArgs) {
       return 99   # exit code lied -> force fail
     }
   }
+  # Underlying `flutter build` / Gradle can fail while shorebird.bat's outer
+  # wrapper still exits 0 (nested shorebird.bat -> inner powershell -> gradle
+  # exit-code propagation is lossy — bit us once already: a missing
+  # shorebird.yaml "flavors" entry failed the Gradle build but ship.ps1
+  # still reported success). Any of these markers with no "Published
+  # Release"/"Published Patch" success line alongside them = real failure.
+  if (($text -match 'BUILD FAILED' -or
+       $text -match 'Gradle task \S+ failed' -or
+       $text -match 'Failed to build (AAB|APK)') -and
+      $text -notmatch 'Published (Release|Patch)') {
+    return 98   # exit code lied -> force fail
+  }
   return $code
 }
 
@@ -151,8 +163,15 @@ function Step-BumpBuild {
   $old = "$maj.$min.$pat+$bld"
   $new = "$maj.$min.$pat+$($bld + 1)"
   # [ \t] use karo, \s nahi - warna multiline mode me newline/blank line bhi
-  # khaa jaata hai.
-  $c2  = $c -replace ('(?m)^version:[ \t]*' + [regex]::Escape($old) + '[ \t]*$'), "version: $new"
+  # khaa jaata hai. Par \r? zaroori hai (trailing \r?$, \s nahi) - pubspec.yaml
+  # CRLF line endings ke saath hai (git core.autocrlf), aur bina \r? pattern
+  # kabhi match hi nahi karta -> -replace silently no-op -> Write-Ok neeche
+  # phir bhi "bumped" print kar deta tha jabki file kabhi badli hi nahi thi.
+  # Caught 2026-08-08: ek poora release "bumped" print hone ke baad bhi
+  # purani hi version pe ban raha tha.
+  $rx2 = '(?m)^version:[ \t]*' + [regex]::Escape($old) + '[ \t]*\r?$'
+  $c2  = $c -replace $rx2, "version: $new"
+  if ($c2 -eq $c) { Die "Version replace no-op raha (pattern match nahi hua) - pubspec.yaml manually check karo." }
   Set-Content -Path $Pubspec -Value $c2 -NoNewline
   Write-Ok "pubspec version bumped: $old -> $new"
   return @{ Old = $old; New = $new }
@@ -305,7 +324,7 @@ try {
     if ($Changelog) { [void](Set-Changelog $marker $Changelog) }
     else { Write-Note "Changelog marker suggestion: $marker (update_service.dart latestChangelog me daalo)" }
 
-    $sbArgs = @('patch', 'android', "--release-version=$ReleaseVersion")
+    $sbArgs = @('patch', 'android', '--flavor=prod', "--release-version=$ReleaseVersion")
     if ($DryRun)          { $sbArgs += '--dry-run' }
     if ($AllowAssetDiffs) { $sbArgs += '--allow-asset-diffs' }
     if ($AllowNativeDiffs){ $sbArgs += '--allow-native-diffs' }
@@ -332,7 +351,7 @@ try {
     if ($DryRun) {
       # Dry-run me pubspec mat chhedo - sirf current version validate karo.
       Write-Note 'Dry-run: pubspec version bump skip.'
-      $code = Invoke-ShorebirdBuild @('release', 'android', '--artifact', 'apk', '--dry-run')
+      $code = Invoke-ShorebirdBuild @('release', 'android', '--flavor=prod', '--artifact', 'apk', '--dry-run')
       if ($code -ne 0) { Die "Release dry-run fail (code $code)." }
       Write-Step 'DONE (release)'
       Write-Ok 'Dry-run complete - kuch upload nahi hua.'
@@ -347,7 +366,7 @@ try {
     if ($Changelog) { [void](Set-Changelog $marker $Changelog) }
     else { Write-Note "Changelog marker suggestion: $marker" }
 
-    $code = Invoke-ShorebirdBuild @('release', 'android', '--artifact', 'apk')
+    $code = Invoke-ShorebirdBuild @('release', 'android', '--flavor=prod', '--artifact', 'apk')
     if ($code -ne 0) {
       Copy-Item "$Pubspec.bak" $Pubspec -Force
       Remove-Item "$Pubspec.bak" -Force -ErrorAction SilentlyContinue
