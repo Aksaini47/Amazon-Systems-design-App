@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'rf_colors.dart';
 
@@ -67,6 +68,68 @@ class RfGlass {
     );
   }
 
+  /// Liquid-glass decoration — like [decoration] but with a brighter
+  /// top-left specular highlight and a softer, wider shadow, evoking light
+  /// refracting through curved glass rather than a flat frosted panel.
+  /// New addition for the design-system revamp (Feature 6 pilot) — existing
+  /// [decoration] callers elsewhere in the app are untouched.
+  static BoxDecoration liquidDecoration({
+    double radius = RfRadius.lg,
+    Color? tint,
+    Color? borderColor,
+  }) {
+    final base = tint ?? fill(0.16);
+    return BoxDecoration(
+      borderRadius: BorderRadius.circular(radius),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color.lerp(base, Colors.white, 0.20)!.withValues(alpha: (base.a * 1.7).clamp(0.0, 1.0)),
+          base,
+          Color.lerp(base, Colors.black, 0.12)!.withValues(alpha: base.a),
+        ],
+        stops: const [0.0, 0.5, 1.0],
+      ),
+      border: Border.all(color: borderColor ?? border(0.30)),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.30),
+          blurRadius: 30,
+          offset: const Offset(0, 16),
+          spreadRadius: -8,
+        ),
+      ],
+    );
+  }
+
+  /// Thin specular highlight along the top edge — pair with
+  /// [liquidDecoration] as a `Positioned` overlay to simulate light
+  /// catching curved glass.
+  static Widget specularArc({double radius = RfRadius.lg, double inset = 0.35}) {
+    return Positioned(
+      top: 1,
+      left: 0,
+      right: 0,
+      child: IgnorePointer(
+        child: Container(
+          height: 1.4,
+          margin: EdgeInsets.symmetric(horizontal: radius * inset),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(2),
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withValues(alpha: 0),
+                Colors.white.withValues(alpha: 0.65),
+                Colors.white.withValues(alpha: 0),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   static LinearGradient meshGradient = const LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -79,17 +142,17 @@ class RfGlass {
   );
 }
 
-/// Ambient background — gradient mesh + optional grid + soft orbs.
+/// Ambient background — dark gradient + grid pattern. No colored glow
+/// orbs (removed per Sir's direction 2026-08-11: flat, minimal, grid-first
+/// look, no blue/orange fades — closer to a plain dark-grid canvas).
 class RfGlassBackground extends StatelessWidget {
   final Widget? child;
   final bool showGrid;
-  final bool showOrbs;
 
   const RfGlassBackground({
     super.key,
     this.child,
     this.showGrid = true,
-    this.showOrbs = true,
   });
 
   @override
@@ -98,51 +161,18 @@ class RfGlassBackground extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         DecoratedBox(decoration: BoxDecoration(gradient: RfGlass.meshGradient)),
-        if (showOrbs) ...[
-          Positioned(
-            top: -80,
-            right: -40,
-            child: _orb(RfColors.navy, 220, 0.35),
-          ),
-          Positioned(
-            bottom: 120,
-            left: -60,
-            child: _orb(RfColors.rtAccent, 180, 0.12),
-          ),
-          Positioned(
-            top: MediaQuery.sizeOf(context).height * 0.35,
-            right: -30,
-            child: _orb(RfColors.pkAccent, 140, 0.08),
-          ),
-        ],
         if (showGrid)
-          CustomPaint(painter: _GlassGridPainter(color: RfColors.navy)),
+          CustomPaint(painter: _GlassGridPainter(color: RfColors.textSecondary)),
         if (child != null) child!,
       ],
-    );
-  }
-
-  Widget _orb(Color color, double size, double opacity) {
-    return IgnorePointer(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [
-              color.withValues(alpha: opacity),
-              color.withValues(alpha: 0),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
 
 class _GlassGridPainter extends CustomPainter {
-  static const _opacity = 0.14;
+  // Slightly more visible than before (0.14->0.18) now that it's the
+  // background's main texture, not a backdrop for glow orbs.
+  static const _opacity = 0.18;
   static const _spacing = 32.0;
   static const _stroke = 0.5;
 
@@ -217,6 +247,7 @@ class RfGlassContainer extends StatelessWidget {
   final double blur;
   final bool blurEnabled;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   const RfGlassContainer({
     super.key,
@@ -229,6 +260,7 @@ class RfGlassContainer extends StatelessWidget {
     this.blur = RfGlass.blurStandard,
     this.blurEnabled = true,
     this.onTap,
+    this.onLongPress,
   });
 
   @override
@@ -258,17 +290,117 @@ class RfGlassContainer extends StatelessWidget {
         ? Padding(padding: margin!, child: content)
         : content;
 
-    if (onTap == null) return wrapped;
+    if (onTap == null && onLongPress == null) return wrapped;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(radius),
         splashColor: Colors.white.withValues(alpha: 0.06),
         highlightColor: Colors.white.withValues(alpha: 0.04),
         child: wrapped,
       ),
+    );
+  }
+}
+
+/// Liquid-glass card/container — heavier blur, specular top highlight,
+/// larger radius, and (when tappable) a press-morph: scale + the same
+/// 200ms/easeOut timing as the rest of the app's press feedback, evoking
+/// soft glass giving slightly under a touch. New widget for the
+/// design-system revamp (Feature 6 pilot on Home) — existing
+/// [RfGlassContainer] usages elsewhere in the app are untouched.
+class RfLiquidGlassContainer extends StatefulWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final double radius;
+  final Color? tint;
+  final Color? borderColor;
+  final double blur;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  const RfLiquidGlassContainer({
+    super.key,
+    required this.child,
+    this.padding,
+    this.radius = RfRadius.lg,
+    this.tint,
+    this.borderColor,
+    this.blur = RfGlass.blurHeavy,
+    this.onTap,
+    this.onLongPress,
+  });
+
+  @override
+  State<RfLiquidGlassContainer> createState() => _RfLiquidGlassContainerState();
+}
+
+class _RfLiquidGlassContainerState extends State<RfLiquidGlassContainer> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: RfDuration.press);
+    _scale = Tween<double>(begin: 1.0, end: 0.97)
+        .animate(CurvedAnimation(parent: _ctrl, curve: RfDuration.pressCurve));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final content = ClipRRect(
+      borderRadius: BorderRadius.circular(widget.radius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: widget.blur, sigmaY: widget.blur),
+        child: Stack(
+          children: [
+            DecoratedBox(
+              decoration: RfGlass.liquidDecoration(
+                radius: widget.radius,
+                tint: widget.tint,
+                borderColor: widget.borderColor,
+              ),
+              child: Padding(
+                padding: widget.padding ?? EdgeInsets.zero,
+                child: widget.child,
+              ),
+            ),
+            RfGlass.specularArc(radius: widget.radius),
+          ],
+        ),
+      ),
+    );
+
+    if (widget.onTap == null && widget.onLongPress == null) return content;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _ctrl.forward(),
+      onTapUp: (_) => _ctrl.reverse(),
+      onTapCancel: () => _ctrl.reverse(),
+      onTap: widget.onTap == null
+          ? null
+          : () {
+              HapticFeedback.selectionClick();
+              widget.onTap!();
+            },
+      onLongPress: widget.onLongPress == null
+          ? null
+          : () {
+              HapticFeedback.mediumImpact();
+              widget.onLongPress!();
+            },
+      child: ScaleTransition(scale: _scale, child: content),
     );
   }
 }
@@ -279,7 +411,6 @@ class RfGlassScaffold extends StatelessWidget {
   final Widget body;
   final Widget? floatingActionButton;
   final bool extendBodyBehindAppBar;
-  final bool showMeshOrbs;
 
   const RfGlassScaffold({
     super.key,
@@ -287,7 +418,6 @@ class RfGlassScaffold extends StatelessWidget {
     required this.body,
     this.floatingActionButton,
     this.extendBodyBehindAppBar = false,
-    this.showMeshOrbs = true,
   });
 
   @override
@@ -298,7 +428,6 @@ class RfGlassScaffold extends StatelessWidget {
       appBar: appBar,
       floatingActionButton: floatingActionButton,
       body: RfGlassBackground(
-        showOrbs: showMeshOrbs,
         child: body,
       ),
     );

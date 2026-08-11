@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../models/capture_session.dart';
 import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
+import '../widgets/rf_button.dart';
 
 class VerdictBottomSheet extends StatelessWidget {
   final String? orderId;
@@ -107,16 +107,16 @@ class VerdictBottomSheet extends StatelessWidget {
           style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
         ),
         actions: [
-          TextButton(
+          RfButton.secondary(
+            label: 'Cancel',
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
           ),
-          TextButton(
+          RfButton.danger(
+            label: 'Yes, Flag Fraud',
             onPressed: () {
               Navigator.pop(ctx); // Close dialog
               Navigator.pop(context, QCVerdict.different); // Return verdict
             },
-            child: const Text('Yes, Flag Fraud', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -125,12 +125,11 @@ class VerdictBottomSheet extends StatelessWidget {
   }
 }
 
-/// Verdict card — Mahika camera-app doctrine.
-/// ScaleTransition 1.0 → 0.97 press feedback (slightly less aggressive
-/// than the standard 0.95 because cards are larger; the smaller scale
-/// keeps the motion proportionate). Solid tinted bg, 1px accent border,
-/// material outlined chevron icon.
-class _VerdictButton extends StatefulWidget {
+/// Verdict card — liquid-glass treatment (fixed 4-card, non-scrolling set
+/// qualifies per the Phase 4 rollout rule). [RfLiquidGlassContainer]
+/// already provides an equivalent press-morph (1.0 → 0.97) + haptic, so
+/// this widget no longer needs its own AnimationController/GestureDetector.
+class _VerdictButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final String description;
@@ -146,72 +145,37 @@ class _VerdictButton extends StatefulWidget {
   });
 
   @override
-  State<_VerdictButton> createState() => _VerdictButtonState();
-}
-
-class _VerdictButtonState extends State<_VerdictButton> with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-  late final Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(vsync: this, duration: RfDuration.press);
-    _scale = Tween<double>(begin: 1.0, end: 0.97)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut));
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final c = widget.color;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => _ctrl.forward(),
-      onTapUp: (_) => _ctrl.reverse(),
-      onTapCancel: () => _ctrl.reverse(),
-      onTap: () {
-        HapticFeedback.selectionClick();
-        widget.onTap();
-      },
-      child: ScaleTransition(
-        scale: _scale,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          constraints: const BoxConstraints(minHeight: 72),
-          decoration: RfGlass.decoration(
-            tint: c.withValues(alpha: 0.12),
-            borderColor: c.withValues(alpha: 0.45),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: c.withAlpha(45),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(widget.icon, color: c, size: 24),
+    return RfLiquidGlassContainer(
+      onTap: onTap,
+      padding: const EdgeInsets.all(16),
+      tint: color.withValues(alpha: 0.12),
+      borderColor: color.withValues(alpha: 0.45),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 72),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withAlpha(45),
+                shape: BoxShape.circle,
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.label, style: TextStyle(color: c, fontSize: 15, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 2),
-                    Text(widget.description, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11)),
-                  ],
-                ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: TextStyle(color: color, fontSize: 15, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 2),
+                  Text(description, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11)),
+                ],
               ),
-              Icon(Icons.chevron_right_outlined, color: c.withAlpha(150), size: 22),
-            ],
-          ),
+            ),
+            Icon(Icons.chevron_right_outlined, color: color.withAlpha(150), size: 22),
+          ],
         ),
       ),
     );

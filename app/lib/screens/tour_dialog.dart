@@ -188,9 +188,9 @@ class _TourDialogContentState extends State<_TourDialogContent> {
         actions: [
           isLast
               ? const SizedBox(width: 8)
-              : TextButton(
+              : RfButton.secondary(
+                  label: 'Skip',
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Skip', style: TextStyle(color: RfColors.textSecondary)),
                 ),
           Row(
             mainAxisSize: MainAxisSize.min,

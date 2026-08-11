@@ -143,6 +143,8 @@ class RfRadius {
   static const lg = 16.0;
   /// Sharp / data block.
   static const precise = 4.0;
+  /// Fully-rounded pill/capsule shape — liquid-glass buttons, inputs.
+  static const pill = 999.0;
 }
 
 /// Standard touch-target heights. Mahika §IV "Minimum touch target:

@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/capture_session.dart';
 
 class CameraSettingsService {
   // --- Storage Path ---
@@ -162,6 +163,53 @@ class CameraSettingsService {
     await prefs.setDouble('aspect_default', normalizeAspect(ratio));
   }
 
+  // --- Aspect ratio default, PER MODE (PK vs RT). Falls back to the legacy
+  // global `aspect_default` key when this mode hasn't been explicitly set,
+  // so upgrading users keep their previous single choice instead of a
+  // silent revert to 16:9. The legacy key is kept read-only as a migration
+  // seed — it is never written to by the per-mode setter below.
+  static String _aspectModeKey(CaptureMode mode) =>
+      mode == CaptureMode.pk ? 'aspect_default_pk' : 'aspect_default_rt';
+
+  static Future<double> getAspectDefaultForMode(CaptureMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getDouble(_aspectModeKey(mode));
+    if (raw != null) return normalizeAspect(raw);
+    return getAspectDefault();
+  }
+
+  static Future<void> setAspectDefaultForMode(CaptureMode mode, double ratio) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_aspectModeKey(mode), normalizeAspect(ratio));
+  }
+
+  // --- Zoom default, PER MODE. Index matches LiveCaptureScreen._zoomLevels
+  // (0=1x, 1=2x, 2=3x). No legacy key — default is 0 (1x).
+  static String _zoomModeKey(CaptureMode mode) =>
+      mode == CaptureMode.pk ? 'zoom_default_pk' : 'zoom_default_rt';
+
+  static Future<int> getZoomDefaultForMode(CaptureMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getInt(_zoomModeKey(mode)) ?? 0).clamp(0, 2);
+  }
+
+  static Future<void> setZoomDefaultForMode(CaptureMode mode, int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_zoomModeKey(mode), index.clamp(0, 2));
+  }
+
+  // --- Label popup: hold captured still on screen before auto-confirming.
+  //   0 = disabled (old instant-save behavior).
+  static Future<int> getLabelReviewHoldSeconds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('label_review_hold_seconds') ?? 3;
+  }
+
+  static Future<void> setLabelReviewHoldSeconds(int seconds) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('label_review_hold_seconds', seconds);
+  }
+
   // --- Restore all defaults ---
   static Future<void> restoreDefaults() async {
     final prefs = await SharedPreferences.getInstance();
@@ -177,6 +225,11 @@ class CameraSettingsService {
     await prefs.remove('use_custom_storage');
     await prefs.remove('capture_countdown');
     await prefs.remove('aspect_default');
+    await prefs.remove('aspect_default_pk');
+    await prefs.remove('aspect_default_rt');
+    await prefs.remove('zoom_default_pk');
+    await prefs.remove('zoom_default_rt');
+    await prefs.remove('label_review_hold_seconds');
     await prefs.remove('auto_label_scan');
     await prefs.remove('auto_label_save');
     await prefs.remove('claim_photo_countdown');

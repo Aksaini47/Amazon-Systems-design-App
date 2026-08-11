@@ -113,18 +113,21 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
 
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: RfColors.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Delete $n $kind?', style: const TextStyle(color: Colors.white)),
-        content: const Text(
-          'This cannot be undone.',
-          style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
+      builder: (ctx) => RfGlassDialog(
+        child: AlertDialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
+          title: Text('Delete $n $kind?', style: const TextStyle(color: Colors.white)),
+          content: const Text(
+            'This cannot be undone.',
+            style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
+          ),
+          actions: [
+            RfButton.secondary(label: 'Cancel', onPressed: () => Navigator.pop(ctx, false)),
+            RfButton.danger(label: 'Delete', onPressed: () => Navigator.pop(ctx, true)),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
-        ],
       ),
     );
     if (ok != true) return;
@@ -296,24 +299,21 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
   Future<bool> _confirmDelete(String label) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: RfColors.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete?', style: TextStyle(color: Colors.white)),
-        content: Text(
-          'Permanently delete $label?\n\nThis cannot be undone.',
-          style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
+      builder: (ctx) => RfGlassDialog(
+        child: AlertDialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
+          title: const Text('Delete?', style: TextStyle(color: Colors.white)),
+          content: Text(
+            'Permanently delete $label?\n\nThis cannot be undone.',
+            style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
+          ),
+          actions: [
+            RfButton.secondary(label: 'Cancel', onPressed: () => Navigator.pop(ctx, false)),
+            RfButton.danger(label: 'Delete', onPressed: () => Navigator.pop(ctx, true)),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
       ),
     );
     return ok ?? false;
@@ -387,12 +387,13 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
         ],
       ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.checklist_rounded),
+        RfIconButton(
+          icon: Icons.checklist_rounded,
           tooltip: 'Select',
+          size: 40,
           onPressed: (_orders.isEmpty && _drafts.isEmpty) ? null : _enterSelectionMode,
         ),
-        IconButton(icon: const Icon(Icons.refresh), onPressed: _reload),
+        RfIconButton(icon: Icons.refresh, tooltip: 'Refresh', size: 40, onPressed: _reload),
       ],
     );
   }
@@ -402,8 +403,10 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     final total = _tabs.index == 0 ? _orders.length : _draftSessions.length;
     final allSelected = n == total && total > 0;
     return RfGlassAppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.close, color: Colors.white),
+      leading: RfIconButton(
+        icon: Icons.close,
+        color: Colors.white,
+        size: 40,
         onPressed: _exitSelectionMode,
       ),
       titleWidget: Text(
@@ -421,7 +424,9 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
         ],
       ),
       actions: [
-        TextButton(
+        RfButton.secondary(
+          label: allSelected ? 'Clear' : 'Select all',
+          size: RfButtonSize.small,
           onPressed: total == 0 ? null : (allSelected ? () {
             setState(() {
               if (_tabs.index == 0) {
@@ -431,14 +436,12 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
               }
             });
           } : _selectAll),
-          child: Text(
-            allSelected ? 'Clear' : 'Select all',
-            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
-          ),
         ),
-        IconButton(
-          icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+        RfIconButton(
+          icon: Icons.delete_outline,
+          color: Colors.redAccent,
           tooltip: 'Delete selected',
+          size: 40,
           onPressed: n == 0 ? null : _deleteSelected,
         ),
       ],
@@ -490,9 +493,9 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
   }
 
   Widget _buildDraftsStats() {
-    return Container(
+    return RfGlassContainer(
+      blurEnabled: false,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: RfGlass.decoration(),
       child: Row(children: [
         _statChip(Icons.drafts_outlined, '${_draftSessions.length} session${_draftSessions.length == 1 ? '' : 's'}', RfColors.textSecondary),
         const SizedBox(width: 6),
@@ -592,73 +595,76 @@ Future<_PhotoAction?> _showPhotoActionSheet(
 }) {
   return showModalBottomSheet<_PhotoAction>(
     context: context,
-    backgroundColor: RfColors.card,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (ctx) => SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: RfColors.glassBorder(0.2),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                sideLabel.toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.camera_alt_outlined, color: RfColors.rtAccent),
-            title: const Text('Replace photo', style: TextStyle(color: Colors.white)),
-            subtitle: const Text('Capture a new image', style: TextStyle(color: RfColors.textSecondary, fontSize: 12)),
-            onTap: () => Navigator.pop(ctx, _PhotoAction.replace),
-          ),
-          if (showRetag)
-            ListTile(
-              leading: const Icon(Icons.label_outline, color: RfColors.amber),
-              title: const Text('Re-tag photo', style: TextStyle(color: Colors.white)),
-              subtitle: const Text('Change side label', style: TextStyle(color: RfColors.textSecondary, fontSize: 12)),
-              onTap: () => Navigator.pop(ctx, _PhotoAction.retag),
-            ),
-          ListTile(
-            leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
-            title: const Text('Remove photo', style: TextStyle(color: Colors.redAccent)),
-            onTap: () => Navigator.pop(ctx, _PhotoAction.remove),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-            child: GestureDetector(
-              onTap: () => Navigator.pop(ctx),
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => RfGlassSheet(
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
               child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                width: 36,
+                height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white10,
-                  borderRadius: BorderRadius.circular(10),
+                  color: RfColors.glassBorder(0.2),
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                child: const Center(child: Text('Cancel', style: TextStyle(color: Colors.white70))),
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  sideLabel.toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            _SheetActionTile(
+              icon: Icons.camera_alt_outlined,
+              iconColor: RfColors.rtAccent,
+              title: 'Replace photo',
+              subtitle: 'Capture a new image',
+              onTap: () => Navigator.pop(ctx, _PhotoAction.replace),
+            ),
+            if (showRetag)
+              _SheetActionTile(
+                icon: Icons.label_outline,
+                iconColor: RfColors.amber,
+                title: 'Re-tag photo',
+                subtitle: 'Change side label',
+                onTap: () => Navigator.pop(ctx, _PhotoAction.retag),
+              ),
+            _SheetActionTile(
+              icon: Icons.delete_outline,
+              iconColor: Colors.redAccent,
+              title: 'Remove photo',
+              titleColor: Colors.redAccent,
+              onTap: () => Navigator.pop(ctx, _PhotoAction.remove),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+              child: GestureDetector(
+                onTap: () => Navigator.pop(ctx),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white10,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Center(child: Text('Cancel', style: TextStyle(color: Colors.white70))),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -667,24 +673,21 @@ Future<_PhotoAction?> _showPhotoActionSheet(
 Future<bool> _confirmRemovePhoto(BuildContext context, String sideLabel) async {
   final ok = await showDialog<bool>(
     context: context,
-    builder: (ctx) => AlertDialog(
-      backgroundColor: RfColors.card,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text('Remove photo?', style: TextStyle(color: Colors.white)),
-      content: Text(
-        'Permanently remove the $sideLabel photo?\n\nThis cannot be undone.',
-        style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
+    builder: (ctx) => RfGlassDialog(
+      child: AlertDialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
+        title: const Text('Remove photo?', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Permanently remove the $sideLabel photo?\n\nThis cannot be undone.',
+          style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
+        ),
+        actions: [
+          RfButton.secondary(label: 'Cancel', onPressed: () => Navigator.pop(ctx, false)),
+          RfButton.danger(label: 'Remove', onPressed: () => Navigator.pop(ctx, true)),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: const Text('Remove', style: TextStyle(color: Colors.red)),
-        ),
-      ],
     ),
   );
   return ok ?? false;
@@ -700,6 +703,63 @@ PhotoSide? _photoSideFromOrderPath(String path) {
     if (side.name == sideName) return side;
   }
   return null;
+}
+
+/// Minimal stand-in for [ListTile] inside our bottom sheets — this codebase
+/// has no `RfListTile`, so this reproduces just enough of ListTile's layout
+/// (leading icon, title, optional subtitle, optional trailing, tap handler)
+/// for the photo-action sheet and the re-tag sheet. `onTap == null` renders
+/// the "disabled / current selection" look those two sheets rely on.
+class _SheetActionTile extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final Color titleColor;
+  final FontWeight titleWeight;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  const _SheetActionTile({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    this.titleColor = Colors.white,
+    this.titleWeight = FontWeight.normal,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, color: iconColor),
+            const SizedBox(width: 24),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(color: titleColor, fontWeight: titleWeight)),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(subtitle!, style: const TextStyle(color: RfColors.textSecondary, fontSize: 12)),
+                  ],
+                ],
+              ),
+            ),
+            if (trailing != null) trailing!,
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 // ─── Order card ────────────────────────────────────────────────────────
@@ -730,86 +790,80 @@ class _OrderCard extends StatelessWidget {
     final ts = '${modified.day}/${modified.month}/${modified.year} '
                '${modified.hour.toString().padLeft(2, '0')}:${modified.minute.toString().padLeft(2, '0')}';
 
-    return Material(
-      color: selected ? RfColors.rtAccent.withValues(alpha: 0.25) : RfColors.card,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: selected ? RfColors.rtAccent : RfColors.border, width: selected ? 1.5 : 1),
+    return RfGlassContainer(
+      blurEnabled: false,
+      padding: const EdgeInsets.all(12),
+      tint: selected ? RfColors.rtAccent.withValues(alpha: 0.25) : null,
+      borderColor: selected ? RfColors.rtAccent : RfColors.border,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: Row(
+        children: [
+          // Selection checkbox (only in selection mode)
+          if (selectionMode) ...[
+            Icon(
+              selected ? Icons.check_circle : Icons.radio_button_unchecked,
+              color: selected ? RfColors.rtAccent : Colors.white38,
+              size: 22,
+            ),
+            const SizedBox(width: 10),
+          ],
+          // Thumbnail — first photo if available, else video icon
+          Container(
+            width: 64, height: 64,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white12),
+            ),
+            clipBehavior: Clip.hardEdge,
+            child: photoPaths.isNotEmpty
+                ? Image.file(File(photoPaths.first), fit: BoxFit.cover, cacheWidth: 200,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.white24))
+                : Icon(hasVideo ? Icons.videocam : Icons.folder, color: Colors.white38, size: 28),
           ),
-          child: Row(
-            children: [
-              // Selection checkbox (only in selection mode)
-              if (selectionMode) ...[
-                Icon(
-                  selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: selected ? RfColors.rtAccent : Colors.white38,
-                  size: 22,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  order['bareOrderId'] as String? ?? order['orderId'] as String,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'monospace',
+                  ),
                 ),
-                const SizedBox(width: 10),
-              ],
-              // Thumbnail — first photo if available, else video icon
-              Container(
-                width: 64, height: 64,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white12),
-                ),
-                clipBehavior: Clip.hardEdge,
-                child: photoPaths.isNotEmpty
-                    ? Image.file(File(photoPaths.first), fit: BoxFit.cover, cacheWidth: 200,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.white24))
-                    : Icon(hasVideo ? Icons.videocam : Icons.folder, color: Colors.white38, size: 28),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      order['bareOrderId'] as String? ?? order['orderId'] as String,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'monospace',
-                      ),
+                const SizedBox(height: 4),
+                Text(ts, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11)),
+                const SizedBox(height: 4),
+                Wrap(spacing: 8, runSpacing: 4, children: [
+                  if (order['mode'] != null)
+                    _chip(
+                      Icons.label_outline,
+                      (order['mode'] as String).toUpperCase(),
+                      (order['mode'] as String) == 'pk'
+                          ? RfColors.pkAccent
+                          : RfColors.rtAccent,
                     ),
-                    const SizedBox(height: 4),
-                    Text(ts, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11)),
-                    const SizedBox(height: 4),
-                    Wrap(spacing: 8, runSpacing: 4, children: [
-                      if (order['mode'] != null)
-                        _chip(
-                          Icons.label_outline,
-                          (order['mode'] as String).toUpperCase(),
-                          (order['mode'] as String) == 'pk'
-                              ? RfColors.pkAccent
-                              : RfColors.rtAccent,
-                        ),
-                      _chip(Icons.videocam, hasVideo ? 'Video' : 'No video', hasVideo ? RfColors.successLight : RfColors.textSecondary),
-                      _chip(Icons.photo, '${photoPaths.length} photo${photoPaths.length == 1 ? '' : 's'}', RfColors.textSecondary),
-                      _chip(Icons.sd_storage, '$sizeMb MB', RfColors.textSecondary),
-                    ]),
-                  ],
-                ),
-              ),
-              if (!selectionMode)
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                  onPressed: onDelete,
-                  tooltip: 'Delete',
-                ),
-            ],
+                  _chip(Icons.videocam, hasVideo ? 'Video' : 'No video', hasVideo ? RfColors.successLight : RfColors.textSecondary),
+                  _chip(Icons.photo, '${photoPaths.length} photo${photoPaths.length == 1 ? '' : 's'}', RfColors.textSecondary),
+                  _chip(Icons.sd_storage, '$sizeMb MB', RfColors.textSecondary),
+                ]),
+              ],
+            ),
           ),
-        ),
+          if (!selectionMode)
+            RfIconButton(
+              icon: Icons.delete_outline,
+              color: Colors.redAccent,
+              tooltip: 'Delete',
+              size: 40,
+              onPressed: onDelete,
+            ),
+        ],
       ),
     );
   }
@@ -894,91 +948,82 @@ class _DraftSessionCard extends StatelessWidget {
 
     final accent = mode == 'PK' ? RfColors.pkAccent : RfColors.rtAccent;
 
-    return Material(
-      color: selected ? RfColors.rtAccent.withValues(alpha: 0.25) : RfColors.card,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onLongPress: onLongPress,
-        onTap: selectionMode ? onTapInSelectionMode : onTap,
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: selected
-                  ? RfColors.rtAccent
-                  : (hasRecovered ? Colors.amber.withAlpha(120) : RfColors.border),
-              width: selected ? 1.5 : 1,
+    return RfGlassContainer(
+      blurEnabled: false,
+      padding: const EdgeInsets.all(12),
+      tint: selected ? RfColors.rtAccent.withValues(alpha: 0.25) : null,
+      borderColor: selected
+          ? RfColors.rtAccent
+          : (hasRecovered ? Colors.amber.withAlpha(120) : RfColors.border),
+      onLongPress: onLongPress,
+      onTap: selectionMode ? onTapInSelectionMode : onTap,
+      child: Row(
+        children: [
+          if (selectionMode) ...[
+            Icon(
+              selected ? Icons.check_circle : Icons.radio_button_unchecked,
+              color: selected ? RfColors.rtAccent : Colors.white38,
+              size: 22,
+            ),
+            const SizedBox(width: 10),
+          ],
+          // Thumbnail
+          Container(
+            width: 64, height: 64,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white12),
+            ),
+            clipBehavior: Clip.hardEdge,
+            child: thumbnail,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(children: [
+                  // Mode badge (PK/RT) with accent
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(6)),
+                    child: Text(
+                      '$mode DRAFT',
+                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Flexible(
+                    child: Text(
+                      'No order ID yet',
+                      style: TextStyle(color: RfColors.textSecondary, fontSize: 11, fontStyle: FontStyle.italic),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ]),
+                const SizedBox(height: 4),
+                Text(ts, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11)),
+                const SizedBox(height: 4),
+                Wrap(spacing: 8, runSpacing: 4, children: [
+                  _chip(Icons.videocam, hasVideo ? 'Video' : 'No video', hasVideo ? RfColors.successLight : RfColors.textSecondary),
+                  _chip(Icons.photo, '${photoPaths.length} photo${photoPaths.length == 1 ? '' : 's'}', RfColors.textSecondary),
+                  _chip(Icons.sd_storage, '$sizeMb MB', RfColors.textSecondary),
+                  if (hasRecovered)
+                    _chip(Icons.restore_rounded, 'Recovered', Colors.amber),
+                ]),
+              ],
             ),
           ),
-          child: Row(
-            children: [
-              if (selectionMode) ...[
-                Icon(
-                  selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: selected ? RfColors.rtAccent : Colors.white38,
-                  size: 22,
-                ),
-                const SizedBox(width: 10),
-              ],
-              // Thumbnail
-              Container(
-                width: 64, height: 64,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white12),
-                ),
-                clipBehavior: Clip.hardEdge,
-                child: thumbnail,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [
-                      // Mode badge (PK/RT) with accent
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(6)),
-                        child: Text(
-                          '$mode DRAFT',
-                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      const Flexible(
-                        child: Text(
-                          'No order ID yet',
-                          style: TextStyle(color: RfColors.textSecondary, fontSize: 11, fontStyle: FontStyle.italic),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ]),
-                    const SizedBox(height: 4),
-                    Text(ts, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11)),
-                    const SizedBox(height: 4),
-                    Wrap(spacing: 8, runSpacing: 4, children: [
-                      _chip(Icons.videocam, hasVideo ? 'Video' : 'No video', hasVideo ? RfColors.successLight : RfColors.textSecondary),
-                      _chip(Icons.photo, '${photoPaths.length} photo${photoPaths.length == 1 ? '' : 's'}', RfColors.textSecondary),
-                      _chip(Icons.sd_storage, '$sizeMb MB', RfColors.textSecondary),
-                      if (hasRecovered)
-                        _chip(Icons.restore_rounded, 'Recovered', Colors.amber),
-                    ]),
-                  ],
-                ),
-              ),
-              if (!selectionMode)
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                  onPressed: onDelete,
-                  tooltip: 'Delete',
-                ),
-            ],
-          ),
-        ),
+          if (!selectionMode)
+            RfIconButton(
+              icon: Icons.delete_outline,
+              color: Colors.redAccent,
+              tooltip: 'Delete',
+              size: 40,
+              onPressed: onDelete,
+            ),
+        ],
       ),
     );
   }
@@ -1198,9 +1243,11 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
               child: AnimatedOpacity(
                 opacity: _showControls ? 1 : 0,
                 duration: const Duration(milliseconds: 250),
-                child: IconButton(
-                  icon: const Icon(Icons.zoom_out_map, color: Colors.white70, size: 20),
+                child: RfIconButton(
+                  icon: Icons.zoom_out_map,
+                  color: Colors.white70,
                   tooltip: 'Reset zoom',
+                  size: 40,
                   onPressed: _resetVideoZoom,
                 ),
               ),
@@ -1395,61 +1442,60 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     const sides = ['label', 'contents', 'front', 'back', 'serial'];
     final newSide = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: RfColors.card,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Container(width: 36, height: 4, decoration: BoxDecoration(color: RfColors.glassBorder(0.2), borderRadius: BorderRadius.circular(2))),
-            ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 16, 20, 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Re-tag this photo', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => RfGlassSheet(
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Container(width: 36, height: 4, decoration: BoxDecoration(color: RfColors.glassBorder(0.2), borderRadius: BorderRadius.circular(2))),
               ),
-            ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text('If another photo already uses this tag, the two will be swapped.', style: TextStyle(color: RfColors.textSecondary, fontSize: 12)),
-              ),
-            ),
-            ...sides.map((s) {
-              final isCurrent = s == currentSide;
-              return ListTile(
-                leading: Icon(
-                  isCurrent ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                  color: isCurrent ? RfColors.amber : Colors.white54,
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 16, 20, 4),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Re-tag this photo', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
-                title: Text(s.toUpperCase(), style: TextStyle(color: isCurrent ? RfColors.amber : Colors.white, fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal)),
-                trailing: isCurrent ? const Text('current', style: TextStyle(color: RfColors.textSecondary, fontSize: 11)) : null,
-                onTap: isCurrent ? null : () => Navigator.pop(ctx, s),
-              );
-            }),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-              child: GestureDetector(
-                onTap: () => Navigator.pop(ctx),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white10,
-                    borderRadius: BorderRadius.circular(10),
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('If another photo already uses this tag, the two will be swapped.', style: TextStyle(color: RfColors.textSecondary, fontSize: 12)),
+                ),
+              ),
+              ...sides.map((s) {
+                final isCurrent = s == currentSide;
+                return _SheetActionTile(
+                  icon: isCurrent ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  iconColor: isCurrent ? RfColors.amber : Colors.white54,
+                  title: s.toUpperCase(),
+                  titleColor: isCurrent ? RfColors.amber : Colors.white,
+                  titleWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                  trailing: isCurrent ? const Text('current', style: TextStyle(color: RfColors.textSecondary, fontSize: 11)) : null,
+                  onTap: isCurrent ? null : () => Navigator.pop(ctx, s),
+                );
+              }),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(ctx),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white10,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Center(child: Text('Cancel', style: TextStyle(color: Colors.white70))),
                   ),
-                  child: const Center(child: Text('Cancel', style: TextStyle(color: Colors.white70))),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1550,12 +1596,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     final saved = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: RfColors.card,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (ctx) {
-        return Padding(
+        return RfGlassSheet(
+          child: Padding(
           padding: EdgeInsets.only(
             left: 20,
             right: 20,
@@ -1647,12 +1691,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                       runSpacing: 8,
                       children: QCVerdict.values.map((v) {
                         final active = selectedVerdict == v;
-                        return ChoiceChip(
-                          label: Text(v.name, style: TextStyle(color: active ? Colors.white : RfColors.textSecondary, fontSize: 12)),
-                          selected: active,
-                          selectedColor: RfColors.rtAccent.withValues(alpha: 0.35),
-                          backgroundColor: RfColors.surface,
-                          onSelected: (_) => setSheetState(() => selectedVerdict = v),
+                        return RfChip(
+                          label: v.name,
+                          active: active,
+                          onPressed: () => setSheetState(() => selectedVerdict = v),
                         );
                       }).toList(),
                     ),
@@ -1661,14 +1703,15 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
+                        child: RfButton.secondary(
+                          label: 'Cancel',
                           onPressed: () => Navigator.pop(ctx),
-                          child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: ElevatedButton(
+                        child: RfButton.service(
+                          label: _savingEdit ? 'Saving...' : 'Save',
                           onPressed: _savingEdit
                               ? null
                               : () async {
@@ -1694,10 +1737,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                                     }
                                   }
                                 },
-                          style: ElevatedButton.styleFrom(backgroundColor: RfColors.navy),
-                          child: _savingEdit
-                              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                              : const Text('Save'),
                         ),
                       ),
                     ],
@@ -1706,6 +1745,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
               );
             },
           ),
+        ),
         );
       },
     );
@@ -1748,9 +1788,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
       appBar: RfGlassAppBar(
         titleWidget: Text(orderId, style: const TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'monospace')),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
+          RfIconButton(
+            icon: Icons.edit_outlined,
             tooltip: 'Edit order',
+            size: 40,
             onPressed: _showEditOrderSheet,
           ),
         ],
@@ -1758,9 +1799,9 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Container(
+          RfGlassContainer(
+            blurEnabled: false,
             padding: const EdgeInsets.all(14),
-            decoration: RfGlass.decoration(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1768,14 +1809,11 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                 const SizedBox(height: 4),
                 Text(bareId, style: const TextStyle(color: Colors.white, fontSize: 15, fontFamily: 'monospace', fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
-                OutlinedButton.icon(
+                RfButton.secondary(
+                  label: 'Edit order ID, AWB, QC',
+                  icon: Icons.edit_outlined,
+                  accentColor: RfColors.rtAccent,
                   onPressed: _showEditOrderSheet,
-                  icon: const Icon(Icons.edit_outlined, size: 16),
-                  label: const Text('Edit order ID, AWB, QC'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: RfColors.rtAccent,
-                    side: BorderSide(color: RfColors.rtAccent.withValues(alpha: 0.5)),
-                  ),
                 ),
               ],
             ),
@@ -1789,8 +1827,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
             const SizedBox(height: 6),
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                icon: const Icon(Icons.copy, size: 14, color: Colors.white54),
+              child: RfButton.secondary(
+                icon: Icons.copy,
+                label: videoPath.split(Platform.pathSeparator).last,
+                size: RfButtonSize.small,
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: videoPath));
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -1799,9 +1839,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                     backgroundColor: Colors.black87,
                   ));
                 },
-                label: Text(videoPath.split(Platform.pathSeparator).last,
-                    style: const TextStyle(color: Colors.white54, fontSize: 11, fontFamily: 'monospace'),
-                    overflow: TextOverflow.ellipsis),
               ),
             ),
             const SizedBox(height: 16),
@@ -1866,9 +1903,9 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
           // Folder info
           const _SectionLabel('Folder'),
           const SizedBox(height: 8),
-          Container(
+          RfGlassContainer(
+            blurEnabled: false,
             padding: const EdgeInsets.all(12),
-            decoration: RfGlass.decoration(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1876,8 +1913,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                 const SizedBox(height: 6),
                 Text('Total: $sizeMb MB', style: const TextStyle(color: RfColors.textSecondary, fontSize: 11)),
                 const SizedBox(height: 8),
-                TextButton.icon(
-                  icon: const Icon(Icons.copy, size: 14, color: Colors.white54),
+                RfButton.secondary(
+                  icon: Icons.copy,
+                  label: 'Copy folder path',
+                  size: RfButtonSize.small,
                   onPressed: () {
                     Clipboard.setData(ClipboardData(text: folderPath));
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -1886,7 +1925,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                       backgroundColor: Colors.black87,
                     ));
                   },
-                  label: const Text('Copy folder path', style: TextStyle(color: Colors.white54, fontSize: 12)),
                 ),
               ],
             ),
@@ -1894,29 +1932,27 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
           const SizedBox(height: 32),
 
           // Delete
-          OutlinedButton.icon(
-            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-            label: const Text('Delete this order', style: TextStyle(color: Colors.redAccent, fontSize: 14)),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              side: const BorderSide(color: Colors.redAccent),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
+          RfButton.danger(
+            icon: Icons.delete_outline,
+            label: 'Delete this order',
             onPressed: () async {
               final ok = await showDialog<bool>(
                 context: context,
-                builder: (ctx) => AlertDialog(
-                  backgroundColor: RfColors.card,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  title: const Text('Delete order?', style: TextStyle(color: Colors.white)),
-                  content: Text(
-                    'Permanently delete order $orderId\n(video + ${photoPaths.length} photos)?\n\nThis cannot be undone.',
-                    style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
+                builder: (ctx) => RfGlassDialog(
+                  child: AlertDialog(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
+                    title: const Text('Delete order?', style: TextStyle(color: Colors.white)),
+                    content: Text(
+                      'Permanently delete order $orderId\n(video + ${photoPaths.length} photos)?\n\nThis cannot be undone.',
+                      style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
+                    ),
+                    actions: [
+                      RfButton.secondary(label: 'Cancel', onPressed: () => Navigator.pop(ctx, false)),
+                      RfButton.danger(label: 'Delete', onPressed: () => Navigator.pop(ctx, true)),
+                    ],
                   ),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
-                    TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
-                  ],
                 ),
               );
               if (ok == true && context.mounted) {
@@ -2052,8 +2088,10 @@ class _PhotoViewerState extends State<_PhotoViewer> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
+                    RfIconButton(
+                      icon: Icons.close,
+                      color: Colors.white,
+                      size: 40,
                       onPressed: () => Navigator.pop(context),
                     ),
                     Container(
@@ -2250,18 +2288,21 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
       final side = missing.first;
       final capture = await showDialog<bool>(
         context: context,
-        builder: (ctx) => AlertDialog(
-          backgroundColor: RfColors.card,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Add photo', style: TextStyle(color: Colors.white)),
-          content: Text(
-            'Capture ${DraftSaveService.labelForSide(side)} for this $modeStr shipment.',
-            style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
+        builder: (ctx) => RfGlassDialog(
+          child: AlertDialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
+            title: const Text('Add photo', style: TextStyle(color: Colors.white)),
+            content: Text(
+              'Capture ${DraftSaveService.labelForSide(side)} for this $modeStr shipment.',
+              style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
+            ),
+            actions: [
+              RfButton.secondary(label: 'Cancel', onPressed: () => Navigator.pop(ctx, false)),
+              RfButton.primary(label: 'Capture', onPressed: () => Navigator.pop(ctx, true)),
+            ],
           ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-            TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Capture')),
-          ],
         ),
       );
       if (capture != true || !mounted) return;
@@ -2309,18 +2350,21 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
     final paths = (session['draftPaths'] as List).cast<String>();
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: RfColors.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete this draft?', style: TextStyle(color: Colors.white)),
-        content: Text(
-          'Permanently delete all ${paths.length} file${paths.length == 1 ? '' : 's'} in this draft session?\n\nThis cannot be undone.',
-          style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
+      builder: (ctx) => RfGlassDialog(
+        child: AlertDialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
+          title: const Text('Delete this draft?', style: TextStyle(color: Colors.white)),
+          content: Text(
+            'Permanently delete all ${paths.length} file${paths.length == 1 ? '' : 's'} in this draft session?\n\nThis cannot be undone.',
+            style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
+          ),
+          actions: [
+            RfButton.secondary(label: 'Cancel', onPressed: () => Navigator.pop(ctx, false)),
+            RfButton.danger(label: 'Delete', onPressed: () => Navigator.pop(ctx, true)),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
-        ],
       ),
     );
     if (ok != true) return;
@@ -2366,10 +2410,12 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
           Text(ts, style: const TextStyle(color: Colors.white70, fontSize: 12)),
         ]),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-            onPressed: _deleteAll,
+          RfIconButton(
+            icon: Icons.delete_outline,
+            color: Colors.redAccent,
             tooltip: 'Delete all',
+            size: 40,
+            onPressed: _deleteAll,
           ),
         ],
       ),
@@ -2424,8 +2470,10 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
             const SizedBox(height: 6),
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                icon: const Icon(Icons.copy, size: 14, color: Colors.white54),
+              child: RfButton.secondary(
+                icon: Icons.copy,
+                label: videoPath.split(Platform.pathSeparator).last,
+                size: RfButtonSize.small,
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: videoPath));
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -2434,9 +2482,6 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
                     backgroundColor: Colors.black87,
                   ));
                 },
-                label: Text(videoPath.split(Platform.pathSeparator).last,
-                    style: const TextStyle(color: Colors.white54, fontSize: 11, fontFamily: 'monospace'),
-                    overflow: TextOverflow.ellipsis),
               ),
             ),
             const SizedBox(height: 16),
@@ -2514,9 +2559,10 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
           // ── Files list (debugging / inspection) ───────────────────────
           const _SectionLabel('Files in this session'),
           const SizedBox(height: 8),
-          Container(
+          RfGlassContainer(
+            blurEnabled: false,
+            radius: RfRadius.button,
             padding: const EdgeInsets.all(12),
-            decoration: RfGlass.decoration(radius: RfRadius.button),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

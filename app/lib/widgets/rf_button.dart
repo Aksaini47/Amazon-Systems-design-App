@@ -36,6 +36,10 @@ class RfButton extends StatefulWidget {
   final RfButtonVariant variant;
   final RfButtonSize size;
   final bool fullWidth;
+  /// Tints text/icon/border — honored only by [RfButtonVariant.secondary],
+  /// for the handful of spots that color-code an otherwise-neutral action
+  /// (e.g. rtAccent/pkAccent). Ignored by every other variant.
+  final Color? accentColor;
 
   const RfButton({
     super.key,
@@ -45,6 +49,7 @@ class RfButton extends StatefulWidget {
     this.variant = RfButtonVariant.primary,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
+    this.accentColor,
   });
 
   const RfButton.primary({
@@ -54,7 +59,8 @@ class RfButton extends StatefulWidget {
     this.onPressed,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
-  }) : variant = RfButtonVariant.primary;
+  })  : variant = RfButtonVariant.primary,
+        accentColor = null;
 
   const RfButton.service({
     super.key,
@@ -63,7 +69,8 @@ class RfButton extends StatefulWidget {
     this.onPressed,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
-  }) : variant = RfButtonVariant.service;
+  })  : variant = RfButtonVariant.service,
+        accentColor = null;
 
   const RfButton.secondary({
     super.key,
@@ -72,6 +79,7 @@ class RfButton extends StatefulWidget {
     this.onPressed,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
+    this.accentColor,
   }) : variant = RfButtonVariant.secondary;
 
   const RfButton.danger({
@@ -81,7 +89,8 @@ class RfButton extends StatefulWidget {
     this.onPressed,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
-  }) : variant = RfButtonVariant.danger;
+  })  : variant = RfButtonVariant.danger,
+        accentColor = null;
 
   @override
   State<RfButton> createState() => _RfButtonState();
@@ -152,10 +161,13 @@ class _RfButtonState extends State<RfButton> with SingleTickerProviderStateMixin
           border: null,
         );
       case RfButtonVariant.secondary:
+        final accent = widget.accentColor;
         return (
           fill: pressed ? RfColors.glassFill(0.22) : RfColors.glassFill(0.10),
-          text: Colors.white,
-          border: RfColors.glassBorder(pressed ? 0.35 : 0.28),
+          text: accent ?? Colors.white,
+          border: accent != null
+              ? accent.withValues(alpha: pressed ? 0.55 : 0.4)
+              : RfColors.glassBorder(pressed ? 0.35 : 0.28),
         );
       case RfButtonVariant.danger:
         return (
@@ -189,12 +201,16 @@ class _RfButtonState extends State<RfButton> with SingleTickerProviderStateMixin
             SizedBox(width: widget.label.isEmpty ? 0 : 8),
           ],
           if (widget.label.isNotEmpty)
-            Text(
-              widget.label,
-              style: TextStyle(
-                color: palette.text,
-                fontSize: dims.font,
-                fontWeight: FontWeight.w600,
+            Flexible(
+              child: Text(
+                widget.label,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+                style: TextStyle(
+                  color: palette.text,
+                  fontSize: dims.font,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
         ],

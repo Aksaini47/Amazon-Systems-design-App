@@ -123,9 +123,18 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   bool get _isAspectCropped =>
       (_aspectRatio - _aspectFull).abs() > 0.001;
 
-  /// Full-bleed only during claim re-init or while a draft video is still in session.
+  // True once the post-claim-re-init camera texture has stabilized (see
+  // _runClaimPhotoSequence). Gates ONLY the brief black-texture risk window
+  // right after re-init, not the whole claim-photo sequence — previously
+  // the cropped/guided preview was hidden for all 5 claim photos, so the
+  // user never saw their selected frame while shooting RT QC images even
+  // though the saved files were already being cropped correctly.
+  bool _claimPreviewSettled = false;
+
+  /// Full-bleed only during the brief claim re-init settle window, or while
+  /// a draft video is still in session.
   bool get _useFullBleedPreview =>
-      _inClaimFlow ||
+      (_inClaimFlow && !_claimPreviewSettled) ||
       (_session.videoPath != null && _camera != null);
 
   // Capture countdown duration from settings. 0 = manual capture mode.
@@ -175,7 +184,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _timestampOnPhotos = await CameraSettingsService.getTimestampImage();
     _captureCountdownSec = await CameraSettingsService.getCaptureCountdown();
     _claimCountdownEnabled = await CameraSettingsService.getClaimPhotoCountdown();
-    _aspectRatio = await CameraSettingsService.getAspectDefault();
+    _aspectRatio = await CameraSettingsService.getAspectDefaultForMode(widget.mode);
+    _currentZoomIndex = await CameraSettingsService.getZoomDefaultForMode(widget.mode);
     if (mounted) setState(() {});
     unawaited(_initCamera());
   }
@@ -473,6 +483,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _countdownTimer?.cancel();
     _skipCurrentClaimPhoto = false;
     _inClaimFlow = false;
+    _claimPreviewSettled = false;
     _nextPhotoSide = PhotoSide.front;
     if (_manualCaptureCompleter != null && !_manualCaptureCompleter!.isCompleted) {
       _manualCaptureCompleter!.complete(false);
@@ -759,13 +770,13 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
             style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
           ),
           actions: [
-            TextButton(
+            RfButton.secondary(
+              label: 'Skip',
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Skip', style: TextStyle(color: Colors.white54)),
             ),
-            TextButton(
+            RfButton.primary(
+              label: 'Grant',
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Grant', style: TextStyle(color: RfColors.amber, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -1144,6 +1155,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     if (index < 0 || index >= _zoomLevels.length) return;
     _currentZoomIndex = index;
     _applyZoom();
+    // Persist as the per-mode default, same mental model as aspect ratio
+    // (live taps update the saved default too). Pinch-to-zoom also routes
+    // through here — at most a couple writes per gesture (only on threshold
+    // crossings, not continuously), not a SharedPreferences-spam risk.
+    unawaited(CameraSettingsService.setZoomDefaultForMode(widget.mode, index));
   }
 
   /// Apply current zoom level to camera
@@ -1333,7 +1349,21 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     );
 
     _inClaimFlow = true;
+    _claimPreviewSettled = false;
     try {
+      // Brief settle window before showing the cropped/guided preview — the
+      // OverflowBox crop path can render a black texture on Android right
+      // after a camera re-init. 350ms is a starting estimate matching this
+      // file's other hardware-settle delays (300ms/500ms above); tune on a
+      // real low/mid-tier device if the texture is still visibly black.
+      // If the camera drops out during this wait, the per-photo checks
+      // below (`if (... _camera == null || !_cameraReady) return;`) catch
+      // it on the first iteration — `finally` still resets state correctly.
+      await Future<void>.delayed(const Duration(milliseconds: 350));
+      if (mounted && _camera != null && _cameraReady) {
+        setState(() => _claimPreviewSettled = true);
+      }
+
       final verdict = _session.verdict;
       // QC OK: front, back, serial (optional). Others: full 5-step sequence.
       final sequence = <(PhotoSide, String)>[
@@ -1650,10 +1680,13 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
             style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel', style: TextStyle(color: Colors.white54))),
-            TextButton(
+            RfButton.secondary(
+              label: 'Cancel',
+              onPressed: () => Navigator.pop(ctx),
+            ),
+            RfButton.danger(
+              label: 'Discard',
               onPressed: () { Navigator.pop(ctx); Navigator.pop(context); },
-              child: const Text('Discard', style: TextStyle(color: Colors.red)),
             ),
           ],
         ),
@@ -2045,7 +2078,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     final normalized = CameraSettingsService.normalizeAspect(ratio);
     if ((_aspectRatio - normalized).abs() < 0.001) return;
     setState(() => _aspectRatio = normalized);
-    await CameraSettingsService.setAspectDefault(normalized);
+    await CameraSettingsService.setAspectDefaultForMode(widget.mode, normalized);
   }
 
   Widget _buildRtInstructionBanner(Color accent) {
@@ -2446,10 +2479,23 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   /// Collapsible frame-ratio control. Collapsed: a single pill showing the
   /// active ratio. Tap → expands into the 3:4 / 1:1 / 16:9 option strip;
-  /// tapping an option applies it and collapses back. Hidden while
-  /// recording — the frame is locked during capture.
+  /// tapping an option applies it and collapses back. Locked (inert, with a
+  /// lock icon) while recording — the frame can't change mid-clip since the
+  /// saved video is a single file, not a per-segment crop. Previously this
+  /// vanished entirely (SizedBox.shrink) during recording, which read as
+  /// "frame switching is broken" rather than "frame is intentionally locked".
   Widget _buildRatioControl(Color accent) {
-    if (_isRecording) return const SizedBox.shrink();
+    if (_isRecording) {
+      return _floatingPill(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        radius: 18,
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.lock_outline_rounded, color: Colors.white54, size: 14),
+          const SizedBox(width: 6),
+          Text(_selectedAspectLabel, style: const TextStyle(color: Colors.white54, fontSize: 13, fontWeight: FontWeight.w700)),
+        ]),
+      );
+    }
 
     if (!_aspectStripExpanded) {
       return _floatingPill(
@@ -2487,9 +2533,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       radius: 20,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
-        _pillOption('1×', _currentZoomIndex == 0, accent, () => _setZoomByIndex(0)),
-        _pillOption('2×', _currentZoomIndex == 1, accent, () => _setZoomByIndex(1)),
-        _pillOption('3×', _currentZoomIndex == 2, accent, () => _setZoomByIndex(2)),
+        _ZoomPillButton(label: '1×', active: _currentZoomIndex == 0, accent: accent, onTap: () => _setZoomByIndex(0)),
+        _ZoomPillButton(label: '2×', active: _currentZoomIndex == 1, accent: accent, onTap: () => _setZoomByIndex(1)),
+        _ZoomPillButton(label: '3×', active: _currentZoomIndex == 2, accent: accent, onTap: () => _setZoomByIndex(2)),
         const SizedBox(width: 6),
         Container(width: 1, height: 20, color: RfGlass.border(0.2)),
         const SizedBox(width: 6),
@@ -2737,6 +2783,75 @@ class _MicToggleButtonState extends State<_MicToggleButton> with SingleTickerPro
                   style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Zoom pill option (1×/2×/3×) — mirrors [_MicToggleButton]'s press/haptic
+/// pattern (200ms scale-to-0.95 + selectionClick) so zoom feels consistent
+/// with the rest of the camera chrome. Kept separate from the shared
+/// `_pillOption` helper (used by the aspect-ratio strip too) so this
+/// doesn't risk regressing that control — zoom just needed a bigger tap
+/// target + haptics + motion, nothing about the ratio strip's behavior.
+class _ZoomPillButton extends StatefulWidget {
+  final String label;
+  final bool active;
+  final Color accent;
+  final VoidCallback onTap;
+  const _ZoomPillButton({required this.label, required this.active, required this.accent, required this.onTap});
+
+  @override
+  State<_ZoomPillButton> createState() => _ZoomPillButtonState();
+}
+
+class _ZoomPillButtonState extends State<_ZoomPillButton> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: RfDuration.press);
+    _scale = Tween<double>(begin: 1.0, end: 0.95)
+        .animate(CurvedAnimation(parent: _ctrl, curve: RfDuration.pressCurve));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _ctrl.forward(),
+      onTapUp: (_) => _ctrl.reverse(),
+      onTapCancel: () => _ctrl.reverse(),
+      onTap: () {
+        HapticFeedback.selectionClick();
+        widget.onTap();
+      },
+      child: ScaleTransition(
+        scale: _scale,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+              child: Text(
+                widget.label,
+                style: TextStyle(
+                  color: widget.active ? widget.accent : Colors.white,
+                  fontSize: 14,
+                  fontWeight: widget.active ? FontWeight.w800 : FontWeight.w600,
+                ),
+              ),
             ),
           ),
         ),

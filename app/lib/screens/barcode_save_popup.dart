@@ -36,7 +36,7 @@ class BarcodeSavePopup extends StatefulWidget {
   State<BarcodeSavePopup> createState() => _BarcodeSavePopupState();
 }
 
-class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
+class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerProviderStateMixin {
   final _orderIdController = TextEditingController();
   final _awbController = TextEditingController();
   final _orderIdRegex = RegExp(r'^\d{3}-\d{7}-\d{7}$');
@@ -72,6 +72,21 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   bool _autoLabelSave = true;
   Timer? _autoScanTimer;
 
+  // ── Label review hold ──────────────────────────────────────────────────
+  // After a successful lock, hold the just-captured still on screen for a
+  // few seconds so the user can visually confirm the physical label's Order
+  // ID/AWB actually printed correctly, before auto-confirming the save.
+  // AnimationController (not Timer) deliberately — Flutter's ticker pauses
+  // automatically when the app is backgrounded, so if the user backgrounds
+  // mid-hold the countdown freezes and resumes on return instead of
+  // silently auto-confirming while nobody is looking.
+  int _labelReviewHoldSeconds = 3;
+  AnimationController? _reviewCtrl;
+  XFile? _reviewXFile;
+  String? _reviewOrderId;
+  String? _reviewAwb;
+  bool _reviewActive = false;
+
   @override
   void initState() {
     super.initState();
@@ -96,6 +111,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   Future<void> _loadLabelSettings() async {
     _autoLabelScan = await CameraSettingsService.getAutoLabelScan();
     _autoLabelSave = await CameraSettingsService.getAutoLabelSave();
+    _labelReviewHoldSeconds = await CameraSettingsService.getLabelReviewHoldSeconds();
     DebugSessionLog.log(
       location: 'barcode_save_popup.dart:_loadLabelSettings',
       message: 'label settings loaded',
@@ -103,6 +119,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       data: {
         'autoLabelScan': _autoLabelScan,
         'autoLabelSave': _autoLabelSave,
+        'labelReviewHoldSeconds': _labelReviewHoldSeconds,
       },
     );
   }
@@ -199,6 +216,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   @override
   void dispose() {
     _stopAutoScanLoop();
+    _reviewCtrl?.dispose();
     VolumeButtonService().unregisterListener('barcode_popup');
     _cam?.dispose();
     _scanner?.dispose();
@@ -261,7 +279,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   ///   6. Order ID is filled from OcrService.extractOrderId (or from a
   ///      barcode whose value matches the 3-7-7 pattern)
   Future<void> _scan({bool fromAuto = false}) async {
-    if (_cam == null || !_camReady || _scanning) return;
+    if (_cam == null || !_camReady || _scanning || _reviewActive) return;
     if (fromAuto) _autoScanDone = true;
     _stopAutoScanLoop();
     setState(() {
@@ -374,10 +392,19 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
           location: 'barcode_save_popup.dart:_scan',
           message: 'auto save triggered',
           hypothesisId: 'H4-settings',
-          data: {'fromAuto': fromAuto, 'orderId': orderId, 'autoScanDone': _autoScanDone},
+          data: {
+            'fromAuto': fromAuto,
+            'orderId': orderId,
+            'autoScanDone': _autoScanDone,
+            'labelReviewHoldSeconds': _labelReviewHoldSeconds,
+          },
         );
         // #endregion
-        _onSave();
+        if (_labelReviewHoldSeconds > 0) {
+          _startReviewHold(xFile);
+        } else {
+          _onSave();
+        }
       } else if (fromAuto) {
         DebugSessionLog.log(
           location: 'barcode_save_popup.dart:_scan',
@@ -448,10 +475,54 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
 
   void _onCancel() => Navigator.pop(context);
 
+  /// Starts the label-review hold: freezes the just-captured still on
+  /// screen with the detected Order ID/AWB for [_labelReviewHoldSeconds],
+  /// then auto-confirms via [_confirmReviewHold] unless the user cancels
+  /// (Retake) or confirms early (Looks good).
+  void _startReviewHold(XFile xFile) {
+    _reviewCtrl?.dispose();
+    _reviewCtrl = AnimationController(vsync: this, duration: Duration(seconds: _labelReviewHoldSeconds))
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) _confirmReviewHold();
+      });
+    setState(() {
+      _reviewActive = true;
+      _reviewXFile = xFile;
+      _reviewOrderId = _orderIdController.text.trim();
+      _reviewAwb = _awbController.text.trim();
+    });
+    _reviewCtrl!.forward();
+  }
+
+  void _confirmReviewHold() {
+    if (!mounted || !_reviewActive) return;
+    // Defensive: a duplicate could have been discovered by _onTextChanged
+    // while the overlay was up (fields stay live underneath it).
+    if (_duplicateWarning != null) {
+      _cancelReviewHold();
+      return;
+    }
+    _reviewCtrl?.dispose();
+    _reviewCtrl = null;
+    setState(() => _reviewActive = false);
+    _onSave();
+  }
+
+  void _cancelReviewHold() {
+    _reviewCtrl?.dispose();
+    _reviewCtrl = null;
+    if (!mounted) return;
+    setState(() {
+      _reviewActive = false;
+      _reviewXFile = null;
+    });
+    // Order ID / AWB fields are left populated (not cleared) so the user
+    // can correct them manually or re-tap SCAN to retake.
+  }
+
   @override
   Widget build(BuildContext context) {
     return RfGlassScaffold(
-      showMeshOrbs: false,
       appBar: RfGlassAppBar(
         leadingWidth: 56,
         leading: Padding(
@@ -475,7 +546,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         ],
       ),
       body: SafeArea(
-        child: Column(
+        child: Stack(
+          children: [
+            Column(
           children: [
             const SizedBox(height: 12),
 
@@ -580,6 +653,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
 
             const SizedBox(height: 14),
           ],
+            ),
+            if (_reviewActive) _buildLabelReviewOverlay(),
+          ],
         ),
       ),
     );
@@ -671,6 +747,145 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         );
       },
     );
+  }
+
+  /// Full-screen review-hold overlay: shows the frozen captured still with
+  /// the detected Order ID/AWB and a shrinking countdown ring, so the user
+  /// can visually confirm the physical label actually printed correctly
+  /// before the save auto-confirms. "Looks good" confirms immediately;
+  /// "Retake" cancels and leaves the fields populated for a manual fix or
+  /// a fresh SCAN.
+  Widget _buildLabelReviewOverlay() {
+    return Positioned.fill(
+      child: Container(
+        color: Colors.black.withAlpha(230),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Expanded(
+                flex: 5,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      double width, height;
+                      if (constraints.maxWidth * 1.5 <= constraints.maxHeight) {
+                        width = constraints.maxWidth;
+                        height = width * 1.5;
+                      } else {
+                        height = constraints.maxHeight;
+                        width = height / 1.5;
+                      }
+                      return Center(
+                        child: SizedBox(
+                          width: width,
+                          height: height,
+                          child: Stack(
+                            children: [
+                              Positioned.fill(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: _reviewXFile != null
+                                      ? Image.file(File(_reviewXFile!.path), fit: BoxFit.cover)
+                                      : Container(color: Colors.black),
+                                ),
+                              ),
+                              Positioned.fill(
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: RfColors.successLight, width: 2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                              if (_reviewCtrl != null)
+                                Positioned(
+                                  top: 12, right: 12,
+                                  child: AnimatedBuilder(
+                                    animation: _reviewCtrl!,
+                                    builder: (context, _) => SizedBox(
+                                      width: 34, height: 34,
+                                      child: Stack(alignment: Alignment.center, children: [
+                                        CircularProgressIndicator(
+                                          value: 1.0 - _reviewCtrl!.value,
+                                          strokeWidth: 3,
+                                          backgroundColor: Colors.white24,
+                                          valueColor: const AlwaysStoppedAnimation(RfColors.successLight),
+                                        ),
+                                        Text(
+                                          '${(_labelReviewHoldSeconds * (1.0 - _reviewCtrl!.value)).ceil()}',
+                                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+                                        ),
+                                      ]),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Text(
+                    'Confirm the label printed correctly',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildReviewReadout('Order ID', _reviewOrderId ?? ''),
+                  const SizedBox(height: 6),
+                  _buildReviewReadout('AWB', (_reviewAwb == null || _reviewAwb!.isEmpty) ? '—' : _reviewAwb!),
+                ]),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(children: [
+                  Expanded(
+                    child: RfButton.secondary(
+                      label: 'Retake',
+                      icon: Icons.replay_rounded,
+                      onPressed: _cancelReviewHold,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: RfButton.primary(
+                      label: 'Looks good',
+                      icon: Icons.check_rounded,
+                      onPressed: _confirmReviewHold,
+                    ),
+                  ),
+                ]),
+              ),
+              const SizedBox(height: 14),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReviewReadout(String label, String value) {
+    return Row(children: [
+      SizedBox(
+        width: 64,
+        child: Text(label, style: const TextStyle(color: RfColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
+      ),
+      Expanded(
+        child: Text(
+          value,
+          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700, fontFamily: 'monospace'),
+        ),
+      ),
+    ]);
   }
 
   List<Widget> _cornerBrackets({Color color = RfColors.amber}) {

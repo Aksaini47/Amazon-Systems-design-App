@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,9 +8,11 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../screens/activity_log_screen.dart';
 import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
+import '../models/capture_session.dart';
 import '../services/camera_settings_service.dart';
 import '../services/local_storage_service.dart';
 import '../services/update_service.dart';
+import '../widgets/rf_button.dart';
 import 'tour_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -32,10 +35,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _claimPhotoCountdown = false;
   // New: capture countdown (0=manual, 3/5/10=seconds)
   int _captureCountdown = 3;
-  // New: aspect ratio default (9/16 = 16:9 portrait, 3/4 = 3:4, 1.0 = 1:1)
-  double _aspectDefault = 9 / 16;
+  // Per-mode aspect ratio default (9/16 = 16:9 portrait, 3/4 = 3:4, 1.0 = 1:1)
+  double _aspectDefaultPk = CameraSettingsService.aspectFull;
+  double _aspectDefaultRt = CameraSettingsService.aspectFull;
+  // Per-mode zoom default (0=1x, 1=2x, 2=3x)
+  int _zoomDefaultPk = 0;
+  int _zoomDefaultRt = 0;
+  // Label popup: seconds to hold the captured still before auto-confirming
+  // (0 = instant, old behavior)
+  int _labelReviewHoldSeconds = 3;
   // Storage path settings
   String _selectedStoragePath = CameraSettingsService.storageDefault;
+
+  // Accordion open/close state — multi-open (opening one doesn't close
+  // others). Only Camera starts open so the page opens as a readable index.
+  final Set<String> _openSections = {'Camera'};
 
   @override
   void initState() {
@@ -50,7 +64,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _timestampImage = await CameraSettingsService.getTimestampImage();
     _micDefault = await CameraSettingsService.getMicDefault();
     _captureCountdown = await CameraSettingsService.getCaptureCountdown();
-    _aspectDefault = await CameraSettingsService.getAspectDefault();
+    _aspectDefaultPk = await CameraSettingsService.getAspectDefaultForMode(CaptureMode.pk);
+    _aspectDefaultRt = await CameraSettingsService.getAspectDefaultForMode(CaptureMode.rt);
+    _zoomDefaultPk = await CameraSettingsService.getZoomDefaultForMode(CaptureMode.pk);
+    _zoomDefaultRt = await CameraSettingsService.getZoomDefaultForMode(CaptureMode.rt);
+    _labelReviewHoldSeconds = await CameraSettingsService.getLabelReviewHoldSeconds();
     _autoLabelScan = await CameraSettingsService.getAutoLabelScan();
     _autoLabelSave = await CameraSettingsService.getAutoLabelSave();
     _claimPhotoCountdown = await CameraSettingsService.getClaimPhotoCountdown();
@@ -64,281 +82,299 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Settings restored to defaults')));
   }
 
+  void _toggleSection(String key) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      if (_openSections.contains(key)) {
+        _openSections.remove(key);
+      } else {
+        _openSections.add(key);
+      }
+    });
+  }
+
+  /// Short summary shown on a collapsed section header — so the index is
+  /// still informative without expanding (standard settings-app pattern).
+  String _summaryFor(String key) {
+    switch (key) {
+      case 'Camera':
+        return '${_resolutionLabel(_resolution)} · $_fps fps';
+      case 'Capture & QC':
+        return _captureCountdown == 0 ? 'Manual capture' : '${_captureCountdown}s countdown';
+      case 'Storage':
+        return _selectedStoragePath.isNotEmpty
+            ? _selectedStoragePath.split('/').last
+            : 'Not set';
+      default:
+        return '';
+    }
+  }
+
+  static String _resolutionLabel(ResolutionPreset p) => switch (p) {
+        ResolutionPreset.low => '240p',
+        ResolutionPreset.medium => '480p',
+        ResolutionPreset.high => '720p',
+        ResolutionPreset.veryHigh => '1080p',
+        ResolutionPreset.ultraHigh => '4K',
+        ResolutionPreset.max => 'Max',
+      };
+
   @override
   Widget build(BuildContext context) {
     return RfGlassScaffold(
       appBar: const RfGlassAppBar(title: 'Settings'),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ══ CAMERA ════════════════════════════════════════════════════
-            _buildSectionHeader(Icons.videocam_outlined, 'Camera'),
-            const SizedBox(height: 10),
-            _buildSectionCard(children: [
-              Row(
-                children: [
-                  Expanded(child: _buildSettingTile(
-                    icon: Icons.high_quality_rounded,
-                    label: 'Resolution',
-                    child: _buildDropdown<ResolutionPreset>(
-                      value: _resolution,
-                      items: const {
-                        ResolutionPreset.low: '240p',
-                        ResolutionPreset.medium: '480p',
-                        ResolutionPreset.high: '720p',
-                        ResolutionPreset.veryHigh: '1080p',
-                        ResolutionPreset.ultraHigh: '4K',
-                      },
-                      onChanged: (v) {
-                        setState(() => _resolution = v);
-                        CameraSettingsService.setResolution(v);
-                      },
-                    ),
-                  )),
-                  const SizedBox(width: 10),
-                  Expanded(child: _buildSettingTile(
-                    icon: Icons.speed_rounded,
-                    label: 'Frame Rate',
-                    child: _buildDropdown<int>(
-                      value: _fps,
-                      items: const {30: '30 fps', 60: '60 fps'},
-                      onChanged: (v) {
-                        setState(() => _fps = v);
-                        CameraSettingsService.setFps(v);
-                      },
-                    ),
-                  )),
-                ],
-              ),
-              const SizedBox(height: 10),
-              _buildSettingTile(
-                icon: Icons.aspect_ratio_rounded,
-                label: 'Default Frame Ratio',
-                child: _buildDropdown<double>(
-                  value: CameraSettingsService.normalizeAspect(_aspectDefault),
-                  items: {
-                    CameraSettingsService.aspectFull: '16:9 (fullscreen)',
-                    CameraSettingsService.aspect34: '3:4 (portrait)',
-                    CameraSettingsService.aspect11: '1:1 (square)',
-                  },
-                  onChanged: (v) {
-                    setState(() => _aspectDefault = v);
-                    CameraSettingsService.setAspectDefault(v);
-                  },
-                ),
-              ),
-              const SizedBox(height: 10),
-              _buildSettingToggle(
-                icon: Icons.volume_up_rounded,
-                label: 'Shutter Sounds',
-                subtitle: 'Play sounds when capturing photos or starting recording',
-                value: _sound,
-                onChanged: (v) {
-                  setState(() => _sound = v);
-                  CameraSettingsService.setSound(v);
-                },
-              ),
-            ]),
-
-            const SizedBox(height: 24),
-
-            // ══ CAPTURE & QC ══════════════════════════════════════════════
-            _buildSectionHeader(Icons.tune_rounded, 'Capture & QC'),
-            const SizedBox(height: 10),
-            _buildSectionCard(children: [
-              _buildSettingToggle(
-                icon: Icons.mic_rounded,
-                label: 'Microphone default',
-                subtitle: 'Start PK/RT sessions with mic on (toggle in camera to override)',
-                value: _micDefault,
-                onChanged: (v) {
-                  setState(() => _micDefault = v);
-                  CameraSettingsService.setMicDefault(v);
-                },
-              ),
-              const SizedBox(height: 10),
-              _buildSettingTile(
-                icon: Icons.timer_outlined,
-                label: 'Photo Countdown',
-                child: _buildDropdown<int>(
-                  value: _captureCountdown,
-                  items: const {
-                    0: 'Off (manual)',
-                    3: '3 seconds',
-                    5: '5 seconds',
-                    10: '10 seconds',
-                  },
-                  onChanged: (v) {
-                    setState(() => _captureCountdown = v);
-                    CameraSettingsService.setCaptureCountdown(v);
-                  },
-                ),
-              ),
-              const SizedBox(height: 10),
-              _buildSettingToggle(
-                icon: Icons.photo_camera_back_rounded,
-                label: 'RT claim photo countdown',
-                subtitle: 'Countdown before each return photo (off = manual tap)',
-                value: _claimPhotoCountdown,
-                onChanged: (v) {
-                  setState(() => _claimPhotoCountdown = v);
-                  CameraSettingsService.setClaimPhotoCountdown(v);
-                },
-              ),
-              const SizedBox(height: 10),
-              _buildSettingToggle(
-                icon: Icons.photo_camera_back_rounded,
-                label: 'Return images by QC',
-                subtitle: 'QC OK: front/back only. Damaged/different: label + contents + front/back. Fixed by design.',
-                value: true,
-                info: true,
-              ),
-              const SizedBox(height: 10),
-              _buildSettingToggle(
-                icon: Icons.access_time_rounded,
-                label: 'Photo timestamp',
-                subtitle: 'Overlay date/time on saved photos',
-                value: _timestampImage,
-                onChanged: (v) {
-                  setState(() => _timestampImage = v);
-                  CameraSettingsService.setTimestampImage(v);
-                },
-              ),
-              const SizedBox(height: 10),
-              _buildSettingToggle(
-                icon: Icons.center_focus_strong_rounded,
-                label: 'Auto label scan',
-                subtitle: 'Scan label once when Order ID popup opens',
-                value: _autoLabelScan,
-                onChanged: (v) {
-                  setState(() => _autoLabelScan = v);
-                  CameraSettingsService.setAutoLabelScan(v);
-                },
-              ),
-              const SizedBox(height: 10),
-              _buildSettingToggle(
-                icon: Icons.save_alt_rounded,
-                label: 'Auto save after scan',
-                subtitle: 'Close label popup when Order ID is valid',
-                value: _autoLabelSave,
-                onChanged: (v) {
-                  setState(() => _autoLabelSave = v);
-                  CameraSettingsService.setAutoLabelSave(v);
-                },
-              ),
-            ]),
-
-            const SizedBox(height: 24),
-
-            // ══ STORAGE ════════════════════════════════════════════════════
-            _buildSectionHeader(Icons.folder_outlined, 'Storage'),
-            const SizedBox(height: 10),
-            _buildSectionCard(children: [
-              InkWell(
-                onTap: () async {
-                  final selectedDir = await FilePicker.platform.getDirectoryPath();
-                  if (selectedDir != null) {
-                    setState(() => _selectedStoragePath = selectedDir);
-                    await CameraSettingsService.setStoragePath(selectedDir);
-                    LocalStorageService.clearCache();
-                  }
-                },
-                borderRadius: BorderRadius.circular(12),
-                child: RfGlassContainer(
-                  blurEnabled: false,
-                  padding: const EdgeInsets.all(14),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: RfColors.glassFill(0.22),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: RfColors.glassBorder(0.18)),
-                        ),
-                        child: const Icon(Icons.folder_outlined, color: RfColors.textSecondary, size: 20),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Storage location',
-                              style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              _selectedStoragePath.isNotEmpty ? _selectedStoragePath : 'Tap to select folder',
-                              style: const TextStyle(color: RfColors.textSecondary, fontSize: 11),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right, color: RfColors.textSecondary, size: 22),
-                    ],
+            _buildAccordionSection(
+              icon: Icons.videocam_outlined,
+              label: 'Camera',
+              sectionKey: 'Camera',
+              children: [
+                _buildRow(
+                  label: 'Resolution',
+                  isFirst: true,
+                  trailing: _buildDropdown<ResolutionPreset>(
+                    value: _resolution,
+                    items: const {
+                      ResolutionPreset.low: '240p',
+                      ResolutionPreset.medium: '480p',
+                      ResolutionPreset.high: '720p',
+                      ResolutionPreset.veryHigh: '1080p',
+                      ResolutionPreset.ultraHigh: '4K',
+                    },
+                    onChanged: (v) {
+                      setState(() => _resolution = v);
+                      CameraSettingsService.setResolution(v);
+                    },
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              InkWell(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const ActivityLogScreen()),
-                  );
-                },
-                borderRadius: BorderRadius.circular(12),
-                child: RfGlassContainer(
-                  blurEnabled: false,
-                  padding: const EdgeInsets.all(14),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.article_outlined, color: RfColors.textSecondary, size: 22),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Activity log',
-                              style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                            ),
-                            SizedBox(height: 3),
-                            Text(
-                              'Last 60 days — shipment events by day',
-                              style: TextStyle(color: RfColors.textSecondary, fontSize: 11),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(Icons.chevron_right, color: RfColors.textSecondary, size: 22),
-                    ],
+                _buildRow(
+                  label: 'Frame rate',
+                  trailing: _buildDropdown<int>(
+                    value: _fps,
+                    items: const {30: '30 fps', 60: '60 fps'},
+                    onChanged: (v) {
+                      setState(() => _fps = v);
+                      CameraSettingsService.setFps(v);
+                    },
                   ),
                 ),
-              ),
-            ]),
-
-            const SizedBox(height: 24),
-
-            // ══ ABOUT & UPDATES ═══════════════════════════════════════════
-            _buildSectionHeader(Icons.info_outline_rounded, 'About & Updates'),
-            const SizedBox(height: 10),
-            _AboutCard(),
-
-            const SizedBox(height: 20),
-
-            _buildDangerButton(
-              icon: Icons.restore_rounded,
-              label: 'Restore defaults',
-              onPressed: _restoreDefaults,
+                _buildRow(
+                  label: 'PK frame ratio',
+                  subtitle: 'Default aspect for packing sessions',
+                  trailing: _buildDropdown<double>(
+                    value: CameraSettingsService.normalizeAspect(_aspectDefaultPk),
+                    items: {
+                      CameraSettingsService.aspectFull: '16:9',
+                      CameraSettingsService.aspect34: '3:4',
+                      CameraSettingsService.aspect11: '1:1',
+                    },
+                    onChanged: (v) {
+                      setState(() => _aspectDefaultPk = v);
+                      CameraSettingsService.setAspectDefaultForMode(CaptureMode.pk, v);
+                    },
+                  ),
+                ),
+                _buildRow(
+                  label: 'RT frame ratio',
+                  subtitle: 'Default aspect for return sessions',
+                  trailing: _buildDropdown<double>(
+                    value: CameraSettingsService.normalizeAspect(_aspectDefaultRt),
+                    items: {
+                      CameraSettingsService.aspectFull: '16:9',
+                      CameraSettingsService.aspect34: '3:4',
+                      CameraSettingsService.aspect11: '1:1',
+                    },
+                    onChanged: (v) {
+                      setState(() => _aspectDefaultRt = v);
+                      CameraSettingsService.setAspectDefaultForMode(CaptureMode.rt, v);
+                    },
+                  ),
+                ),
+                _buildRow(
+                  label: 'PK default zoom',
+                  trailing: _buildDropdown<int>(
+                    value: _zoomDefaultPk,
+                    items: const {0: '1×', 1: '2×', 2: '3×'},
+                    onChanged: (v) {
+                      setState(() => _zoomDefaultPk = v);
+                      CameraSettingsService.setZoomDefaultForMode(CaptureMode.pk, v);
+                    },
+                  ),
+                ),
+                _buildRow(
+                  label: 'RT default zoom',
+                  trailing: _buildDropdown<int>(
+                    value: _zoomDefaultRt,
+                    items: const {0: '1×', 1: '2×', 2: '3×'},
+                    onChanged: (v) {
+                      setState(() => _zoomDefaultRt = v);
+                      CameraSettingsService.setZoomDefaultForMode(CaptureMode.rt, v);
+                    },
+                  ),
+                ),
+                _buildRow(
+                  label: 'Shutter sounds',
+                  subtitle: 'Play a sound when capturing or starting a recording',
+                  trailing: _buildSwitch(
+                    value: _sound,
+                    onChanged: (v) {
+                      setState(() => _sound = v);
+                      CameraSettingsService.setSound(v);
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildAccordionSection(
+              icon: Icons.tune_rounded,
+              label: 'Capture & QC',
+              sectionKey: 'Capture & QC',
+              children: [
+                _buildRow(
+                  label: 'Microphone default',
+                  subtitle: 'Start PK/RT sessions with the mic on',
+                  isFirst: true,
+                  trailing: _buildSwitch(
+                    value: _micDefault,
+                    onChanged: (v) {
+                      setState(() => _micDefault = v);
+                      CameraSettingsService.setMicDefault(v);
+                    },
+                  ),
+                ),
+                _buildRow(
+                  label: 'Photo countdown',
+                  trailing: _buildDropdown<int>(
+                    value: _captureCountdown,
+                    items: const {
+                      0: 'Off',
+                      3: '3 sec',
+                      5: '5 sec',
+                      10: '10 sec',
+                    },
+                    onChanged: (v) {
+                      setState(() => _captureCountdown = v);
+                      CameraSettingsService.setCaptureCountdown(v);
+                    },
+                  ),
+                ),
+                _buildRow(
+                  label: 'RT claim photo countdown',
+                  subtitle: 'Countdown before each return photo',
+                  trailing: _buildSwitch(
+                    value: _claimPhotoCountdown,
+                    onChanged: (v) {
+                      setState(() => _claimPhotoCountdown = v);
+                      CameraSettingsService.setClaimPhotoCountdown(v);
+                    },
+                  ),
+                ),
+                _buildRow(
+                  label: 'Return images by QC',
+                  subtitle: 'QC OK: front/back only. Damaged or different: label, contents, front and back. Fixed by design.',
+                  trailing: const Icon(Icons.lock_outline_rounded, size: 18, color: RfColors.textMuted),
+                ),
+                _buildRow(
+                  label: 'Photo timestamp',
+                  subtitle: 'Overlay date and time on saved photos',
+                  trailing: _buildSwitch(
+                    value: _timestampImage,
+                    onChanged: (v) {
+                      setState(() => _timestampImage = v);
+                      CameraSettingsService.setTimestampImage(v);
+                    },
+                  ),
+                ),
+                _buildRow(
+                  label: 'Auto label scan',
+                  subtitle: 'Scan the label once when the Order ID popup opens',
+                  trailing: _buildSwitch(
+                    value: _autoLabelScan,
+                    onChanged: (v) {
+                      setState(() => _autoLabelScan = v);
+                      CameraSettingsService.setAutoLabelScan(v);
+                    },
+                  ),
+                ),
+                _buildRow(
+                  label: 'Auto save after scan',
+                  subtitle: 'Close the label popup once the Order ID is valid',
+                  trailing: _buildSwitch(
+                    value: _autoLabelSave,
+                    onChanged: (v) {
+                      setState(() => _autoLabelSave = v);
+                      CameraSettingsService.setAutoLabelSave(v);
+                    },
+                  ),
+                ),
+                _buildRow(
+                  label: 'Label review hold',
+                  subtitle: 'Pause to confirm the print before auto-saving',
+                  trailing: _buildDropdown<int>(
+                    value: _labelReviewHoldSeconds,
+                    items: const {0: 'Off', 2: '2 sec', 3: '3 sec', 5: '5 sec'},
+                    onChanged: (v) {
+                      setState(() => _labelReviewHoldSeconds = v);
+                      CameraSettingsService.setLabelReviewHoldSeconds(v);
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildAccordionSection(
+              icon: Icons.folder_outlined,
+              label: 'Storage',
+              sectionKey: 'Storage',
+              children: [
+                _buildRow(
+                  label: 'Storage location',
+                  subtitle: _selectedStoragePath.isNotEmpty ? _selectedStoragePath : 'Tap to select a folder',
+                  isFirst: true,
+                  trailing: const Icon(Icons.chevron_right_rounded, size: 20, color: RfColors.textSecondary),
+                  onTap: () async {
+                    final selectedDir = await FilePicker.platform.getDirectoryPath();
+                    if (selectedDir != null) {
+                      setState(() => _selectedStoragePath = selectedDir);
+                      await CameraSettingsService.setStoragePath(selectedDir);
+                      LocalStorageService.clearCache();
+                    }
+                  },
+                ),
+                _buildRow(
+                  label: 'Activity log',
+                  subtitle: 'Last 60 days — shipment events by day',
+                  trailing: const Icon(Icons.chevron_right_rounded, size: 20, color: RfColors.textSecondary),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const ActivityLogScreen()),
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildAccordionSection(
+              icon: Icons.info_outline_rounded,
+              label: 'About & Updates',
+              sectionKey: 'About & Updates',
+              children: const [_AboutCard()],
             ),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 28),
+
+            RfButton.secondary(
+              icon: Icons.restore_rounded,
+              label: 'Restore defaults',
+              accentColor: RfColors.error,
+              fullWidth: true,
+              onPressed: _restoreDefaults,
+            ),
           ],
         ),
       ),
@@ -347,163 +383,172 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // ─── Widget Builders ─────────────────────────────────────────────────────
 
-  Widget _buildSectionHeader(IconData icon, String label) {
-    return Row(
+  /// One accordion section, rendered as a self-contained card: tappable
+  /// header (icon badge + title + summary + rotating chevron) over a
+  /// collapsing body. Multi-open — toggling one never closes another
+  /// (state lives in [_openSections]).
+  Widget _buildAccordionSection({
+    required IconData icon,
+    required String label,
+    required String sectionKey,
+    required List<Widget> children,
+  }) {
+    final isOpen = _openSections.contains(sectionKey);
+    final summary = isOpen ? '' : _summaryFor(sectionKey);
+
+    return RfGlassContainer(
+      blurEnabled: false,
+      radius: RfRadius.lg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: () => _toggleSection(sectionKey),
+            borderRadius: BorderRadius.circular(RfRadius.lg),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.07),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+                    ),
+                    child: Icon(icon, size: 18, color: RfColors.textSecondary),
+                  ),
+                  const SizedBox(width: 13),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  if (summary.isNotEmpty) ...[
+                    Flexible(
+                      child: Text(
+                        summary,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                  AnimatedRotation(
+                    turns: isOpen ? 0.25 : 0,
+                    duration: RfDuration.fade,
+                    child: const Icon(Icons.chevron_right_rounded, size: 20, color: RfColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedSize(
+            duration: RfDuration.controlsFade,
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: isOpen
+                ? Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _hairline(),
+                        ...children,
+                      ],
+                    ),
+                  )
+                : const SizedBox(width: double.infinity, height: 0),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _hairline({double indent = 0}) => Divider(
+        height: 1,
+        thickness: 1,
+        indent: indent,
+        color: Colors.white.withValues(alpha: 0.09),
+      );
+
+  /// One settings row — label (+ optional subtitle) on the left, control on
+  /// the right, hairline separator above unless [isFirst].
+  Widget _buildRow({
+    required String label,
+    String? subtitle,
+    required Widget trailing,
+    VoidCallback? onTap,
+    bool isFirst = false,
+  }) {
+    final content = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 11, 16, 11),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 32),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(color: RfColors.textSecondary, fontSize: 12, height: 1.35),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 14),
+            trailing,
+          ],
+        ),
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: RfColors.navy.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: RfColors.navy.withValues(alpha: 0.35)),
-          ),
-          child: Icon(icon, color: RfColors.navy, size: 16),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          label.toUpperCase(),
-          style: const TextStyle(
-            color: RfColors.textPrimary,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.0,
-          ),
-        ),
+        if (!isFirst) _hairline(indent: 16),
+        if (onTap == null) content else InkWell(onTap: onTap, child: content),
       ],
     );
   }
 
-  Widget _buildSectionCard({required List<Widget> children}) {
-    return RfGlassContainer(
-      blurEnabled: false,
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
-      ),
+  Widget _buildSwitch({required bool value, required ValueChanged<bool> onChanged}) {
+    return Switch(
+      value: value,
+      onChanged: onChanged,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      trackColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return RfColors.success;
+        return RfColors.border;
+      }),
+      thumbColor: WidgetStateProperty.all(Colors.white),
+      trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return RfColors.success.withValues(alpha: 0.6);
+        return RfColors.border;
+      }),
     );
   }
 
-  /// Stacked tile — icon+label on top row, dropdown on full-width row below.
-  /// Avoids label truncation when laid out in a narrow Expanded column.
-  Widget _buildSettingTile({required IconData icon, required String label, required Widget child}) {
-    return RfGlassContainer(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: RfColors.textSecondary, size: 14),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  label.toUpperCase(),
-                  style: const TextStyle(
-                    color: RfColors.textSecondary,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.8,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Align(alignment: Alignment.centerLeft, child: child),
-        ],
-      ),
-    );
-  }
-
-  /// [info] renders a lock glyph instead of a Switch — for behaviour that is
-  /// fixed by design (the row documents it, nothing toggles it).
-  Widget _buildSettingToggle({
-    required IconData icon,
-    required String label,
-    required String subtitle,
-    required bool value,
-    ValueChanged<bool>? onChanged,
-    bool info = false,
-  }) {
-    return RfGlassContainer(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      borderColor: value ? RfColors.success.withValues(alpha: 0.35) : RfColors.glassBorder(0.22),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: value ? RfColors.success.withValues(alpha: 0.15) : RfColors.glassFill(0.12),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: value ? RfColors.success.withValues(alpha: 0.4) : RfColors.glassBorder(0.18),
-              ),
-            ),
-            child: Icon(
-              icon,
-              color: value ? RfColors.success : RfColors.textSecondary,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: value ? Colors.white : RfColors.textPrimary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(subtitle, style: const TextStyle(color: RfColors.textSecondary, fontSize: 12, height: 1.3)),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          if (info)
-            const Icon(Icons.lock_outline_rounded, size: 18, color: RfColors.textSecondary)
-          else
-            Switch(
-              value: value,
-              onChanged: onChanged,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              trackColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) return RfColors.success;
-                return RfColors.border;
-              }),
-              thumbColor: WidgetStateProperty.all(Colors.white),
-              trackOutlineColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) return RfColors.success.withValues(alpha: 0.6);
-                return RfColors.border;
-              }),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDangerButton({required IconData icon, required String label, required VoidCallback onPressed}) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.red.shade400,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        side: BorderSide(color: Colors.red.shade800),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-      icon: Icon(icon, size: 20),
-      label: Text(label, style: const TextStyle(fontSize: 14)),
-    );
-  }
-
+  /// Value control — a proper filled pill (value + chevron), tappable as a
+  /// whole. Mechanism is unchanged [PopupMenuButton]; only the trigger's
+  /// visual is a real control instead of bare text.
   Widget _buildDropdown<T>({
     required T value,
     required Map<T, String> items,
@@ -512,24 +557,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return PopupMenuButton<T>(
       initialValue: value,
       onSelected: onChanged,
-      offset: const Offset(0, 44),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      color: RfColors.glassElevated(0.85),
-      elevation: 6,
-      child: RfGlassContainer(
-        blurEnabled: false,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        radius: RfRadius.chip,
-        tint: RfColors.glassFill(0.10),
+      offset: const Offset(0, 42),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: RfColors.surface,
+      elevation: 8,
+      tooltip: '',
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 36),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(RfRadius.chip),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               items[value] ?? value.toString(),
-              style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+              style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(width: 4),
-            const Icon(Icons.expand_more, color: RfColors.textSecondary, size: 18),
+            const SizedBox(width: 6),
+            const Icon(Icons.expand_more_rounded, color: RfColors.textSecondary, size: 17),
           ],
         ),
       ),
@@ -537,37 +586,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final isSelected = e.key == value;
         return PopupMenuItem<T>(
           value: e.key,
-          height: 40,
+          height: 44,
           child: Row(
             children: [
-              if (isSelected) const Icon(Icons.check, color: RfColors.navy, size: 16),
-              if (isSelected) const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   e.value,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : RfColors.textSecondary,
-                    fontSize: 13,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isSelected ? Colors.white : RfColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),
               ),
+              if (isSelected) const Icon(Icons.check_rounded, color: RfColors.successLight, size: 18),
             ],
           ),
         );
       }).toList(),
     );
   }
-
 }
 
 // ─── About card ──────────────────────────────────────────────────────────
 //
 // Surfaces app version, Shorebird code-push state, Firebase Crashlytics
-// status, and a "Check for updates" action. Read-only diagnostics for the
-// operator (Mahika) to verify the rig is healthy.
+// status, and the update / changelog / tour actions. Read-only diagnostics
+// for the operator (Mahika) to verify the rig is healthy. Lives inside the
+// "About & Updates" accordion section, so it carries no card chrome of its
+// own — it matches the row rhythm of the other sections.
 
 class _AboutCard extends StatefulWidget {
+  const _AboutCard();
+
   @override
   State<_AboutCard> createState() => _AboutCardState();
 }
@@ -647,23 +698,23 @@ class _AboutCardState extends State<_AboutCard> {
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
           title: const Row(children: [
-          Icon(Icons.history_rounded, color: RfColors.rtAccent, size: 22),
-          SizedBox(width: 10),
-          Text('What\'s new', style: TextStyle(color: Colors.white)),
-        ]),
-        content: SingleChildScrollView(
-          child: Text(
-            UpdateService.latestChangelog,
-            style: const TextStyle(color: RfColors.textPrimary, fontSize: 13, height: 1.4),
+            Icon(Icons.history_rounded, color: RfColors.rtAccent, size: 22),
+            SizedBox(width: 10),
+            Text('What\'s new', style: TextStyle(color: Colors.white)),
+          ]),
+          content: SingleChildScrollView(
+            child: Text(
+              UpdateService.latestChangelog,
+              style: const TextStyle(color: RfColors.textPrimary, fontSize: 13, height: 1.4),
+            ),
           ),
+          actions: [
+            RfButton.secondary(
+              label: 'Close',
+              onPressed: () => Navigator.pop(ctx),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close', style: TextStyle(color: Colors.white70)),
-          ),
-        ],
-      ),
       ),
     );
   }
@@ -675,137 +726,95 @@ class _AboutCardState extends State<_AboutCard> {
     final version = _info != null ? '${_info!.version} (build ${_info!.buildNumber})' : '—';
     final packageName = _info?.packageName ?? '—';
 
-    return RfGlassContainer(
-      blurEnabled: false,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Header row: app name + version
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: Row(children: [
-              Container(
-                width: 44, height: 44,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(
-                    'assets/branding/rf_logo.png',
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: RfColors.pkAccent.withAlpha(40),
-                      child: const Icon(Icons.camera_outlined, color: RfColors.pkAccent, size: 22),
-                    ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Identity block: app icon + name + version
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+          child: Row(children: [
+            SizedBox(
+              width: 46,
+              height: 46,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  'assets/branding/rf_logo.png',
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: RfColors.pkAccent.withAlpha(40),
+                    child: const Icon(Icons.camera_outlined, color: RfColors.pkAccent, size: 22),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(appName,
-                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 2),
-                    Text('v$version',
-                        style: const TextStyle(color: RfColors.textSecondary, fontSize: 12, fontFamily: 'monospace')),
-                  ],
-                ),
-              ),
-            ]),
-          ),
-
-          Divider(height: 1, color: RfColors.glassBorder(0.2)),
-
-          // Detail rows
-          _row(Icons.tag_outlined, 'Package', packageName, monospace: true),
-          _row(
-            Icons.cloud_outlined,
-            'Crashlytics',
-            firebaseUp ? 'Connected (rf-logger)' : 'Not connected',
-            valueColor: firebaseUp ? RfColors.successLight : RfColors.error,
-          ),
-          _row(
-            Icons.system_update_outlined,
-            'Code-push',
-            _shorebirdAvailable
-                ? (_currentPatch == null
-                    ? 'Active · base release (no OTA patch yet)'
-                    : 'Active · patch #$_currentPatch')
-                : (kReleaseMode
-                    ? 'Inactive — not a Shorebird release APK'
-                    : 'Inactive — debug / flutter run'),
-            valueColor: _shorebirdAvailable ? RfColors.successLight : RfColors.textSecondary,
-          ),
-          if (_nextPatch != null)
-            _row(
-              Icons.download_for_offline_outlined,
-              'Staged update',
-              'Patch #$_nextPatch — applies on next launch',
-              valueColor: RfColors.amber,
             ),
-          _row(Icons.security_outlined, 'Signed by', 'debug keystore (deliberate — see build.gradle)', monospace: true),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(appName,
+                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 3),
+                  Text('v$version',
+                      style: const TextStyle(color: RfColors.textSecondary, fontSize: 12, fontFamily: 'monospace')),
+                ],
+              ),
+            ),
+          ]),
+        ),
 
-          Divider(height: 1, color: RfColors.glassBorder(0.2)),
+        _SettingsScreenState._hairline(indent: 16),
 
-          // Action buttons
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            child: Row(children: [
-              Expanded(
-                child: TextButton.icon(
-                  onPressed: _checking ? null : _checkUpdates,
-                  icon: _checking
-                      ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.refresh_rounded, size: 18),
-                  label: Text(_checking ? 'Checking…' : 'Check for updates'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: RfColors.rtAccent,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                ),
-              ),
-              Container(width: 1, height: 22, color: RfColors.border),
-              Expanded(
-                child: TextButton.icon(
-                  onPressed: _showChangelog,
-                  icon: const Icon(Icons.history_rounded, size: 18),
-                  label: const Text('What\'s new'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: RfColors.pkAccent,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                ),
-              ),
-              Container(width: 1, height: 22, color: RfColors.border),
-              Expanded(
-                child: TextButton.icon(
-                  onPressed: () => TourDialog.show(context),
-                  icon: const Icon(Icons.help_outline_rounded, size: 18),
-                  label: const Text('Replay tour'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: RfColors.rtAccent,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                ),
-              ),
-            ]),
+        // Diagnostics
+        _infoRow(Icons.tag_outlined, 'Package', packageName, monospace: true),
+        _infoRow(
+          Icons.cloud_outlined,
+          'Crashlytics',
+          firebaseUp ? 'Connected' : 'Not connected',
+          valueColor: firebaseUp ? RfColors.successLight : RfColors.error,
+        ),
+        _infoRow(
+          Icons.system_update_outlined,
+          'Code-push',
+          _shorebirdAvailable
+              ? (_currentPatch == null ? 'Base release' : 'Patch #$_currentPatch')
+              : (kReleaseMode ? 'Inactive' : 'Debug build'),
+          valueColor: _shorebirdAvailable ? RfColors.successLight : RfColors.textSecondary,
+        ),
+        if (_nextPatch != null)
+          _infoRow(
+            Icons.download_for_offline_outlined,
+            'Staged update',
+            'Patch #$_nextPatch',
+            valueColor: RfColors.amber,
           ),
-        ],
-      ),
+        _infoRow(Icons.security_outlined, 'Signed by', 'debug keystore', monospace: true),
+
+        _SettingsScreenState._hairline(indent: 16),
+
+        // Actions — full-width rows rather than a cramped 3-button strip.
+        _actionRow(
+          Icons.refresh_rounded,
+          _checking ? 'Checking…' : 'Check for updates',
+          _checking ? null : _checkUpdates,
+        ),
+        _SettingsScreenState._hairline(indent: 52),
+        _actionRow(Icons.history_rounded, 'What\'s new', _showChangelog),
+        _SettingsScreenState._hairline(indent: 52),
+        _actionRow(Icons.help_outline_rounded, 'Replay tour', () => TourDialog.show(context)),
+      ],
     );
   }
 
-  Widget _row(IconData icon, String label, String value,
+  Widget _infoRow(IconData icon, String label, String value,
       {Color? valueColor, bool monospace = false}) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+      padding: const EdgeInsets.fromLTRB(16, 11, 16, 11),
       child: Row(children: [
-        Icon(icon, color: RfColors.textSecondary, size: 16),
-        const SizedBox(width: 10),
-        Text(label, style: const TextStyle(color: RfColors.textSecondary, fontSize: 12)),
+        Icon(icon, color: RfColors.textMuted, size: 17),
+        const SizedBox(width: 13),
+        Text(label, style: const TextStyle(color: RfColors.textSecondary, fontSize: 13)),
         const Spacer(),
         Flexible(
           child: Text(
@@ -814,13 +823,38 @@ class _AboutCardState extends State<_AboutCard> {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: valueColor ?? Colors.white,
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
               fontFamily: monospace ? 'monospace' : null,
             ),
           ),
         ),
       ]),
+    );
+  }
+
+  Widget _actionRow(IconData icon, String label, VoidCallback? onTap) {
+    final disabled = onTap == null;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        child: Row(children: [
+          Icon(icon, size: 19, color: disabled ? RfColors.textMuted : RfColors.rtAccent),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: disabled ? RfColors.textSecondary : Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const Icon(Icons.chevron_right_rounded, size: 20, color: RfColors.textSecondary),
+        ]),
+      ),
     );
   }
 }

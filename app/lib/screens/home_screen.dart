@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
-import '../widgets/rf_logo.dart';
+import '../widgets/rf_button.dart';
 import '../config/app_config.dart';
 import 'settings_screen.dart';
 import 'live_capture_screen.dart';
@@ -26,9 +27,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  PackageInfo? _appInfo;
+  int? _currentPatch;
+  bool _shorebirdAvailable = false;
+
   @override
   void initState() {
     super.initState();
+    _loadAppInfo();
     _recoverOrphanVideos();
     _maybeShowChangelog();
     _maybeShowTour();
@@ -39,6 +45,15 @@ class _HomeScreenState extends State<HomeScreen> {
       if (event == 1) _goToLiveCapture(context, CaptureMode.pk);
       if (event == 2) _goToLiveCapture(context, CaptureMode.rt);
     });
+  }
+
+  Future<void> _loadAppInfo() async {
+    try {
+      _appInfo = await PackageInfo.fromPlatform();
+    } catch (_) {}
+    _shorebirdAvailable = await UpdateService.isAvailable;
+    _currentPatch = await UpdateService.currentPatchNumber();
+    if (mounted) setState(() {});
   }
 
   Future<void> _maybeShowChangelog() async {
@@ -130,28 +145,35 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return RfGlassScaffold(
       appBar: RfGlassAppBar(
-        titleWidget: const RfLogo(size: 34, showLabel: true),
+        titleWidget: _buildTitle(),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.photo_library_outlined),
+          RfIconButton(
+            icon: Icons.photo_library_outlined,
             tooltip: 'Local Gallery',
+            size: 40,
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute<void>(builder: (_) => const LocalGalleryScreen()),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
+          const SizedBox(width: 8),
+          RfIconButton(
+            icon: Icons.settings_outlined,
+            tooltip: 'Settings',
+            size: 40,
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.help_outline_rounded),
+          const SizedBox(width: 8),
+          RfIconButton(
+            icon: Icons.help_outline_rounded,
             tooltip: 'How to use RF Logger',
+            size: 40,
             onPressed: () => TourDialog.show(context),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
@@ -188,6 +210,44 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  /// App name + version, with the active Shorebird patch number appended
+  /// once one exists — mirrors the same source (`PackageInfo`,
+  /// `UpdateService`) Settings' About card reads, so the two never disagree.
+  Widget _buildTitle() {
+    final name = _appInfo?.appName ?? 'RepairFully';
+    String? subtitle;
+    if (_appInfo != null) {
+      subtitle = 'v${_appInfo!.version} (${_appInfo!.buildNumber})';
+      if (_shorebirdAvailable && _currentPatch != null) {
+        subtitle = '$subtitle · Patch #$_currentPatch';
+      }
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          name,
+          style: const TextStyle(
+            color: RfColors.textPrimary,
+            fontWeight: FontWeight.w700,
+            fontSize: 15.3,
+          ),
+        ),
+        if (subtitle != null)
+          Text(
+            subtitle,
+            style: const TextStyle(
+              color: RfColors.textSecondary,
+              fontSize: 10.5,
+              fontFamily: 'monospace',
+            ),
+          ),
+      ],
     );
   }
 
@@ -237,11 +297,10 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RfGlassContainer(
+    return RfLiquidGlassContainer(
       onTap: onTap,
       padding: const EdgeInsets.all(20),
-      radius: RfRadius.lg,
-      borderColor: color.withValues(alpha: 0.25),
+      borderColor: color.withValues(alpha: 0.32),
       child: Row(
         children: [
           Container(

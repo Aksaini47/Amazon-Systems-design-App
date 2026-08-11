@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../services/activity_log_service.dart';
 import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
+import '../widgets/rf_button.dart';
 
 /// Scrollable viewer for the last 60 days of plain-text activity logs.
 class ActivityLogScreen extends StatefulWidget {
@@ -49,20 +50,23 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
   @override
   Widget build(BuildContext context) {
     return RfGlassScaffold(
-      showMeshOrbs: false,
       appBar: RfGlassAppBar(
         title: 'Activity log',
         actions: [
-          IconButton(
+          RfIconButton(
+            icon: Icons.refresh_rounded,
             tooltip: 'Refresh',
+            size: 40,
             onPressed: _loading ? null : _load,
-            icon: const Icon(Icons.refresh_rounded),
           ),
-          IconButton(
+          const SizedBox(width: 8),
+          RfIconButton(
+            icon: Icons.copy_rounded,
             tooltip: 'Copy folder path',
+            size: 40,
             onPressed: _logPath.isEmpty ? null : _copyPath,
-            icon: const Icon(Icons.copy_rounded),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: _loading
