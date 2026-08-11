@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+12:0 - Design-system UI update (Settings redesign, dynamic Home title)\n- Same changes as patch #1, packaged as a full release APK';
+      '2.1.0+13:0 - Design-system UI update (clean rebuild)\n- Verified fresh build of the Settings redesign + Home dynamic title';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
