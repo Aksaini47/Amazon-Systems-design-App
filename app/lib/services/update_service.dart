@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+11:0 - New app icon (original branded artwork)\n- Launcher icon now uses the actual sourced illustration, optimized';
+      '2.1.0+11:1 - UI polish: Settings redesign + app-wide design consistency\n- Settings screen redesigned as card-based sections with icon badges and dropdown pills\n- Consistent buttons/dialogs/sheets across Gallery, verdict sheet, camera dialogs\n- Home screen now shows live app name, version, and patch number';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
