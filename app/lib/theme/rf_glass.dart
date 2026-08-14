@@ -142,9 +142,11 @@ class RfGlass {
   );
 }
 
-/// Ambient background — dark gradient + grid pattern. No colored glow
-/// orbs (removed per Sir's direction 2026-08-11: flat, minimal, grid-first
-/// look, no blue/orange fades — closer to a plain dark-grid canvas).
+/// Ambient background — dark gradient, with an optional grid pattern.
+/// No colored glow orbs (removed per Sir's direction 2026-08-11: flat,
+/// minimal, no blue/orange fades). The grid itself is opt-in per Sir's
+/// 2026-08-11 follow-up — Home is the only screen with the textured grid;
+/// every other screen is the flat charcoal gradient alone.
 class RfGlassBackground extends StatelessWidget {
   final Widget? child;
   final bool showGrid;
@@ -152,7 +154,7 @@ class RfGlassBackground extends StatelessWidget {
   const RfGlassBackground({
     super.key,
     this.child,
-    this.showGrid = true,
+    this.showGrid = false,
   });
 
   @override
@@ -406,11 +408,15 @@ class _RfLiquidGlassContainerState extends State<RfLiquidGlassContainer> with Si
 }
 
 /// App scaffold with glass mesh background.
+///
+/// [showGrid] defaults to false — the textured grid is a Home-only accent
+/// (Sir 2026-08-11); every other screen renders the flat charcoal gradient.
 class RfGlassScaffold extends StatelessWidget {
   final PreferredSizeWidget? appBar;
   final Widget body;
   final Widget? floatingActionButton;
   final bool extendBodyBehindAppBar;
+  final bool showGrid;
 
   const RfGlassScaffold({
     super.key,
@@ -418,6 +424,7 @@ class RfGlassScaffold extends StatelessWidget {
     required this.body,
     this.floatingActionButton,
     this.extendBodyBehindAppBar = false,
+    this.showGrid = false,
   });
 
   @override
@@ -428,6 +435,7 @@ class RfGlassScaffold extends StatelessWidget {
       appBar: appBar,
       floatingActionButton: floatingActionButton,
       body: RfGlassBackground(
+        showGrid: showGrid,
         child: body,
       ),
     );

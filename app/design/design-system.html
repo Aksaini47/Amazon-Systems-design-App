@@ -551,6 +551,16 @@ section.block:first-of-type{border-top:none;}
     radial-gradient(320px 200px at 90% -5%, rgba(var(--rf-navy-rgb),0.6), transparent 60%),
     linear-gradient(160deg,#0A1428,#0D1117 55%,#101828);
 }
+/* Grid texture is Home-only (Sir 2026-08-11) — every other screen is the
+   flat charcoal gradient above, alone. Matches RfGlassBackground's
+   showGrid flag in the real app (rf_glass.dart). */
+.phone-screen.pf-grid::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(139,148,158,0.18) 0.5px, transparent 0.5px),
+    linear-gradient(90deg, rgba(139,148,158,0.18) 0.5px, transparent 0.5px);
+  background-size:32px 32px;
+}
 .phone-status{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 2px;font-size:11px;color:#fff;font-weight:600;font-family:var(--rf-font-mono);}
 .phone-status .icons{display:flex;gap:5px;align-items:center;color:var(--rf-text-secondary);}
 .phone-status .icons .icon{width:13px;height:13px;}
@@ -1041,12 +1051,12 @@ section.block:first-of-type{border-top:none;}
     </div>
 
     <div class="phone-row">
-      <!-- HOME -->
+      <!-- HOME (grid texture — the one screen that keeps it) -->
       <div class="phone">
-        <div class="phone-screen">
+        <div class="phone-screen pf-grid">
           <div class="phone-status"><span id="clockHome">9:41</span><div class="icons"><span class="icon" data-icon="mic"></span><span class="icon" data-icon="gauge"></span><span class="icon" data-icon="volume"></span></div></div>
           <div class="pf-appbar">
-            <div class="brand"><div class="brand-mark"><span class="icon" data-icon="camera"></span></div><div class="brand-text"><b>RF Logger</b><span>&nbsp;</span></div></div>
+            <div class="brand"><div class="brand-text"><b>RF Logger</b><span style="font-family:var(--rf-font-mono);">v2.1.0 (13)</span></div></div>
             <div class="pf-appbar-actions">
               <div class="pf-icon-btn"><span class="icon" data-icon="image"></span></div>
               <div class="pf-icon-btn"><span class="icon" data-icon="gear"></span></div>

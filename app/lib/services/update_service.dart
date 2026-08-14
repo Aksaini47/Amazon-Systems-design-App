@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+13:0 - Design-system UI update (clean rebuild)\n- Verified fresh build of the Settings redesign + Home dynamic title';
+      '2.1.0+13:1 - Grid background is now Home-only\n- Settings, Gallery, and other screens use the flat charcoal background (no grid texture)';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
