@@ -104,6 +104,36 @@ class CameraSettingsService {
     await prefs.setBool('auto_label_scan', val);
   }
 
+  // --- Auto label scan, PER MODE. Falls back to the legacy global toggle
+  // above when a mode hasn't been explicitly set, same migration-seed
+  // pattern as aspect ratio's per-mode getter — the legacy key stays
+  // read-only, never written to by the per-mode setter below.
+  static String _autoScanModeKey(CaptureMode mode) =>
+      mode == CaptureMode.pk ? 'auto_label_scan_pk' : 'auto_label_scan_rt';
+
+  static Future<bool> getAutoLabelScanForMode(CaptureMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = _autoScanModeKey(mode);
+    if (prefs.containsKey(key)) return prefs.getBool(key) ?? false;
+    return getAutoLabelScan();
+  }
+
+  static Future<void> setAutoLabelScanForMode(CaptureMode mode, bool val) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_autoScanModeKey(mode), val);
+  }
+
+  // --- Delay before auto-scan fires (was hardcoded 900ms) ---
+  static Future<int> getAutoScanDelayMs() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('auto_scan_delay_ms') ?? 900;
+  }
+
+  static Future<void> setAutoScanDelayMs(int ms) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('auto_scan_delay_ms', ms);
+  }
+
   // --- Label scan popup: auto-pop SAVE when Order ID + AWB lock ---
   static Future<bool> getAutoLabelSave() async {
     final prefs = await SharedPreferences.getInstance();
@@ -231,6 +261,9 @@ class CameraSettingsService {
     await prefs.remove('zoom_default_rt');
     await prefs.remove('label_review_hold_seconds');
     await prefs.remove('auto_label_scan');
+    await prefs.remove('auto_label_scan_pk');
+    await prefs.remove('auto_label_scan_rt');
+    await prefs.remove('auto_scan_delay_ms');
     await prefs.remove('auto_label_save');
     await prefs.remove('claim_photo_countdown');
     await prefs.remove('mandatory_return_images');

@@ -1078,6 +1078,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   /// Triggered when user taps Skip button during manual capture (claim flow only).
   void _onSkipManualCapture() {
+    HapticFeedback.selectionClick();
     _skipCurrentClaimPhoto = true;
     if (_manualCaptureCompleter != null && !_manualCaptureCompleter!.isCompleted) {
       _manualCaptureCompleter!.complete(false);
@@ -1365,7 +1366,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       }
 
       final verdict = _session.verdict;
-      // QC OK: front, back, serial (optional). Others: full 5-step sequence.
+      // QC OK: front + back only — serial is never required to save (see
+      // CaptureSession.isPhotoComplete) and is skipped from the prompt too,
+      // not just made optional. Others: full sequence including serial.
       final sequence = <(PhotoSide, String)>[
         if (verdict != QCVerdict.ok) ...[
           (PhotoSide.label, 'Position RETURN LABEL in frame'),
@@ -1373,7 +1376,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         ],
         (PhotoSide.front, 'Position product FRONT facing up'),
         (PhotoSide.back, 'Position product BACK facing up'),
-        (PhotoSide.serial, 'Capture SERIAL / FPC closeup (optional)'),
+        if (verdict != QCVerdict.ok)
+          (PhotoSide.serial, 'Capture SERIAL / FPC closeup (optional)'),
       ];
 
       for (final (side, _) in sequence) {
@@ -2343,6 +2347,15 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           // obscured by the capture button. Previously rendered as an
           // absolute Positioned widget which got hidden behind the bigger
           // capture button — user reported "skip button chup raha hai".
+          //
+          // Design-system audit (2026-08-14): deliberately NOT migrated to
+          // RfButton.secondary despite that being the documented SKIP
+          // variant — this pill's white+shadow text was a proven fix for
+          // legibility over the live, brightness-varying camera feed
+          // (RfButton's plain white text has no shadow and would risk
+          // washing out again on bright backgrounds). Haptic is fired from
+          // _onSkipManualCapture() directly instead of getting it for free
+          // from RfButton. Keep this exception — don't "simplify" it back.
           if (_inClaimFlow)
             Padding(
               padding: const EdgeInsets.only(bottom: 14),

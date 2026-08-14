@@ -17,6 +17,7 @@ import '../theme/rf_glass.dart';
 import '../widgets/rf_button.dart';
 import '../services/activity_log_service.dart';
 import '../utils/debug_session_log.dart';
+import '../utils/order_id_matcher.dart';
 import '../utils/volume_button_service.dart';
 
 /// Full-screen label scan — manual SCAN tap or optional auto-scan (Settings).
@@ -36,11 +37,47 @@ class BarcodeSavePopup extends StatefulWidget {
   State<BarcodeSavePopup> createState() => _BarcodeSavePopupState();
 }
 
+/// Digits-only, auto-inserts hyphens at positions 3 and 10 to match the
+/// 3-7-7 Order ID shape while typing. Caps at 17 digits. Programmatic
+/// `.text =` assignment (scan/OCR autofill) bypasses this — formatters only
+/// intercept user keystrokes, so already-correct scanned values pass through
+/// untouched.
+class _OrderIdInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final capped = digits.length > 17 ? digits.substring(0, 17) : digits;
+    final buf = StringBuffer();
+    for (var i = 0; i < capped.length; i++) {
+      buf.write(capped[i]);
+      if ((i == 2 || i == 9) && i != capped.length - 1) buf.write('-');
+    }
+    final formatted = buf.toString();
+
+    final digitsBeforeCursor = newValue.text
+        .substring(0, newValue.selection.end.clamp(0, newValue.text.length))
+        .replaceAll(RegExp(r'[^0-9]'), '').length;
+    var cursor = 0, seen = 0;
+    while (cursor < formatted.length && seen < digitsBeforeCursor) {
+      if (formatted[cursor] != '-') seen++;
+      cursor++;
+    }
+    return TextEditingValue(text: formatted, selection: TextSelection.collapsed(offset: cursor));
+  }
+}
+
+/// User's choice when a scanned/typed RT Order ID is a near-match (1-3
+/// digits off) of a known PK Order ID.
+enum _MismatchResolution { useSuggested, keep, retake }
+
 class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerProviderStateMixin {
   final _orderIdController = TextEditingController();
   final _awbController = TextEditingController();
   final _orderIdRegex = RegExp(r'^\d{3}-\d{7}-\d{7}$');
+  // Amazon's Order ID prefixes — every valid order id starts with one of these.
+  static const _validOrderIdPrefixes = {'171', '402', '403', '404', '405', '406', '407', '408', '409'};
   bool _isValid = false;
+  bool _prefixValid = true;
 
   // Live preview camera
   CameraController? _cam;
@@ -68,8 +105,14 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   Set<String> _existingAwbs = {};
   String? _duplicateWarning;
 
+  // Known PK-saved order ids (bare, hyphenated) — ground truth for the RT
+  // near-match mismatch check. Built from the same disk scan as the
+  // duplicate-detection sets above, zero extra I/O.
+  Set<String> _pkOrderIds = {};
+
   bool _autoLabelScan = false;
   bool _autoLabelSave = true;
+  int _autoScanDelayMs = 900;
   Timer? _autoScanTimer;
 
   // ── Label review hold ──────────────────────────────────────────────────
@@ -109,8 +152,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   }
 
   Future<void> _loadLabelSettings() async {
-    _autoLabelScan = await CameraSettingsService.getAutoLabelScan();
+    _autoLabelScan = await CameraSettingsService.getAutoLabelScanForMode(widget.mode);
     _autoLabelSave = await CameraSettingsService.getAutoLabelSave();
+    _autoScanDelayMs = await CameraSettingsService.getAutoScanDelayMs();
     _labelReviewHoldSeconds = await CameraSettingsService.getLabelReviewHoldSeconds();
     DebugSessionLog.log(
       location: 'barcode_save_popup.dart:_loadLabelSettings',
@@ -119,6 +163,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
       data: {
         'autoLabelScan': _autoLabelScan,
         'autoLabelSave': _autoLabelSave,
+        'autoScanDelayMs': _autoScanDelayMs,
         'labelReviewHoldSeconds': _labelReviewHoldSeconds,
       },
     );
@@ -127,7 +172,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   void _scheduleAutoScanOnce() {
     _autoScanTimer?.cancel();
     if (!_autoLabelScan || _autoScanDone) return;
-    _autoScanTimer = Timer(const Duration(milliseconds: 900), () {
+    _autoScanTimer = Timer(Duration(milliseconds: _autoScanDelayMs), () {
       if (!mounted || _scanning || _isValid || _autoScanDone) return;
       if (_cam == null || !_camReady) return;
       _scan(fromAuto: true);
@@ -148,9 +193,14 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
       final orders = await LocalStorageService().listOrders();
       final ids = <String>{};
       final awbs = <String>{};
+      final pkIds = <String>{};
       for (final o in orders) {
         final id = o['orderId'] as String?;
         if (id != null && id.isNotEmpty) ids.add(id);
+        if (o['mode'] == 'pk') {
+          final bare = o['bareOrderId'] as String?;
+          if (bare != null && bare.isNotEmpty) pkIds.add(bare);
+        }
         // meta.json may carry awb in some orders — pull from it if present
         try {
           final metaPath = o['metaPath'] as String?;
@@ -166,8 +216,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
       setState(() {
         _existingOrderIds = ids;
         _existingAwbs = awbs;
+        _pkOrderIds = pkIds;
       });
-      debugPrint('Duplicate scan loaded: ${ids.length} orderIds, ${awbs.length} AWBs');
+      debugPrint('Duplicate scan loaded: ${ids.length} orderIds, ${awbs.length} AWBs, ${pkIds.length} PK ids');
     } catch (e) {
       debugPrint('_loadExistingOrders failed: $e');
     }
@@ -383,9 +434,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
       _onTextChanged();
 
       final orderId = _orderIdController.text.trim();
-      final canAutoSave = _autoLabelSave &&
-          _orderIdRegex.hasMatch(orderId) &&
-          _duplicateWarning == null;
+      final canAutoSave = _autoLabelSave && _isValid && _duplicateWarning == null;
       if (canAutoSave) {
         // #region agent log
         DebugSessionLog.log(
@@ -403,7 +452,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
         if (_labelReviewHoldSeconds > 0) {
           _startReviewHold(xFile);
         } else {
-          _onSave();
+          unawaited(_onSave());
         }
       } else if (fromAuto) {
         DebugSessionLog.log(
@@ -425,8 +474,16 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   }
 
   void _validateInput() {
-    final valid = _orderIdRegex.hasMatch(_orderIdController.text.trim());
-    if (valid != _isValid) setState(() => _isValid = valid);
+    final text = _orderIdController.text.trim();
+    final formatOk = _orderIdRegex.hasMatch(text);
+    final prefixOk = !formatOk || _validOrderIdPrefixes.contains(text.substring(0, 3));
+    final valid = formatOk && prefixOk;
+    if (valid != _isValid || prefixOk != _prefixValid) {
+      setState(() {
+        _isValid = valid;
+        _prefixValid = prefixOk;
+      });
+    }
   }
 
   /// Confirms scan-lock to the user with a strong haptic pulse + an audible
@@ -457,20 +514,81 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
     }
   }
 
-  void _onSave() {
+  /// Every save path (instant auto-save, label-review-hold auto-confirm,
+  /// manual SAVE button) funnels through here — a single choke point for
+  /// the RT near-match mismatch check, so it always runs "before an RT
+  /// order id gets saved" regardless of how the save was triggered.
+  Future<void> _onSave() async {
     if (!_isValid) return;
-    final orderId = _orderIdController.text.trim();
+    var orderId = _orderIdController.text.trim();
     final awb = _awbController.text.trim();
-    ActivityLogService.log(
+
+    if (widget.mode == CaptureMode.rt) {
+      final match = findNearMatch(orderId, _pkOrderIds);
+      if (match != null) {
+        final resolution = await _showMismatchDialog(orderId, match.candidate);
+        if (!mounted) return;
+        if (resolution == null || resolution == _MismatchResolution.retake) {
+          // Fields stay populated — same UX as _cancelReviewHold's Retake.
+          return;
+        }
+        if (resolution == _MismatchResolution.useSuggested) {
+          orderId = match.candidate;
+          _orderIdController.text = orderId;
+        }
+        // .keep falls through with the originally typed orderId.
+      }
+    }
+
+    unawaited(ActivityLogService.log(
       event: 'barcode_saved',
       mode: widget.mode,
       orderId: orderId,
       awb: awb.isEmpty ? null : awb,
-    );
+    ));
+    if (!mounted) return;
     Navigator.pop(context, {
       'orderId': orderId,
       'awb': awb.isEmpty ? null : awb,
     });
+  }
+
+  /// Flags a likely misprinted RT Order ID (1-3 digits off a known PK
+  /// record). `barrierDismissible: false` + treating null (back/outside-tap)
+  /// the same as Retake means this can never be silently bypassed into an
+  /// unconfirmed save.
+  Future<_MismatchResolution?> _showMismatchDialog(String typed, String suggested) {
+    return showDialog<_MismatchResolution>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => RfGlassDialog(
+        child: AlertDialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
+          title: const Text('Order ID mismatch?', style: TextStyle(color: Colors.white)),
+          content: Text(
+            'You typed:\n$typed\n\nClosest packing (PK) record:\n$suggested\n\n'
+            'Return labels are sometimes misprinted — pick the correct Order ID.',
+            style: const TextStyle(color: RfColors.textSecondary, fontSize: 13, fontFamily: 'monospace', height: 1.4),
+          ),
+          actions: [
+            RfButton.secondary(
+              label: 'Retake',
+              onPressed: () => Navigator.pop(ctx, _MismatchResolution.retake),
+            ),
+            RfButton.secondary(
+              label: 'Keep as typed',
+              onPressed: () => Navigator.pop(ctx, _MismatchResolution.keep),
+            ),
+            RfButton.primary(
+              label: 'Use suggested ID',
+              onPressed: () => Navigator.pop(ctx, _MismatchResolution.useSuggested),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _onCancel() => Navigator.pop(context);
@@ -505,7 +623,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
     _reviewCtrl?.dispose();
     _reviewCtrl = null;
     setState(() => _reviewActive = false);
-    _onSave();
+    unawaited(_onSave());
   }
 
   void _cancelReviewHold() {
@@ -638,6 +756,11 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
                   hint: '407-1234567-1234567',
                   detected: _foundOrderId,
                   isValid: _isValid,
+                  errorText: (!_prefixValid && _orderIdController.text.trim().isNotEmpty)
+                      ? 'Invalid Order ID prefix'
+                      : null,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [_OrderIdInputFormatter()],
                 ),
                 const SizedBox(height: 8),
                 _buildField(
@@ -914,6 +1037,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
     required String hint,
     bool detected = false,
     bool isValid = false,
+    String? errorText,
+    List<TextInputFormatter>? inputFormatters,
+    TextInputType keyboardType = TextInputType.text,
   }) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
@@ -929,6 +1055,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
       TextField(
         controller: controller,
         style: const TextStyle(color: Colors.white, fontFamily: 'monospace', fontSize: 14, letterSpacing: 0.5),
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.15), fontFamily: 'monospace', fontSize: 14),
@@ -939,10 +1066,14 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.border)),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.border)),
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.rtAccent, width: 1.5)),
+          errorText: errorText,
+          errorStyle: const TextStyle(color: RfColors.error, fontSize: 11),
+          errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.error, width: 1.5)),
+          focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.error, width: 1.5)),
           suffixIcon: isValid ? const Icon(Icons.check_circle, color: RfColors.successLight, size: 18) : null,
           suffixIconConstraints: const BoxConstraints(minWidth: 28, minHeight: 28),
         ),
-        keyboardType: TextInputType.text,
+        keyboardType: keyboardType,
         autocorrect: false,
         textInputAction: TextInputAction.done,
       ),

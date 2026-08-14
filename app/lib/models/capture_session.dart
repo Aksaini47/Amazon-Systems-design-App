@@ -10,7 +10,9 @@ enum QCVerdict {
   /// Fraud/swap detected — buyer returned a different item.
   different,
   /// Both damaged AND different item returned.
-  damagedDifferent;
+  damagedDifferent,
+  /// Box arrived with no product inside.
+  emptyBox;
 
   /// Single source of truth for meta.json's claim_trigger: every non-OK
   /// verdict flags a claim (damagedDifferent included — the worst case).

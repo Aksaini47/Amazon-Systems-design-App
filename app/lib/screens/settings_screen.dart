@@ -30,7 +30,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _timestampImage = false;
   // Default mic state when entering camera
   bool _micDefault = false;
-  bool _autoLabelScan = false;
+  bool _autoLabelScanPk = false;
+  bool _autoLabelScanRt = false;
+  int _autoScanDelayMs = 900;
   bool _autoLabelSave = true;
   bool _claimPhotoCountdown = false;
   // New: capture countdown (0=manual, 3/5/10=seconds)
@@ -69,7 +71,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _zoomDefaultPk = await CameraSettingsService.getZoomDefaultForMode(CaptureMode.pk);
     _zoomDefaultRt = await CameraSettingsService.getZoomDefaultForMode(CaptureMode.rt);
     _labelReviewHoldSeconds = await CameraSettingsService.getLabelReviewHoldSeconds();
-    _autoLabelScan = await CameraSettingsService.getAutoLabelScan();
+    _autoLabelScanPk = await CameraSettingsService.getAutoLabelScanForMode(CaptureMode.pk);
+    _autoLabelScanRt = await CameraSettingsService.getAutoLabelScanForMode(CaptureMode.rt);
+    _autoScanDelayMs = await CameraSettingsService.getAutoScanDelayMs();
     _autoLabelSave = await CameraSettingsService.getAutoLabelSave();
     _claimPhotoCountdown = await CameraSettingsService.getClaimPhotoCountdown();
     _selectedStoragePath = await CameraSettingsService.getStoragePath();
@@ -291,13 +295,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 _buildRow(
-                  label: 'Auto label scan',
-                  subtitle: 'Scan the label once when the Order ID popup opens',
+                  label: 'Auto scan — PK',
+                  subtitle: 'Scan the label once when the Order ID popup opens (packing)',
                   trailing: _buildSwitch(
-                    value: _autoLabelScan,
+                    value: _autoLabelScanPk,
                     onChanged: (v) {
-                      setState(() => _autoLabelScan = v);
-                      CameraSettingsService.setAutoLabelScan(v);
+                      setState(() => _autoLabelScanPk = v);
+                      CameraSettingsService.setAutoLabelScanForMode(CaptureMode.pk, v);
+                    },
+                  ),
+                ),
+                _buildRow(
+                  label: 'Auto scan — RT',
+                  subtitle: 'Scan the label once when the Order ID popup opens (returns)',
+                  trailing: _buildSwitch(
+                    value: _autoLabelScanRt,
+                    onChanged: (v) {
+                      setState(() => _autoLabelScanRt = v);
+                      CameraSettingsService.setAutoLabelScanForMode(CaptureMode.rt, v);
+                    },
+                  ),
+                ),
+                _buildRow(
+                  label: 'Auto scan delay',
+                  subtitle: 'Wait before auto-scanning the label',
+                  trailing: _buildDropdown<int>(
+                    value: _autoScanDelayMs,
+                    items: const {500: '0.5s', 900: '0.9s', 1200: '1.2s', 1500: '1.5s', 2000: '2s'},
+                    onChanged: (v) {
+                      setState(() => _autoScanDelayMs = v);
+                      CameraSettingsService.setAutoScanDelayMs(v);
                     },
                   ),
                 ),

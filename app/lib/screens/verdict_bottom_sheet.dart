@@ -50,7 +50,7 @@ class VerdictBottomSheet extends StatelessWidget {
                       color: Colors.green,
                       onTap: () => Navigator.pop(context, QCVerdict.ok),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     _VerdictButton(
                       icon: Icons.warning_amber_rounded,
                       label: 'DAMAGED',
@@ -58,21 +58,29 @@ class VerdictBottomSheet extends StatelessWidget {
                       color: Colors.orange,
                       onTap: () => Navigator.pop(context, QCVerdict.damaged),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     _VerdictButton(
                       icon: Icons.dangerous_outlined,
                       label: 'DIFFERENT',
-                      description: 'Swap / fraud — different item returned',
+                      description: 'Fraud / swap — different item',
                       color: Colors.red,
                       onTap: () => _confirmDifferent(context),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     _VerdictButton(
                       icon: Icons.broken_image_outlined,
                       label: 'DAMAGED + DIFFERENT',
-                      description: 'Both damaged AND different item returned',
+                      description: 'Damaged AND different item',
                       color: RfColors.error,
                       onTap: () => Navigator.pop(context, QCVerdict.damagedDifferent),
+                    ),
+                    const SizedBox(height: 8),
+                    _VerdictButton(
+                      icon: Icons.inventory_2_outlined,
+                      label: 'EMPTY BOX',
+                      description: 'Box arrived with no product inside',
+                      color: RfColors.warning,
+                      onTap: () => Navigator.pop(context, QCVerdict.emptyBox),
                     ),
                     const SizedBox(height: 16),
                     GestureDetector(
@@ -146,35 +154,44 @@ class _VerdictButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RfLiquidGlassContainer(
-      onTap: onTap,
-      padding: const EdgeInsets.all(16),
-      tint: color.withValues(alpha: 0.12),
-      borderColor: color.withValues(alpha: 0.45),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 72),
+    return SizedBox(
+      height: 60,
+      child: RfLiquidGlassContainer(
+        onTap: onTap,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        tint: color.withValues(alpha: 0.12),
+        borderColor: color.withValues(alpha: 0.45),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(7),
               decoration: BoxDecoration(
                 color: color.withAlpha(45),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 24),
+              child: Icon(icon, color: color, size: 18),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: TextStyle(color: color, fontSize: 15, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 2),
-                  Text(description, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11)),
+                  Text(
+                    label,
+                    style: TextStyle(color: color, fontSize: 13.5, fontWeight: FontWeight.w700),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    description,
+                    style: const TextStyle(color: RfColors.textSecondary, fontSize: 10.5),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_outlined, color: color.withAlpha(150), size: 22),
           ],
         ),
       ),
