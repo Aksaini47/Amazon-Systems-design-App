@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+13:1 - Grid background is now Home-only\n- Settings, Gallery, and other screens use the flat charcoal background (no grid texture)';
+      '2.1.0+13:2 - Order ID hardening + QC verdict redesign\n- Auto-hyphen typing, prefix validation, RT near-match mismatch check\n- RT+OK skips serial photo, Skip button haptic\n- Per-mode auto-scan settings, QC sheet: Empty box + compact cards';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
