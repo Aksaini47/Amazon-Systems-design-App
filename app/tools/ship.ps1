@@ -308,6 +308,15 @@ if ($Mode -eq 'auto') {
 
 Push-Location $AppDir
 try {
+  # 2026-08-15: patch #3 (2.1.0+13) published clean per Shorebird, phone
+  # confirmed it active, but the compiled code was still the PREVIOUS
+  # patch's — a stale build/.dart_tool cache served an old Dart AOT
+  # snapshot into the diff. Neither mode ever cleaned before this; always
+  # do it now so "published" == "actually contains today's source".
+  Write-Step 'flutter clean (avoid stale build/.dart_tool cache in the patch/release diff)'
+  & $FlutterBat clean 2>&1 | ForEach-Object { Write-Host $_ }
+  if ($LASTEXITCODE -ne 0) { Die "flutter clean fail (code $LASTEXITCODE)." }
+
   if ($Mode -eq 'patch') {
     Write-Step 'PATCH mode'
     if (-not $ReleaseVersion) {
