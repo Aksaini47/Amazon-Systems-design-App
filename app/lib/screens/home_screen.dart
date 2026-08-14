@@ -59,7 +59,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _maybeShowChangelog() async {
     await Future<void>.delayed(const Duration(milliseconds: 800));
     final notes = await UpdateService.consumePendingChangelog();
-    if (notes == null || !mounted) return;
+    if (notes == null) {
+      await _maybeShowUpdatePending();
+      return;
+    }
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       duration: const Duration(seconds: 8),
       backgroundColor: RfColors.card,
@@ -88,6 +92,41 @@ class _HomeScreenState extends State<HomeScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    ));
+  }
+
+  /// Shorebird patches apply only on the *next cold process start* — a
+  /// plain task-switch (home button, recents) often leaves the process
+  /// alive, so a silently-downloaded patch can sit staged indefinitely
+  /// with zero on-screen sign it's waiting. This nags on every Home mount
+  /// until the patch actually goes active (root cause of "OTA not
+  /// landing" reports 2026-08-14 — the download was fine, nothing ever
+  /// told the user a real restart was needed).
+  Future<void> _maybeShowUpdatePending() async {
+    if (!await UpdateService.isAvailable) return;
+    final current = await UpdateService.currentPatchNumber();
+    final next = await UpdateService.nextPatchNumber();
+    if (next == null || next == current || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      duration: const Duration(seconds: 7),
+      backgroundColor: RfColors.card,
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      content: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.restart_alt_rounded, color: RfColors.amber, size: 22),
+          SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Update downloaded but not applied yet. Swipe this app away from '
+              'Recents (fully close it) and reopen — switching apps isn\'t enough.',
+              style: TextStyle(color: Colors.white, fontSize: 12, height: 1.35),
             ),
           ),
         ],
