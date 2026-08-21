@@ -47,6 +47,19 @@ class MainActivity: FlutterActivity() {
                 }
             }
 
+        // Storage-space channel — the camera plugin records into getCacheDir()
+        // and Android reclaims cache whenever the device runs low, with no
+        // exemption for foreground apps. That is how fully-recorded shipment
+        // videos disappeared between stop and save on 2026-08-19. Dart has no
+        // free-space API, so the capture screen asks here before arming.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.repairfully.camera/storage")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "freeBytes" -> result.success(freeBytes())
+                    else -> result.notImplemented()
+                }
+            }
+
         // Do Not Disturb channel — gates notifications/ringer during recording
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.repairfully.camera/dnd")
             .setMethodCallHandler { call, result ->
@@ -114,6 +127,32 @@ class MainActivity: FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    /// Usable free space, in bytes, on the volume the recording lands on.
+    ///
+    /// Prefers StorageManager.getAllocatableBytes(): plain StatFs reports only
+    /// what is free right now, while getAllocatableBytes also counts space the
+    /// system could reclaim from other apps' caches — a truer answer to "can I
+    /// record". Falls back to StatFs on older devices or any failure, and
+    /// returns -1 if even that fails so Dart can treat it as "unknown" and
+    /// allow the recording rather than blocking on a broken probe.
+    private fun freeBytes(): Long {
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                val sm = getSystemService(Context.STORAGE_SERVICE) as android.os.storage.StorageManager
+                val uuid = sm.getUuidForPath(filesDir)
+                return sm.getAllocatableBytes(uuid)
+            }
+        } catch (e: Exception) {
+            // fall through to StatFs
+        }
+        return try {
+            val stat = android.os.StatFs(filesDir.absolutePath)
+            stat.availableBytes
+        } catch (e: Exception) {
+            -1L
+        }
     }
 
     /// Modern MediaScanner using MediaScannerConnection

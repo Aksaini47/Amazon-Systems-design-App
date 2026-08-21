@@ -12,6 +12,7 @@ import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
 import '../services/camera_settings_service.dart';
 import '../services/local_storage_service.dart';
+import '../services/storage_space_service.dart';
 import '../utils/debug_session_log.dart';
 import '../services/dnd_service.dart';
 import '../services/crash_reporting.dart';
@@ -680,6 +681,73 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   /// fires `startVideoRecording()` twice and the camera plugin throws.
   bool _startingRecording = false;
 
+  /// Free-space gate, run before every recording. Returns false to abort.
+  ///
+  /// Returns true when free space is unknown (-1): an older APK that predates
+  /// the native storage channel, or a probe failure, must not stop Sir from
+  /// recording a shipment.
+  Future<bool> _checkStorageBeforeRecording() async {
+    final free = await StorageSpaceService.freeBytes();
+    if (!mounted) return false;
+    if (StorageSpaceService.isCritical(free)) {
+      _logActivity('record_blocked_low_storage', extra: {'free_bytes': '$free'});
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        duration: const Duration(seconds: 6),
+        backgroundColor: Colors.black87,
+        content: Row(children: [
+          const Icon(Icons.sd_card_alert_outlined, color: RfColors.error, size: 20),
+          const SizedBox(width: 10),
+          Expanded(child: Text(
+            'Only ${StorageSpaceService.format(free)} free — too low to record '
+            'safely. Free up space first, or the video can be lost while saving.',
+            style: const TextStyle(fontSize: 12.5),
+          )),
+        ]),
+      ));
+      return false;
+    }
+    if (StorageSpaceService.isLow(free)) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        duration: const Duration(seconds: 5),
+        backgroundColor: Colors.black87,
+        content: Row(children: [
+          const Icon(Icons.warning_amber_rounded, color: RfColors.warning, size: 20),
+          const SizedBox(width: 10),
+          Expanded(child: Text(
+            'Storage getting low (${StorageSpaceService.format(free)} free).',
+            style: const TextStyle(fontSize: 12.5),
+          )),
+        ]),
+      ));
+    }
+    return true;
+  }
+
+  /// Mid-recording watchdog: stop cleanly if free space crosses the blocking
+  /// threshold, so the video is copied out of cache while it is still intact
+  /// rather than being reclaimed by the OS — or deleted by CameraX's own
+  /// ERROR_INSUFFICIENT_STORAGE abort, which the plugin never reports.
+  Future<void> _abortIfStorageCritical() async {
+    if (!_isRecording || _stoppingRecording) return;
+    final free = await StorageSpaceService.freeBytes();
+    if (!mounted || !_isRecording || _stoppingRecording) return;
+    if (!StorageSpaceService.isCritical(free)) return;
+    _logActivity('record_autostop_low_storage', extra: {'free_bytes': '$free'});
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      duration: const Duration(seconds: 5),
+      backgroundColor: Colors.black87,
+      content: Text(
+        'Storage critically low (${StorageSpaceService.format(free)}) — stopping '
+        'now to save what has been recorded.',
+        style: const TextStyle(fontSize: 12.5),
+      ),
+    ));
+    await _stopRecording();
+  }
+
   Future<void> _startRecording() async {
     if (_inClaimFlow) return;
     if (_camera == null || !_cameraReady) return;
@@ -689,6 +757,14 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _startingRecording = true;
 
     try {
+      // Storage pre-flight. Refusing to start is the only reliable protection
+      // available: the plugin records into a cache directory Android is free
+      // to reclaim mid-capture (see StorageSpaceService), so once a recording
+      // has begun on a nearly-full phone the video can be destroyed before it
+      // is ever copied out, with nothing the Dart side can do. Better to
+      // refuse loudly up front than lose a shipment silently at stop.
+      if (!await _checkStorageBeforeRecording()) return;
+
       // First-time DND prompt. If user opts to go to system settings, the
       // method returns false and we abort this recording attempt — recording
       // can't proceed while the app is backgrounded. They tap record again
@@ -701,7 +777,14 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       _stopwatch.reset();
       _stopwatch.start();
       _timerTick?.cancel();
-      _timerTick = Timer.periodic(const Duration(seconds: 1), (_) { if (mounted) setState(() {}); });
+      _timerTick = Timer.periodic(const Duration(seconds: 1), (t) {
+        if (!mounted) return;
+        setState(() {});
+        // Space can run out mid-capture — 4K/60 eats it fast on a phone that
+        // was already near the line, and the pre-flight check only saw the
+        // moment recording began.
+        if (t.tick % 15 == 0) unawaited(_abortIfStorageCritical());
+      });
 
       if (_soundEnabled) unawaited(NativeCameraSound.playStartRecord());
 
