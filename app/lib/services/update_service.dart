@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+13:2 - Order ID hardening + QC verdict redesign\n- Auto-hyphen typing, prefix validation, RT near-match mismatch check\n- RT+OK skips serial photo, Skip button haptic\n- Per-mode auto-scan settings, QC sheet: Empty box + compact cards';
+      '2.1.0+14:0 - Video ab low storage par kabhi lost nahi hogi\n- Storage kam ho to recording start hi nahi hogi (free space dikhega)\n- Recording ke beech space khatam ho to apne aap safely stop\n- Video pehle save hoti hai, check baad mein hota hai\n- Fail hone par DND wapas, purani photos clear, log mein entry';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
