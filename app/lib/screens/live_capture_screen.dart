@@ -200,6 +200,10 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     // Always release wakelock + restore DND on exit, in case the user
     // backed out mid-recording without going through _stopRecording.
     _disableRecordingMode();
+    // Must be cleared here too: backing out mid-recording skips
+    // _stopRecording's finally, and a flag left true would silently disable
+    // orphan recovery for the rest of the process.
+    LocalStorageService.recordingInFlight = false;
     VolumeButtonService().unregisterListener('live_capture_screen');
     // Restore all orientations so other app screens (gallery, settings)
     // remain free to rotate.
@@ -709,6 +713,12 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           _stopwatch.stop();
           return;
         }
+        // Fence the cache-dir sweepers off this recording BEFORE the plugin
+        // creates its temp file there. recoverOrphanVideos() walks the same
+        // directory and copy-deletes every *.mp4 it finds; unlinking a live
+        // recording leaves the writer's fd valid, so the capture "succeeds"
+        // and only fails at stop with a path that no longer exists.
+        LocalStorageService.recordingInFlight = true;
         await _camera!.startVideoRecording();
         if (!mounted) return;
         _logPreviewState('live_capture_screen.dart:_startRecording', extra: {
@@ -725,6 +735,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         });
       } catch (e) {
         _stopwatch.stop();
+        LocalStorageService.recordingInFlight = false;
         _setError('Failed to start recording: $e');
       }
     } finally {
@@ -921,13 +932,36 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       //     small number, and never delete on that signal alone.
       final tempFile = File(xfile.path);
       final tooShort = _stopwatch.elapsed.inMilliseconds < 1000;
+
+      // A FileSystemException out of length() is NOT "the file is small" —
+      // it means the recording is already GONE. The previous loop collapsed
+      // both cases into `fileSize = 0`, swallowing five exceptions in a row;
+      // that is why the 2026-08-19 failures spent a full second re-probing a
+      // file that no longer existed and then walked into saveDraftVideo()
+      // with nothing to copy, surfacing as a raw PathNotFoundException.
+      // Track the two cases apart, and stop probing the moment it vanishes.
       int fileSize = 0;
-      for (var attempt = 0; attempt < 5; attempt++) {
-        try { fileSize = await tempFile.length(); } catch (_) { fileSize = 0; }
-        if (fileSize >= 50000 || attempt == 4) break;
-        await Future<void>.delayed(const Duration(milliseconds: 200));
+      var tempMissing = false;
+      Future<void> probeTemp() async {
+        try {
+          fileSize = await tempFile.length();
+        } on FileSystemException {
+          tempMissing = !await tempFile.exists();
+          if (!tempMissing) fileSize = 0;
+        }
       }
-      final looksSmall = fileSize < 50000;
+      await probeTemp();
+      // Retry only while the file still EXISTS and still looks small —
+      // CameraX flushes the moov atom asynchronously, so an early small read
+      // on a genuinely-recorded video is expected (2026-07-24 fix).
+      // (Skipped for a too-short tap — that path discards regardless, so
+      // waiting on a flush that does not matter only delays the retry.)
+      for (var attempt = 0;
+          attempt < 4 && !tooShort && !tempMissing && fileSize < 50000;
+          attempt++) {
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        await probeTemp();
+      }
 
       if (tooShort) {
         // Genuinely near-instant tap — nothing of value was recorded. Safe
@@ -971,29 +1005,79 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         return;  // stay on camera, user can retry
       }
 
+      // CRITICAL: get the evidence OUT of Android's cache directory before
+      // doing anything else with it.
+      //
+      // The camera plugin records into File.createTempFile(..., getCacheDir())
+      // and exposes no way to change that (flutter/flutter#91680, open since
+      // 2021). Android reclaims cache space whenever the device runs low —
+      // there is no exemption for foreground apps — and CameraX 1.5 also
+      // aborts and DELETES its own output on ERROR_INSUFFICIENT_STORAGE, an
+      // error the Flutter plugin never reads (VideoRecordEventFinalize
+      // carries no error field), so it hands back the path of a file that is
+      // already gone. That is the 2026-08-19 double failure, on a phone with
+      // under 2 GB free. So: copy FIRST, judge the copy second. Everything
+      // that used to run before this point was time the only copy of the
+      // evidence spent sitting in an evictable directory.
+      String? draftPath;
+      Object? saveError;
+      StackTrace? saveStack;
+      if (!tempMissing) {
+        try {
+          draftPath = await _localStorage.saveDraftVideo(xfile, widget.mode);
+        } catch (e, st) {
+          saveError = e;
+          saveStack = st;
+        }
+      }
+      // The reported path can be stale even when a good file does exist: the
+      // plugin never clears videoOutputPath after a stop, and silently
+      // no-ops a start when its `recording` field is left over from an
+      // earlier capture. Look for the real file before declaring a loss.
+      draftPath ??= await _localStorage.salvageOrphanRecording(
+        widget.mode,
+        // Bound the search to this capture: a file older than the moment
+        // recording started belongs to a different shipment, and silently
+        // filing that under this order would be worse than reporting a loss.
+        notBefore: DateTime.now()
+            .subtract(_stopwatch.elapsed + const Duration(seconds: 30)),
+      );
+
+      if (draftPath == null) {
+        await _handleLostRecording(
+          error: saveError ??
+              FileSystemException('recording file missing', xfile.path),
+          stack: saveStack ?? StackTrace.current,
+          tempPath: xfile.path,
+          tempMissing: tempMissing,
+        );
+        return;
+      }
+
+      // Evidence is safe now — judge the size from the saved copy, not from
+      // the volatile temp file.
+      var savedSize = 0;
+      try { savedSize = await File(draftPath).length(); } catch (_) {}
+      final looksSmall = savedSize < 50000;
       if (looksSmall) {
-        // A real recording happened (stopwatch agrees) but the file still
-        // looks small after retries. Never destroy the only copy on this
-        // signal alone — keep it and let it flow into drafts like any other
-        // recording so the evidence survives for manual review.
-        debugPrint('Recording finished (${_stopwatch.elapsed.inMilliseconds}ms) but file size still low (${fileSize}B) after retries — keeping, saving to drafts');
+        // A real recording happened (stopwatch agrees) but it still looks
+        // small. Never destroy the only copy on this signal alone — it stays
+        // in drafts, listed there flagged as suspect.
+        debugPrint('Recording finished (${_stopwatch.elapsed.inMilliseconds}ms) but saved file is small (${savedSize}B) — kept in drafts');
         await CrashReporting.recordNonFatal(
           Exception('recording_small_file_kept'),
           StackTrace.current,
-          reason: 'stop_recording_small_but_kept size=$fileSize ms=${_stopwatch.elapsed.inMilliseconds}',
+          reason: 'stop_recording_small_but_kept size=$savedSize ms=${_stopwatch.elapsed.inMilliseconds}',
         );
       }
 
-      // CRITICAL: Save valid video to drafts folder IMMEDIATELY.
-      // The video file must NEVER be lost — even if the user cancels the save
-      // flow, the app crashes, or storage runs out later. The draft is in the
-      // user's persistent storage (sibling of orders/), not Android's temp dir
-      // (which gets cleaned up). _saveSession() promotes the draft to the
-      // order folder once the order ID is known.
-      final draftPath = await _localStorage.saveDraftVideo(xfile, widget.mode);
       _session.videoPath = draftPath;
       _session.isDraft = true;
       debugPrint('Video saved to drafts: $draftPath');
+      _logActivity('draft_saved', extra: {
+        'size': '$savedSize',
+        'salvaged': '${saveError != null}',
+      });
       // #region agent log
       DebugSessionLog.log(
         location: 'live_capture_screen.dart:_stopRecording',
@@ -1003,8 +1087,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           'mode': widget.mode.name,
           'draftPath': draftPath,
           'durationSec': _stopwatch.elapsed.inSeconds,
-          'fileSize': fileSize,
+          'fileSize': savedSize,
           'looksSmall': looksSmall,
+          'salvaged': saveError != null,
         },
       );
       // #endregion
@@ -1040,15 +1125,63 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         _openBarcodePopup();
       }
     } catch (e, st) {
-      await CrashReporting.setCaptureContext(
-        mode: widget.mode,
-        phase: 'stop_failed',
+      await _handleLostRecording(
+        error: e,
+        stack: st,
+        tempPath: '',
+        tempMissing: false,
       );
-      await CrashReporting.recordNonFatal(e, st, reason: 'stop_recording_failed');
-      _setError('Failed to stop recording: $e');
     } finally {
       _stoppingRecording = false;
+      LocalStorageService.recordingInFlight = false;
     }
+  }
+
+  /// The recording could not be saved and nothing could be salvaged — the
+  /// evidence is gone. Everything in here exists because the old catch block
+  /// did none of it: it dumped a raw PathNotFoundException on screen and left
+  /// the wakelock held, Sir's DND filter un-restored, and the failed
+  /// attempt's PK photos sitting in `_tempPhotoPaths`, where the NEXT capture
+  /// would have promoted them to disk alongside a different order's video.
+  Future<void> _handleLostRecording({
+    required Object error,
+    required StackTrace stack,
+    required String tempPath,
+    required bool tempMissing,
+  }) async {
+    final ms = _stopwatch.elapsed.inMilliseconds;
+    await CrashReporting.setCaptureContext(
+      mode: widget.mode,
+      phase: 'stop_failed',
+    );
+    await CrashReporting.recordNonFatal(
+      error,
+      stack,
+      reason: 'stop_recording_failed temp_missing=$tempMissing ms=$ms path=$tempPath',
+    );
+    // The activity log is the only diagnostic Sir can actually reach
+    // (Settings → Activity log). Until now a lost recording left no trace
+    // in it whatsoever: video_start, video_stop, then silence — shaped
+    // exactly like a capture the user simply abandoned.
+    _logActivity('video_stop_failed', extra: {
+      'temp_missing': '$tempMissing',
+      'duration_sec': '${_stopwatch.elapsed.inSeconds}',
+      'error': '$error',
+    });
+
+    // Same rollback the too-short branch performs: photos belonging to a
+    // capture whose video is gone must not survive into the next attempt.
+    for (final p in _tempPhotoPaths.values) {
+      try { await File(p).delete(); } catch (_) {}
+    }
+    _tempPhotoPaths.clear();
+    _nextPhotoSide = PhotoSide.front;
+
+    await _disableRecordingMode();
+    _setError(tempMissing
+        ? 'Recording was lost before it could be saved — the phone is out of '
+          'storage. Free up space, then re-record this shipment.'
+        : 'Could not save the recording: $error');
   }
 
   // ─── Manual capture (used when Photo Countdown setting = Off) ─────

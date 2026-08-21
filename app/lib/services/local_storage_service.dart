@@ -96,11 +96,31 @@ class LocalStorageService {
 
   // ─── Crash recovery + listing + delete ─────────────────────────────────
 
+  /// True while the capture screen holds a live recording. The camera
+  /// plugin records straight into the app cache dir that
+  /// [recoverOrphanVideos] sweeps, so without this flag a sweep that
+  /// happens to run mid-recording would copy-and-DELETE the file CameraX
+  /// is still writing. The writer's fd stays valid on an unlinked inode,
+  /// so the recording appears to succeed and only fails minutes later when
+  /// saveDraftVideo() cannot find the path — indistinguishable from the
+  /// 2026-08-19 storage-eviction crash. Set by _startRecording/_stopRecording.
+  static bool recordingInFlight = false;
+
+  /// A recording still being finalised must never be treated as an orphan.
+  /// CameraX flushes the moov atom after its stop Future resolves, so a
+  /// file touched seconds ago may be a live capture, not crash debris.
+  static const _orphanMinAge = Duration(minutes: 2);
+
   /// Scan the camera plugin's cache directory for orphan recording files
   /// left over from an app crash mid-recording, and migrate any valid ones
   /// to drafts/. Called once on app launch.
   /// Returns the number of files recovered.
   Future<int> recoverOrphanVideos() async {
+    // Never race a live recording — see [recordingInFlight].
+    if (recordingInFlight) {
+      debugPrint('recoverOrphanVideos: skipped — recording in flight');
+      return 0;
+    }
     try {
       final tempDir = await getTemporaryDirectory();
       if (!await tempDir.exists()) return 0;
@@ -115,11 +135,22 @@ class LocalStorageService {
 
       final draftsDir = await getDraftsFolder();
       int recovered = 0;
+      final now = DateTime.now();
       for (final file in candidates) {
         try {
+          if (recordingInFlight) break;  // a recording started mid-sweep
+          final age = now.difference((await file.stat()).modified);
+          if (age < _orphanMinAge) {
+            debugPrint('Skipping ${file.path} — only ${age.inSeconds}s old, may be live');
+            continue;
+          }
           final size = await file.length();
           if (size < 50000) {
-            // <50KB → almost certainly not a valid video. Delete.
+            // <50KB → almost certainly not a valid video. Only now that the
+            // age gate above proves it is not mid-flush is deleting safe;
+            // a single small read on a live file is NOT proof of failure
+            // (the lesson of the 2026-07-24 video-loss fix, which was
+            // applied to _stopRecording but never backported here).
             try { await file.delete(); } catch (_) {}
             continue;
           }
@@ -143,6 +174,68 @@ class LocalStorageService {
     } catch (e) {
       debugPrint('recoverOrphanVideos failed: $e');
       return 0;
+    }
+  }
+
+  /// Last-ditch rescue for a recording whose plugin-reported path could not
+  /// be copied. Returns the new draft path, or null if nothing was found.
+  ///
+  /// Two real failure modes make this worth trying rather than giving up:
+  ///   * The camera plugin never clears its `videoOutputPath` after a stop
+  ///     and silently no-ops `startVideoCapturing` when its `recording`
+  ///     field is stale, so the path handed back can belong to an EARLIER
+  ///     capture while this capture's file sits in cache under a different
+  ///     REC* name — perfectly intact, just unreferenced.
+  ///   * A partially-flushed file may be readable even when the exact
+  ///     reported path is not.
+  ///
+  /// Unlike [recoverOrphanVideos] this inverts the age gate — it takes the
+  /// NEWEST file, because we are looking for the recording that just ended.
+  /// [notBefore] must be the moment the capture started: anything older
+  /// belongs to a different capture and attaching it to this order would be
+  /// worse than reporting the loss. It copies without deleting: if the guess
+  /// is wrong the original is still there for the next boot sweep.
+  Future<String?> salvageOrphanRecording(
+    CaptureMode mode, {
+    required DateTime notBefore,
+  }) async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      if (!await tempDir.exists()) return null;
+      File? best;
+      DateTime? bestAt;
+      for (final entity in tempDir.listSync(recursive: true, followLinks: false)) {
+        if (entity is! File) continue;
+        if (!entity.path.toLowerCase().endsWith('.mp4')) continue;
+        try {
+          if (await entity.length() < 50000) continue;
+          final at = (await entity.stat()).modified;
+          // Only files written by the capture that just finished.
+          if (at.isBefore(notBefore)) continue;
+          if (bestAt == null || at.isAfter(bestAt)) {
+            best = entity;
+            bestAt = at;
+          }
+        } catch (_) {/* unreadable — skip */}
+      }
+      if (best == null) return null;
+
+      final draftsDir = await getDraftsFolder();
+      String two(int v) => v.toString().padLeft(2, '0');
+      final t = bestAt!;
+      final stamp = '${t.year}-${two(t.month)}-${two(t.day)}_'
+                    '${two(t.hour)}-${two(t.minute)}-${two(t.second)}';
+      final suffix = (t.millisecondsSinceEpoch & 0xFFFFFF).toRadixString(16);
+      final destPath =
+          '${draftsDir.path}/${mode.name.toUpperCase()}_DRAFT_${stamp}_$suffix.mp4';
+      await best.copy(destPath);
+      if (!await File(destPath).exists()) return null;
+      await _scanFile(destPath);
+      debugPrint('Salvaged recording: ${best.path} -> $destPath');
+      return destPath;
+    } catch (e) {
+      debugPrint('salvageOrphanRecording failed: $e');
+      return null;
     }
   }
 
@@ -199,29 +292,50 @@ class LocalStorageService {
 
   /// List drafts (both videos and photos) — pure read, no side effects.
   /// Junk-sized files are hidden from the list; [sweepJunkDrafts] deletes them.
-  /// Returns list of maps: path, fileName, sizeBytes, modifiedAt, kind.
+  /// Returns list of maps: path, fileName, sizeBytes, modifiedAt, kind, suspect.
+  ///
+  /// Exception: an undersized VIDEO is still listed, flagged `suspect: true`.
+  /// _stopRecording keeps such a recording on purpose and tells the user to
+  /// double-check it in Drafts — hiding it here made that message a lie and
+  /// left a real (if short) capture invisible until the sweep removed it.
   Future<List<Map<String, dynamic>>> listDrafts() async {
     final out = <Map<String, dynamic>>[];
     for (final (file, stat, isVideo) in await _draftFiles()) {
-      if (stat.size < (isVideo ? _minVideoBytes : _minPhotoBytes)) continue;
+      final undersized = stat.size < (isVideo ? _minVideoBytes : _minPhotoBytes);
+      if (undersized && !isVideo) continue;
       out.add({
         'path': file.path,
         'fileName': file.path.split(Platform.pathSeparator).last,
         'sizeBytes': stat.size,
         'modifiedAt': stat.modified.toIso8601String(),
         'kind': isVideo ? 'video' : 'photo',
+        'suspect': undersized,
       });
     }
     out.sort((a, b) => (b['modifiedAt'] as String).compareTo(a['modifiedAt'] as String));
     return out;
   }
 
-  /// Delete junk-sized drafts. Called once at boot (main.dart), not from
-  /// read paths. Returns the number of files deleted; failures are logged.
+  /// Delete junk-sized drafts. Called once at boot (from HomeScreen), not
+  /// from read paths. Returns the number of files deleted; failures logged.
+  ///
+  /// Videos get a 24h grace period on top of the size test. _stopRecording
+  /// deliberately KEEPS an undersized-but-real recording ("saved to Drafts,
+  /// please double-check it") rather than destroying the only copy — but
+  /// this sweep runs before the Drafts list is ever shown, so without the
+  /// grace period it silently deleted exactly the file the user was being
+  /// asked to inspect, revoking that guarantee at the next launch.
+  static const _junkVideoGrace = Duration(hours: 24);
+
   Future<int> sweepJunkDrafts() async {
     var purged = 0;
+    final now = DateTime.now();
     for (final (file, stat, isVideo) in await _draftFiles()) {
       if (stat.size >= (isVideo ? _minVideoBytes : _minPhotoBytes)) continue;
+      if (isVideo && now.difference(stat.modified) < _junkVideoGrace) {
+        debugPrint('sweepJunkDrafts: keeping recent small video ${file.path}');
+        continue;
+      }
       try {
         await file.delete();
         purged++;
