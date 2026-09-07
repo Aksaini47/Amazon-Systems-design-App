@@ -1,4 +1,5 @@
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import '../utils/order_id_matcher.dart';
 
 /// Amazon Order ID extraction — "nuclear" multi-stage pipeline.
 ///
@@ -99,7 +100,11 @@ class OcrService {
   static String? _validate(String? candidate) {
     if (candidate == null) return null;
     final clean = candidate.trim();
-    if (RegExp(r'^\d{3}-\d{7}-\d{7}$').hasMatch(clean)) return clean;
+    // Shape AND prefix. Shape alone let this return any 3-7-7-looking run on
+    // the label — and with _digitize turning letters into digits and _tight
+    // accepting any 17 consecutive digits, that regularly meant a tracking or
+    // reference number was handed back as the Order ID.
+    if (isPlausibleOrderId(clean)) return clean;
     return null;
   }
 

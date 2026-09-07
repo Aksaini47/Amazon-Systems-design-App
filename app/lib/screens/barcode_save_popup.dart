@@ -75,7 +75,6 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   final _awbController = TextEditingController();
   final _orderIdRegex = RegExp(r'^\d{3}-\d{7}-\d{7}$');
   // Amazon's Order ID prefixes — every valid order id starts with one of these.
-  static const _validOrderIdPrefixes = {'171', '402', '403', '404', '405', '406', '407', '408', '409'};
   bool _isValid = false;
   bool _prefixValid = true;
 
@@ -89,8 +88,23 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   double _minZoom = 1.0;
   double _maxZoom = 8.0;
 
-  // mobile_scanner controller — used only for analyzeImage on captured frames.
+  // mobile_scanner controller — drives the live PK barcode reader, and is
+  // also used for analyzeImage on captured frames in OCR mode.
   MobileScannerController? _scanner;
+
+  // ─── Scan mode ────────────────────────────────────────────────────────
+  // PK opens on the live barcode reader: the label encodes the Order ID in a
+  // barcode, so reading that barcode is exact. The old path photographed the
+  // WHOLE frame and let OCR hunt for a 3-7-7 anywhere in it, which is how a
+  // tracking/reference number on the same label ended up in the Order ID
+  // field. OCR is still one tap away for labels whose barcode is torn or
+  // faded — it just is not the default any more. RT is unchanged.
+  late bool _barcodeMode;
+  bool _switchingMode = false;
+  /// Latches once the reader has handed off to save/review, so the next
+  /// detection frame — they arrive several times a second — cannot fire a
+  /// second save on top of the first.
+  bool _saveTriggered = false;
 
   bool _scanning = false;
   String? _statusMessage;
@@ -135,7 +149,17 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
     super.initState();
     _orderIdController.addListener(_onTextChanged);
     _awbController.addListener(_onTextChanged);
-    _scanner = MobileScannerController();
+    _scanner = MobileScannerController(
+      formats: const [
+        BarcodeFormat.code128,
+        BarcodeFormat.code39,
+        BarcodeFormat.qrCode,
+        BarcodeFormat.dataMatrix,
+        BarcodeFormat.pdf417,
+        BarcodeFormat.ean13,
+      ],
+    );
+    _barcodeMode = widget.mode == CaptureMode.pk;
     _bootstrap();
     VolumeButtonService().registerListener('barcode_popup', (event) {
       if (!mounted) return;
@@ -147,7 +171,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
 
   Future<void> _bootstrap() async {
     await _loadLabelSettings();
-    await _initCamera();
+    // In barcode mode the MobileScanner widget opens the camera itself —
+    // initialising a CameraController here too would fight it for the device.
+    if (!_barcodeMode) await _initCamera();
     await _loadExistingOrders();
   }
 
@@ -315,6 +341,122 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
     _applyZoom();
   }
 
+  // ─── Live barcode reader (PK default) ─────────────────────────────────
+
+  /// Detections arrive continuously while the reader is open, and values
+  /// ACCUMULATE across frames instead of coming from one shot. The Order ID
+  /// and AWB barcodes sit apart on an Amazon label and rarely fall inside the
+  /// scan window together, so Sir can sweep the phone along the label and
+  /// each one locks in as it passes. Nothing outside the window is ever
+  /// considered — mobile_scanner drops those natively, in
+  /// isBarcodeInScanWindow() on the Android side, so this really is a crop
+  /// and not just an overlay.
+  void _onBarcodesDetected(BarcodeCapture capture) {
+    if (!mounted || !_barcodeMode) return;
+    if (_reviewActive || _saveTriggered || _switchingMode) return;
+
+    final values = <String>[];
+    for (final b in capture.barcodes) {
+      final raw = b.rawValue?.trim();
+      if (raw != null && raw.isNotEmpty) values.add(raw);
+    }
+    if (values.isEmpty) return;
+
+    var changed = false;
+
+    // Order ID — taken verbatim from the barcode, accepted only if it is
+    // ALREADY exactly 3-7-7. No digit-guessing, no letter→digit fixups, no
+    // "any 17 digits on the page" fallback: those are what put a tracking
+    // number into this field in the first place.
+    if (!_orderIdRegex.hasMatch(_orderIdController.text.trim())) {
+      for (final v in values) {
+        if (_orderIdRegex.hasMatch(v)) {
+          _orderIdController.text = v;
+          _foundOrderId = true;
+          changed = true;
+          break;
+        }
+      }
+    }
+
+    // AWB rides along on the same detections — free, since the label's AWB is
+    // a barcode too. pickAwbFromBarcodes already skips Order-ID-shaped values,
+    // so the two can never take each other's slot.
+    if (_awbController.text.trim().isEmpty) {
+      final pick = CarrierPatterns.pickAwbFromBarcodes(values);
+      if (pick != null) {
+        _awbController.text = pick.value;
+        _detectedCarrierName = pick.carrier.name;
+        _foundAwb = true;
+        changed = true;
+      }
+    }
+
+    if (!changed) return;
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _statusMessage = _foundOrderId && _foundAwb
+          ? '✓ Order ID + AWB read'
+          : _foundOrderId
+              ? 'Order ID read — sweep across the AWB barcode'
+              : 'AWB read — sweep across the Order ID barcode';
+    });
+    _maybeAutoSaveFromBarcode();
+  }
+
+  /// Mirrors the auto-save decision [_scan] makes, minus the captured still —
+  /// the reader never takes one. The review-hold overlay already tolerates a
+  /// null image, so Sir keeps his countdown window to cancel a wrong read.
+  void _maybeAutoSaveFromBarcode() {
+    if (!_autoLabelSave || !_isValid || _duplicateWarning != null) return;
+    if (_reviewActive || _saveTriggered) return;
+    _saveTriggered = true;
+    if (_labelReviewHoldSeconds > 0) {
+      _startReviewHold(null);
+    } else {
+      unawaited(_onSave());
+    }
+  }
+
+  /// Hand the camera between the two readers. Only one may hold it: the
+  /// MobileScanner widget opens the device itself, and CameraController would
+  /// fail with "camera busy" if both were live at once. Order matters —
+  /// release the old owner fully before the new one asks for the device.
+  Future<void> _toggleScanMode() async {
+    if (_switchingMode) return;
+    _switchingMode = true;
+    unawaited(HapticFeedback.selectionClick());
+    _stopAutoScanLoop();
+    try {
+      if (!_barcodeMode) {
+        final cam = _cam;
+        _cam = null;
+        _camReady = false;
+        if (mounted) {
+          setState(() {
+            _barcodeMode = true;
+            _statusMessage = 'Point the box at the barcode';
+          });
+        }
+        await cam?.dispose();
+      } else {
+        await _scanner?.stop();
+        if (mounted) {
+          setState(() {
+            _barcodeMode = false;
+            _statusMessage = 'Text scan — tap SCAN with the label in frame';
+          });
+        }
+        await _initCamera();
+      }
+    } catch (e) {
+      debugPrint('scan mode switch failed: $e');
+    } finally {
+      _switchingMode = false;
+      if (mounted) setState(() {});
+    }
+  }
+
   /// Manual scan — captures a still, runs barcode + OCR in parallel, then
   /// classifies via [CarrierPatterns] to assign AWB to the right carrier.
   ///
@@ -476,7 +618,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   void _validateInput() {
     final text = _orderIdController.text.trim();
     final formatOk = _orderIdRegex.hasMatch(text);
-    final prefixOk = !formatOk || _validOrderIdPrefixes.contains(text.substring(0, 3));
+    final prefixOk = !formatOk || validOrderIdPrefixes.contains(text.substring(0, 3));
     final valid = formatOk && prefixOk;
     if (valid != _isValid || prefixOk != _prefixValid) {
       setState(() {
@@ -597,7 +739,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   /// screen with the detected Order ID/AWB for [_labelReviewHoldSeconds],
   /// then auto-confirms via [_confirmReviewHold] unless the user cancels
   /// (Retake) or confirms early (Looks good).
-  void _startReviewHold(XFile xFile) {
+  void _startReviewHold(XFile? xFile) {
     _reviewCtrl?.dispose();
     _reviewCtrl = AnimationController(vsync: this, duration: Duration(seconds: _labelReviewHoldSeconds))
       ..addStatusListener((status) {
@@ -633,6 +775,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
     setState(() {
       _reviewActive = false;
       _reviewXFile = null;
+      _saveTriggered = false;
     });
     // Order ID / AWB fields are left populated (not cleared) so the user
     // can correct them manually or re-tap SCAN to retake.
@@ -701,10 +844,27 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
 
             const SizedBox(height: 10),
 
-            // Zoom + SCAN row — all skeuomorphic with press feedback
+            // Controls row. The barcode reader is continuous — there is no
+            // shot to take — so it shows only the escape hatch to text scan.
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(children: [
+              child: _barcodeMode
+                  ? RfButton.secondary(
+                      label: 'BARCODE TORN? USE TEXT SCAN',
+                      icon: Icons.text_fields_rounded,
+                      size: RfButtonSize.large,
+                      fullWidth: true,
+                      onPressed: _switchingMode ? null : _toggleScanMode,
+                    )
+                  : Row(children: [
+                if (widget.mode == CaptureMode.pk) ...[
+                  RfChip(
+                    label: 'BARCODE',
+                    active: false,
+                    onPressed: _switchingMode ? null : _toggleScanMode,
+                  ),
+                  const SizedBox(width: 10),
+                ],
                 RfChip(label: '1×', active: _zoomIndex == 0, onPressed: () => _setZoom(0)),
                 const SizedBox(width: 4),
                 RfChip(label: '2×', active: _zoomIndex == 1, onPressed: () => _setZoom(1)),
@@ -811,7 +971,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       color: Colors.black,
-                      child: _camReady && _cam != null
+                      child: _barcodeMode
+                          ? _buildBarcodeReader(width, height)
+                          : _camReady && _cam != null
                           ? ClipRect(
                               child: FittedBox(
                                 fit: BoxFit.cover,
@@ -852,7 +1014,11 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        locked ? '✓ LOCKED' : 'AMAZON LABEL',
+                        locked
+                            ? '✓ LOCKED'
+                            : _barcodeMode
+                                ? 'BARCODE READER'
+                                : 'AMAZON LABEL',
                         style: TextStyle(color: accent, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2),
                       ),
                     ),
@@ -869,6 +1035,46 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
           ),
         );
       },
+    );
+  }
+
+  /// The live reader. The scan window is a real crop, not decoration: the
+  /// plugin discards every barcode whose bounding box falls outside it, so
+  /// the numbers printed above and below the barcode band — tracking and
+  /// reference codes, the ones OCR used to mistake for an Order ID — can no
+  /// longer reach the fields at all.
+  ///
+  /// The band is wide and short because a label's barcodes are horizontal;
+  /// it is deliberately tall enough to hold the Order ID and AWB barcodes
+  /// together when the phone is held square, but detections accumulate
+  /// anyway, so catching them one at a time works just as well.
+  Widget _buildBarcodeReader(double w, double h) {
+    final window = Rect.fromCenter(
+      center: Offset(w / 2, h / 2),
+      width: w * 0.86,
+      height: h * 0.44,
+    );
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        MobileScanner(
+          controller: _scanner!,
+          scanWindow: window,
+          onDetect: _onBarcodesDetected,
+        ),
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: _ScanWindowPainter(
+                window: window,
+                color: (_foundAwb && _foundOrderId)
+                    ? RfColors.successLight
+                    : RfColors.amber,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1079,4 +1285,35 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
       ),
     ]);
   }
+}
+
+/// Dims everything outside the scan window so it is obvious what the reader
+/// is actually allowed to see. Purely cosmetic — the real filtering happens
+/// natively inside mobile_scanner; this just makes the crop visible.
+class _ScanWindowPainter extends CustomPainter {
+  final Rect window;
+  final Color color;
+  const _ScanWindowPainter({required this.window, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rrect = RRect.fromRectAndRadius(window, const Radius.circular(10));
+    final scrim = Path.combine(
+      PathOperation.difference,
+      Path()..addRect(Offset.zero & size),
+      Path()..addRRect(rrect),
+    );
+    canvas.drawPath(scrim, Paint()..color = Colors.black.withAlpha(150));
+    canvas.drawRRect(
+      rrect,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ScanWindowPainter old) =>
+      old.window != window || old.color != color;
 }
