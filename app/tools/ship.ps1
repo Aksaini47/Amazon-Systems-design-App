@@ -126,6 +126,24 @@ function Invoke-ShorebirdBuild([string[]]$sbArgs) {
       $text -notmatch 'Published (Release|Patch)') {
     return 98   # exit code lied -> force fail
   }
+  # POSITIVE assertion, not another error string added to the blacklist above.
+  # A real publish always prints its "Published Patch"/"Published Release"
+  # marker; anything else means nothing shipped, whatever the exit code says.
+  # 2026-09-08: expired Shorebird credentials made every command die with
+  # "Failed to refresh credentials / ProcessExit: 70" while shorebird.bat's
+  # outer wrapper still exited 0, so ship.ps1 went on to announce "Patch
+  # publish ho gaya" for a patch that was never uploaded. Blacklisting that
+  # one string would only have moved the next silent failure somewhere else.
+  if ($sbArgs -notcontains '--dry-run') {
+    if ($sbArgs -contains 'patch' -and $text -notmatch 'Published Patch') {
+      Write-Warn2 'Shorebird ne "Published Patch" print nahi kiya - kuch upload NAHI hua.'
+      return 97
+    }
+    if ($sbArgs -contains 'release' -and $text -notmatch 'Published Release') {
+      Write-Warn2 'Shorebird ne "Published Release" print nahi kiya - kuch upload NAHI hua.'
+      return 97
+    }
+  }
   return $code
 }
 
