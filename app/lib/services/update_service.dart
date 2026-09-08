@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:0 - Video ab low storage par kabhi lost nahi hogi\n- Storage kam ho to recording start hi nahi hogi (free space dikhega)\n- Recording ke beech space khatam ho to apne aap safely stop\n- Video pehle save hoti hai, check baad mein hota hai\n- Fail hone par DND wapas, purani photos clear, log mein entry';
+      '2.1.0+14:3 - Fix: PK barcode reader ka scan window ab saaf rectangular hai (wide-short band), portrait camera box se independent';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

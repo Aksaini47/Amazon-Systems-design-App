@@ -158,6 +158,15 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
         BarcodeFormat.pdf417,
         BarcodeFormat.ean13,
       ],
+      // The Order ID barcode is printed with noticeably narrower bars than
+      // the AWB barcode on the same label (verified by decoding a real label
+      // at increasing render DPI: the AWB barcode decodes at the plugin's
+      // default analysis resolution, the Order ID one only decodes once the
+      // image is ~1.5-2x finer) — this is why AWB reads reliably while Order
+      // ID does not at the same phone distance/zoom. Requesting a higher
+      // camera analysis resolution resolves the narrower bars without Sir
+      // needing to hold the phone closer or more zoomed in.
+      cameraResolution: const Size(1920, 1080),
     );
     _barcodeMode = widget.mode == CaptureMode.pk;
     _bootstrap();
@@ -1044,15 +1053,20 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   /// reference codes, the ones OCR used to mistake for an Order ID — can no
   /// longer reach the fields at all.
   ///
-  /// The band is wide and short because a label's barcodes are horizontal;
-  /// it is deliberately tall enough to hold the Order ID and AWB barcodes
-  /// together when the phone is held square, but detections accumulate
-  /// anyway, so catching them one at a time works just as well.
+  /// The band is wide and short because a label's barcodes are horizontal.
+  /// Height is sized off the window's OWN width (not the camera box's height)
+  /// so the box is a real rectangle on any device — the old `h * 0.44` tied
+  /// the shape to the 4:6 portrait camera box and came out closer to square
+  /// than to the short horizontal band a 1D barcode actually needs. A single
+  /// barcode fits comfortably at this ratio; detections still accumulate
+  /// across frames, so a sweep across the label catches Order ID and AWB one
+  /// at a time just as well as it did with the taller window.
   Widget _buildBarcodeReader(double w, double h) {
+    final winWidth = w * 0.86;
     final window = Rect.fromCenter(
       center: Offset(w / 2, h / 2),
-      width: w * 0.86,
-      height: h * 0.44,
+      width: winWidth,
+      height: winWidth * 0.30,
     );
     return Stack(
       fit: StackFit.expand,
