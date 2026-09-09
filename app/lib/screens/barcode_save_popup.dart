@@ -112,6 +112,27 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   bool _foundOrderId = false;
   String? _detectedCarrierName;  // shown next to AWB field once classified
 
+  // ─── Order ID dual-channel cross-check ─────────────────────────────────
+  // 2026-09: a wrong Order ID saved on a PK video broke the PK<->RT match on
+  // the PC side and cost a real, unfiled claim. A barcode decode alone
+  // proves the value is WELL-FORMED (it passed Code128's own checksum), not
+  // that it is the right one — and there is no checksum inside an Amazon
+  // order id, and no ground truth to check a first capture against. See
+  // OrderIdCrossCheck (order_id_matcher.dart) for the full reasoning; the
+  // short version is: trust a value only when a second, independent read
+  // (OCR of the same frame's printed digits) agrees with it.
+  //
+  // Tracked as the specific STRING that was confirmed, not a bool, so any
+  // edit — a fresh scan overwriting it, a manual retype — makes it stale on
+  // its own without needing an explicit reset at every call site that
+  // touches the field.
+  String? _verifiedOrderIdValue;
+  bool get _orderIdVerified =>
+      _verifiedOrderIdValue != null &&
+      _verifiedOrderIdValue == _orderIdController.text.trim();
+  bool _orderIdChecking = false;
+  String? _orderIdConflictValue;  // disagreeing OCR read, for display only
+
   // Duplicate detection — populated from disk at init, compared on every
   // text-change/scan so the user gets a red banner BEFORE saving over an
   // existing order.
@@ -167,6 +188,12 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
       // camera analysis resolution resolves the narrower bars without Sir
       // needing to hold the phone closer or more zoomed in.
       cameraResolution: const Size(1920, 1080),
+      // Needed so BarcodeCapture.image carries the PNG frame the barcode was
+      // just decoded from — the cross-check OCR pass runs on THAT exact
+      // frame, not a fresh capture, so the two channels are reading the same
+      // physical moment. Only costs a bitmap encode on frames where a
+      // barcode was actually found, not every frame.
+      returnImage: true,
     );
     _barcodeMode = widget.mode == CaptureMode.pk;
     _bootstrap();
@@ -376,13 +403,16 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
     // Order ID — taken verbatim from the barcode, accepted only if it is
     // ALREADY exactly 3-7-7. No digit-guessing, no letter→digit fixups, no
     // "any 17 digits on the page" fallback: those are what put a tracking
-    // number into this field in the first place.
+    // number into this field in the first place. Filling the field is NOT
+    // the same as trusting it — _crossCheckOrderId decides that, and only
+    // its result unlocks auto-save (_maybeAutoSaveFromBarcode).
     if (!_orderIdRegex.hasMatch(_orderIdController.text.trim())) {
       for (final v in values) {
         if (_orderIdRegex.hasMatch(v)) {
           _orderIdController.text = v;
           _foundOrderId = true;
           changed = true;
+          unawaited(_crossCheckOrderId(v, capture.image));
           break;
         }
       }
@@ -404,20 +434,62 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
     if (!changed) return;
     HapticFeedback.mediumImpact();
     setState(() {
-      _statusMessage = _foundOrderId && _foundAwb
-          ? '✓ Order ID + AWB read'
-          : _foundOrderId
-              ? 'Order ID read — sweep across the AWB barcode'
-              : 'AWB read — sweep across the Order ID barcode';
+      _statusMessage = _foundOrderId && !_orderIdChecking && !_orderIdVerified
+          ? 'Verifying Order ID against label text…'
+          : _foundOrderId && _foundAwb
+              ? '✓ Order ID + AWB read'
+              : _foundOrderId
+                  ? 'Order ID read — sweep across the AWB barcode'
+                  : 'AWB read — sweep across the Order ID barcode';
     });
     _maybeAutoSaveFromBarcode();
+  }
+
+  /// Independently confirm a barcode-read Order ID against the SAME frame's
+  /// printed digits before it is trusted for auto-save. Never touches the
+  /// field's TEXT — only [_verifiedOrderIdValue]/[_orderIdConflictValue],
+  /// which [_buildField]'s call site and [_maybeAutoSaveFromBarcode] read.
+  Future<void> _crossCheckOrderId(String barcodeValue, Uint8List? pngBytes) async {
+    if (pngBytes == null) {
+      // returnImage produced nothing for this frame (rare). Leave
+      // unverified rather than guessing — the value stays usable via the
+      // manual SAVE button, just not auto-save eligible.
+      return;
+    }
+    setState(() => _orderIdChecking = true);
+    final ocrValue = await OcrService.extractOrderIdFromBytes(pngBytes);
+    if (!mounted) return;
+    // A newer detection or a manual edit may have superseded this candidate
+    // while OCR ran — only apply the result to the value it was actually
+    // checking.
+    if (_orderIdController.text.trim() != barcodeValue) {
+      setState(() => _orderIdChecking = false);
+      return;
+    }
+    final check = OrderIdCrossCheck(barcode: barcodeValue, ocr: ocrValue);
+    setState(() {
+      _orderIdChecking = false;
+      _orderIdConflictValue = check.conflicting ? ocrValue : null;
+      if (check.confirmed) _verifiedOrderIdValue = barcodeValue;
+      _statusMessage = check.confirmed
+          ? '✓ Order ID confirmed — barcode and label text agree'
+          : check.conflicting
+              ? 'Mismatch: barcode reads $barcodeValue, label text reads $ocrValue — check the label'
+              : 'Order ID read once, unconfirmed — check the label before saving';
+    });
+    if (check.confirmed) {
+      unawaited(HapticFeedback.mediumImpact());
+      _maybeAutoSaveFromBarcode();
+    } else {
+      unawaited(HapticFeedback.heavyImpact());
+    }
   }
 
   /// Mirrors the auto-save decision [_scan] makes, minus the captured still —
   /// the reader never takes one. The review-hold overlay already tolerates a
   /// null image, so Sir keeps his countdown window to cancel a wrong read.
   void _maybeAutoSaveFromBarcode() {
-    if (!_autoLabelSave || !_isValid || _duplicateWarning != null) return;
+    if (!_autoLabelSave || !_isValid || !_orderIdVerified || _duplicateWarning != null) return;
     if (_reviewActive || _saveTriggered) return;
     _saveTriggered = true;
     if (_labelReviewHoldSeconds > 0) {
@@ -507,17 +579,19 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
       bool awbFound = _foundAwb;
       bool orderIdFound = _foundOrderId;
 
-      // Collect every barcode raw value and find any that encodes the Order ID
+      // Collect every barcode raw value and find any that encodes the Order ID.
+      // Assignment is deferred to Stage 6 below — barcode and OCR both read
+      // this SAME frame, so whichever the Order ID turns out to be, it needs
+      // the other channel's answer alongside it before either is trusted.
       final allBarcodes = barcodeResult?.barcodes ?? const <Barcode>[];
       final barcodeValues = <String>[];
+      String? barcodeOrderId;
       for (final b in allBarcodes) {
         final raw = b.rawValue?.trim();
         if (raw == null || raw.isEmpty) continue;
         barcodeValues.add(raw);
         if (_orderIdRegex.hasMatch(raw)) {
-          if (!_orderIdRegex.hasMatch(_orderIdController.text.trim())) {
-            _orderIdController.text = raw;
-          }
+          barcodeOrderId ??= raw;
           orderIdFound = true;
         }
       }
@@ -551,12 +625,25 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
         }
       }
 
-      // Stage 6: Order ID via OCR (fallback if no barcode encoded it)
-      if (ocrResult.orderId != null && !_orderIdRegex.hasMatch(_orderIdController.text.trim())) {
-        _orderIdController.text = ocrResult.orderId!;
-        orderIdFound = true;
-      } else if (ocrResult.orderId != null) {
-        orderIdFound = true;
+      // Stage 6: Order ID. Barcode and OCR just read the SAME captured
+      // still, so if BOTH answered, cross-check them before trusting either
+      // — a barcode decode alone already passed Code128's own checksum,
+      // which proves well-formed, not correct (see OrderIdCrossCheck). Never
+      // overwrites a value already in the field.
+      final ocrOrderId = ocrResult.orderId;
+      if (ocrOrderId != null) orderIdFound = true;
+      if (!_orderIdRegex.hasMatch(_orderIdController.text.trim())) {
+        final chosen = barcodeOrderId ?? ocrOrderId;
+        if (chosen != null) {
+          _orderIdController.text = chosen;
+          if (barcodeOrderId != null && ocrOrderId != null) {
+            final check = OrderIdCrossCheck(barcode: barcodeOrderId, ocr: ocrOrderId);
+            _orderIdConflictValue = check.conflicting ? ocrOrderId : null;
+            if (check.confirmed) _verifiedOrderIdValue = barcodeOrderId;
+          } else {
+            _orderIdConflictValue = null;
+          }
+        }
       }
 
       if (!mounted) return;
@@ -564,7 +651,12 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
       // (Lock-feedback is fired by _onTextChanged() once both fields are
       //  valid — we let that path own the gating to keep manual-typing and
       //  scan-fill paths consistent.)
-      if (awbFound && orderIdFound) {
+      final orderIdOk = _orderIdRegex.hasMatch(_orderIdController.text.trim());
+      if (_orderIdConflictValue != null) {
+        msg = 'Order ID mismatch — barcode and label text disagree, check the label';
+      } else if (awbFound && orderIdOk && !_orderIdVerified) {
+        msg = '${carrierName ?? "AWB"} found · Order ID unconfirmed — check the label';
+      } else if (awbFound && orderIdFound) {
         msg = '✓ Locked${carrierName != null ? " · $carrierName" : ""} + Order ID';
       } else if (orderIdFound && !awbFound) {
         msg = 'Order ID found — no AWB detected on label';
@@ -585,7 +677,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
       _onTextChanged();
 
       final orderId = _orderIdController.text.trim();
-      final canAutoSave = _autoLabelSave && _isValid && _duplicateWarning == null;
+      final canAutoSave = _autoLabelSave && _isValid && _orderIdVerified && _duplicateWarning == null;
       if (canAutoSave) {
         // #region agent log
         DebugSessionLog.log(
@@ -691,11 +783,17 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
       }
     }
 
+    // 'verified' traces whether this exact order id was independently
+    // confirmed (barcode + label-text OCR agreed) before saving, or went
+    // through on a single unconfirmed channel / manual entry / an RT
+    // near-match override above. Whoever debugs a future PK<->RT mismatch
+    // does not have to guess which case this was.
     unawaited(ActivityLogService.log(
       event: 'barcode_saved',
       mode: widget.mode,
       orderId: orderId,
       awb: awb.isEmpty ? null : awb,
+      extra: {'verified': '${orderId == _verifiedOrderIdValue}'},
     ));
     if (!mounted) return;
     Navigator.pop(context, {
@@ -925,8 +1023,17 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
                   hint: '407-1234567-1234567',
                   detected: _foundOrderId,
                   isValid: _isValid,
-                  errorText: (!_prefixValid && _orderIdController.text.trim().isNotEmpty)
-                      ? 'Invalid Order ID prefix'
+                  errorText: _orderIdConflictValue != null
+                      ? 'Mismatch — barcode: ${_orderIdController.text.trim()}, label text: $_orderIdConflictValue'
+                      : (!_prefixValid && _orderIdController.text.trim().isNotEmpty)
+                          ? 'Invalid Order ID prefix'
+                          : null,
+                  // Format-valid and came from a scan, but not (yet)
+                  // independently confirmed — see the cross-check block
+                  // above. A value typed by hand with no scan involved
+                  // skips this: there is nothing scanned to disagree with.
+                  warningText: (_orderIdConflictValue == null && _isValid && _foundOrderId && !_orderIdVerified)
+                      ? (_orderIdChecking ? 'Verifying against label text…' : 'Unconfirmed — check the label before saving')
                       : null,
                   keyboardType: TextInputType.number,
                   inputFormatters: [_OrderIdInputFormatter()],
@@ -1258,9 +1365,17 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
     bool detected = false,
     bool isValid = false,
     String? errorText,
+    String? warningText,
     List<TextInputFormatter>? inputFormatters,
     TextInputType keyboardType = TextInputType.text,
   }) {
+    // Amber sits between the existing red (errorText — format/prefix wrong,
+    // or a live cross-check mismatch) and green (isValid) states: format is
+    // fine, just not independently confirmed yet. errorText always wins
+    // when both are set — a live mismatch is more urgent than "still
+    // checking".
+    final warn = errorText == null && warningText != null;
+    final warnColor = warn ? RfColors.warning : null;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
         Text(label, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
@@ -1284,13 +1399,23 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.border)),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.border)),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.rtAccent, width: 1.5)),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: warnColor ?? RfColors.border)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: warnColor ?? RfColors.rtAccent, width: 1.5)),
           errorText: errorText,
+          errorMaxLines: 2,
           errorStyle: const TextStyle(color: RfColors.error, fontSize: 11),
           errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.error, width: 1.5)),
           focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.error, width: 1.5)),
-          suffixIcon: isValid ? const Icon(Icons.check_circle, color: RfColors.successLight, size: 18) : null,
+          helperText: warn ? warningText : null,
+          helperStyle: const TextStyle(color: RfColors.warning, fontSize: 11),
+          helperMaxLines: 2,
+          suffixIcon: errorText != null
+              ? null
+              : warn
+                  ? const Icon(Icons.help_outline_rounded, color: RfColors.warning, size: 18)
+                  : isValid
+                      ? const Icon(Icons.check_circle, color: RfColors.successLight, size: 18)
+                      : null,
           suffixIconConstraints: const BoxConstraints(minWidth: 28, minHeight: 28),
         ),
         keyboardType: keyboardType,

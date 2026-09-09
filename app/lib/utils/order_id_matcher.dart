@@ -26,6 +26,50 @@ bool isPlausibleOrderId(String orderId) {
   return validOrderIdPrefixes.contains(t.substring(0, 3));
 }
 
+// ─── Dual-channel cross-check ───────────────────────────────────────────
+//
+// 2026-09: a barcode-only read on a 4x6 thermal label decoded successfully
+// only ~2/7 times — narrow module width at print, thermal fade, or just
+// distance/angle. Every fallback attempted before this (OCR digit-fixups,
+// prefix gating, a bigger scan window) improved the SHAPE of a wrong read,
+// never its correctness: a misdecoded barcode still passes Code128's own
+// checksum and this file's own prefix check, because those only prove the
+// value LOOKS like a real order id, not that it IS the one on the label.
+// One PK video saved against the wrong order id was enough to break the
+// PK<->RT match on the PC side and cost a real, unfiled claim.
+//
+// There is no checksum digit inside an Amazon order id to verify a single
+// read against, and no offline ground truth to check it against either —
+// this is the FIRST capture of this order id, nothing to compare it to yet.
+// The only lever left is redundancy: read the same physical barcode two
+// independent ways (barcode decode, OCR of the printed digits) and only
+// trust a value neither channel already agrees on. Their failure modes
+// barely overlap — decode failure is bar-width/print-quality, OCR failure
+// is font/glare/blur — so an identical WRONG value from both is far less
+// likely than either channel alone being wrong.
+
+/// Two-channel read of the same order id. [ocr] is null when OCR could not
+/// extract a candidate from the frame at all (not the same as disagreeing).
+class OrderIdCrossCheck {
+  final String barcode;
+  final String? ocr;
+  const OrderIdCrossCheck({required this.barcode, this.ocr});
+
+  /// Both channels read the SAME value — the only case safe to trust
+  /// without a deliberate, unhurried look from Sir.
+  bool get confirmed => ocr != null && ocr == barcode;
+
+  /// OCR ran and returned something, but a DIFFERENT order id — the
+  /// dangerous case: two live, plausible-looking candidates. Never guess
+  /// between them; whoever is packing has to look at the actual label.
+  bool get conflicting => ocr != null && ocr != barcode;
+
+  /// OCR found nothing to compare against (blur, glare, angle) — the
+  /// barcode value is the only signal there is. Treat as unconfirmed, not
+  /// as failed: still worth showing, just not worth auto-saving on.
+  bool get singleSource => ocr == null;
+}
+
 /// A candidate PK Order ID close to the one just entered/scanned in RT mode.
 class OrderIdMatch {
   final String candidate; // full hyphenated PK order id

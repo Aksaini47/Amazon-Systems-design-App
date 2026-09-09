@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:path_provider/path_provider.dart';
 import '../utils/order_id_matcher.dart';
 
 /// Amazon Order ID extraction — "nuclear" multi-stage pipeline.
@@ -115,6 +118,27 @@ class OcrService {
   static Future<String?> extractOrderId(String imagePath) async {
     final scan = await scanAll(imagePath);
     return scan.orderId;
+  }
+
+  /// Same as [extractOrderId], for a frame that only exists in memory (e.g.
+  /// mobile_scanner's BarcodeCapture.image, PNG-encoded — the frame the
+  /// barcode itself was just decoded from). ML Kit's recognizer needs a file
+  /// path, so this round-trips through a scratch file in the OS temp dir;
+  /// the file is always removed, success or failure.
+  static Future<String?> extractOrderIdFromBytes(Uint8List pngBytes) async {
+    final dir = await getTemporaryDirectory();
+    final path =
+        '${dir.path}/ocr_xcheck_${DateTime.now().microsecondsSinceEpoch}.png';
+    final file = File(path);
+    try {
+      await file.writeAsBytes(pngBytes, flush: true);
+      return await extractOrderId(path);
+    } catch (e) {
+      debugPrint('extractOrderIdFromBytes failed: $e');
+      return null;
+    } finally {
+      try { await file.delete(); } catch (_) {}
+    }
   }
 
   /// Combined scan: returns the Order ID AND the full recognized text in one
