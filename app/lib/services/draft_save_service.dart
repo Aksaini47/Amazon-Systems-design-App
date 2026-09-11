@@ -90,6 +90,7 @@ class DraftSaveService {
     required String videoPath,
     required Map<PhotoSide, String> photosBySide,
     QCVerdict? verdict,
+    List<QCSubReason> subReasons = const [],
     LocalStorageService? storage,
   }) async {
     final local = storage ?? LocalStorageService();
@@ -140,6 +141,7 @@ class DraftSaveService {
       contentsPhotoPath: finalPaths[PhotoSide.contents],
       serialPhotoPath: finalPaths[PhotoSide.serial],
       verdict: verdict,
+      subReasons: subReasons,
     );
 
     if (!session.isReadyToSave) {

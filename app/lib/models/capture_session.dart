@@ -19,6 +19,44 @@ enum QCVerdict {
   bool get triggersClaim => this != QCVerdict.ok;
 }
 
+/// Sub-reason under a claim-triggering [QCVerdict] — wording is Amazon's
+/// own SAFE-T claim-form labels verbatim (kept exact so this feeds that
+/// form later without re-translating). Sir picked a filtered subset of
+/// Amazon's "damaged/used" list (2026-09-12): only heavily-damaged,
+/// minor-damage, mildly-used, heavily-used — "packaging only damaged" and
+/// "open seal" were deliberately dropped.
+enum QCSubReason {
+  // ── "I received damaged/ used item" family ──────────────────────────
+  heavilyDamaged,
+  minorDamage,
+  mildlyUsed,
+  heavilyUsed,
+
+  // ── "I received different item/ empty box" family ───────────────────
+  // "Empty box received" is deliberately absent here — QCVerdict.emptyBox
+  // already IS that sub-reason and is auto-assigned (see emptyBoxReceived
+  // below) without ever showing a picker for it.
+  differentItem,
+  counterfeitItem,
+
+  // Auto-assigned for QCVerdict.emptyBox. Never offered as a tappable card.
+  emptyBoxReceived;
+
+  /// Amazon's exact SAFE-T claim-form wording.
+  String get label => switch (this) {
+        QCSubReason.heavilyDamaged => 'Product heavily damaged',
+        QCSubReason.minorDamage => 'Product with minor damaged/dents/scratches',
+        QCSubReason.mildlyUsed => 'Mildly used product received',
+        QCSubReason.heavilyUsed => 'Heavily used product received',
+        QCSubReason.differentItem => 'Different item received',
+        QCSubReason.counterfeitItem => 'Fake/ replica/ counterfeit item received',
+        QCSubReason.emptyBoxReceived => 'Empty box received',
+      };
+
+  static const damagedFamily = [heavilyDamaged, minorDamage, mildlyUsed, heavilyUsed];
+  static const differentFamily = [differentItem, counterfeitItem];
+}
+
 /// Side / type of the product in a photo.
 /// Used in both PK mode and RT claim-photo flows.
 ///   label    — return label / shipping label
@@ -44,6 +82,7 @@ class CaptureSession {
   final String? contentsPhotoPath; // RT claim flow only — package contents shot
   final String? serialPhotoPath; // RT only, optional
   final QCVerdict? verdict;
+  final List<QCSubReason> subReasons;
   final String? productTitle;
 
   const CaptureSession({
@@ -61,6 +100,7 @@ class CaptureSession {
     this.contentsPhotoPath,
     this.serialPhotoPath,
     this.verdict,
+    this.subReasons = const [],
     this.productTitle,
   });
 
@@ -80,6 +120,7 @@ class CaptureSession {
     Object? contentsPhotoPath = _unset,
     Object? serialPhotoPath = _unset,
     QCVerdict? verdict,
+    List<QCSubReason>? subReasons,
     String? productTitle,
   }) {
     return CaptureSession(
@@ -107,6 +148,7 @@ class CaptureSession {
           ? this.serialPhotoPath
           : serialPhotoPath as String?,
       verdict: verdict ?? this.verdict,
+      subReasons: subReasons ?? this.subReasons,
       productTitle: productTitle ?? this.productTitle,
     );
   }
@@ -160,6 +202,9 @@ class CaptureSession {
           if (serialPhotoPath != null) 'serial': {'captured_at': DateTime.now().toIso8601String(), 'file': serialPhotoPath},
         },
       if (verdict != null) 'verdict': verdict!.name,
+      if (subReasons.isNotEmpty) 'qc_sub_reasons': subReasons.map((r) => r.name).toList(),
+      // Amazon's own wording, verbatim — for direct use when filing the SAFE-T claim.
+      if (subReasons.isNotEmpty) 'qc_sub_reason_labels': subReasons.map((r) => r.label).toList(),
       if (productTitle != null) 'product_title': productTitle,
       'claim_trigger': verdict?.triggersClaim ?? false,
       'app_version': appVersion,

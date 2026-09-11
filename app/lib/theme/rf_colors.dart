@@ -29,11 +29,14 @@ class RfColors {
   static const action = Color(0xFFF1641E);
 
   /// PK mode accent — used to color packing-flow UI (capture screen badge,
-  /// progress indicators, etc.).
-  static const pkAccent = Color(0xFFE86C2B);
+  /// progress indicators, etc.). Blue (Sir, 2026-09-12) — previously
+  /// orange, which was the swapped/wrong way round versus RT's red.
+  static const pkAccent = Color(0xFF388BFD);
 
-  /// RT mode accent — used to color return-flow UI.
-  static const rtAccent = Color(0xFF388BFD);
+  /// RT mode accent — used to color return-flow UI. Red (Sir, 2026-09-12) —
+  /// matches [recording]'s tone so the return flow reads as the
+  /// "higher-stakes" one at a glance, same as the live record indicator.
+  static const rtAccent = Color(0xFFFF3B30);
 
   /// FBA badge / future tier accent (legacy alias retained).
   static const fbaAccent = Color(0xFFF78166);

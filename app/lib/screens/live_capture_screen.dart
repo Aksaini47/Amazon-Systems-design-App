@@ -1490,14 +1490,14 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   /// RT only. User picks QC verdict, scans return label / order ID,
   /// then captures claim photos (QC OK: front/back; others: full set).
   Future<void> _openRtPostVideoFlow() async {
-    final verdict = await showModalBottomSheet<QCVerdict>(
+    final verdictResult = await showModalBottomSheet<QcVerdictResult>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => const VerdictBottomSheet(),
     );
 
-    if (verdict == null) {
+    if (verdictResult == null) {
       await _retainDraftOnCancel();
       await _disposeCameraForModal();
       if (mounted) setState(() => _phase = CapturePhase.stopped);
@@ -1506,8 +1506,13 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       return;
     }
 
-    _session.verdict = verdict;
-    _logActivity('qc_verdict', extra: {'qc': verdict.name});
+    _session.verdict = verdictResult.verdict;
+    _session.subReasons = verdictResult.subReasons;
+    _logActivity('qc_verdict', extra: {
+      'qc': verdictResult.verdict.name,
+      if (verdictResult.subReasons.isNotEmpty)
+        'qc_sub': verdictResult.subReasons.map((r) => r.name).join('+'),
+    });
 
     await _disposeCameraForModal();
     if (!mounted) return;
@@ -1771,6 +1776,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         contentsPhotoPath: finalPaths[PhotoSide.contents],
         serialPhotoPath: finalPaths[PhotoSide.serial],
         verdict: _session.verdict,
+        subReasons: _session.subReasons,
       );
 
       await _localStorage.writeMetaJson(session);
@@ -2109,11 +2115,38 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     );
   }
 
+  // Chrome heights the preview viewport is centered AROUND, not just
+  // within. `_buildCroppedPreview` sits under `Positioned.fill` as a
+  // sibling of `_buildTopBar`/`_buildBottomControls` (not a parent of
+  // them), so it only ever sees the full SafeArea height, not the shorter
+  // gap actually left between them. Centering on the full height put the
+  // frame visibly low — the thin top bar (close button + mode pill) and
+  // the much taller bottom controls (instruction banner/pill + the 76px
+  // capture button + its own padding) aren't symmetric, so the true
+  // "open" viewing window is biased upward relative to screen-center. Sir,
+  // 2026-09-12: "bottom mein zyada hai, upar zyada black margin hai."
+  //
+  // Approximate, not measured live (no GlobalKey plumbing into two sibling
+  // subtrees for a cosmetic nudge) — tune these two numbers if the chrome
+  // rows change height.
+  static const _topChromeHeight = 50.0;    // padding(6*2) + close button(38)
+  static const _bottomChromeHeight = 186.0; // padding(16+36) + banner(~58) + capture button(76)
+
   Widget _buildCroppedPreview() {
     return LayoutBuilder(
       builder: (context, constraints) {
         final availW = constraints.maxWidth;
         final availH = constraints.maxHeight;
+        // Shift the viewport's center up by half the top/bottom chrome
+        // imbalance, expressed as a fraction of half the available height
+        // (Alignment's y axis: -1 = top edge, +1 = bottom edge) — so it
+        // scales correctly across device sizes instead of a fixed pixel
+        // nudge. Clamped so a very short viewport can't push the frame
+        // off-screen.
+        final chromeBiasPx = (_bottomChromeHeight - _topChromeHeight) / 2;
+        final verticalBias = availH > 0
+            ? (-2 * chromeBiasPx / availH).clamp(-0.4, 0.0)
+            : 0.0;
 
         // Keep the same on-screen frame during recording as in photo idle.
         final effectiveCropped = _isAspectCropped;
@@ -2162,7 +2195,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Center(
+              Align(
+                alignment: Alignment(0, verticalBias),
                 child: ClipRect(
                   child: SizedBox(
                     width: vpW,
@@ -2177,7 +2211,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
                   ),
                 ),
               ),
-              if (effectiveCropped) _buildFrameGuides(vpW, vpH, availW, availH),
+              if (effectiveCropped) _buildFrameGuides(vpW, vpH, availW, availH, verticalBias),
             ],
           ),
         );
@@ -2186,9 +2220,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   }
 
   /// White corner brackets on the active photo frame (letterbox stays solid black).
-  Widget _buildFrameGuides(double vpW, double vpH, double availW, double availH) {
+  /// [verticalBias] must match the Align applied to the viewport itself
+  /// (see _buildCroppedPreview) or the brackets drift off the actual frame.
+  Widget _buildFrameGuides(double vpW, double vpH, double availW, double availH, double verticalBias) {
     final left = (availW - vpW) / 2;
-    final top = (availH - vpH) / 2;
+    final top = (availH - vpH) / 2 * (1 + verticalBias);
     const len = 26.0;
     const stroke = 2.5;
     const color = Colors.white;
@@ -3132,6 +3168,7 @@ class _LiveSession {
   String? orderId;
   String? awb;
   QCVerdict? verdict;
+  List<QCSubReason> subReasons = const [];
   String? videoPath;
   bool isDraft = false;
   DateTime? sessionStartedAt;

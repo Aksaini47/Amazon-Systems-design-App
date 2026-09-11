@@ -2255,14 +2255,17 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
     }
 
     QCVerdict? verdict;
+    List<QCSubReason> subReasons = const [];
     if (mode == CaptureMode.rt) {
-      verdict = await showModalBottomSheet<QCVerdict>(
+      final result = await showModalBottomSheet<QcVerdictResult>(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (_) => const VerdictBottomSheet(),
       );
-      if (verdict == null || !mounted) return;
+      if (result == null || !mounted) return;
+      verdict = result.verdict;
+      subReasons = result.subReasons;
     }
 
     final barcode = await Navigator.of(context).push<Map<String, String?>>(
@@ -2327,6 +2330,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
         videoPath: videoPath,
         photosBySide: photos,
         verdict: verdict,
+        subReasons: subReasons,
         storage: _storage,
       );
       if (!mounted) return;
