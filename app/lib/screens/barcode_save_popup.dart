@@ -112,6 +112,12 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   bool _foundOrderId = false;
   String? _detectedCarrierName;  // shown next to AWB field once classified
 
+  // Popup-open timestamp + one-shot latch, purely for the
+  // barcode_scanner_first_detection analytics event — lets Sir/Claude see
+  // actual on-device time-to-first-frame instead of guessing at lag.
+  DateTime? _scanOpenedAt;
+  bool _firstDetectionLogged = false;
+
   // ─── Order ID dual-channel cross-check ─────────────────────────────────
   // 2026-09: a wrong Order ID saved on a PK video broke the PK<->RT match on
   // the PC side and cost a real, unfiled claim. A barcode decode alone
@@ -168,6 +174,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   @override
   void initState() {
     super.initState();
+    _scanOpenedAt = DateTime.now();
     _orderIdController.addListener(_onTextChanged);
     _awbController.addListener(_onTextChanged);
     _scanner = MobileScannerController(
@@ -398,6 +405,16 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
     }
     if (values.isEmpty) return;
 
+    if (!_firstDetectionLogged && _scanOpenedAt != null) {
+      _firstDetectionLogged = true;
+      final ms = DateTime.now().difference(_scanOpenedAt!).inMilliseconds;
+      unawaited(ActivityLogService.log(
+        event: 'barcode_scanner_first_detection',
+        mode: widget.mode,
+        extra: {'ms_since_open': '$ms'},
+      ));
+    }
+
     var changed = false;
 
     // Order ID — taken verbatim from the barcode, accepted only if it is
@@ -482,6 +499,18 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
       _maybeAutoSaveFromBarcode();
     } else {
       unawaited(HapticFeedback.heavyImpact());
+      if (check.conflicting) {
+        // Barcode and OCR disagreed — exactly the case the dual-channel
+        // cross-check exists to catch before a wrong Order ID gets saved.
+        // Frequency of this event is the signal for whether that safeguard
+        // is earning its keep or just adding friction.
+        unawaited(ActivityLogService.log(
+          event: 'order_id_cross_check_conflict',
+          mode: widget.mode,
+          orderId: barcodeValue,
+          extra: {'ocr_read': ocrValue ?? ''},
+        ));
+      }
     }
   }
 
@@ -513,13 +542,19 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
         final cam = _cam;
         _cam = null;
         _camReady = false;
+        // Release the CameraController FIRST — same camera-device race as
+        // BarcodeSavePopup's own open: mounting MobileScanner (via setState
+        // below) before the old controller's dispose() completes makes it
+        // fight the still-releasing hardware for the device. The `else`
+        // branch below already gets this order right (await stop() before
+        // setState); this branch didn't.
+        await cam?.dispose();
         if (mounted) {
           setState(() {
             _barcodeMode = true;
             _statusMessage = 'Point the box at the barcode';
           });
         }
-        await cam?.dispose();
       } else {
         await _scanner?.stop();
         if (mounted) {

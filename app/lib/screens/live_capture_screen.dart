@@ -1464,6 +1464,15 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   void _openBarcodePopup() async {
     await _disposeCameraForModal();
     if (!mounted) return;
+    // CRITICAL: same 500ms hardware-release delay this file already uses on
+    // every OTHER camera-controller handoff (see _runClaimPhotoSequence and
+    // the cancel paths below). Without it, BarcodeSavePopup's
+    // MobileScannerController races Android/CameraX's still-in-progress
+    // teardown of this screen's just-disposed CameraController — both want
+    // the same physical camera device at once, which is what made the
+    // scanner visibly freeze right on open.
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
     final result = await Navigator.of(context).push<Map<String, String?>>(
       MaterialPageRoute(
         fullscreenDialog: true,
@@ -1515,6 +1524,10 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     });
 
     await _disposeCameraForModal();
+    if (!mounted) return;
+    // Same camera-device-release race as _openBarcodePopup — see comment
+    // there.
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
     final result = await Navigator.of(context).push<Map<String, String?>>(
       MaterialPageRoute(

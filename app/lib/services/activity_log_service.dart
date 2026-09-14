@@ -1,11 +1,16 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/capture_session.dart';
+import 'analytics_service.dart';
 
-/// Plain-text, day-wise activity log for shipments and capture events.
+/// Plain-text, day-wise activity log for shipments and capture events, plus
+/// a fire-and-forget mirror of every event into Firestore via
+/// [AnalyticsService] — this is the single choke point both sinks share, so
+/// every existing and future call site gets cloud visibility for free.
 /// Files live under `{appDocuments}/RepairFully/logs/activity_YYYY-MM-DD.txt`.
 class ActivityLogService {
   ActivityLogService._();
@@ -40,6 +45,18 @@ class ActivityLogService {
     String? qc,
     Map<String, String>? extra,
   }) async {
+    // Cloud mirror — independent of the local-file write below, so a
+    // Firestore hiccup (no network, etc.) never blocks or corrupts the
+    // on-device log, and vice versa.
+    unawaited(AnalyticsService.record(
+      event: event,
+      mode: mode?.name,
+      orderId: orderId,
+      awb: awb,
+      qc: qc,
+      extra: extra,
+    ));
+
     try {
       final now = DateTime.now();
       final ts = '${_dayKey(now)} '

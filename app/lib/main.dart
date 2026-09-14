@@ -9,6 +9,7 @@ import 'models/capture_session.dart';
 import 'theme/rf_colors.dart';
 import 'screens/home_screen.dart';
 import 'screens/trial_gate.dart';
+import 'services/activity_log_service.dart';
 import 'services/update_service.dart';
 import 'utils/volume_button_service.dart';
 import 'widgets/demo_watermark_overlay.dart';
@@ -70,6 +71,14 @@ Future<void> bootstrap({required bool isDemo}) async {
     }
 
     VolumeButtonService(); // Initialize singleton, register MethodChannel
+
+    // Cold-start marker — first entry in both the local activity log and its
+    // Firestore mirror for this launch, so a session's later events can be
+    // correlated against which app_version/patch/device they ran on.
+    unawaited(ActivityLogService.log(
+      event: 'app_open',
+      extra: {'is_demo': isDemo.toString()},
+    ));
 
     // Fire-and-forget silent Shorebird update check. We DO NOT await this
     // — the user shouldn't wait at the splash for a network round-trip.

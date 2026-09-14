@@ -29,6 +29,22 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Per-action analytics mirror — see lib/services/analytics_service.dart.
+    // One doc per device (deviceId = Android ID, same anchor as demo_trials),
+    // one append-only sub-collection of individual event docs underneath.
+    // Write-only from the client: `ts` must be the server's own request
+    // time (no backdating), events can never be edited or deleted once
+    // written, and there is no client `read` — order IDs/AWBs are real
+    // business data and this app has no Auth to scope reads by device, so
+    // reading back is done from the Firebase console or a service account
+    // (both bypass rules), never the app itself.
+    match /device_events/{deviceId}/events/{eventId} {
+      allow read: if false;
+      allow create: if request.resource.data.keys().hasAll(['event', 'ts'])
+                    && request.resource.data.ts == request.time;
+      allow update, delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

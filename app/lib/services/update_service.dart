@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:4 - PK Order ID ab dual-channel verify hota hai\n- Barcode aur label ke printed text dono se independently padha jata hai\n- Dono match karein tabhi auto-save - warna manual confirm mangega\n- Mismatch ho to dono values dikhenge, auto-save nahi hoga\n- Galat Order ID se video save hona ab bahut mushkil';
+      '2.1.0+14:6 - Barcode scanner ab snappy khulega (camera-clash lag fix)\n- Har action ka data ab Firebase pe track hota hai\n- Scan-mode switch ka chhota race bug bhi fix';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
