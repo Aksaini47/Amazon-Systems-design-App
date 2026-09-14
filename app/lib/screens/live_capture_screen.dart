@@ -858,7 +858,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           ]),
           content: const Text(
             'Grant Do Not Disturb access so RepairFully can mute notifications, '
-            'ringer, and non-urgent calls while you\'re recording. Auto-restores '
+            'ringer, and incoming calls while you\'re recording. Auto-restores '
             'your previous settings when you stop.\n\n'
             'You can change this anytime in your phone\'s settings.',
             style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
@@ -902,6 +902,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
       // User chose Skip → remember it so we never re-prompt
       await prefs.setBool('dnd_prompt_skipped', true);
+      _logActivity('dnd_prompt_skipped');
       return true;
     } catch (e) {
       debugPrint('_maybePromptDndPermission failed (non-fatal): $e');
@@ -911,10 +912,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   /// Engage all recording-time guards so the user isn't interrupted:
   ///   - Wakelock — prevents screen-off / sleep
-  ///   - DND (priority mode) — silences notifications, ringer, and non-priority
-  ///     calls during recording. Saves the previous DND state so we can restore
-  ///     it exactly when recording stops. Silently no-ops if user hasn't
-  ///     granted DND permission yet (offered as one-time prompt elsewhere).
+  ///   - DND (total silence) — blocks notifications, ringer, AND incoming
+  ///     calls during recording. Saves the previous DND state so we can
+  ///     restore it exactly when recording stops. Silently no-ops if user
+  ///     hasn't granted DND permission yet (offered as one-time prompt
+  ///     elsewhere).
   ///
   /// Immersive layout is engaged once for the whole screen in initState(),
   /// not here — see the comment there for why.
@@ -923,16 +925,27 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       await WakelockPlus.enable();
 
       // Save current filter so _disableRecordingMode can restore it exactly,
-      // then switch to priority-only (silences notifications + ringer but
-      // still lets through priority calls/messages — safer than total NONE).
+      // then switch to total silence. PRIORITY mode was tried first, but its
+      // "let priority calls through" carve-out is decided by the PHONE'S OWN
+      // call-priority policy (Settings -> Sound -> DND -> Calls), not by this
+      // app — on a phone whose policy allows all/starred callers through
+      // (common OEM default), Priority mode blocks nothing for calls and a
+      // ringing call still interrupts mid-recording, which is exactly what
+      // happened during an RT unpack. NONE is the only level Android
+      // guarantees blocks calls unconditionally, independent of that policy.
       final granted = await DndService.isPermissionGranted();
       if (granted) {
         _previousDndFilter = await DndService.getFilter();
-        await DndService.setFilter(DndService.filterPriority);
-        debugPrint('DND: switched to priority (was: $_previousDndFilter)');
+        await DndService.setFilter(DndService.filterNone);
+        debugPrint('DND: switched to total silence (was: $_previousDndFilter)');
       } else {
         _previousDndFilter = null;
       }
+      // Visibility into whether DND was actually engaged for THIS recording —
+      // "DND doesn't work" is ambiguous between "permission never granted"
+      // (silent no-op, every time) and "filter too weak" (the bug fixed
+      // above); this event tells the two apart after the fact.
+      _logActivity('dnd_engage', extra: {'granted': '$granted'});
     } catch (e) {
       debugPrint('enableRecordingMode failed (non-fatal): $e');
     }
