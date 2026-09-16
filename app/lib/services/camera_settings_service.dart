@@ -228,18 +228,6 @@ class CameraSettingsService {
     await prefs.setInt(_zoomModeKey(mode), index.clamp(0, 2));
   }
 
-  // --- Label popup: hold captured still on screen before auto-confirming.
-  //   0 = disabled (old instant-save behavior).
-  static Future<int> getLabelReviewHoldSeconds() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('label_review_hold_seconds') ?? 3;
-  }
-
-  static Future<void> setLabelReviewHoldSeconds(int seconds) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('label_review_hold_seconds', seconds);
-  }
-
   // --- Restore all defaults ---
   static Future<void> restoreDefaults() async {
     final prefs = await SharedPreferences.getInstance();
@@ -259,7 +247,6 @@ class CameraSettingsService {
     await prefs.remove('aspect_default_rt');
     await prefs.remove('zoom_default_pk');
     await prefs.remove('zoom_default_rt');
-    await prefs.remove('label_review_hold_seconds');
     await prefs.remove('auto_label_scan');
     await prefs.remove('auto_label_scan_pk');
     await prefs.remove('auto_label_scan_rt');

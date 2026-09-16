@@ -43,9 +43,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Per-mode zoom default (0=1x, 1=2x, 2=3x)
   int _zoomDefaultPk = 0;
   int _zoomDefaultRt = 0;
-  // Label popup: seconds to hold the captured still before auto-confirming
-  // (0 = instant, old behavior)
-  int _labelReviewHoldSeconds = 3;
   // Storage path settings
   String _selectedStoragePath = CameraSettingsService.storageDefault;
 
@@ -70,7 +67,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _aspectDefaultRt = await CameraSettingsService.getAspectDefaultForMode(CaptureMode.rt);
     _zoomDefaultPk = await CameraSettingsService.getZoomDefaultForMode(CaptureMode.pk);
     _zoomDefaultRt = await CameraSettingsService.getZoomDefaultForMode(CaptureMode.rt);
-    _labelReviewHoldSeconds = await CameraSettingsService.getLabelReviewHoldSeconds();
     _autoLabelScanPk = await CameraSettingsService.getAutoLabelScanForMode(CaptureMode.pk);
     _autoLabelScanRt = await CameraSettingsService.getAutoLabelScanForMode(CaptureMode.rt);
     _autoScanDelayMs = await CameraSettingsService.getAutoScanDelayMs();
@@ -336,18 +332,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onChanged: (v) {
                       setState(() => _autoLabelSave = v);
                       CameraSettingsService.setAutoLabelSave(v);
-                    },
-                  ),
-                ),
-                _buildRow(
-                  label: 'Label review hold',
-                  subtitle: 'Pause to confirm the print before auto-saving',
-                  trailing: _buildDropdown<int>(
-                    value: _labelReviewHoldSeconds,
-                    items: const {0: 'Off', 2: '2 sec', 3: '3 sec', 5: '5 sec'},
-                    onChanged: (v) {
-                      setState(() => _labelReviewHoldSeconds = v);
-                      CameraSettingsService.setLabelReviewHoldSeconds(v);
                     },
                   ),
                 ),

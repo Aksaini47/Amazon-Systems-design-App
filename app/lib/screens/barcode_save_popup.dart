@@ -70,7 +70,7 @@ class _OrderIdInputFormatter extends TextInputFormatter {
 /// digits off) of a known PK Order ID.
 enum _MismatchResolution { useSuggested, keep, retake }
 
-class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerProviderStateMixin {
+class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   final _orderIdController = TextEditingController();
   final _awbController = TextEditingController();
   final _orderIdRegex = RegExp(r'^\d{3}-\d{7}-\d{7}$');
@@ -156,20 +156,6 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   int _autoScanDelayMs = 900;
   Timer? _autoScanTimer;
 
-  // ── Label review hold ──────────────────────────────────────────────────
-  // After a successful lock, hold the just-captured still on screen for a
-  // few seconds so the user can visually confirm the physical label's Order
-  // ID/AWB actually printed correctly, before auto-confirming the save.
-  // AnimationController (not Timer) deliberately — Flutter's ticker pauses
-  // automatically when the app is backgrounded, so if the user backgrounds
-  // mid-hold the countdown freezes and resumes on return instead of
-  // silently auto-confirming while nobody is looking.
-  int _labelReviewHoldSeconds = 3;
-  AnimationController? _reviewCtrl;
-  XFile? _reviewXFile;
-  String? _reviewOrderId;
-  String? _reviewAwb;
-  bool _reviewActive = false;
 
   @override
   void initState() {
@@ -224,7 +210,6 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
     _autoLabelScan = await CameraSettingsService.getAutoLabelScanForMode(widget.mode);
     _autoLabelSave = await CameraSettingsService.getAutoLabelSave();
     _autoScanDelayMs = await CameraSettingsService.getAutoScanDelayMs();
-    _labelReviewHoldSeconds = await CameraSettingsService.getLabelReviewHoldSeconds();
     DebugSessionLog.log(
       location: 'barcode_save_popup.dart:_loadLabelSettings',
       message: 'label settings loaded',
@@ -233,7 +218,6 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
         'autoLabelScan': _autoLabelScan,
         'autoLabelSave': _autoLabelSave,
         'autoScanDelayMs': _autoScanDelayMs,
-        'labelReviewHoldSeconds': _labelReviewHoldSeconds,
       },
     );
   }
@@ -336,7 +320,6 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   @override
   void dispose() {
     _stopAutoScanLoop();
-    _reviewCtrl?.dispose();
     VolumeButtonService().unregisterListener('barcode_popup');
     _cam?.dispose();
     _scanner?.dispose();
@@ -396,7 +379,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   /// and not just an overlay.
   void _onBarcodesDetected(BarcodeCapture capture) {
     if (!mounted || !_barcodeMode) return;
-    if (_reviewActive || _saveTriggered || _switchingMode) return;
+    if (_saveTriggered || _switchingMode) return;
 
     final values = <String>[];
     for (final b in capture.barcodes) {
@@ -514,18 +497,15 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
     }
   }
 
-  /// Mirrors the auto-save decision [_scan] makes, minus the captured still —
-  /// the reader never takes one. The review-hold overlay already tolerates a
-  /// null image, so Sir keeps his countdown window to cancel a wrong read.
+  /// Mirrors the auto-save decision [_scan] makes. Only reached once the
+  /// dual-channel cross-check has already confirmed the Order ID
+  /// (_orderIdVerified), so there's nothing left for a manual look-and-
+  /// confirm step to catch — save immediately.
   void _maybeAutoSaveFromBarcode() {
     if (!_autoLabelSave || !_isValid || !_orderIdVerified || _duplicateWarning != null) return;
-    if (_reviewActive || _saveTriggered) return;
+    if (_saveTriggered) return;
     _saveTriggered = true;
-    if (_labelReviewHoldSeconds > 0) {
-      _startReviewHold(null);
-    } else {
-      unawaited(_onSave());
-    }
+    unawaited(_onSave());
   }
 
   /// Hand the camera between the two readers. Only one may hold it: the
@@ -588,7 +568,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   ///   6. Order ID is filled from OcrService.extractOrderId (or from a
   ///      barcode whose value matches the 3-7-7 pattern)
   Future<void> _scan({bool fromAuto = false}) async {
-    if (_cam == null || !_camReady || _scanning || _reviewActive) return;
+    if (_cam == null || !_camReady || _scanning) return;
     if (fromAuto) _autoScanDone = true;
     _stopAutoScanLoop();
     setState(() {
@@ -723,15 +703,10 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
             'fromAuto': fromAuto,
             'orderId': orderId,
             'autoScanDone': _autoScanDone,
-            'labelReviewHoldSeconds': _labelReviewHoldSeconds,
           },
         );
         // #endregion
-        if (_labelReviewHoldSeconds > 0) {
-          _startReviewHold(xFile);
-        } else {
-          unawaited(_onSave());
-        }
+        unawaited(_onSave());
       } else if (fromAuto) {
         DebugSessionLog.log(
           location: 'barcode_save_popup.dart:_scan',
@@ -807,7 +782,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
         final resolution = await _showMismatchDialog(orderId, match.candidate);
         if (!mounted) return;
         if (resolution == null || resolution == _MismatchResolution.retake) {
-          // Fields stay populated — same UX as _cancelReviewHold's Retake.
+          // Fields stay populated so the user can correct manually or retake.
           return;
         }
         if (resolution == _MismatchResolution.useSuggested) {
@@ -876,52 +851,6 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
   }
 
   void _onCancel() => Navigator.pop(context);
-
-  /// Starts the label-review hold: freezes the just-captured still on
-  /// screen with the detected Order ID/AWB for [_labelReviewHoldSeconds],
-  /// then auto-confirms via [_confirmReviewHold] unless the user cancels
-  /// (Retake) or confirms early (Looks good).
-  void _startReviewHold(XFile? xFile) {
-    _reviewCtrl?.dispose();
-    _reviewCtrl = AnimationController(vsync: this, duration: Duration(seconds: _labelReviewHoldSeconds))
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) _confirmReviewHold();
-      });
-    setState(() {
-      _reviewActive = true;
-      _reviewXFile = xFile;
-      _reviewOrderId = _orderIdController.text.trim();
-      _reviewAwb = _awbController.text.trim();
-    });
-    _reviewCtrl!.forward();
-  }
-
-  void _confirmReviewHold() {
-    if (!mounted || !_reviewActive) return;
-    // Defensive: a duplicate could have been discovered by _onTextChanged
-    // while the overlay was up (fields stay live underneath it).
-    if (_duplicateWarning != null) {
-      _cancelReviewHold();
-      return;
-    }
-    _reviewCtrl?.dispose();
-    _reviewCtrl = null;
-    setState(() => _reviewActive = false);
-    unawaited(_onSave());
-  }
-
-  void _cancelReviewHold() {
-    _reviewCtrl?.dispose();
-    _reviewCtrl = null;
-    if (!mounted) return;
-    setState(() {
-      _reviewActive = false;
-      _reviewXFile = null;
-      _saveTriggered = false;
-    });
-    // Order ID / AWB fields are left populated (not cleared) so the user
-    // can correct them manually or re-tap SCAN to retake.
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1088,7 +1017,6 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
             const SizedBox(height: 14),
           ],
             ),
-            if (_reviewActive) _buildLabelReviewOverlay(),
           ],
         ),
       ),
@@ -1232,145 +1160,6 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> with SingleTickerPr
         ),
       ],
     );
-  }
-
-  /// Full-screen review-hold overlay: shows the frozen captured still with
-  /// the detected Order ID/AWB and a shrinking countdown ring, so the user
-  /// can visually confirm the physical label actually printed correctly
-  /// before the save auto-confirms. "Looks good" confirms immediately;
-  /// "Retake" cancels and leaves the fields populated for a manual fix or
-  /// a fresh SCAN.
-  Widget _buildLabelReviewOverlay() {
-    return Positioned.fill(
-      child: Container(
-        color: Colors.black.withAlpha(230),
-        child: SafeArea(
-          child: Column(
-            children: [
-              const SizedBox(height: 12),
-              Expanded(
-                flex: 5,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      double width, height;
-                      if (constraints.maxWidth * 1.5 <= constraints.maxHeight) {
-                        width = constraints.maxWidth;
-                        height = width * 1.5;
-                      } else {
-                        height = constraints.maxHeight;
-                        width = height / 1.5;
-                      }
-                      return Center(
-                        child: SizedBox(
-                          width: width,
-                          height: height,
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: _reviewXFile != null
-                                      ? Image.file(File(_reviewXFile!.path), fit: BoxFit.cover)
-                                      : Container(color: Colors.black),
-                                ),
-                              ),
-                              Positioned.fill(
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: RfColors.successLight, width: 2),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              ),
-                              if (_reviewCtrl != null)
-                                Positioned(
-                                  top: 12, right: 12,
-                                  child: AnimatedBuilder(
-                                    animation: _reviewCtrl!,
-                                    builder: (context, _) => SizedBox(
-                                      width: 34, height: 34,
-                                      child: Stack(alignment: Alignment.center, children: [
-                                        CircularProgressIndicator(
-                                          value: 1.0 - _reviewCtrl!.value,
-                                          strokeWidth: 3,
-                                          backgroundColor: Colors.white24,
-                                          valueColor: const AlwaysStoppedAnimation(RfColors.successLight),
-                                        ),
-                                        Text(
-                                          '${(_labelReviewHoldSeconds * (1.0 - _reviewCtrl!.value)).ceil()}',
-                                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
-                                        ),
-                                      ]),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  Text(
-                    'Confirm the label printed correctly',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildReviewReadout('Order ID', _reviewOrderId ?? ''),
-                  const SizedBox(height: 6),
-                  _buildReviewReadout('AWB', (_reviewAwb == null || _reviewAwb!.isEmpty) ? '—' : _reviewAwb!),
-                ]),
-              ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(children: [
-                  Expanded(
-                    child: RfButton.secondary(
-                      label: 'Retake',
-                      icon: Icons.replay_rounded,
-                      onPressed: _cancelReviewHold,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: RfButton.primary(
-                      label: 'Looks good',
-                      icon: Icons.check_rounded,
-                      onPressed: _confirmReviewHold,
-                    ),
-                  ),
-                ]),
-              ),
-              const SizedBox(height: 14),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReviewReadout(String label, String value) {
-    return Row(children: [
-      SizedBox(
-        width: 64,
-        child: Text(label, style: const TextStyle(color: RfColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
-      ),
-      Expanded(
-        child: Text(
-          value,
-          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700, fontFamily: 'monospace'),
-        ),
-      ),
-    ]);
   }
 
   List<Widget> _cornerBrackets({Color color = RfColors.amber}) {

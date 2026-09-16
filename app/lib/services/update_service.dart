@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:7 - DND fix: recording ke time ab calls bhi block honge\n- Pehle sirf notifications/ringer mute hote the, priority calls aa jaate the\n- Ab total silence mode - koi bhi call interrupt nahi karega\n- DND on/off ka data bhi ab track hota hai';
+      '2.1.0+14:8 - Label scan ke baad \'confirm looks good\' screen hata diya\n- Barcode + OCR dono channel already match check karte hain\n- Ab match hote hi seedha save ho jaayega, extra confirm step nahi';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
