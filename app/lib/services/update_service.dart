@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:8 - Label scan ke baad \'confirm looks good\' screen hata diya\n- Barcode + OCR dono channel already match check karte hain\n- Ab match hote hi seedha save ho jaayega, extra confirm step nahi';
+      '2.1.0+14:9 - Barcode scanner kabhi-kabhi stuck ho jaata tha - ab auto-detect + Retry button\n- 6 sec tak kuch detect na ho to \'Camera scanner stuck\' dikhega\n- Retry button se scanner khud restart ho jaayega, video dobara nahi karni padegi';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

@@ -156,6 +156,17 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   int _autoScanDelayMs = 900;
   Timer? _autoScanTimer;
 
+  // ── Scanner-stuck watchdog ───────────────────────────────────────────────
+  // 2026-09-23: on a live device, the barcode reader occasionally never
+  // produces a single detection after opening — the camera-release race this
+  // screen already guards against (500ms delay before this popup opens; see
+  // live_capture_screen.dart's _openBarcodePopup) isn't airtight, so this
+  // catches the tail case instead of leaving Sir staring at a frozen preview
+  // with no feedback and no way to recover short of backing out and redoing
+  // the whole video. Every successful scan detects within ~2.5-3.5s
+  // (see barcode_scanner_first_detection events), so 6s is a safe margin.
+  Timer? _scanWatchdog;
+  bool _scanStuck = false;
 
   @override
   void initState() {
@@ -189,6 +200,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       returnImage: true,
     );
     _barcodeMode = widget.mode == CaptureMode.pk;
+    if (_barcodeMode) _armScanWatchdog();
     _bootstrap();
     VolumeButtonService().registerListener('barcode_popup', (event) {
       if (!mounted) return;
@@ -320,6 +332,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   @override
   void dispose() {
     _stopAutoScanLoop();
+    _scanWatchdog?.cancel();
     VolumeButtonService().unregisterListener('barcode_popup');
     _cam?.dispose();
     _scanner?.dispose();
@@ -390,6 +403,8 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
 
     if (!_firstDetectionLogged && _scanOpenedAt != null) {
       _firstDetectionLogged = true;
+      _scanWatchdog?.cancel();
+      if (_scanStuck) setState(() => _scanStuck = false);
       final ms = DateTime.now().difference(_scanOpenedAt!).inMilliseconds;
       unawaited(ActivityLogService.log(
         event: 'barcode_scanner_first_detection',
@@ -535,7 +550,10 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
             _statusMessage = 'Point the box at the barcode';
           });
         }
+        _armScanWatchdog();
       } else {
+        _scanWatchdog?.cancel();
+        _scanStuck = false;
         await _scanner?.stop();
         if (mounted) {
           setState(() {
@@ -551,6 +569,37 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       _switchingMode = false;
       if (mounted) setState(() {});
     }
+  }
+
+  /// Starts (or restarts) the "has the reader detected anything yet" clock.
+  /// Cancelled the moment [_onBarcodesDetected] sees its first real barcode,
+  /// or when leaving barcode mode entirely.
+  void _armScanWatchdog() {
+    _scanWatchdog?.cancel();
+    _scanWatchdog = Timer(const Duration(seconds: 6), () {
+      if (!mounted || !_barcodeMode || _firstDetectionLogged) return;
+      setState(() => _scanStuck = true);
+      unawaited(ActivityLogService.log(event: 'barcode_scanner_stuck', mode: widget.mode));
+    });
+  }
+
+  /// Stops and restarts the scanner's own camera session in place — the
+  /// camera device should be long free by the time this is ever reachable
+  /// (6s+ after this popup opened), so a fresh start() almost always clears
+  /// whatever the initial race left stuck. "BARCODE TORN? USE TEXT SCAN"
+  /// remains available underneath as a second escape hatch if it doesn't.
+  Future<void> _retryScanner() async {
+    unawaited(HapticFeedback.selectionClick());
+    setState(() => _scanStuck = false);
+    unawaited(ActivityLogService.log(event: 'barcode_scanner_retry', mode: widget.mode));
+    try {
+      await _scanner?.stop();
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      await _scanner?.start();
+    } catch (e) {
+      debugPrint('Scanner retry failed: $e');
+    }
+    if (mounted && _barcodeMode) _armScanWatchdog();
   }
 
   /// Manual scan — captures a still, runs barcode + OCR in parallel, then
@@ -1158,6 +1207,35 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
             ),
           ),
         ),
+        if (_scanStuck)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withAlpha(200),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.camera_alt_outlined, color: Colors.white70, size: 28),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Camera scanner stuck',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 14),
+                      RfButton.primary(
+                        label: 'Retry',
+                        icon: Icons.refresh_rounded,
+                        onPressed: _retryScanner,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
