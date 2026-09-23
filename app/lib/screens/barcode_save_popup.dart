@@ -199,8 +199,16 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       // barcode was actually found, not every frame.
       returnImage: true,
     );
-    _barcodeMode = widget.mode == CaptureMode.pk;
-    if (_barcodeMode) _armScanWatchdog();
+    // 2026-09-23 (Sir): the continuous live barcode reader — ML Kit decoding
+    // every frame at a forced 1920x1080 analysis resolution — stayed
+    // perceptibly laggy even after the camera-release-race fixes above, and
+    // still occasionally hung outright despite the watchdog. Reverting PK's
+    // default to the same tap/auto-scan flow RT already uses: one still,
+    // OCR + barcode read together, cross-checked (_crossCheckOrderId /
+    // OrderIdCrossCheck below still fully applies) — same safety, lighter
+    // camera load. The live reader is still one tap away via the BARCODE
+    // chip below for labels whose barcode reads better that way.
+    _barcodeMode = false;
     _bootstrap();
     VolumeButtonService().registerListener('barcode_popup', (event) {
       if (!mounted) return;
