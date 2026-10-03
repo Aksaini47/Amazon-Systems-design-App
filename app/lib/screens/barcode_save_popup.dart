@@ -429,7 +429,8 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     // number into this field in the first place. Filling the field is NOT
     // the same as trusting it — _crossCheckOrderId decides that, and only
     // its result unlocks auto-save (_maybeAutoSaveFromBarcode).
-    if (!_orderIdRegex.hasMatch(_orderIdController.text.trim())) {
+    final currentOrderId = _orderIdController.text.trim();
+    if (!_orderIdRegex.hasMatch(currentOrderId)) {
       for (final v in values) {
         if (_orderIdRegex.hasMatch(v)) {
           _orderIdController.text = v;
@@ -439,6 +440,13 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
           break;
         }
       }
+    } else if (!_orderIdVerified && !_orderIdChecking && values.contains(currentOrderId)) {
+      // Same bug as _scan() below: once the field already holds a
+      // well-formed value, this used to never ask for a second opinion
+      // again, so a value whose first cross-check came back unconfirmed (no
+      // OCR agreement that pass) stayed stuck unverified forever even
+      // though the reader keeps seeing the same barcode every frame.
+      unawaited(_crossCheckOrderId(currentOrderId, capture.image));
     }
 
     // AWB rides along on the same detections — free, since the label's AWB is
@@ -704,7 +712,8 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       // overwrites a value already in the field.
       final ocrOrderId = ocrResult.orderId;
       if (ocrOrderId != null) orderIdFound = true;
-      if (!_orderIdRegex.hasMatch(_orderIdController.text.trim())) {
+      final currentOrderId = _orderIdController.text.trim();
+      if (!_orderIdRegex.hasMatch(currentOrderId)) {
         final chosen = barcodeOrderId ?? ocrOrderId;
         if (chosen != null) {
           _orderIdController.text = chosen;
@@ -715,6 +724,25 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
           } else {
             _orderIdConflictValue = null;
           }
+        }
+      } else if (!_orderIdVerified) {
+        // The field already holds a well-formed Order ID from an earlier
+        // scan that never got independently confirmed (that attempt's OCR
+        // read missed, or no order-id barcode was in frame that time) — the
+        // guard above used to skip this whole channel once the field was
+        // already valid, so a rescan could NEVER retry the cross-check and
+        // auto-save stayed permanently locked out no matter how many times
+        // Sir tapped SCAN again. Retry here, but only accept a confirmation
+        // that is actually about THIS value — a fresh read of some other
+        // order id must not silently verify (or overwrite) what's typed.
+        if (barcodeOrderId == currentOrderId && ocrOrderId != null) {
+          final check = OrderIdCrossCheck(barcode: barcodeOrderId!, ocr: ocrOrderId);
+          _orderIdConflictValue = check.conflicting ? ocrOrderId : null;
+          if (check.confirmed) _verifiedOrderIdValue = barcodeOrderId;
+        } else if (ocrOrderId == currentOrderId && barcodeOrderId != null) {
+          final check = OrderIdCrossCheck(barcode: barcodeOrderId, ocr: ocrOrderId!);
+          _orderIdConflictValue = check.conflicting ? ocrOrderId : null;
+          if (check.confirmed) _verifiedOrderIdValue = barcodeOrderId;
         }
       }
 
@@ -1049,13 +1077,11 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
                       : (!_prefixValid && _orderIdController.text.trim().isNotEmpty)
                           ? 'Invalid Order ID prefix'
                           : null,
-                  // Format-valid and came from a scan, but not (yet)
-                  // independently confirmed — see the cross-check block
-                  // above. A value typed by hand with no scan involved
-                  // skips this: there is nothing scanned to disagree with.
-                  warningText: (_orderIdConflictValue == null && _isValid && _foundOrderId && !_orderIdVerified)
-                      ? (_orderIdChecking ? 'Verifying against label text…' : 'Unconfirmed — check the label before saving')
-                      : null,
+                  // Sir 2026-10-03: the amber "unconfirmed, check the label"
+                  // highlight on this field is removed — a real mismatch
+                  // still shows red via errorText above; the dual-channel
+                  // check itself (_orderIdVerified) still gates auto-save,
+                  // only the visual nag is gone.
                   keyboardType: TextInputType.number,
                   inputFormatters: [_OrderIdInputFormatter()],
                 ),

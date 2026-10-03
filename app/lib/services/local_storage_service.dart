@@ -817,6 +817,19 @@ class LocalStorageService {
       }
     }
 
+    final subReasons = <QCSubReason>[];
+    final subReasonNames = meta?['qc_sub_reasons'];
+    if (subReasonNames is List) {
+      for (final name in subReasonNames) {
+        for (final r in QCSubReason.values) {
+          if (r.name == name) {
+            subReasons.add(r);
+            break;
+          }
+        }
+      }
+    }
+
     DateTime sessionStartedAt = DateTime.now();
     if (meta?['session_started_at'] != null) {
       sessionStartedAt =
@@ -838,6 +851,7 @@ class LocalStorageService {
       contentsPhotoPath: await resolvePhoto(PhotoSide.contents),
       serialPhotoPath: await resolvePhoto(PhotoSide.serial),
       verdict: verdict,
+      subReasons: subReasons,
       productTitle: meta?['product_title'] as String?,
     );
   }
@@ -1036,7 +1050,19 @@ class LocalStorageService {
 
     if (session.verdict != null) {
       merged['verdict'] = session.verdict!.name;
+      merged['qc_reason_label'] = session.verdict!.label;
       merged['claim_trigger'] = session.verdict!.triggersClaim;
+    }
+
+    // Sub-reason was being picked in the verdict sheet, carried all the way
+    // into this CaptureSession, and then dropped silently right here — meta
+    // files never had it even though the whole flow upstream behaved as if
+    // they would. Amazon's SAFE-T claim-form wording is included alongside
+    // the raw enum names, same as qc_reason_label above, for direct use
+    // when filing a claim without decoding anything.
+    if (session.subReasons.isNotEmpty) {
+      merged['qc_sub_reasons'] = session.subReasons.map((r) => r.name).toList();
+      merged['qc_sub_reason_labels'] = session.subReasons.map((r) => r.label).toList();
     }
 
     if (session.productTitle != null) {

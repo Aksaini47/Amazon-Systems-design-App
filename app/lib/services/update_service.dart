@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:10 - PK barcode scanner default se hata diya - wapas fast tap-scan wala\n- Live continuous barcode reader laggy tha, hardware pe bhaari tha\n- Ab PK bhi RT jaisa: tap karo, ek photo se order id+AWB dono nikalte hain\n- Safety same hai - barcode aur label text dono match karke hi verify hota hai\n- Chaaho to BARCODE button se live-scan try kar sakte ho abhi bhi';
+      '2.1.0+14:11 - Label auto-save aur return QC meta fix\n- Order ID rescan par ab dobara verify hota hai; pehle ek baar fail hua toh auto-save hamesha ruka reh jaata tha\n- Order ID field ka yellow unconfirmed highlight hata diya\n- Return (RT) ka QC reason aur sub-reason ab meta file mein properly save hota hai';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

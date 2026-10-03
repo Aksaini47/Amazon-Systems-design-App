@@ -17,6 +17,18 @@ enum QCVerdict {
   /// Single source of truth for meta.json's claim_trigger: every non-OK
   /// verdict flags a claim (damagedDifferent included — the worst case).
   bool get triggersClaim => this != QCVerdict.ok;
+
+  /// Human-readable reason, parallel to [QCSubReason.label] — meta.json
+  /// writes both so the return reason is legible without decoding the raw
+  /// enum name (`verdict: "damagedDifferent"` on its own told nobody what
+  /// actually happened).
+  String get label => switch (this) {
+        QCVerdict.ok => 'Item matches, no issue',
+        QCVerdict.damaged => 'Item received damaged',
+        QCVerdict.different => 'Different item received',
+        QCVerdict.damagedDifferent => 'Item received damaged and different from what was sent',
+        QCVerdict.emptyBox => 'Empty box received',
+      };
 }
 
 /// Sub-reason under a claim-triggering [QCVerdict] — wording is Amazon's
