@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:11 - Label auto-save aur return QC meta fix\n- Order ID rescan par ab dobara verify hota hai; pehle ek baar fail hua toh auto-save hamesha ruka reh jaata tha\n- Order ID field ka yellow unconfirmed highlight hata diya\n- Return (RT) ka QC reason aur sub-reason ab meta file mein properly save hota hai';
+      '2.1.0+14:12 - Auto-save ab Order ID aur AWB dono mil-te hi hota hai\n- Pehle barcode aur label-text dono ka ek hi photo mein match hona zaroori tha, isliye auto-save lagbhag kabhi nahi chalta tha\n- Ab sirf tab rukta hai jab dono padhaai aapas mein ulti aayein ya duplicate ho\n- Return label ka AWB agar usi order ke packing record se milta ho toh ab duplicate nahi maana jaata\n- Order ID field par ab koi yellow highlight nahi';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

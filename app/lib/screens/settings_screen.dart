@@ -326,7 +326,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _buildRow(
                   label: 'Auto save after scan',
-                  subtitle: 'Close the label popup once the Order ID is valid',
+                  subtitle: 'Save and close the label popup as soon as both Order ID and AWB are read',
                   trailing: _buildSwitch(
                     value: _autoLabelSave,
                     onChanged: (v) {

@@ -16,7 +16,6 @@ import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
 import '../widgets/rf_button.dart';
 import '../services/activity_log_service.dart';
-import '../utils/debug_session_log.dart';
 import '../utils/order_id_matcher.dart';
 import '../utils/volume_button_service.dart';
 
@@ -119,31 +118,33 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   bool _firstDetectionLogged = false;
 
   // ─── Order ID dual-channel cross-check ─────────────────────────────────
-  // 2026-09: a wrong Order ID saved on a PK video broke the PK<->RT match on
-  // the PC side and cost a real, unfiled claim. A barcode decode alone
-  // proves the value is WELL-FORMED (it passed Code128's own checksum), not
-  // that it is the right one — and there is no checksum inside an Amazon
-  // order id, and no ground truth to check a first capture against. See
-  // OrderIdCrossCheck (order_id_matcher.dart) for the full reasoning; the
-  // short version is: trust a value only when a second, independent read
-  // (OCR of the same frame's printed digits) agrees with it.
+  // Barcode decode and OCR of the printed digits are two independent reads
+  // of the same Order ID (see OrderIdCrossCheck in order_id_matcher.dart).
+  // Since 2026-10-05 they no longer GATE auto-save on agreeing — requiring
+  // both to land in one frame meant auto-save almost never fired. They only
+  // BLOCK it when they positively disagree (_orderIdConflictValue): two
+  // plausible-looking candidates is the one case worth stopping for. A clean
+  // agreement is still recorded here, purely so the saved-order log shows
+  // whether a given save was double-confirmed or single-channel.
   //
   // Tracked as the specific STRING that was confirmed, not a bool, so any
   // edit — a fresh scan overwriting it, a manual retype — makes it stale on
   // its own without needing an explicit reset at every call site that
   // touches the field.
   String? _verifiedOrderIdValue;
-  bool get _orderIdVerified =>
-      _verifiedOrderIdValue != null &&
-      _verifiedOrderIdValue == _orderIdController.text.trim();
   bool _orderIdChecking = false;
-  String? _orderIdConflictValue;  // disagreeing OCR read, for display only
+  String? _orderIdConflictValue;  // the disagreeing read, blocks auto-save
+  String _lastOrderIdText = '';
 
   // Duplicate detection — populated from disk at init, compared on every
   // text-change/scan so the user gets a red banner BEFORE saving over an
   // existing order.
   Set<String> _existingOrderIds = {};
-  Set<String> _existingAwbs = {};
+  // AWB -> the bare Order IDs it is already saved under. Keyed by owner, not a
+  // flat set, because a returned parcel often travels back on its ORIGINAL
+  // AWB: the PK and RT records of one order legitimately share it, and a flat
+  // set flagged every such return as a duplicate and blocked its auto-save.
+  final Map<String, Set<String>> _awbOwners = {};
   String? _duplicateWarning;
 
   // Known PK-saved order ids (bare, hyphenated) — ground truth for the RT
@@ -155,6 +156,12 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   bool _autoLabelSave = true;
   int _autoScanDelayMs = 900;
   Timer? _autoScanTimer;
+  // Settings load async while the live reader may already be detecting —
+  // auto-save waits for the real value instead of trusting the default.
+  bool _settingsLoaded = false;
+  // Last reason auto-save declined to fire, so the analytics log records a
+  // reason once per change rather than once per detection frame.
+  String? _lastAutoSaveBlock;
 
   // ── Scanner-stuck watchdog ───────────────────────────────────────────────
   // 2026-09-23: on a live device, the barcode reader occasionally never
@@ -230,16 +237,16 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     _autoLabelScan = await CameraSettingsService.getAutoLabelScanForMode(widget.mode);
     _autoLabelSave = await CameraSettingsService.getAutoLabelSave();
     _autoScanDelayMs = await CameraSettingsService.getAutoScanDelayMs();
-    DebugSessionLog.log(
-      location: 'barcode_save_popup.dart:_loadLabelSettings',
-      message: 'label settings loaded',
-      hypothesisId: 'H4-settings',
-      data: {
-        'autoLabelScan': _autoLabelScan,
-        'autoLabelSave': _autoLabelSave,
-        'autoScanDelayMs': _autoScanDelayMs,
+    _settingsLoaded = true;
+    unawaited(ActivityLogService.log(
+      event: 'label_popup_open',
+      mode: widget.mode,
+      extra: {
+        'auto_save': '$_autoLabelSave',
+        'auto_scan': '$_autoLabelScan',
+        'barcode_mode': '$_barcodeMode',
       },
-    );
+    ));
   }
 
   void _scheduleAutoScanOnce() {
@@ -260,38 +267,41 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   bool _autoScanDone = false;
 
   /// Read every order on disk once at popup-open. Stores the set of orderIds
-  /// and AWBs so [_onTextChanged] can flag duplicates without per-keystroke I/O.
+  /// and each AWB's owning orders so [_onTextChanged] can flag duplicates
+  /// without per-keystroke I/O.
   Future<void> _loadExistingOrders() async {
     try {
       final orders = await LocalStorageService().listOrders();
       final ids = <String>{};
-      final awbs = <String>{};
+      final owners = <String, Set<String>>{};
       final pkIds = <String>{};
       for (final o in orders) {
         final id = o['orderId'] as String?;
         if (id != null && id.isNotEmpty) ids.add(id);
-        if (o['mode'] == 'pk') {
-          final bare = o['bareOrderId'] as String?;
-          if (bare != null && bare.isNotEmpty) pkIds.add(bare);
-        }
+        final bare = o['bareOrderId'] as String?;
+        if (o['mode'] == 'pk' && bare != null && bare.isNotEmpty) pkIds.add(bare);
         // meta.json may carry awb in some orders — pull from it if present
         try {
           final metaPath = o['metaPath'] as String?;
-          if (metaPath != null) {
+          if (metaPath != null && bare != null) {
             final raw = await File(metaPath).readAsString();
             final m = jsonDecode(raw) as Map<String, dynamic>;
-            final awb = m['awb'] as String?;
-            if (awb != null && awb.isNotEmpty) awbs.add(awb.trim());
+            final awb = (m['awb'] as String?)?.trim();
+            if (awb != null && awb.isNotEmpty) {
+              owners.putIfAbsent(awb, () => <String>{}).add(bare);
+            }
           }
         } catch (_) {}
       }
       if (!mounted) return;
       setState(() {
         _existingOrderIds = ids;
-        _existingAwbs = awbs;
+        _awbOwners
+          ..clear()
+          ..addAll(owners);
         _pkOrderIds = pkIds;
       });
-      debugPrint('Duplicate scan loaded: ${ids.length} orderIds, ${awbs.length} AWBs, ${pkIds.length} PK ids');
+      debugPrint('Duplicate scan loaded: ${ids.length} orderIds, ${owners.length} AWBs, ${pkIds.length} PK ids');
     } catch (e) {
       debugPrint('_loadExistingOrders failed: $e');
     }
@@ -309,17 +319,28 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     _validateInput();
     final orderId = _orderIdController.text.trim();
     final awb = _awbController.text.trim();
+    // A mismatch verdict belongs to the value it was reached about; a new or
+    // retyped Order ID starts clean. Scan fills assign the text BEFORE they
+    // set the verdict, so this never wipes a fresh one.
+    if (orderId != _lastOrderIdText) {
+      _lastOrderIdText = orderId;
+      if (_orderIdConflictValue != null) {
+        setState(() => _orderIdConflictValue = null);
+      }
+    }
     String? warn;
-    if (orderId.isNotEmpty && _orderIdRegex.hasMatch(orderId)) {
+    if (_orderIdRegex.hasMatch(orderId)) {
       final storageKey = FileNamingService.orderFolderName(orderId, widget.mode);
       if (_existingOrderIds.contains(storageKey)) {
         warn = 'Order $orderId already saved (${widget.mode.name.toUpperCase()})';
+      } else if (_existingOrderIds.contains(orderId)) {
+        warn = 'Order ID $orderId already in gallery';
+      } else if (awb.isNotEmpty && (_awbOwners[awb]?.any((o) => o != orderId) ?? false)) {
+        // Same AWB under the SAME order is normal (see _awbOwners); only
+        // another order's AWB is suspicious. Judged once the Order ID is
+        // known, so a half-filled form never flashes a false alarm.
+        warn = 'AWB $awb already saved under a different order';
       }
-    }
-    if (warn == null && orderId.isNotEmpty && _existingOrderIds.contains(orderId)) {
-      warn = 'Order ID $orderId already in gallery';
-    } else if (awb.isNotEmpty && _existingAwbs.contains(awb)) {
-      warn = 'AWB $awb already in gallery (different order ID?)';
     }
     if (warn != _duplicateWarning) {
       setState(() => _duplicateWarning = warn);
@@ -426,11 +447,10 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     // Order ID — taken verbatim from the barcode, accepted only if it is
     // ALREADY exactly 3-7-7. No digit-guessing, no letter→digit fixups, no
     // "any 17 digits on the page" fallback: those are what put a tracking
-    // number into this field in the first place. Filling the field is NOT
-    // the same as trusting it — _crossCheckOrderId decides that, and only
-    // its result unlocks auto-save (_maybeAutoSaveFromBarcode).
-    final currentOrderId = _orderIdController.text.trim();
-    if (!_orderIdRegex.hasMatch(currentOrderId)) {
+    // number into this field in the first place. _crossCheckOrderId then
+    // reads the same frame's printed digits and flags a disagreement, which
+    // _maybeAutoSave treats as a block.
+    if (!_orderIdRegex.hasMatch(_orderIdController.text.trim())) {
       for (final v in values) {
         if (_orderIdRegex.hasMatch(v)) {
           _orderIdController.text = v;
@@ -440,13 +460,6 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
           break;
         }
       }
-    } else if (!_orderIdVerified && !_orderIdChecking && values.contains(currentOrderId)) {
-      // Same bug as _scan() below: once the field already holds a
-      // well-formed value, this used to never ask for a second opinion
-      // again, so a value whose first cross-check came back unconfirmed (no
-      // OCR agreement that pass) stayed stuck unverified forever even
-      // though the reader keeps seeing the same barcode every frame.
-      unawaited(_crossCheckOrderId(currentOrderId, capture.image));
     }
 
     // AWB rides along on the same detections — free, since the label's AWB is
@@ -465,26 +478,24 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     if (!changed) return;
     HapticFeedback.mediumImpact();
     setState(() {
-      _statusMessage = _foundOrderId && !_orderIdChecking && !_orderIdVerified
-          ? 'Verifying Order ID against label text…'
-          : _foundOrderId && _foundAwb
-              ? '✓ Order ID + AWB read'
-              : _foundOrderId
-                  ? 'Order ID read — sweep across the AWB barcode'
-                  : 'AWB read — sweep across the Order ID barcode';
+      _statusMessage = _foundOrderId && _foundAwb
+          ? '✓ Order ID + AWB read'
+          : _foundOrderId
+              ? 'Order ID read — sweep across the AWB barcode'
+              : 'AWB read — sweep across the Order ID barcode';
     });
-    _maybeAutoSaveFromBarcode();
+    _maybeAutoSave('live');
   }
 
-  /// Independently confirm a barcode-read Order ID against the SAME frame's
-  /// printed digits before it is trusted for auto-save. Never touches the
-  /// field's TEXT — only [_verifiedOrderIdValue]/[_orderIdConflictValue],
-  /// which [_buildField]'s call site and [_maybeAutoSaveFromBarcode] read.
+  /// Reads the SAME frame's printed digits and compares them with a
+  /// barcode-read Order ID. Never touches the field's TEXT — only
+  /// [_verifiedOrderIdValue]/[_orderIdConflictValue]; a disagreement is what
+  /// makes [_maybeAutoSave] hold off.
   Future<void> _crossCheckOrderId(String barcodeValue, Uint8List? pngBytes) async {
     if (pngBytes == null) {
-      // returnImage produced nothing for this frame (rare). Leave
-      // unverified rather than guessing — the value stays usable via the
-      // manual SAVE button, just not auto-save eligible.
+      // returnImage produced nothing for this frame (rare): no second read
+      // to compare against, so nothing can disagree.
+      _maybeAutoSave('live');
       return;
     }
     setState(() => _orderIdChecking = true);
@@ -502,41 +513,67 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       _orderIdChecking = false;
       _orderIdConflictValue = check.conflicting ? ocrValue : null;
       if (check.confirmed) _verifiedOrderIdValue = barcodeValue;
-      _statusMessage = check.confirmed
-          ? '✓ Order ID confirmed — barcode and label text agree'
-          : check.conflicting
-              ? 'Mismatch: barcode reads $barcodeValue, label text reads $ocrValue — check the label'
-              : 'Order ID read once, unconfirmed — check the label before saving';
-    });
-    if (check.confirmed) {
-      unawaited(HapticFeedback.mediumImpact());
-      _maybeAutoSaveFromBarcode();
-    } else {
-      unawaited(HapticFeedback.heavyImpact());
       if (check.conflicting) {
-        // Barcode and OCR disagreed — exactly the case the dual-channel
-        // cross-check exists to catch before a wrong Order ID gets saved.
-        // Frequency of this event is the signal for whether that safeguard
-        // is earning its keep or just adding friction.
-        unawaited(ActivityLogService.log(
-          event: 'order_id_cross_check_conflict',
-          mode: widget.mode,
-          orderId: barcodeValue,
-          extra: {'ocr_read': ocrValue ?? ''},
-        ));
+        _statusMessage = 'Mismatch: barcode reads $barcodeValue, label text reads $ocrValue — check the label';
       }
+    });
+    if (check.conflicting) {
+      unawaited(HapticFeedback.heavyImpact());
+      unawaited(ActivityLogService.log(
+        event: 'order_id_cross_check_conflict',
+        mode: widget.mode,
+        orderId: barcodeValue,
+        extra: {'ocr_read': ocrValue ?? ''},
+      ));
     }
+    _maybeAutoSave('live');
   }
 
-  /// Mirrors the auto-save decision [_scan] makes. Only reached once the
-  /// dual-channel cross-check has already confirmed the Order ID
-  /// (_orderIdVerified), so there's nothing left for a manual look-and-
-  /// confirm step to catch — save immediately.
-  void _maybeAutoSaveFromBarcode() {
-    if (!_autoLabelSave || !_isValid || !_orderIdVerified || _duplicateWarning != null) return;
-    if (_saveTriggered) return;
+  // ─── Auto-save ─────────────────────────────────────────────────────────
+
+  /// Why auto-save must NOT fire right now, or null when it may. Every
+  /// scan-driven path (tap scan, auto-scan, live reader) asks this one
+  /// question — the old code had three near-copies of the gate, one of which
+  /// demanded barcode+OCR agreement and so almost never let a save through.
+  ///
+  /// Auto-save fires the moment BOTH the Order ID and the AWB are read and
+  /// nothing is wrong with them: valid Order ID, no duplicate, and no
+  /// positive barcode-vs-OCR disagreement.
+  String? _autoSaveBlocker() {
+    if (!_autoLabelSave) return 'setting_off';
+    if (!_isValid) return 'order_id_invalid';
+    if (_awbController.text.trim().isEmpty) return 'awb_missing';
+    if (_orderIdChecking) return 'order_id_checking';
+    if (_orderIdConflictValue != null) return 'order_id_conflict';
+    if (_duplicateWarning != null) return 'duplicate';
+    return null;
+  }
+
+  /// Saves and closes the popup if [_autoSaveBlocker] allows. [source] names
+  /// the path that asked ('scan', 'auto_scan', 'live') for the analytics log.
+  void _maybeAutoSave(String source) {
+    if (!mounted || _saveTriggered || !_settingsLoaded) return;
+    final blocker = _autoSaveBlocker();
+    if (blocker != null) {
+      // Nothing to say about an empty form; every other reason is worth a
+      // row, once per change, so "auto-save didn't fire" is diagnosable from
+      // the Firestore log instead of guessed at.
+      if (blocker != 'order_id_invalid' && blocker != _lastAutoSaveBlock) {
+        unawaited(ActivityLogService.log(
+          event: 'auto_save_blocked',
+          mode: widget.mode,
+          orderId: _orderIdController.text.trim(),
+          extra: {'reason': blocker, 'source': source},
+        ));
+      }
+      _lastAutoSaveBlock = blocker;
+      return;
+    }
+    _lastAutoSaveBlock = null;
+    // Released again if _onSave declines (RT near-match dialog → Retake), so
+    // one declined save cannot lock auto-save out for the rest of the popup.
     _saveTriggered = true;
-    unawaited(_onSave());
+    unawaited(_onSave(autoSource: source).whenComplete(() => _saveTriggered = false));
   }
 
   /// Hand the camera between the two readers. Only one may hold it: the
@@ -705,46 +742,10 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         }
       }
 
-      // Stage 6: Order ID. Barcode and OCR just read the SAME captured
-      // still, so if BOTH answered, cross-check them before trusting either
-      // — a barcode decode alone already passed Code128's own checksum,
-      // which proves well-formed, not correct (see OrderIdCrossCheck). Never
-      // overwrites a value already in the field.
+      // Stage 6: Order ID — barcode and OCR both read this same still.
       final ocrOrderId = ocrResult.orderId;
       if (ocrOrderId != null) orderIdFound = true;
-      final currentOrderId = _orderIdController.text.trim();
-      if (!_orderIdRegex.hasMatch(currentOrderId)) {
-        final chosen = barcodeOrderId ?? ocrOrderId;
-        if (chosen != null) {
-          _orderIdController.text = chosen;
-          if (barcodeOrderId != null && ocrOrderId != null) {
-            final check = OrderIdCrossCheck(barcode: barcodeOrderId, ocr: ocrOrderId);
-            _orderIdConflictValue = check.conflicting ? ocrOrderId : null;
-            if (check.confirmed) _verifiedOrderIdValue = barcodeOrderId;
-          } else {
-            _orderIdConflictValue = null;
-          }
-        }
-      } else if (!_orderIdVerified) {
-        // The field already holds a well-formed Order ID from an earlier
-        // scan that never got independently confirmed (that attempt's OCR
-        // read missed, or no order-id barcode was in frame that time) — the
-        // guard above used to skip this whole channel once the field was
-        // already valid, so a rescan could NEVER retry the cross-check and
-        // auto-save stayed permanently locked out no matter how many times
-        // Sir tapped SCAN again. Retry here, but only accept a confirmation
-        // that is actually about THIS value — a fresh read of some other
-        // order id must not silently verify (or overwrite) what's typed.
-        if (barcodeOrderId == currentOrderId && ocrOrderId != null) {
-          final check = OrderIdCrossCheck(barcode: barcodeOrderId!, ocr: ocrOrderId);
-          _orderIdConflictValue = check.conflicting ? ocrOrderId : null;
-          if (check.confirmed) _verifiedOrderIdValue = barcodeOrderId;
-        } else if (ocrOrderId == currentOrderId && barcodeOrderId != null) {
-          final check = OrderIdCrossCheck(barcode: barcodeOrderId, ocr: ocrOrderId!);
-          _orderIdConflictValue = check.conflicting ? ocrOrderId : null;
-          if (check.confirmed) _verifiedOrderIdValue = barcodeOrderId;
-        }
-      }
+      _applyOrderIdReads(barcodeId: barcodeOrderId, ocrId: ocrOrderId);
 
       if (!mounted) return;
       String msg;
@@ -754,12 +755,10 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       final orderIdOk = _orderIdRegex.hasMatch(_orderIdController.text.trim());
       if (_orderIdConflictValue != null) {
         msg = 'Order ID mismatch — barcode and label text disagree, check the label';
-      } else if (awbFound && orderIdOk && !_orderIdVerified) {
-        msg = '${carrierName ?? "AWB"} found · Order ID unconfirmed — check the label';
-      } else if (awbFound && orderIdFound) {
+      } else if (awbFound && orderIdOk) {
         msg = '✓ Locked${carrierName != null ? " · $carrierName" : ""} + Order ID';
       } else if (orderIdFound && !awbFound) {
-        msg = 'Order ID found — no AWB detected on label';
+        msg = 'Order ID found — no AWB detected, tap SCAN again';
       } else if (awbFound && !orderIdFound) {
         msg = '${carrierName ?? "AWB"} found — Order ID text not detected';
       } else {
@@ -775,31 +774,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       });
       // Re-run duplicate check after auto-fill from scan
       _onTextChanged();
-
-      final orderId = _orderIdController.text.trim();
-      final canAutoSave = _autoLabelSave && _isValid && _orderIdVerified && _duplicateWarning == null;
-      if (canAutoSave) {
-        // #region agent log
-        DebugSessionLog.log(
-          location: 'barcode_save_popup.dart:_scan',
-          message: 'auto save triggered',
-          hypothesisId: 'H4-settings',
-          data: {
-            'fromAuto': fromAuto,
-            'orderId': orderId,
-            'autoScanDone': _autoScanDone,
-          },
-        );
-        // #endregion
-        unawaited(_onSave());
-      } else if (fromAuto) {
-        DebugSessionLog.log(
-          location: 'barcode_save_popup.dart:_scan',
-          message: 'auto scan once complete',
-          hypothesisId: 'H10-auto-once',
-          data: {'orderIdFound': orderIdFound, 'awbFound': awbFound, 'isValid': _isValid},
-        );
-      }
+      _maybeAutoSave(fromAuto ? 'auto_scan' : 'scan');
     } catch (e) {
       debugPrint('Scan failed: $e');
       if (mounted) {
@@ -809,6 +784,36 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         });
       }
     }
+  }
+
+  /// Puts one scan's Order ID reads into the field and records whether the
+  /// two channels agree. Barcode and OCR read the SAME captured still.
+  ///
+  /// A well-formed value already in the field is never overwritten — a rescan
+  /// only re-judges it against the fresh reads, and only when at least one
+  /// read is about THAT value (a read of some other order id must not
+  /// silently confirm, or overwrite, what is there).
+  void _applyOrderIdReads({String? barcodeId, String? ocrId}) {
+    var filledNow = false;
+    if (!_orderIdRegex.hasMatch(_orderIdController.text.trim())) {
+      final chosen = barcodeId ?? ocrId;
+      if (chosen == null) return;
+      _orderIdController.text = chosen;
+      filledNow = true;
+    }
+    final value = _orderIdController.text.trim();
+    final canJudge = barcodeId != null &&
+        ocrId != null &&
+        (barcodeId == value || ocrId == value);
+    if (!canJudge) {
+      // Single-channel read: nothing to disagree with. A fresh fill drops any
+      // verdict about the previous value; an existing field keeps its own.
+      if (filledNow) _orderIdConflictValue = null;
+      return;
+    }
+    final check = OrderIdCrossCheck(barcode: barcodeId, ocr: ocrId);
+    _orderIdConflictValue = check.conflicting ? (barcodeId == value ? ocrId : barcodeId) : null;
+    if (check.confirmed) _verifiedOrderIdValue = value;
   }
 
   void _validateInput() {
@@ -852,11 +857,11 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     }
   }
 
-  /// Every save path (instant auto-save, label-review-hold auto-confirm,
-  /// manual SAVE button) funnels through here — a single choke point for
-  /// the RT near-match mismatch check, so it always runs "before an RT
-  /// order id gets saved" regardless of how the save was triggered.
-  Future<void> _onSave() async {
+  /// Every save path (auto-save, manual SAVE button) funnels through here —
+  /// a single choke point for the RT near-match mismatch check, so it always
+  /// runs "before an RT order id gets saved" regardless of how the save was
+  /// triggered. [autoSource] is set only for auto-saves, for the log.
+  Future<void> _onSave({String? autoSource}) async {
     if (!_isValid) return;
     var orderId = _orderIdController.text.trim();
     final awb = _awbController.text.trim();
@@ -888,7 +893,10 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       mode: widget.mode,
       orderId: orderId,
       awb: awb.isEmpty ? null : awb,
-      extra: {'verified': '${orderId == _verifiedOrderIdValue}'},
+      extra: {
+        'verified': '${orderId == _verifiedOrderIdValue}',
+        'auto_source': autoSource ?? 'manual',
+      },
     ));
     if (!mounted) return;
     Navigator.pop(context, {
@@ -1073,15 +1081,10 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
                   detected: _foundOrderId,
                   isValid: _isValid,
                   errorText: _orderIdConflictValue != null
-                      ? 'Mismatch — barcode: ${_orderIdController.text.trim()}, label text: $_orderIdConflictValue'
+                      ? 'Mismatch — the label also reads $_orderIdConflictValue, check it before saving'
                       : (!_prefixValid && _orderIdController.text.trim().isNotEmpty)
                           ? 'Invalid Order ID prefix'
                           : null,
-                  // Sir 2026-10-03: the amber "unconfirmed, check the label"
-                  // highlight on this field is removed — a real mismatch
-                  // still shows red via errorText above; the dual-channel
-                  // check itself (_orderIdVerified) still gates auto-save,
-                  // only the visual nag is gone.
                   keyboardType: TextInputType.number,
                   inputFormatters: [_OrderIdInputFormatter()],
                 ),
@@ -1301,17 +1304,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     bool detected = false,
     bool isValid = false,
     String? errorText,
-    String? warningText,
     List<TextInputFormatter>? inputFormatters,
     TextInputType keyboardType = TextInputType.text,
   }) {
-    // Amber sits between the existing red (errorText — format/prefix wrong,
-    // or a live cross-check mismatch) and green (isValid) states: format is
-    // fine, just not independently confirmed yet. errorText always wins
-    // when both are set — a live mismatch is more urgent than "still
-    // checking".
-    final warn = errorText == null && warningText != null;
-    final warnColor = warn ? RfColors.warning : null;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
         Text(label, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
@@ -1335,23 +1330,16 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.border)),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: warnColor ?? RfColors.border)),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: warnColor ?? RfColors.rtAccent, width: 1.5)),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.border)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.rtAccent, width: 1.5)),
           errorText: errorText,
           errorMaxLines: 2,
           errorStyle: const TextStyle(color: RfColors.error, fontSize: 11),
           errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.error, width: 1.5)),
           focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.error, width: 1.5)),
-          helperText: warn ? warningText : null,
-          helperStyle: const TextStyle(color: RfColors.warning, fontSize: 11),
-          helperMaxLines: 2,
-          suffixIcon: errorText != null
-              ? null
-              : warn
-                  ? const Icon(Icons.help_outline_rounded, color: RfColors.warning, size: 18)
-                  : isValid
-                      ? const Icon(Icons.check_circle, color: RfColors.successLight, size: 18)
-                      : null,
+          suffixIcon: errorText == null && isValid
+              ? const Icon(Icons.check_circle, color: RfColors.successLight, size: 18)
+              : null,
           suffixIconConstraints: const BoxConstraints(minWidth: 28, minHeight: 28),
         ),
         keyboardType: keyboardType,

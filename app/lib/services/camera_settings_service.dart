@@ -134,7 +134,8 @@ class CameraSettingsService {
     await prefs.setInt('auto_scan_delay_ms', ms);
   }
 
-  // --- Label scan popup: auto-pop SAVE when Order ID + AWB lock ---
+  // --- Label scan popup: save + close as soon as Order ID AND AWB are both
+  // read (default on). Only scan results trigger it, never typing. ---
   static Future<bool> getAutoLabelSave() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('auto_label_save') ?? true;
