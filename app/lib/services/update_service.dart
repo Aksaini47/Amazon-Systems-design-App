@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:12 - Auto-save ab Order ID aur AWB dono mil-te hi hota hai\n- Pehle barcode aur label-text dono ka ek hi photo mein match hona zaroori tha, isliye auto-save lagbhag kabhi nahi chalta tha\n- Ab sirf tab rukta hai jab dono padhaai aapas mein ulti aayein ya duplicate ho\n- Return label ka AWB agar usi order ke packing record se milta ho toh ab duplicate nahi maana jaata\n- Order ID field par ab koi yellow highlight nahi';
+      '2.1.0+14:13 - RT OK mein photo nahi, settings ek-ek karke khulti hain, home grid halka\n- Return video mein reason OK chunne par ab koi photo nahi khichni padti, seedha save ho jaata hai\n- Settings ke sections ab ek time par ek hi khulte hain aur page sab band hokar khulta hai\n- Home screen ki grid lines 1.5x zyada dense aur kaafi zyada fade';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

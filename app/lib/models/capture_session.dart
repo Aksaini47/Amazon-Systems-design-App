@@ -236,11 +236,8 @@ class CaptureSession {
     if (mode == CaptureMode.pk) {
       return frontPhotoPath != null && backPhotoPath != null;
     }
-    if (verdict == null) return true;
-    // RT QC OK: front + back only (serial optional).
-    if (verdict == QCVerdict.ok) {
-      return frontPhotoPath != null && backPhotoPath != null;
-    }
+    // RT QC OK: no photos at all (Sir 2026-10-05) — the video is the record.
+    if (verdict == null || verdict == QCVerdict.ok) return true;
     // RT damaged / different / etc.: label + contents + front + back (serial optional).
     return labelPhotoPath != null
         && contentsPhotoPath != null

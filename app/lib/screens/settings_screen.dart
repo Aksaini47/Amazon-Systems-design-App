@@ -46,9 +46,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Storage path settings
   String _selectedStoragePath = CameraSettingsService.storageDefault;
 
-  // Accordion open/close state — multi-open (opening one doesn't close
-  // others). Only Camera starts open so the page opens as a readable index.
-  final Set<String> _openSections = {'Camera'};
+  // Accordion state — one section open at a time; null = all collapsed, which
+  // is how the page opens (a readable index of summaries).
+  String? _openSection;
 
   @override
   void initState() {
@@ -84,13 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _toggleSection(String key) {
     HapticFeedback.selectionClick();
-    setState(() {
-      if (_openSections.contains(key)) {
-        _openSections.remove(key);
-      } else {
-        _openSections.add(key);
-      }
-    });
+    setState(() => _openSection = _openSection == key ? null : key);
   }
 
   /// Short summary shown on a collapsed section header — so the index is
@@ -396,15 +390,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   /// One accordion section, rendered as a self-contained card: tappable
   /// header (icon badge + title + summary + rotating chevron) over a
-  /// collapsing body. Multi-open — toggling one never closes another
-  /// (state lives in [_openSections]).
+  /// collapsing body. Single-open — opening one closes the previous
+  /// (state lives in [_openSection]).
   Widget _buildAccordionSection({
     required IconData icon,
     required String label,
     required String sectionKey,
     required List<Widget> children,
   }) {
-    final isOpen = _openSections.contains(sectionKey);
+    final isOpen = _openSection == sectionKey;
     final summary = isOpen ? '' : _summaryFor(sectionKey);
 
     return RfGlassContainer(

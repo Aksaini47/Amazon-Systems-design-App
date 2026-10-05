@@ -172,10 +172,11 @@ class RfGlassBackground extends StatelessWidget {
 }
 
 class _GlassGridPainter extends CustomPainter {
-  // Slightly more visible than before (0.14->0.18) now that it's the
-  // background's main texture, not a backdrop for glow orbs.
-  static const _opacity = 0.18;
-  static const _spacing = 32.0;
+  // 2026-10-05 (Sir): 1.5x denser (spacing 32 -> 32/1.5) and much fainter
+  // (0.18 -> 0.08) — more lines at the old opacity would read as a busier
+  // texture, so the fade drops with the density.
+  static const _opacity = 0.08;
+  static const _spacing = 32.0 / 1.5;
   static const _stroke = 0.5;
 
   final Color color;

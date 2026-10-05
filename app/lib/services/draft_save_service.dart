@@ -40,13 +40,8 @@ class DraftSaveService {
         if (!photos.containsKey(PhotoSide.back)) PhotoSide.back,
       ];
     }
-    if (verdict == null) return const [];
-    if (verdict == QCVerdict.ok) {
-      return [
-        if (!photos.containsKey(PhotoSide.front)) PhotoSide.front,
-        if (!photos.containsKey(PhotoSide.back)) PhotoSide.back,
-      ];
-    }
+    // RT QC OK needs no photos (see CaptureSession.isPhotoComplete).
+    if (verdict == null || verdict == QCVerdict.ok) return const [];
     return [
       if (!photos.containsKey(PhotoSide.label)) PhotoSide.label,
       if (!photos.containsKey(PhotoSide.contents)) PhotoSide.contents,

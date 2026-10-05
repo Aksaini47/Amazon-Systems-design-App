@@ -1561,8 +1561,12 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _session.orderId = result['orderId'];
     _session.awb = result['awb'];
 
-    await _runClaimPhotoSequence();
-    if (!mounted) return;
+    // QC OK needs no claim photos — save straight away, same as the PK path
+    // (no camera re-init, no capture screens).
+    if (verdictResult.verdict != QCVerdict.ok) {
+      await _runClaimPhotoSequence();
+      if (!mounted) return;
+    }
     unawaited(_saveSession());
   }
 
@@ -1612,19 +1616,14 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         setState(() => _claimPreviewSettled = true);
       }
 
-      final verdict = _session.verdict;
-      // QC OK: front + back only — serial is never required to save (see
-      // CaptureSession.isPhotoComplete) and is skipped from the prompt too,
-      // not just made optional. Others: full sequence including serial.
-      final sequence = <(PhotoSide, String)>[
-        if (verdict != QCVerdict.ok) ...[
-          (PhotoSide.label, 'Position RETURN LABEL in frame'),
-          (PhotoSide.contents, 'Position package CONTENTS in frame'),
-        ],
+      // Only reached for a non-OK verdict (QC OK takes no photos — see
+      // _openRtPostVideoFlow). Serial is optional and skippable.
+      const sequence = <(PhotoSide, String)>[
+        (PhotoSide.label, 'Position RETURN LABEL in frame'),
+        (PhotoSide.contents, 'Position package CONTENTS in frame'),
         (PhotoSide.front, 'Position product FRONT facing up'),
         (PhotoSide.back, 'Position product BACK facing up'),
-        if (verdict != QCVerdict.ok)
-          (PhotoSide.serial, 'Capture SERIAL / FPC closeup (optional)'),
+        (PhotoSide.serial, 'Capture SERIAL / FPC closeup (optional)'),
       ];
 
       for (final (side, _) in sequence) {
