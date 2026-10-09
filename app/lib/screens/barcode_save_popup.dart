@@ -680,10 +680,14 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
 
     try {
       final xFile = await _cam!.takePicture();
+      // The popup may have started closing (hardware released) while the
+      // shutter was firing — nothing left to analyse with.
+      final scanner = _scanner;
+      if (scanner == null) return;
 
       // Stage 1+2: barcode + OCR text on the same frame
       final results = await Future.wait([
-        _scanner!.analyzeImage(xFile.path),
+        scanner.analyzeImage(xFile.path),
         OcrService.scanAll(xFile.path),
       ]);
       final barcodeResult = results[0] as BarcodeCapture?;
@@ -898,6 +902,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         'auto_source': autoSource ?? 'manual',
       },
     ));
+    await _releaseHardware();
     if (!mounted) return;
     Navigator.pop(context, {
       'orderId': orderId,
@@ -943,10 +948,64 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     );
   }
 
-  void _onCancel() => Navigator.pop(context);
+  /// Set once [_releaseHardware] has run — the camera widgets must stop
+  /// referencing the (now disposed) controllers.
+  bool _hardwareReleased = false;
+
+  /// Awaits the release of everything holding the camera, BEFORE this route
+  /// hands its result back. The camera plugin's native side is one shared
+  /// object: dispose() tears down whichever controller is CURRENT, not the one
+  /// it was called on. A dispose left to State.dispose() runs ~300ms after the
+  /// route pops — by then the capture screen can already be initialising its
+  /// next controller (a QC-OK save has no photos to slow it down), and the
+  /// late dispose tears THAT preview down: blank screen, yet recording still
+  /// starts. Releasing here means nothing of ours is left to run late.
+  Future<void> _releaseHardware() async {
+    if (_hardwareReleased) return;
+    _hardwareReleased = true;
+    _stopAutoScanLoop();
+    _scanWatchdog?.cancel();
+    final cam = _cam;
+    final scanner = _scanner;
+    _cam = null;
+    _camReady = false;
+    _scanner = null;
+    if (mounted) setState(() {});
+    // Let the frame that drops the preview widgets finish before the
+    // controllers behind them are disposed.
+    await WidgetsBinding.instance.endOfFrame;
+    try {
+      await scanner?.dispose();
+    } catch (e) {
+      debugPrint('Scanner release failed: $e');
+    }
+    try {
+      await cam?.dispose();
+    } catch (e) {
+      debugPrint('Camera release failed: $e');
+    }
+  }
+
+  Future<void> _onCancel() async {
+    await _releaseHardware();
+    if (mounted) Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
+    return PopScope(
+      // Every way out — the X, the system back gesture, a save — goes through
+      // _releaseHardware first, so the popup never pops with a camera still
+      // to be torn down behind its back.
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _onCancel();
+      },
+      child: _buildScaffold(),
+    );
+  }
+
+  Widget _buildScaffold() {
     return RfGlassScaffold(
       appBar: RfGlassAppBar(
         leadingWidth: 56,
@@ -1136,7 +1195,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       color: Colors.black,
-                      child: _barcodeMode
+                      child: _hardwareReleased
+                          ? const SizedBox.expand()
+                          : _barcodeMode
                           ? _buildBarcodeReader(width, height)
                           : _camReady && _cam != null
                           ? ClipRect(

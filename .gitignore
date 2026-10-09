@@ -60,6 +60,14 @@ backend/node_modules/
 # Firebase google-services.json IS safe to commit for private repos
 # (client config restricted by package+SHA fingerprint). Leave it tracked.
 
+# Firebase/GCP service-account private keys grant ADMIN access (they bypass
+# Firestore rules) — never commit. The real key lives outside the repo at
+# ~/.config/rf-logger/firebase-service-account.json; these patterns only catch
+# an accidental copy dropped into the tree.
+*firebase-adminsdk*.json
+*service-account*.json
+*serviceAccount*.json
+
 # Graphify (build artifacts)
 graphify-out/
 .graphify_ast.json

@@ -104,6 +104,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   bool _audioUsedForRecording = false;  // Audio setting used for current recording
   bool _isCameraTransitioning = false;  // THE MUTEX LOCK — blocks re-entrant camera ops
+  // When the label popup last handed the camera hardware back. The camera
+  // plugin keeps ONE native object shared by every controller, so a fresh
+  // controller must not initialise while the popup's teardown is still
+  // settling — see _awaitHardwareSettle.
+  DateTime? _modalClosedAt;
   int? _previousDndFilter;              // Saved DND state, restored on recording stop
   VoidCallback? _cameraListener;        // Rebuild preview when camera texture updates
 
@@ -250,17 +255,20 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   void _attachCameraListener() {
     _detachCameraListener();
-    if (_camera == null) return;
+    // Captured, not re-read from _camera: the field is nulled the moment the
+    // camera is released, and a late notification used to hit `_camera!`.
+    final cam = _camera;
+    if (cam == null) return;
     _cameraListener = () {
       if (!mounted) return;
       if (_isRecording ||
-          _camera!.value.isRecordingVideo ||
+          cam.value.isRecordingVideo ||
           _inClaimFlow ||
           _session.videoPath != null) {
         setState(() {});
       }
     };
-    _camera!.addListener(_cameraListener!);
+    cam.addListener(_cameraListener!);
   }
 
   void _logPreviewState(String location, {Map<String, dynamic>? extra}) {
@@ -310,9 +318,23 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   Future<void> _disposeCameraForModal() async {
     _detachCameraListener();
-    await _camera?.dispose();
+    // Take the controller out of the widget tree BEFORE awaiting dispose():
+    // CameraController flags itself disposed straight away, and any frame
+    // built while the await was pending ran CameraPreview on a dead
+    // controller — the "buildPreview() was called on a disposed
+    // CameraController" fatal Crashlytics recorded on PK stops.
+    final cam = _camera;
     _camera = null;
     if (mounted) setState(() => _cameraReady = false);
+    try {
+      await cam?.dispose();
+    } catch (e) {
+      // CameraX may already have released the preview surface (a stale
+      // dispose got there first). A throw here used to abort the whole modal
+      // flow that called us and leave the screen without a camera.
+      debugPrint('Camera dispose failed (non-fatal): $e');
+      _logActivity('camera_dispose_failed', extra: {'error': '$e'});
+    }
     DebugSessionLog.log(
       location: 'live_capture_screen.dart:_disposeCameraForModal',
       message: 'camera disposed for modal',
@@ -321,15 +343,40 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     );
   }
 
+  /// Minimum gap between the label popup handing the camera back and this
+  /// screen initialising a new controller. Android/CameraX closes the device
+  /// asynchronously after dispose(); the old RT flow got this gap for free
+  /// from its claim photos, and a fast save (QC OK has none) must top it up.
+  static const _hardwareSettle = Duration(milliseconds: 900);
+
+  Future<void> _awaitHardwareSettle() async {
+    final closed = _modalClosedAt;
+    if (closed == null) return;
+    final wait = _hardwareSettle - DateTime.now().difference(closed);
+    if (wait > Duration.zero) await Future<void>.delayed(wait);
+  }
+
+  void _logCameraReady(String ctx, DateTime startedAt) {
+    final now = DateTime.now();
+    final closed = _modalClosedAt;
+    _logActivity('camera_ready', extra: {
+      'ctx': ctx,
+      'init_ms': '${now.difference(startedAt).inMilliseconds}',
+      if (closed != null) 'since_modal_ms': '${now.difference(closed).inMilliseconds}',
+    });
+  }
+
   // ─── Camera init ─────────────────────────────────────────────────────
 
-  Future<void> _initCamera() async {
+  Future<void> _initCamera({String ctx = 'initial'}) async {
     // MUTEX LOCK: Reject if camera is already transitioning
     if (_isCameraTransitioning) {
       debugPrint('BLOCKED: _initCamera rejected — camera transitioning');
+      _logActivity('camera_init_blocked', extra: {'ctx': ctx});
       return;
     }
     _isCameraTransitioning = true;
+    final startedAt = DateTime.now();
 
     try {
       // NOTE: Do NOT clear _errorMessage here — it preserves error state
@@ -383,9 +430,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           // Apply default zoom (1x) to newly initialized camera
           _applyZoom();
           _logPreviewState('live_capture_screen.dart:_initCamera');
+          _logCameraReady(ctx, startedAt);
       }
     } on CameraException catch (e) {
       // Camera disposed/busy while initializing — show retry path
+      _logActivity('camera_init_failed', extra: {'ctx': ctx, 'error': '$e'});
       if (mounted) {
         setState(() {
           _errorMessage = 'Camera busy — tap retry';
@@ -394,6 +443,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       }
       debugPrint('CameraException in _initCamera: $e');
     } catch (e) {
+      _logActivity('camera_init_failed', extra: {'ctx': ctx, 'error': '$e'});
       _setError('Camera error: $e');
     }
     } finally {
@@ -404,13 +454,15 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   /// Re-initialize camera with a specific audio setting.
   /// Used after modal closes to restore camera with the same audio setting
   /// that was used during recording.
-  Future<void> _initCameraWithAudio(bool enableAudio) async {
+  Future<void> _initCameraWithAudio(bool enableAudio, {String ctx = 'reinit'}) async {
     // MUTEX LOCK: Reject if camera is already transitioning
     if (_isCameraTransitioning) {
       debugPrint('BLOCKED: _initCameraWithAudio rejected — camera transitioning');
+      _logActivity('camera_init_blocked', extra: {'ctx': ctx});
       return;
     }
     _isCameraTransitioning = true;
+    final startedAt = DateTime.now();
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 300));
@@ -445,9 +497,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           _startSession();
           _applyZoom();
           _logPreviewState('live_capture_screen.dart:_initCameraWithAudio');
+          _logCameraReady(ctx, startedAt);
         }
       } on CameraException catch (e) {
         // Camera disposed/busy while initializing — show retry path
+        _logActivity('camera_init_failed', extra: {'ctx': ctx, 'error': '$e'});
         if (mounted) {
           setState(() {
             _errorMessage = 'Camera busy — tap retry';
@@ -456,6 +510,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         }
         debugPrint('CameraException in _initCameraWithAudio: $e');
       } catch (e) {
+        _logActivity('camera_init_failed', extra: {'ctx': ctx, 'error': '$e'});
         _setError('Camera error: $e');
       }
     } finally {
@@ -750,8 +805,15 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
   Future<void> _startRecording() async {
     if (_inClaimFlow) return;
-    if (_camera == null || !_cameraReady) return;
-    if (_isCameraTransitioning) return;  // MUTEX guard
+    if (_camera == null || !_cameraReady || _isCameraTransitioning) {
+      // A tap that silently did nothing is exactly what "the record button
+      // is dead" looks like from outside — leave a trace of why.
+      _logActivity('record_start_blocked', extra: {
+        'reason': _camera == null || !_cameraReady ? 'camera_not_ready' : 'camera_transitioning',
+        'phase': _phase.name,
+      });
+      return;
+    }
     if (_isRecording) return;            // already recording — block duplicate
     if (_startingRecording) return;      // start-in-progress — block double-tap
     _startingRecording = true;
@@ -1492,13 +1554,14 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         builder: (_) => BarcodeSavePopup(mode: widget.mode),
       ),
     );
+    _modalClosedAt = DateTime.now();
 
     if (result == null || result['orderId'] == null) {
       await _retainDraftOnCancel();
       // User cancelled — wait 500ms for hardware to fully release, then reinit
       if (mounted) setState(() => _phase = CapturePhase.stopped);
       await Future<void>.delayed(const Duration(milliseconds: 500));
-      await _initCameraWithAudio(_audioUsedForRecording);
+      await _initCameraWithAudio(_audioUsedForRecording, ctx: 'after_cancel');
       return;
     }
 
@@ -1510,7 +1573,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   // ─── RT post-video: verdict → order-ID scan → claim photos ───────────
 
   /// RT only. User picks QC verdict, scans return label / order ID,
-  /// then captures claim photos (QC OK: front/back; others: full set).
+  /// then captures claim photos (QC OK: none; others: the full set).
   Future<void> _openRtPostVideoFlow() async {
     final verdictResult = await showModalBottomSheet<QcVerdictResult>(
       context: context,
@@ -1548,13 +1611,14 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         builder: (_) => BarcodeSavePopup(mode: widget.mode),
       ),
     );
+    _modalClosedAt = DateTime.now();
 
     if (result == null || result['orderId'] == null) {
       await _retainDraftOnCancel();
       await _disposeCameraForModal();
       if (mounted) setState(() => _phase = CapturePhase.stopped);
       await Future<void>.delayed(const Duration(milliseconds: 500));
-      await _initCameraWithAudio(_audioUsedForRecording);
+      await _initCameraWithAudio(_audioUsedForRecording, ctx: 'after_cancel');
       return;
     }
 
@@ -1562,7 +1626,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _session.awb = result['awb'];
 
     // QC OK needs no claim photos — save straight away, same as the PK path
-    // (no camera re-init, no capture screens).
+    // (no camera re-init, no capture screens). That also removes the seconds
+    // of photo-taking that used to sit between the popup closing and the next
+    // camera init; _resetForNextCapture now enforces that gap explicitly.
     if (verdictResult.verdict != QCVerdict.ok) {
       await _runClaimPhotoSequence();
       if (!mounted) return;
@@ -1872,6 +1938,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _countdownTimer?.cancel();
     _stopwatch.reset();
     _clearCaptureOverlayState();
+    // A controller left over from the claim-photo flow used to be dropped
+    // here without dispose(); release it first so nothing stale can be torn
+    // down on top of the new one.
+    if (_camera != null) await _disposeCameraForModal();
+    if (!mounted) return;
     setState(() {
       _session = _LiveSession();
       _tempPhotoPaths.clear();
@@ -1883,7 +1954,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       _phase = CapturePhase.loading;
     });
     _logActivity('capture_reset');
-    await _initCamera();
+    await _awaitHardwareSettle();
+    if (!mounted) return;
+    await _initCamera(ctx: 'after_save');
   }
 
   // ─── Helpers ─────────────────────────────────────────────────────────

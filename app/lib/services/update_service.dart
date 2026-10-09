@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:13 - RT OK mein photo nahi, settings ek-ek karke khulti hain, home grid halka\n- Return video mein reason OK chunne par ab koi photo nahi khichni padti, seedha save ho jaata hai\n- Settings ke sections ab ek time par ek hi khulte hain aur page sab band hokar khulta hai\n- Home screen ki grid lines 1.5x zyada dense aur kaafi zyada fade';
+      '2.1.0+14:14 - Camera blank screen aur atakne ka fix (RT OK ke baad)\n- RT mein reason OK save karne ke baad agla video shuru karte waqt camera blank dikhta tha, popup ka purana camera der se band hota tha. Ab pehle band hota hai, phir naya camera chalta hai\n- Verdict screen se back karne par camera ka crash fix\n- Har PK stop par aane wala preview crash fix\n- Camera ka har step ab tracker mein log hota hai, agli baar exact wajah dikhegi';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
