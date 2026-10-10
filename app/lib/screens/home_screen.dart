@@ -66,7 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       duration: const Duration(seconds: 8),
-      backgroundColor: RfColors.card,
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -82,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const Text(
                   'App updated',
-                  style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+                  style: TextStyle(color: RfColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -113,7 +112,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (next == null || next == current || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       duration: const Duration(seconds: 7),
-      backgroundColor: RfColors.card,
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -126,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text(
               'Update downloaded but not applied yet. Swipe this app away from '
               'Recents (fully close it) and reopen — switching apps isn\'t enough.',
-              style: TextStyle(color: Colors.white, fontSize: 12, height: 1.35),
+              style: TextStyle(color: RfColors.textPrimary, fontSize: 12, height: 1.35),
             ),
           ),
         ],
@@ -161,12 +159,11 @@ class _HomeScreenState extends State<HomeScreen> {
       if (recovered > 0 && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Row(children: [
-            const Icon(Icons.restore, color: Colors.amber, size: 18),
+            const Icon(Icons.restore, color: RfColors.amber, size: 18),
             const SizedBox(width: 8),
             Expanded(child: Text('Recovered $recovered orphan video${recovered == 1 ? '' : 's'} from a previous session. Find them in Gallery → Drafts.')),
           ]),
           duration: const Duration(seconds: 5),
-          backgroundColor: Colors.black87,
         ));
       }
     } catch (e) {
@@ -224,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
             const Text(
               'Record a video',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(color: RfColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -357,7 +354,7 @@ class _ActionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16)),
+                Text(title, style: const TextStyle(color: RfColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 16)),
                 const SizedBox(height: 4),
                 Text(subtitle, style: const TextStyle(color: RfColors.textSecondary, fontSize: 13)),
               ],

@@ -2372,26 +2372,23 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     required Widget child,
     EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     Color? tint,
-    Color? borderColor,
-    double radius = RfRadius.button,
     VoidCallback? onTap,
   }) {
-    final pill = Container(
+    // 2026-10-10 revamp: tinted liquid-glass pill (rim + sheen) with NO
+    // backdrop blur. The default is SMOKY glass — it has to darken the video
+    // behind it so white text stays legible on a bright scene; a clear glass
+    // vanishes there. An accent [tint] arrives with its alpha already set.
+    final base = tint ?? const Color(0xFF1C1C1A).withValues(alpha: 0.74);
+    final pill = RfGlassSurface(
+      tint: base.withValues(alpha: 1),
+      strength: base.a,
       padding: padding,
-      decoration: BoxDecoration(
-        color: tint ?? RfColors.card.withValues(alpha: 0.82),
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: borderColor ?? RfGlass.border()),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 8, offset: const Offset(0, 2)),
-        ],
-      ),
       child: child,
     );
     if (onTap == null) return pill;
     return Material(
       color: Colors.transparent,
-      child: InkWell(onTap: onTap, borderRadius: BorderRadius.circular(radius), child: pill),
+      child: InkWell(onTap: onTap, borderRadius: BorderRadius.circular(RfRadius.pill), child: pill),
     );
   }
 
@@ -2412,9 +2409,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         const SizedBox(width: 6),
         _floatingPill(
           tint: accent.withValues(alpha: 0.85),
-          borderColor: accent.withValues(alpha: 0.6),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          radius: 12,
           child: Text(
             widget.mode == CaptureMode.pk ? 'PK MODE' : 'RT MODE',
             style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
@@ -2440,9 +2435,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       padding: const EdgeInsets.only(bottom: 14),
       child: _floatingPill(
         tint: accent.withValues(alpha: 0.85),
-        borderColor: accent.withValues(alpha: 0.6),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        radius: 14,
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -2482,9 +2475,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       padding: const EdgeInsets.only(bottom: 14),
       child: _floatingPill(
         tint: accent.withValues(alpha: 0.85),
-        borderColor: accent.withValues(alpha: 0.6),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        radius: 14,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -2586,7 +2577,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         const SizedBox(width: 8),
         // Animated pulse dot per Mahika §V #4. 1.0 → 1.1 cycle, 1000ms,
         // easeInOut. Draws the eye without being distracting.
-        const RfRecordingPulse(size: 10, color: RfColors.recording),
+        const RfRecordingPulse(size: 10),
         const SizedBox(width: 6),
         Text(
           _elapsedLabel,
@@ -2630,7 +2621,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
             margin: const EdgeInsets.symmetric(horizontal: 24),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             radius: 14,
-            tint: RfGlass.fill(0.4),
+            tint: Colors.black.withValues(alpha: 0.42),
             borderColor: RfGlass.border(0.2),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               if (_countdownSeconds > 0)
@@ -2766,7 +2757,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
               padding: const EdgeInsets.only(bottom: 16),
               child: _floatingPill(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                radius: 14,
                 child: Text(
                   widget.mode == CaptureMode.pk
                       ? 'Pack the product. Tap STOP when done.'
@@ -2793,8 +2783,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
           if (_isRecording)
             _floatingPill(
               padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
-              borderColor: RfColors.recording.withValues(alpha: 0.6),
-              radius: 18,
+              tint: RfColors.recording.withValues(alpha: 0.55),
               child: const Text(
                 'TAP TO STOP',
                 style: TextStyle(
@@ -2851,7 +2840,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     if (_isRecording) {
       return _floatingPill(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        radius: 18,
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           const Icon(Icons.lock_outline_rounded, color: Colors.white54, size: 14),
           const SizedBox(width: 6),
@@ -2863,7 +2851,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     if (!_aspectStripExpanded) {
       return _floatingPill(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        radius: 18,
         onTap: () => setState(() => _aspectStripExpanded = true),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           const Icon(Icons.crop_free_rounded, color: Colors.white, size: 15),
@@ -2880,7 +2867,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
     return _floatingPill(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      radius: 22,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         _pillOption('3:4', (_aspectRatio - _aspect34).abs() < 0.001, accent, () => select('3:4', _aspect34), fontSize: 15),
         _pillOption('1:1', (_aspectRatio - _aspect11).abs() < 0.001, accent, () => select('1:1', _aspect11), fontSize: 15),
@@ -2894,7 +2880,6 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   Widget _buildZoomMicPill(Color accent) {
     return _floatingPill(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      radius: 20,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         _ZoomPillButton(label: '1×', active: _currentZoomIndex == 0, accent: accent, onTap: () => _setZoomByIndex(0)),
         _ZoomPillButton(label: '2×', active: _currentZoomIndex == 1, accent: accent, onTap: () => _setZoomByIndex(1)),
@@ -2955,7 +2940,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         color: Colors.black.withAlpha(220),
         child: Center(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.error_outline_rounded, color: Colors.red, size: 56),
+            const Icon(Icons.error_outline_rounded, color: RfColors.error, size: 56),
             const SizedBox(height: 16),
             Text(_errorMessage ?? 'An error occurred', style: const TextStyle(color: Colors.white, fontSize: 14), textAlign: TextAlign.center),
             if (_errorLooksLikePermission) ...[
@@ -3109,7 +3094,6 @@ class _MicToggleButtonState extends State<_MicToggleButton> with SingleTickerPro
 
   @override
   Widget build(BuildContext context) {
-    final fill = widget.enabled ? RfColors.error : Colors.white.withAlpha(20);
     final fg = widget.enabled ? Colors.white : Colors.white70;
     final disabled = widget.disabled || widget.onTap == null;
     return Opacity(
@@ -3127,15 +3111,11 @@ class _MicToggleButtonState extends State<_MicToggleButton> with SingleTickerPro
               },
         child: ScaleTransition(
           scale: _scale,
-          child: Container(
+          // Red glass while the mic is live, smoky glass when muted.
+          child: RfGlassSurface(
+            tint: widget.enabled ? RfColors.error : const Color(0xFF1C1C1A),
+            strength: widget.enabled ? 0.78 : 0.45,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: fill,
-              borderRadius: BorderRadius.circular(RfRadius.chip),
-              border: Border.all(
-                color: widget.enabled ? Colors.transparent : Colors.white.withAlpha(60),
-              ),
-            ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

@@ -6,7 +6,8 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'config/app_config.dart';
 import 'models/capture_session.dart';
-import 'theme/rf_colors.dart';
+import 'package:flutter/services.dart';
+import 'theme/rf_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/trial_gate.dart';
 import 'services/activity_log_service.dart';
@@ -31,6 +32,7 @@ Future<void> bootstrap({required bool isDemo}) async {
   // crashes would silently lost.
   unawaited(runZonedGuarded<Future<void>>(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    SystemChrome.setSystemUIOverlayStyle(rfSystemUiStyle);
 
     // Real installed version for meta.json provenance (never crash the boot
     // over it — the fallback 'unknown' is visible and honest).
@@ -106,77 +108,11 @@ class RepairfullyApp extends StatelessWidget {
     return MaterialApp(
       title: 'RF Logger',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: RfColors.navy,
-          brightness: Brightness.dark,
-          surface: RfColors.glassFill(0.18),
-        ),
-        useMaterial3: true,
-        scaffoldBackgroundColor: RfColors.bg,
-        canvasColor: RfColors.bg,
-        textTheme: const TextTheme(
-          titleLarge: RfType.title,
-          titleMedium: RfType.heading,
-          labelLarge: RfType.label,
-          bodyMedium: RfType.body,
-          bodySmall: RfType.caption,
-        ),
-        dialogTheme: DialogThemeData(
-          backgroundColor: RfColors.glassElevated(0.75),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(RfRadius.lg),
-            side: BorderSide(color: RfColors.glassBorder(0.22)),
-          ),
-          // Safety net for any dialog that forgets its own title/content
-          // colors (found one: the "Discard recording?" confirm dialog had
-          // neither, silently inheriting Material's unverified default).
-          titleTextStyle: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
-          contentTextStyle: const TextStyle(color: RfColors.textSecondary, fontSize: 14),
-        ),
-        snackBarTheme: SnackBarThemeData(
-          backgroundColor: RfColors.glassElevated(0.85),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(RfRadius.card),
-            side: BorderSide(color: RfColors.glassBorder(0.18)),
-          ),
-          // Explicit — without this, SnackBar falls back to Material 3's
-          // onSurfaceVariant default, which was never tuned against this
-          // app's dark backgrounds and several call sites' own backgroundColor
-          // overrides (e.g. Colors.black87). White is safe against all of them.
-          contentTextStyle: const TextStyle(color: Colors.white, fontSize: 14),
-          actionTextColor: RfColors.amber,
-        ),
-        bottomSheetTheme: BottomSheetThemeData(
-          backgroundColor: RfColors.glassElevated(0.72),
-          modalBackgroundColor: RfColors.glassElevated(0.72),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(RfRadius.lg)),
-          ),
-        ),
-        cardTheme: CardThemeData(
-          color: RfColors.glassFill(0.16),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(RfRadius.card),
-            side: BorderSide(color: RfColors.glassBorder(0.20)),
-          ),
-        ),
-        dividerTheme: DividerThemeData(
-          color: RfColors.glassBorder(0.10),
-          thickness: 1,
-        ),
-        appBarTheme: AppBarTheme(
-          backgroundColor: RfColors.glassElevated(0.55),
-          foregroundColor: RfColors.textPrimary,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          shape: Border(
-            bottom: BorderSide(color: RfColors.glassBorder(0.12)),
-          ),
-        ),
-      ),
+      // Dark only (Sir, 2026-10-10): one theme, forced for every system
+      // setting. See theme/rf_theme.dart.
+      theme: buildRfTheme(),
+      darkTheme: buildRfTheme(),
+      themeMode: ThemeMode.dark,
       // Demo build: one global tiled "DEMO" overlay covering every screen —
       // Home, Settings, Gallery, camera preview, dialogs (incl. the tour),
       // everything. builder wraps the Navigator's output, so it survives

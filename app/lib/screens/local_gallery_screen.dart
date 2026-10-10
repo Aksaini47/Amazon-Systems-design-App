@@ -118,7 +118,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
           backgroundColor: Colors.transparent,
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
-          title: Text('Delete $n $kind?', style: const TextStyle(color: Colors.white)),
+          title: Text('Delete $n $kind?', style: const TextStyle(color: RfColors.textPrimary)),
           content: const Text(
             'This cannot be undone.',
             style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
@@ -157,7 +157,6 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('$deleted item${deleted == 1 ? '' : 's'} deleted'),
         duration: const Duration(seconds: 2),
-        backgroundColor: Colors.black87,
       ));
     }
   }
@@ -304,7 +303,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
           backgroundColor: Colors.transparent,
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
-          title: const Text('Delete?', style: TextStyle(color: Colors.white)),
+          title: const Text('Delete?', style: TextStyle(color: RfColors.textPrimary)),
           content: Text(
             'Permanently delete $label?\n\nThis cannot be undone.',
             style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
@@ -329,7 +328,6 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Order deleted'),
         duration: Duration(seconds: 2),
-        backgroundColor: Colors.black87,
       ));
     }
   }
@@ -352,7 +350,6 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Deleted $deleted file${deleted == 1 ? '' : 's'}'),
         duration: const Duration(seconds: 2),
-        backgroundColor: Colors.black87,
       ));
     }
   }
@@ -362,7 +359,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     return RfGlassScaffold(
       appBar: _selectionMode ? _buildSelectionAppBar() : _buildNormalAppBar(),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Colors.white38))
+          ? const Center(child: CircularProgressIndicator(color: RfColors.textMuted))
           : TabBarView(
               controller: _tabs,
               children: [
@@ -378,9 +375,9 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
       title: 'Gallery',
       bottom: TabBar(
         controller: _tabs,
-        indicatorColor: RfColors.rtAccent,
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.white54,
+        indicatorColor: RfColors.action,
+        labelColor: RfColors.textPrimary,
+        unselectedLabelColor: RfColors.textSecondary,
         tabs: [
           Tab(text: 'Orders (${_orders.length})'),
           Tab(text: 'Drafts (${_draftSessions.length})'),
@@ -393,7 +390,9 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
           size: 40,
           onPressed: (_orders.isEmpty && _drafts.isEmpty) ? null : _enterSelectionMode,
         ),
+        const SizedBox(width: 8),
         RfIconButton(icon: Icons.refresh, tooltip: 'Refresh', size: 40, onPressed: _reload),
+        const SizedBox(width: 12),
       ],
     );
   }
@@ -405,19 +404,19 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     return RfGlassAppBar(
       leading: RfIconButton(
         icon: Icons.close,
-        color: Colors.white,
+        color: RfColors.textPrimary,
         size: 40,
         onPressed: _exitSelectionMode,
       ),
       titleWidget: Text(
         n == 0 ? 'Select items' : '$n selected',
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        style: const TextStyle(color: RfColors.textPrimary, fontWeight: FontWeight.w600),
       ),
       bottom: TabBar(
         controller: _tabs,
-        indicatorColor: RfColors.rtAccent,
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.white54,
+        indicatorColor: RfColors.action,
+        labelColor: RfColors.textPrimary,
+        unselectedLabelColor: RfColors.textSecondary,
         tabs: [
           Tab(text: 'Orders (${_orders.length})'),
           Tab(text: 'Drafts (${_draftSessions.length})'),
@@ -437,13 +436,15 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
             });
           } : _selectAll),
         ),
+        const SizedBox(width: 6),
         RfIconButton(
           icon: Icons.delete_outline,
-          color: Colors.redAccent,
+          color: RfColors.error,
           tooltip: 'Delete selected',
           size: 40,
           onPressed: n == 0 ? null : _deleteSelected,
         ),
+        const SizedBox(width: 12),
       ],
     );
   }
@@ -454,7 +455,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     }
     return RefreshIndicator(
       onRefresh: _reload,
-      color: RfColors.rtAccent,
+      color: RfColors.action,
       child: ListView.separated(
         controller: _ordersScrollCtrl,
         primary: false,
@@ -530,7 +531,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
     }
     return RefreshIndicator(
       onRefresh: _reload,
-      color: RfColors.rtAccent,
+      color: RfColors.action,
       child: ListView.separated(
         controller: _draftsScrollCtrl,
         primary: false,
@@ -574,7 +575,7 @@ class _LocalGalleryScreenState extends State<LocalGalleryScreen> with SingleTick
           children: [
             const Icon(Icons.inbox_outlined, color: RfColors.textMuted, size: 56),
             const SizedBox(height: 16),
-            Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+            Text(title, style: const TextStyle(color: RfColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
             Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: RfColors.textSecondary, fontSize: 13)),
           ],
@@ -619,7 +620,7 @@ Future<_PhotoAction?> _showPhotoActionSheet(
                 child: Text(
                   sideLabel.toUpperCase(),
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: RfColors.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -628,7 +629,7 @@ Future<_PhotoAction?> _showPhotoActionSheet(
             ),
             _SheetActionTile(
               icon: Icons.camera_alt_outlined,
-              iconColor: RfColors.rtAccent,
+              iconColor: RfColors.action,
               title: 'Replace photo',
               subtitle: 'Capture a new image',
               onTap: () => Navigator.pop(ctx, _PhotoAction.replace),
@@ -643,9 +644,9 @@ Future<_PhotoAction?> _showPhotoActionSheet(
               ),
             _SheetActionTile(
               icon: Icons.delete_outline,
-              iconColor: Colors.redAccent,
+              iconColor: RfColors.error,
               title: 'Remove photo',
-              titleColor: Colors.redAccent,
+              titleColor: RfColors.error,
               onTap: () => Navigator.pop(ctx, _PhotoAction.remove),
             ),
             Padding(
@@ -659,7 +660,7 @@ Future<_PhotoAction?> _showPhotoActionSheet(
                     color: Colors.white10,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Center(child: Text('Cancel', style: TextStyle(color: Colors.white70))),
+                  child: const Center(child: Text('Cancel', style: TextStyle(color: RfColors.textSecondary))),
                 ),
               ),
             ),
@@ -678,7 +679,7 @@ Future<bool> _confirmRemovePhoto(BuildContext context, String sideLabel) async {
         backgroundColor: Colors.transparent,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
-        title: const Text('Remove photo?', style: TextStyle(color: Colors.white)),
+        title: const Text('Remove photo?', style: TextStyle(color: RfColors.textPrimary)),
         content: Text(
           'Permanently remove the $sideLabel photo?\n\nThis cannot be undone.',
           style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
@@ -724,7 +725,7 @@ class _SheetActionTile extends StatelessWidget {
     required this.icon,
     required this.iconColor,
     required this.title,
-    this.titleColor = Colors.white,
+    this.titleColor = RfColors.textPrimary,
     this.titleWeight = FontWeight.normal,
     this.subtitle,
     this.trailing,
@@ -793,8 +794,8 @@ class _OrderCard extends StatelessWidget {
     return RfGlassContainer(
       blurEnabled: false,
       padding: const EdgeInsets.all(12),
-      tint: selected ? RfColors.rtAccent.withValues(alpha: 0.25) : null,
-      borderColor: selected ? RfColors.rtAccent : RfColors.border,
+      tint: selected ? RfColors.action.withValues(alpha: 0.25) : null,
+      borderColor: selected ? RfColors.action : RfColors.border,
       onTap: onTap,
       onLongPress: onLongPress,
       child: Row(
@@ -803,7 +804,7 @@ class _OrderCard extends StatelessWidget {
           if (selectionMode) ...[
             Icon(
               selected ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: selected ? RfColors.rtAccent : Colors.white38,
+              color: selected ? RfColors.action : RfColors.textMuted,
               size: 22,
             ),
             const SizedBox(width: 10),
@@ -820,7 +821,7 @@ class _OrderCard extends StatelessWidget {
             child: photoPaths.isNotEmpty
                 ? Image.file(File(photoPaths.first), fit: BoxFit.cover, cacheWidth: 200,
                     errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.white24))
-                : Icon(hasVideo ? Icons.videocam : Icons.folder, color: Colors.white38, size: 28),
+                : Icon(hasVideo ? Icons.videocam : Icons.folder, color: RfColors.textMuted, size: 28),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -830,7 +831,7 @@ class _OrderCard extends StatelessWidget {
                 Text(
                   order['bareOrderId'] as String? ?? order['orderId'] as String,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: RfColors.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'monospace',
@@ -858,7 +859,7 @@ class _OrderCard extends StatelessWidget {
           if (!selectionMode)
             RfIconButton(
               icon: Icons.delete_outline,
-              color: Colors.redAccent,
+              color: RfColors.error,
               tooltip: 'Delete',
               size: 40,
               onPressed: onDelete,
@@ -936,13 +937,13 @@ class _DraftSessionCard extends StatelessWidget {
         : Stack(alignment: Alignment.center, children: [
             Icon(
               hasRecovered ? Icons.restore_rounded : (hasVideo ? Icons.videocam_outlined : Icons.photo),
-              color: hasRecovered ? Colors.amber : Colors.white38,
+              color: hasRecovered ? RfColors.amber : RfColors.textMuted,
               size: 28,
             ),
             if (hasVideo)
               const Positioned(
                 bottom: 4, right: 4,
-                child: Icon(Icons.play_arrow_rounded, color: Colors.white70, size: 16),
+                child: Icon(Icons.play_arrow_rounded, color: RfColors.textSecondary, size: 16),
               ),
           ]);
 
@@ -951,10 +952,10 @@ class _DraftSessionCard extends StatelessWidget {
     return RfGlassContainer(
       blurEnabled: false,
       padding: const EdgeInsets.all(12),
-      tint: selected ? RfColors.rtAccent.withValues(alpha: 0.25) : null,
+      tint: selected ? RfColors.action.withValues(alpha: 0.25) : null,
       borderColor: selected
-          ? RfColors.rtAccent
-          : (hasRecovered ? Colors.amber.withAlpha(120) : RfColors.border),
+          ? RfColors.action
+          : (hasRecovered ? RfColors.amber.withAlpha(120) : RfColors.border),
       onLongPress: onLongPress,
       onTap: selectionMode ? onTapInSelectionMode : onTap,
       child: Row(
@@ -962,7 +963,7 @@ class _DraftSessionCard extends StatelessWidget {
           if (selectionMode) ...[
             Icon(
               selected ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: selected ? RfColors.rtAccent : Colors.white38,
+              color: selected ? RfColors.action : RfColors.textMuted,
               size: 22,
             ),
             const SizedBox(width: 10),
@@ -990,7 +991,7 @@ class _DraftSessionCard extends StatelessWidget {
                     decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(6)),
                     child: Text(
                       '$mode DRAFT',
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                      style: const TextStyle(color: RfColors.textPrimary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -1010,7 +1011,7 @@ class _DraftSessionCard extends StatelessWidget {
                   _chip(Icons.photo, '${photoPaths.length} photo${photoPaths.length == 1 ? '' : 's'}', RfColors.textSecondary),
                   _chip(Icons.sd_storage, '$sizeMb MB', RfColors.textSecondary),
                   if (hasRecovered)
-                    _chip(Icons.restore_rounded, 'Recovered', Colors.amber),
+                    _chip(Icons.restore_rounded, 'Recovered', RfColors.amber),
                 ]),
               ],
             ),
@@ -1018,7 +1019,7 @@ class _DraftSessionCard extends StatelessWidget {
           if (!selectionMode)
             RfIconButton(
               icon: Icons.delete_outline,
-              color: Colors.redAccent,
+              color: RfColors.error,
               tooltip: 'Delete',
               size: 40,
               onPressed: onDelete,
@@ -1123,7 +1124,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const Icon(Icons.broken_image, color: Colors.white24, size: 40),
             const SizedBox(height: 8),
-            Text(_errorMessage ?? 'Could not load video', style: const TextStyle(color: Colors.white54, fontSize: 12)),
+            Text(_errorMessage ?? 'Could not load video', style: const TextStyle(color: RfColors.textSecondary, fontSize: 12)),
           ]),
         ),
       );
@@ -1132,7 +1133,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
       return Container(
         height: 200,
         decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(12)),
-        child: const Center(child: CircularProgressIndicator(color: Colors.white38)),
+        child: const Center(child: CircularProgressIndicator(color: RfColors.textMuted)),
       );
     }
     final v = _ctrl!.value;
@@ -1230,7 +1231,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
                   child: Container(
                     decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
                     padding: const EdgeInsets.all(14),
-                    child: Icon(v.isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 40),
+                    child: Icon(v.isPlaying ? Icons.pause : Icons.play_arrow, color: RfColors.textPrimary, size: 40),
                   ),
                 ),
               ),
@@ -1245,7 +1246,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
                 duration: const Duration(milliseconds: 250),
                 child: RfIconButton(
                   icon: Icons.zoom_out_map,
-                  color: Colors.white70,
+                  color: RfColors.textSecondary,
                   tooltip: 'Reset zoom',
                   size: 40,
                   onPressed: _resetVideoZoom,
@@ -1262,7 +1263,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
                   padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
                   color: Colors.black.withAlpha(140),
                   child: Row(children: [
-                    Text(_fmt(v.position), style: const TextStyle(color: Colors.white, fontSize: 11, fontFamily: 'monospace')),
+                    Text(_fmt(v.position), style: const TextStyle(color: RfColors.textPrimary, fontSize: 11, fontFamily: 'monospace')),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -1277,7 +1278,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
                         ),
                       ),
                     ),
-                    Text(_fmt(v.duration), style: const TextStyle(color: Colors.white, fontSize: 11, fontFamily: 'monospace')),
+                    Text(_fmt(v.duration), style: const TextStyle(color: RfColors.textPrimary, fontSize: 11, fontFamily: 'monospace')),
                   ]),
                 ),
               ),
@@ -1356,7 +1357,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     if (resolvedSide == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Could not determine photo type'),
-        backgroundColor: Colors.black87,
       ));
       return;
     }
@@ -1383,12 +1383,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('${resolvedSide.name} photo replaced'),
         duration: const Duration(seconds: 2),
-        backgroundColor: Colors.black87,
       ));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Replace failed'),
-        backgroundColor: Colors.black87,
       ));
     }
   }
@@ -1400,7 +1398,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     if (resolvedSide == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Could not determine photo type'),
-        backgroundColor: Colors.black87,
       ));
       return;
     }
@@ -1424,12 +1421,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('${resolvedSide.name} photo removed'),
         duration: const Duration(seconds: 2),
-        backgroundColor: Colors.black87,
       ));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Remove failed'),
-        backgroundColor: Colors.black87,
       ));
     }
   }
@@ -1456,7 +1451,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                 padding: EdgeInsets.fromLTRB(20, 16, 20, 4),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('Re-tag this photo', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: Text('Re-tag this photo', style: TextStyle(color: RfColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
               const Padding(
@@ -1470,7 +1465,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                 final isCurrent = s == currentSide;
                 return _SheetActionTile(
                   icon: isCurrent ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                  iconColor: isCurrent ? RfColors.amber : Colors.white54,
+                  iconColor: isCurrent ? RfColors.amber : RfColors.textSecondary,
                   title: s.toUpperCase(),
                   titleColor: isCurrent ? RfColors.amber : Colors.white,
                   titleWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
@@ -1490,7 +1485,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                       color: Colors.white10,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Center(child: Text('Cancel', style: TextStyle(color: Colors.white70))),
+                    child: const Center(child: Text('Cancel', style: TextStyle(color: RfColors.textSecondary))),
                   ),
                 ),
               ),
@@ -1553,7 +1548,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Re-tagged to $newSide'),
         duration: const Duration(seconds: 2),
-        backgroundColor: Colors.black87,
       ));
     } catch (e) {
       debugPrint('Rename photo failed: $e');
@@ -1561,7 +1555,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Rename failed: $e'),
           duration: const Duration(seconds: 3),
-          backgroundColor: Colors.black87,
         ));
       }
     }
@@ -1614,28 +1607,28 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                 children: [
                   const Text(
                     'Edit order',
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                    style: TextStyle(color: RfColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: orderCtrl,
-                    style: const TextStyle(color: Colors.white, fontFamily: 'monospace'),
+                    style: const TextStyle(color: RfColors.textPrimary, fontFamily: 'monospace'),
                     decoration: const InputDecoration(
                       labelText: 'Order ID',
                       labelStyle: TextStyle(color: RfColors.textSecondary),
                       enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.border)),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.navy)),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.action)),
                     ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: awbCtrl,
-                    style: const TextStyle(color: Colors.white, fontFamily: 'monospace'),
+                    style: const TextStyle(color: RfColors.textPrimary, fontFamily: 'monospace'),
                     decoration: const InputDecoration(
                       labelText: 'AWB / tracking (optional)',
                       labelStyle: TextStyle(color: RfColors.textSecondary),
                       enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.border)),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.navy)),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.action)),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -1674,7 +1667,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                           Expanded(
                             child: Text(
                               DateFormat('dd MMM yyyy, HH:mm').format(selectedStartedAt),
-                              style: const TextStyle(color: Colors.white, fontFamily: 'monospace'),
+                              style: const TextStyle(color: RfColors.textPrimary, fontFamily: 'monospace'),
                             ),
                           ),
                           const Icon(Icons.edit_calendar_outlined, size: 16, color: RfColors.textSecondary),
@@ -1732,7 +1725,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                                     if (ctx.mounted) {
                                       ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
                                         content: Text('$e'),
-                                        backgroundColor: Colors.black87,
                                       ));
                                     }
                                   }
@@ -1768,7 +1760,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Order updated'),
         duration: Duration(seconds: 2),
-        backgroundColor: Colors.black87,
       ));
     } else if (mounted) {
       setState(() => _savingEdit = false);
@@ -1786,7 +1777,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
 
     return RfGlassScaffold(
       appBar: RfGlassAppBar(
-        titleWidget: Text(orderId, style: const TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'monospace')),
+        titleWidget: Text(orderId, style: const TextStyle(color: RfColors.textPrimary, fontSize: 14, fontFamily: 'monospace')),
         actions: [
           RfIconButton(
             icon: Icons.edit_outlined,
@@ -1794,6 +1785,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
             size: 40,
             onPressed: _showEditOrderSheet,
           ),
+          const SizedBox(width: 12),
         ],
       ),
       body: ListView(
@@ -1807,12 +1799,12 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
               children: [
                 Text('Order ID', style: TextStyle(color: RfColors.textSecondary, fontSize: 11)),
                 const SizedBox(height: 4),
-                Text(bareId, style: const TextStyle(color: Colors.white, fontSize: 15, fontFamily: 'monospace', fontWeight: FontWeight.w600)),
+                Text(bareId, style: const TextStyle(color: RfColors.textPrimary, fontSize: 15, fontFamily: 'monospace', fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
                 RfButton.secondary(
                   label: 'Edit order ID, AWB, QC',
                   icon: Icons.edit_outlined,
-                  accentColor: RfColors.rtAccent,
+                  accentColor: RfColors.action,
                   onPressed: _showEditOrderSheet,
                 ),
               ],
@@ -1836,7 +1828,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Video path copied'),
                     duration: Duration(seconds: 2),
-                    backgroundColor: Colors.black87,
                   ));
                 },
               ),
@@ -1887,7 +1878,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                             const SizedBox(width: 4),
                             Text(
                               side.toUpperCase(),
-                              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                              style: const TextStyle(color: RfColors.textPrimary, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5),
                             ),
                           ]),
                         ),
@@ -1922,7 +1913,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text('Folder path copied'),
                       duration: Duration(seconds: 2),
-                      backgroundColor: Colors.black87,
                     ));
                   },
                 ),
@@ -1943,7 +1933,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                     backgroundColor: Colors.transparent,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
-                    title: const Text('Delete order?', style: TextStyle(color: Colors.white)),
+                    title: const Text('Delete order?', style: TextStyle(color: RfColors.textPrimary)),
                     content: Text(
                       'Permanently delete order $orderId\n(video + ${photoPaths.length} photos)?\n\nThis cannot be undone.',
                       style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
@@ -1963,7 +1953,6 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Order deleted'),
                     duration: Duration(seconds: 2),
-                    backgroundColor: Colors.black87,
                   ));
                 }
               }
@@ -2090,7 +2079,7 @@ class _PhotoViewerState extends State<_PhotoViewer> {
                   children: [
                     RfIconButton(
                       icon: Icons.close,
-                      color: Colors.white,
+                      color: RfColors.textPrimary,
                       size: 40,
                       onPressed: () => Navigator.pop(context),
                     ),
@@ -2099,7 +2088,7 @@ class _PhotoViewerState extends State<_PhotoViewer> {
                       decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(10)),
                       child: Text(
                         '${_current + 1} / ${widget.allPaths.length}',
-                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                        style: const TextStyle(color: RfColors.textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
                       ),
                     ),
                     const SizedBox(width: 48),
@@ -2184,7 +2173,6 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
     if (side == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Could not determine photo type — remove and recapture instead'),
-        backgroundColor: Colors.black87,
       ));
       return;
     }
@@ -2205,7 +2193,6 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('${DraftSaveService.labelForSide(side)} replaced'),
       duration: const Duration(seconds: 2),
-      backgroundColor: Colors.black87,
     ));
   }
 
@@ -2226,7 +2213,6 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Photo removed'),
         duration: Duration(seconds: 2),
-        backgroundColor: Colors.black87,
       ));
     }
   }
@@ -2249,7 +2235,6 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
     if (videoPath == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('This draft has no video to save'),
-        backgroundColor: Colors.black87,
       ));
       return;
     }
@@ -2296,7 +2281,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
-            title: const Text('Add photo', style: TextStyle(color: Colors.white)),
+            title: const Text('Add photo', style: TextStyle(color: RfColors.textPrimary)),
             content: Text(
               'Capture ${DraftSaveService.labelForSide(side)} for this $modeStr shipment.',
               style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
@@ -2337,13 +2322,11 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
       Navigator.pop(context, true);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Saved order ${barcode['orderId']}'),
-        backgroundColor: Colors.black87,
       ));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Save failed: $e'),
-        backgroundColor: Colors.black87,
       ));
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -2359,7 +2342,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
-          title: const Text('Delete this draft?', style: TextStyle(color: Colors.white)),
+          title: const Text('Delete this draft?', style: TextStyle(color: RfColors.textPrimary)),
           content: Text(
             'Permanently delete all ${paths.length} file${paths.length == 1 ? '' : 's'} in this draft session?\n\nThis cannot be undone.',
             style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
@@ -2382,7 +2365,6 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('Deleted $deleted file${deleted == 1 ? '' : 's'}'),
       duration: const Duration(seconds: 2),
-      backgroundColor: Colors.black87,
     ));
   }
 
@@ -2407,20 +2389,21 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
             decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(6)),
             child: Text(
               '$mode DRAFT',
-              style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+              style: const TextStyle(color: RfColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5),
             ),
           ),
           const SizedBox(width: 10),
-          Text(ts, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+          Text(ts, style: const TextStyle(color: RfColors.textSecondary, fontSize: 12)),
         ]),
         actions: [
           RfIconButton(
             icon: Icons.delete_outline,
-            color: Colors.redAccent,
+            color: RfColors.error,
             tooltip: 'Delete all',
             size: 40,
             onPressed: _deleteAll,
           ),
+          const SizedBox(width: 12),
         ],
       ),
       body: ListView(
@@ -2449,11 +2432,11 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(color: Colors.amber.withAlpha(40), borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(color: RfColors.amber.withAlpha(40), borderRadius: BorderRadius.circular(8)),
               child: Row(children: [
-                const Icon(Icons.restore_rounded, color: Colors.amber, size: 14),
+                const Icon(Icons.restore_rounded, color: RfColors.amber, size: 14),
                 const SizedBox(width: 6),
-                const Text('Recovered from crash', style: TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.w600)),
+                const Text('Recovered from crash', style: TextStyle(color: RfColors.amber, fontSize: 11, fontWeight: FontWeight.w600)),
               ]),
             ),
           ],
@@ -2483,7 +2466,6 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Video path copied'),
                     duration: Duration(seconds: 2),
-                    backgroundColor: Colors.black87,
                   ));
                 },
               ),
@@ -2500,7 +2482,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
                 border: Border.all(color: Colors.white12),
               ),
               child: const Center(
-                child: Text('No video in this session', style: TextStyle(color: Colors.white38, fontSize: 13)),
+                child: Text('No video in this session', style: TextStyle(color: RfColors.textMuted, fontSize: 13)),
               ),
             ),
             const SizedBox(height: 16),
@@ -2548,7 +2530,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
                             ),
                             child: Text(
                               side.name.toUpperCase(),
-                              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+                              style: const TextStyle(color: RfColors.textPrimary, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5),
                             ),
                           ),
                         ),

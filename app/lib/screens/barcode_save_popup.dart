@@ -923,7 +923,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
-          title: const Text('Order ID mismatch?', style: TextStyle(color: Colors.white)),
+          title: const Text('Order ID mismatch?', style: TextStyle(color: RfColors.textPrimary)),
           content: Text(
             'You typed:\n$typed\n\nClosest packing (PK) record:\n$suggested\n\n'
             'Return labels are sometimes misprinted — pick the correct Order ID.',
@@ -1210,7 +1210,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
                                 ),
                               ),
                             )
-                          : const Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white38)),
+                          : const Center(child: CircularProgressIndicator(strokeWidth: 2, color: RfColors.textMuted)),
                     ),
                   ),
                 ),
@@ -1381,18 +1381,18 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       const SizedBox(height: 4),
       TextField(
         controller: controller,
-        style: const TextStyle(color: Colors.white, fontFamily: 'monospace', fontSize: 14, letterSpacing: 0.5),
+        style: const TextStyle(color: RfColors.textPrimary, fontFamily: 'monospace', fontSize: 14, letterSpacing: 0.5),
         inputFormatters: inputFormatters,
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.15), fontFamily: 'monospace', fontSize: 14),
           filled: true,
-          fillColor: RfColors.bg,
+          fillColor: RfColors.card,
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.border)),
           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.border)),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.rtAccent, width: 1.5)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.action, width: 1.5)),
           errorText: errorText,
           errorMaxLines: 2,
           errorStyle: const TextStyle(color: RfColors.error, fontSize: 11),

@@ -1,32 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/rf_colors.dart';
+import '../theme/rf_glass.dart';
 
-/// RepairFully Camera App buttons — Mahika doctrine.
+/// RepairFully Camera App buttons — tinted liquid-glass pills.
 ///
-/// Authority: `~/.claude/skills/mahika.md §IV "BUTTON STANDARDS" + §V
-/// "SMOOTH ANIMATIONS"`.
-///
-/// **Visual language:**
-///   - Solid fill (no gradients, no inner bevels) — clean operational look
-///   - 10px border radius (Mahika §IV — `BorderRadius.circular(10)`)
+/// **Visual language (2026-10-10 revamp, Sir):**
+///   - Fully-rounded pill ([RfRadius.pill]) on [RfGlassSurface]: a translucent
+///     tint with a top sheen, a thin gradient rim and a specular arc. No
+///     drop shadow, no backdrop blur (buttons also sit over a live camera).
 ///   - 48dp minimum touch target (Material guideline + Mahika §IV)
-///   - FontWeight 600 for labels
-///   - Material outlined icons for status, filled rounded for primary actions
+///   - FontWeight 600 labels, white on filled tints
+///   - Optional trailing chevron on full-width CTAs ([RfButton.trailingChevron])
 ///
 /// **Press feedback (Mahika §V #1 — canonical pattern):**
-///   - `ScaleTransition` driven by AnimationController
-///   - Scale 1.0 → 0.95 on press-down
-///   - 200ms `Curves.easeOut`
-///   - Reverses on tap-up / cancel
-///   - Pairs with a `HapticFeedback.selectionClick()` on release
-///   - Light color-deepen layered on top (visual confirmation)
+///   - `ScaleTransition` 1.0 → 0.95 over 200ms `Curves.easeOut`, reversing on
+///     tap-up / cancel, with a `HapticFeedback.selectionClick()` on release
+///   - The glass deepens (a little more tint, less sheen) while pressed
 ///
 /// **Variants (semantic, not promotional):**
-///   - [RfButton.primary]   — action coral fill, white text (SAVE / CAPTURE / CONFIRM)
-///   - [RfButton.service]   — navy fill, white text (ACCEPT / VIEW)
-///   - [RfButton.secondary] — transparent + 1px white border (CANCEL / BACK / SKIP)
-///   - [RfButton.danger]    — error red fill, white text (DELETE / FLAG)
+///   - [RfButton.primary]   — terracotta glass (SAVE / SCAN / CONFIRM)
+///   - [RfButton.service]   — blue glass (ACCEPT / VIEW)
+///   - [RfButton.secondary] — clear glass (CANCEL / BACK / SKIP); an
+///     `accentColor` tints the rim, fill and label
+///   - [RfButton.danger]    — red glass (DELETE / FLAG)
 ///
 /// For chip-style toggles (zoom/aspect rows) use [RfChip], not RfButton.
 class RfButton extends StatefulWidget {
@@ -36,10 +33,13 @@ class RfButton extends StatefulWidget {
   final RfButtonVariant variant;
   final RfButtonSize size;
   final bool fullWidth;
-  /// Tints text/icon/border — honored only by [RfButtonVariant.secondary],
-  /// for the handful of spots that color-code an otherwise-neutral action
-  /// (e.g. rtAccent/pkAccent). Ignored by every other variant.
+  /// Tints text/icon/fill — honored only by [RfButtonVariant.secondary], for
+  /// the handful of spots that color-code an otherwise-neutral action (e.g.
+  /// rtAccent/pkAccent). Ignored by every other variant.
   final Color? accentColor;
+  /// Left-aligned label with a `>` at the right end — the call-to-action look.
+  /// Only applies together with [fullWidth].
+  final bool trailingChevron;
 
   const RfButton({
     super.key,
@@ -50,6 +50,7 @@ class RfButton extends StatefulWidget {
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
     this.accentColor,
+    this.trailingChevron = false,
   });
 
   const RfButton.primary({
@@ -59,6 +60,7 @@ class RfButton extends StatefulWidget {
     this.onPressed,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
+    this.trailingChevron = false,
   })  : variant = RfButtonVariant.primary,
         accentColor = null;
 
@@ -69,6 +71,7 @@ class RfButton extends StatefulWidget {
     this.onPressed,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
+    this.trailingChevron = false,
   })  : variant = RfButtonVariant.service,
         accentColor = null;
 
@@ -80,6 +83,7 @@ class RfButton extends StatefulWidget {
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
     this.accentColor,
+    this.trailingChevron = false,
   }) : variant = RfButtonVariant.secondary;
 
   const RfButton.danger({
@@ -89,6 +93,7 @@ class RfButton extends StatefulWidget {
     this.onPressed,
     this.size = RfButtonSize.medium,
     this.fullWidth = false,
+    this.trailingChevron = false,
   })  : variant = RfButtonVariant.danger,
         accentColor = null;
 
@@ -103,7 +108,7 @@ enum RfButtonSize { small, medium, large }
 class _RfButtonState extends State<RfButton> with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<double> _scale;
-  bool _hover = false;  // tracks tap-down for color-deepen
+  bool _hover = false;  // tracks tap-down for the glass deepen
 
   @override
   void initState() {
@@ -143,76 +148,60 @@ class _RfButtonState extends State<RfButton> with SingleTickerProviderStateMixin
     }
   }
 
-  ({Color fill, Color text, Color? border}) _palette() {
-    final pressed = _hover;
-    Color darker(Color c, [double amount = 0.12]) => Color.lerp(c, Colors.black, amount)!;
-
+  ({Color tint, double strength, Color text}) _style() {
     switch (widget.variant) {
       case RfButtonVariant.primary:
-        return (
-          fill: pressed ? darker(RfColors.action) : RfColors.action,
-          text: Colors.white,
-          border: null,
-        );
+        return (tint: RfColors.action, strength: 0.72, text: Colors.white);
       case RfButtonVariant.service:
-        return (
-          fill: pressed ? darker(RfColors.navy, 0.2) : RfColors.navy,
-          text: Colors.white,
-          border: null,
-        );
+        return (tint: RfColors.info, strength: 0.60, text: Colors.white);
       case RfButtonVariant.secondary:
         final accent = widget.accentColor;
-        return (
-          fill: pressed ? RfColors.glassFill(0.22) : RfColors.glassFill(0.10),
-          text: accent ?? Colors.white,
-          border: accent != null
-              ? accent.withValues(alpha: pressed ? 0.55 : 0.4)
-              : RfColors.glassBorder(pressed ? 0.35 : 0.28),
-        );
+        return accent != null
+            ? (tint: accent, strength: 0.16, text: accent)
+            : (tint: Colors.white, strength: 0.08, text: RfColors.textPrimary);
       case RfButtonVariant.danger:
-        return (
-          fill: pressed ? RfColors.errorDark : RfColors.error,
-          text: Colors.white,
-          border: null,
-        );
+        return (tint: RfColors.error, strength: 0.66, text: Colors.white);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final dims = _dims();
-    final palette = _palette();
+    final style = _style();
     final disabled = widget.onPressed == null;
+    final cta = widget.trailingChevron && widget.fullWidth;
 
-    final body = Container(
+    final label = widget.label.isEmpty
+        ? null
+        : Text(
+            widget.label,
+            overflow: TextOverflow.ellipsis,
+            softWrap: false,
+            textAlign: cta ? TextAlign.left : TextAlign.center,
+            style: TextStyle(
+              color: style.text,
+              fontSize: dims.font,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.1,
+            ),
+          );
+
+    final body = RfGlassSurface(
+      tint: style.tint,
+      strength: style.strength,
+      pressed: _hover,
       height: dims.h,
       padding: EdgeInsets.symmetric(horizontal: dims.padH),
-      decoration: BoxDecoration(
-        color: palette.fill,
-        borderRadius: BorderRadius.circular(RfRadius.button),
-        border: palette.border != null ? Border.all(color: palette.border!) : null,
-      ),
       child: Row(
         mainAxisSize: widget.fullWidth ? MainAxisSize.max : MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: cta ? MainAxisAlignment.start : MainAxisAlignment.center,
         children: [
           if (widget.icon != null) ...[
-            Icon(widget.icon, size: dims.iconSize, color: palette.text),
+            Icon(widget.icon, size: dims.iconSize, color: style.text),
             SizedBox(width: widget.label.isEmpty ? 0 : 8),
           ],
-          if (widget.label.isNotEmpty)
-            Flexible(
-              child: Text(
-                widget.label,
-                overflow: TextOverflow.ellipsis,
-                softWrap: false,
-                style: TextStyle(
-                  color: palette.text,
-                  fontSize: dims.font,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+          if (label != null) cta ? Expanded(child: label) : Flexible(child: label),
+          if (cta) Icon(Icons.chevron_right_rounded, size: dims.iconSize + 6, color: style.text),
         ],
       ),
     );
@@ -245,8 +234,10 @@ class _RfButtonState extends State<RfButton> with SingleTickerProviderStateMixin
   }
 }
 
-/// Compact toggle chip — for zoom + aspect rows in camera UI.
-/// ScaleTransition press matches RfButton (consistent feel across the app).
+/// Compact toggle chip — for zoom + aspect rows in camera UI. A glass pill:
+/// inactive is clear glass, active is a light (warm-white) glass with dark
+/// text so the selected option stays unmistakable. ScaleTransition press
+/// matches RfButton (consistent feel across the app).
 class RfChip extends StatefulWidget {
   final String label;
   final bool active;
@@ -286,27 +277,22 @@ class _RfChipState extends State<RfChip> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final disabled = widget.onPressed == null;
-    final fill = widget.active
-        ? Colors.white
-        : RfColors.glassFill(0.12);
-    final textColor = widget.active ? RfColors.navy : Colors.white;
-    final borderColor = widget.active ? Colors.transparent : RfColors.glassBorder(0.24);
+    final active = widget.active;
 
-    final visual = Container(
+    final visual = ConstrainedBox(
       constraints: BoxConstraints(minWidth: widget.minWidth ?? 0, minHeight: 36),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: fill,
-        borderRadius: BorderRadius.circular(RfRadius.chip),
-        border: Border.all(color: borderColor),
-      ),
-      child: Center(
+      child: RfGlassSurface(
+        tint: active ? RfColors.textPrimary : Colors.white,
+        strength: active ? 0.90 : 0.08,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        alignment: Alignment.center,
         child: Text(
           widget.label,
+          textAlign: TextAlign.center,
           style: TextStyle(
-            color: textColor,
+            color: active ? RfColors.bg : RfColors.textPrimary,
             fontSize: 13,
-            fontWeight: widget.active ? FontWeight.w700 : FontWeight.w600,
+            fontWeight: active ? FontWeight.w700 : FontWeight.w600,
           ),
         ),
       ),
@@ -328,8 +314,10 @@ class _RfChipState extends State<RfChip> with SingleTickerProviderStateMixin {
   }
 }
 
-/// Circular icon button — for AppBar close X, mic-mute toggle, etc.
-/// ScaleTransition press matches RfButton.
+/// Circular icon button — for AppBar close X, mic-mute toggle, etc. A round
+/// glass disc: dark-tinted by default so the white icon stays legible both on
+/// the grey canvas and over a bright live camera. ScaleTransition press
+/// matches RfButton.
 class RfIconButton extends StatefulWidget {
   final IconData icon;
   final VoidCallback? onPressed;
@@ -374,25 +362,16 @@ class _RfIconButtonState extends State<RfIconButton> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final disabled = widget.onPressed == null;
-    final bg = widget.bgColor ?? RfColors.glassFill(0.18);
-    final fg = widget.color ?? Colors.white;
-    final pressedBg = Color.lerp(bg, Colors.black, 0.25)!;
+    final base = widget.bgColor ?? Colors.black.withValues(alpha: 0.34);
+    final fg = widget.color ?? RfColors.textPrimary;
 
-    final visual = Container(
+    final visual = RfGlassSurface(
+      tint: base.withValues(alpha: 1),
+      strength: base.a,
+      pressed: _pressed,
       width: widget.size,
       height: widget.size,
-      decoration: BoxDecoration(
-        color: _pressed ? pressedBg : bg,
-        shape: BoxShape.circle,
-        border: Border.all(color: RfColors.glassBorder()),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      alignment: Alignment.center,
       child: Icon(widget.icon, size: widget.size * 0.5, color: fg.withAlpha(disabled ? 100 : 255)),
     );
 
@@ -431,7 +410,7 @@ class _RfIconButtonState extends State<RfIconButton> with SingleTickerProviderSt
 class RfRecordingPulse extends StatefulWidget {
   final double size;
   final Color color;
-  const RfRecordingPulse({super.key, this.size = 12, this.color = const Color(0xFFFF7B72)});
+  const RfRecordingPulse({super.key, this.size = 12, this.color = RfColors.recording});
 
   @override
   State<RfRecordingPulse> createState() => _RfRecordingPulseState();

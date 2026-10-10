@@ -102,7 +102,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
-          title: const Text('Flag as Fraud?', style: TextStyle(color: Colors.white)),
+          title: const Text('Flag as Fraud?', style: TextStyle(color: RfColors.textPrimary)),
           content: const Text(
             'This will flag the order as potential buyer fraud (swap/different item returned).\n\nSAFE-T claim will be triggered automatically.',
             style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
@@ -145,7 +145,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
-                  Text(_titleFor(_panel), style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
+                  Text(_titleFor(_panel), style: const TextStyle(color: RfColors.textPrimary, fontSize: 17, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   if (widget.orderId != null)
                     Text('Order: ${widget.orderId}', style: const TextStyle(color: RfColors.textSecondary, fontSize: 12, fontFamily: 'monospace')),
@@ -215,7 +215,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               icon: Icons.check_circle_outline,
               label: 'OK',
               description: 'Product matches what was sent',
-              color: Colors.green,
+              color: RfColors.successLight,
               onTap: () => _finish(QCVerdict.ok, const []),
             ),
             const SizedBox(height: 8),
@@ -223,7 +223,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               icon: Icons.warning_amber_rounded,
               label: 'DAMAGED',
               description: 'Arrived damaged or defective',
-              color: Colors.orange,
+              color: RfColors.amber,
               onTap: () => _goTo(_Panel.damagedSub, verdict: QCVerdict.damaged),
             ),
             const SizedBox(height: 8),
@@ -231,7 +231,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               icon: Icons.dangerous_outlined,
               label: 'DIFFERENT',
               description: 'Fraud / swap — different item',
-              color: Colors.red,
+              color: RfColors.error,
               onTap: () => _goTo(_Panel.differentSub, verdict: QCVerdict.different),
             ),
             const SizedBox(height: 8),
@@ -239,7 +239,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               icon: Icons.broken_image_outlined,
               label: 'DAMAGED + DIFFERENT',
               description: 'Damaged AND different item',
-              color: RfColors.error,
+              color: RfColors.rtAccent,
               onTap: () => _goTo(_Panel.damagedSub, verdict: QCVerdict.damagedDifferent),
             ),
             const SizedBox(height: 8),
@@ -263,7 +263,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               icon: Icons.report_problem_rounded,
               label: 'HEAVILY DAMAGED',
               description: QCSubReason.heavilyDamaged.label,
-              color: Colors.orange,
+              color: RfColors.amber,
               onTap: () => _onDamagedSubPicked(QCSubReason.heavilyDamaged),
             ),
             const SizedBox(height: 8),
@@ -271,7 +271,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               icon: Icons.warning_amber_rounded,
               label: 'MINOR DAMAGE',
               description: QCSubReason.minorDamage.label,
-              color: Colors.orange,
+              color: RfColors.amber,
               onTap: () => _onDamagedSubPicked(QCSubReason.minorDamage),
             ),
             const SizedBox(height: 8),
@@ -279,7 +279,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               icon: Icons.recycling_rounded,
               label: 'MILDLY USED',
               description: QCSubReason.mildlyUsed.label,
-              color: Colors.orange,
+              color: RfColors.amber,
               onTap: () => _onDamagedSubPicked(QCSubReason.mildlyUsed),
             ),
             const SizedBox(height: 8),
@@ -287,7 +287,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               icon: Icons.delete_sweep_rounded,
               label: 'HEAVILY USED',
               description: QCSubReason.heavilyUsed.label,
-              color: Colors.orange,
+              color: RfColors.amber,
               onTap: () => _onDamagedSubPicked(QCSubReason.heavilyUsed),
             ),
             const SizedBox(height: 16),
@@ -303,7 +303,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               icon: Icons.swap_horiz_rounded,
               label: 'DIFFERENT ITEM',
               description: QCSubReason.differentItem.label,
-              color: Colors.red,
+              color: RfColors.error,
               onTap: () => _onDifferentSubPicked(QCSubReason.differentItem),
             ),
             const SizedBox(height: 8),
@@ -311,7 +311,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               icon: Icons.gpp_bad_rounded,
               label: 'COUNTERFEIT / FAKE',
               description: QCSubReason.counterfeitItem.label,
-              color: Colors.red,
+              color: RfColors.error,
               onTap: () => _onDifferentSubPicked(QCSubReason.counterfeitItem),
             ),
             const SizedBox(height: 16),
@@ -322,14 +322,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
   }
 
   Widget _footerButton({required String label, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: RfGlassContainer(
-        blurEnabled: false,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        child: Center(child: Text(label, style: const TextStyle(color: Colors.white54, fontSize: 14))),
-      ),
-    );
+    return RfButton.secondary(label: label, fullWidth: true, onPressed: onTap);
   }
 }
 
@@ -357,6 +350,9 @@ class _VerdictButton extends StatelessWidget {
     return SizedBox(
       height: 60,
       child: RfLiquidGlassContainer(
+        // No backdrop blur: this sheet is shown over the LIVE camera in RT
+        // mode, and five blurred buttons there re-blur the video every frame.
+        blur: 0,
         onTap: onTap,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         tint: color.withValues(alpha: 0.12),

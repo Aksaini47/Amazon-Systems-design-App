@@ -70,7 +70,7 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Colors.white38))
+          ? const Center(child: CircularProgressIndicator(color: RfColors.textMuted))
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -96,7 +96,7 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
                           child: SelectableText(
                             _content,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: RfColors.textPrimary,
                               fontSize: 12,
                               fontFamily: 'monospace',
                               height: 1.45,

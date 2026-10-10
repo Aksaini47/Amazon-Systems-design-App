@@ -1,73 +1,65 @@
 import 'package:flutter/material.dart';
 
-/// RepairFully Camera App — color tokens (Mahika doctrine, v3.0).
+/// RepairFully Camera App — color tokens.
 ///
-/// Authority: `~/.claude/skills/mahika.md §VII "REPAIRFULLY BRAND GUIDELINES"`
-/// + Project Bravo's `mahika_capture_specs.md`.
-///
-/// This is the CAMERA APP palette — seller-facing operational tool, runs on
-/// a dark canvas (necessary for video preview contrast + low-light capture
-/// + reduced eye strain during long sessions). The customer-facing website
-/// uses a separate light-theme palette governed by
-/// `06_pipeline/_governance/DESIGN_SYSTEM.txt`. The two palettes share brand
-/// navy / coral / success / error tokens but apply them to different
-/// surface contexts.
+/// 2026-10-10 revamp (Sir): the app is forced dark and now follows the Claude
+/// desktop app's dark look — warm neutral greys (not the old GitHub-dark
+/// blue-black), warm off-white text and a terracotta accent. The camera
+/// screens keep pure black behind the live preview; everything else sits on
+/// these greys. The customer-facing website uses a separate light palette
+/// (`06_pipeline/_governance/DESIGN_SYSTEM.txt`).
 class RfColors {
   RfColors._();
 
-  // ─── BRAND TOKENS (shared with web property) ──────────────────────────
-  //
-  // Sourced from RepairFully brand lock. Navy is the structural primary;
-  // action coral is reserved for commerce / save / primary CTA actions
-  // (per W33 lock 10 May 2026 — Etsy-warm `#F1641E`, superseded the older
-  // `#F0653E` coral that Mahika v3.0 documents).
+  // ─── BRAND / ACCENT TOKENS ────────────────────────────────────────────
 
-  /// Brand primary — structural authority, navy bars, primary surfaces.
+  /// Brand primary — kept for the legacy [primary] alias only; the revamp no
+  /// longer paints anything navy.
   static const navy = Color(0xFF0A1B3F);
 
-  /// Action / commerce / primary CTA. White text site-wide (W33 lock).
-  static const action = Color(0xFFF1641E);
+  /// Action / primary CTA — terracotta, the Claude desktop accent. White text.
+  /// (The launcher icon and native splash keep the older brand orange; those
+  /// are native assets and cannot change in an OTA patch.)
+  static const action = Color(0xFFD97757);
 
-  /// PK mode accent — used to color packing-flow UI (capture screen badge,
-  /// progress indicators, etc.). Blue (Sir, 2026-09-12) — previously
-  /// orange, which was the swapped/wrong way round versus RT's red.
-  static const pkAccent = Color(0xFF388BFD);
+  /// Pressed / deeper terracotta.
+  static const actionDeep = Color(0xFFC6613F);
 
-  /// RT mode accent — used to color return-flow UI. Red (Sir, 2026-09-12) —
-  /// matches [recording]'s tone so the return flow reads as the
-  /// "higher-stakes" one at a glance, same as the live record indicator.
-  static const rtAccent = Color(0xFFFF3B30);
+  /// PK mode accent — packing flow. Soft blue, deep enough for white text.
+  static const pkAccent = Color(0xFF4C8BD0);
+
+  /// RT mode accent — return flow. Red-coral: reads as the higher-stakes flow.
+  static const rtAccent = Color(0xFFD9534A);
 
   /// FBA badge / future tier accent (legacy alias retained).
   static const fbaAccent = Color(0xFFF78166);
 
-  // ─── DARK SURFACE TOKENS (camera app — Mahika §VII) ──────────────────
-  //
-  // GitHub-dark family. Selected for low-light capture sessions where
-  // pure-white surfaces would wash out preview contrast.
+  // ─── DARK SURFACE TOKENS (warm greys — Claude desktop dark) ───────────
 
-  /// App background (deepest dark surface).
-  static const bg = Color(0xFF0D1117);
+  /// App background.
+  static const bg = Color(0xFF262624);
 
   /// Card / panel surface (one elevation above bg).
-  static const card = Color(0xFF161B22);
+  static const card = Color(0xFF30302E);
 
-  /// Elevated surface — buttons in rest state, dropdowns, chips.
-  static const surface = Color(0xFF21262D);
+  /// Elevated surface — dropdowns, menus, sheets, dialogs.
+  static const surface = Color(0xFF3A3A37);
 
-  /// Standard dark-theme border for cards over `bg`.
-  static const border = Color(0xFF30363D);
+  /// Standard border for cards over `bg`.
+  static const border = Color(0xFF454540);
 
   /// Subtle separator — for in-card section dividers.
-  static const borderSubtle = Color(0xFF21262D);
+  static const borderSubtle = Color(0xFF3A3A37);
 
-  // ─── GLASS TOKENS (frosted UI overlays) ───────────────────────────────
+  // ─── GLASS TOKENS (translucent UI) ────────────────────────────────────
 
-  /// Default frosted panel tint over dark mesh.
+  /// Default translucent panel over the grey background. White-based: a dark
+  /// fill is invisible on a dark-grey canvas. Camera chrome that must DARKEN
+  /// the video behind it uses an explicit black tint instead.
   static Color glassFill([double opacity = 0.14]) =>
-      card.withValues(alpha: opacity);
+      Colors.white.withValues(alpha: opacity * 0.45);
 
-  /// Elevated glass (app bars, sheets).
+  /// Elevated glass (app bars, sheets, dialogs).
   static Color glassElevated([double opacity = 0.22]) =>
       surface.withValues(alpha: opacity);
 
@@ -77,47 +69,46 @@ class RfColors {
 
   // ─── TEXT TOKENS ──────────────────────────────────────────────────────
 
-  /// Primary text on dark surfaces.
-  static const textPrimary = Color(0xFFE6EDF3);
+  /// Primary text on dark surfaces — warm off-white.
+  static const textPrimary = Color(0xFFFAF9F5);
 
   /// Secondary text — supporting descriptions, metadata.
-  static const textSecondary = Color(0xFF8B949E);
+  static const textSecondary = Color(0xFFB5B3A9);
 
   /// Muted text — timestamps, hints, low-priority labels.
-  static const textMuted = Color(0xFF4D5565);
+  static const textMuted = Color(0xFF918F86);
 
   // ─── STATUS TOKENS ────────────────────────────────────────────────────
 
-  /// Success / connected / completed.
-  static const success = Color(0xFF238636);
+  /// Success / connected / completed — sage green.
+  static const success = Color(0xFF4F9979);
 
   /// Success light — checkmarks, success accents.
-  static const successLight = Color(0xFF3FB950);
+  static const successLight = Color(0xFF7CC4A1);
 
   /// Success tinted bg for confirmation cards.
-  static const successBg = Color(0xFF1A3A1A);
+  static const successBg = Color(0xFF22362D);
 
   /// Error / form failure / system error.
-  static const error = Color(0xFFFF7B72);
+  static const error = Color(0xFFE5675B);
 
   /// Error darker — borders + dark accents.
-  static const errorDark = Color(0xFF8B1A1A);
+  static const errorDark = Color(0xFF8F2F28);
 
   /// Error tinted bg.
-  static const errorBg = Color(0xFF3D1A1A);
+  static const errorBg = Color(0xFF402523);
 
   /// Warning / amber alerts (refund-pending day 3+).
-  static const warning = Color(0xFFD29922);
+  static const warning = Color(0xFFE0A24E);
 
   /// Warning tinted bg.
-  static const warningBg = Color(0xFF3A2E00);
+  static const warningBg = Color(0xFF3D3321);
 
   /// Information links / secondary actions.
-  static const info = Color(0xFF388BFD);
+  static const info = Color(0xFF6FA3DC);
 
   /// Amber highlight — drafts, pending states, soft attention accents.
-  /// (Promoted 2026-07-17: was 17 raw `0xFFFFA657` literals across screens.)
-  static const amber = Color(0xFFFFA657);
+  static const amber = Color(0xFFE6A55C);
 
   /// Recording indicator — the universal vivid "REC" red. Deliberately NOT
   /// the softer [error] token: while recording, the dot must be unmissable.
@@ -133,12 +124,10 @@ class RfColors {
   static const errorBorder = errorDark;
 }
 
-/// Border-radius tokens. Camera app uses 10-12px friendly radii
-/// (Mahika §IV — "shape: RoundedRectangleBorder(borderRadius:
-/// BorderRadius.circular(10))").
+/// Border-radius tokens.
 class RfRadius {
   RfRadius._();
-  /// Default for buttons + cards.
+  /// Default for rectangular buttons (legacy) + small cards.
   static const button = 10.0;
   static const card = 12.0;
   static const chip = 8.0;
@@ -146,7 +135,7 @@ class RfRadius {
   static const lg = 16.0;
   /// Sharp / data block.
   static const precise = 4.0;
-  /// Fully-rounded pill/capsule shape — liquid-glass buttons, inputs.
+  /// Fully-rounded pill/capsule — every button, chip and round control.
   static const pill = 999.0;
 }
 
@@ -189,12 +178,12 @@ class RfSpace {
 }
 
 /// Type scale — sizes/weights the screens already converge on, named.
-/// Wired into ThemeData.textTheme (main.dart) so unstyled Text inherits it.
+/// Wired into ThemeData.textTheme (rf_theme.dart) so unstyled Text inherits it.
 class RfType {
   RfType._();
-  static const title = TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold);
-  static const heading = TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold);
-  static const label = TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600);
+  static const title = TextStyle(color: RfColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold);
+  static const heading = TextStyle(color: RfColors.textPrimary, fontSize: 17, fontWeight: FontWeight.bold);
+  static const label = TextStyle(color: RfColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600);
   static const body = TextStyle(color: RfColors.textPrimary, fontSize: 14);
   static const caption = TextStyle(color: RfColors.textSecondary, fontSize: 12, height: 1.3);
   static const mono = TextStyle(color: RfColors.textPrimary, fontSize: 12, fontFamily: 'monospace');

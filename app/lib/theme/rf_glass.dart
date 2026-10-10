@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -5,10 +6,14 @@ import 'package:flutter/services.dart';
 
 import 'rf_colors.dart';
 
-/// Glassmorphic design tokens + reusable surfaces for RF Logger.
+/// Glass design tokens + reusable surfaces for RF Logger.
 ///
-/// Frosted panels: blur + translucent fill + soft white border highlight.
-/// Works on the dark navy mesh background used app-wide.
+/// 2026-10-10 revamp (Sir): the look is tinted liquid glass on a warm dark
+/// grey canvas — translucent tint with a vertical sheen, a thin gradient rim
+/// (bright top-left, dim bottom-right) and a short specular arc on the top
+/// edge ([RfGlassSurface]). Backdrop blur is reserved for the few surfaces
+/// that sit over something worth blurring (dialogs, sheets); over a live
+/// camera texture it would re-run every frame, so camera chrome keeps it off.
 class RfGlass {
   RfGlass._();
 
@@ -16,13 +21,12 @@ class RfGlass {
   static const double blurStandard = 14;
   static const double blurHeavy = 22;
 
-  /// Primary frosted panel fill.
-  static Color fill([double opacity = 0.14]) =>
-      RfColors.card.withValues(alpha: opacity);
+  /// Primary translucent panel fill.
+  static Color fill([double opacity = 0.14]) => RfColors.glassFill(opacity);
 
-  /// Slightly denser panel (app bar, modals).
+  /// Slightly denser panel (modals).
   static Color fillElevated([double opacity = 0.22]) =>
-      RfColors.surface.withValues(alpha: opacity);
+      RfColors.glassElevated(opacity);
 
   /// Hairline glass border.
   static Color border([double opacity = 0.28]) =>
@@ -40,7 +44,6 @@ class RfGlass {
     Color? tint,
     Color? borderColor,
     double borderWidth = 1,
-    bool showHighlight = true,
   }) {
     return BoxDecoration(
       borderRadius: BorderRadius.circular(radius),
@@ -53,26 +56,17 @@ class RfGlass {
         ],
       ),
       border: Border.all(
-        color: borderColor ?? border(0.22),
+        color: borderColor ?? border(0.14),
         width: borderWidth,
       ),
-      boxShadow: showHighlight
-          ? [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ]
-          : null,
     );
   }
 
   /// Liquid-glass decoration — like [decoration] but with a brighter
-  /// top-left specular highlight and a softer, wider shadow, evoking light
-  /// refracting through curved glass rather than a flat frosted panel.
-  /// New addition for the design-system revamp (Feature 6 pilot) — existing
-  /// [decoration] callers elsewhere in the app are untouched.
+  /// top-left specular highlight, evoking light refracting through curved
+  /// glass rather than a flat frosted panel. No box shadow on either: both
+  /// are drawn inside a ClipRRect over a translucent fill, so the shadow only
+  /// ever showed THROUGH the fill as a muddy darker band.
   static BoxDecoration liquidDecoration({
     double radius = RfRadius.lg,
     Color? tint,
@@ -91,15 +85,7 @@ class RfGlass {
         ],
         stops: const [0.0, 0.5, 1.0],
       ),
-      border: Border.all(color: borderColor ?? border(0.30)),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.30),
-          blurRadius: 30,
-          offset: const Offset(0, 16),
-          spreadRadius: -8,
-        ),
-      ],
+      border: Border.all(color: borderColor ?? border(0.20)),
     );
   }
 
@@ -120,7 +106,7 @@ class RfGlass {
             gradient: LinearGradient(
               colors: [
                 Colors.white.withValues(alpha: 0),
-                Colors.white.withValues(alpha: 0.65),
+                Colors.white.withValues(alpha: 0.5),
                 Colors.white.withValues(alpha: 0),
               ],
             ),
@@ -130,23 +116,168 @@ class RfGlass {
     );
   }
 
+  /// Neutral warm-grey canvas gradient — barely there, just enough depth that
+  /// the screen is not one flat slab.
   static LinearGradient meshGradient = const LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF0A1428),
-      Color(0xFF0D1117),
-      Color(0xFF101828),
+      Color(0xFF2B2B29),
+      Color(0xFF262624),
+      Color(0xFF222221),
     ],
-    stops: [0.0, 0.55, 1.0],
+    stops: [0.0, 0.5, 1.0],
   );
 }
 
-/// Ambient background — dark gradient, with an optional grid pattern.
-/// No colored glow orbs (removed per Sir's direction 2026-08-11: flat,
-/// minimal, no blue/orange fades). The grid itself is opt-in per Sir's
-/// 2026-08-11 follow-up — Home is the only screen with the textured grid;
-/// every other screen is the flat charcoal gradient alone.
+/// Tinted liquid-glass surface — the one primitive behind every pill, chip
+/// and round control.
+///
+/// [tint] at [strength] opacity forms the glass: a clear glass is white at
+/// ~0.08, an accent button is its accent at ~0.7. A vertical sheen lightens
+/// the top edge, a thin gradient rim and a short specular arc are painted on
+/// top. No backdrop blur unless [blur] > 0 — see the class doc of this file.
+class RfGlassSurface extends StatelessWidget {
+  final Widget child;
+  final Color tint;
+  final double strength;
+  final double radius;
+  final bool pressed;
+  final double blur;
+  final bool shadow;
+  final EdgeInsetsGeometry? padding;
+  final AlignmentGeometry? alignment;
+  final double? width;
+  final double? height;
+
+  const RfGlassSurface({
+    super.key,
+    required this.child,
+    this.tint = Colors.white,
+    this.strength = 0.08,
+    this.radius = RfRadius.pill,
+    this.pressed = false,
+    this.blur = 0,
+    this.shadow = false,
+    this.padding,
+    this.alignment,
+    this.width,
+    this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final deepen = pressed ? 0.08 : 0.0;
+    final top = Color.lerp(tint, Colors.white, pressed ? 0.08 : 0.17)!
+        .withValues(alpha: (strength + deepen + 0.09).clamp(0.0, 1.0));
+    final bottom = tint.withValues(alpha: (strength + deepen).clamp(0.0, 1.0));
+    final shape = BorderRadius.circular(radius);
+
+    Widget body = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: shape,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [top, bottom],
+        ),
+        boxShadow: shadow
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.20),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                  spreadRadius: -2,
+                ),
+              ]
+            : null,
+      ),
+      child: CustomPaint(
+        foregroundPainter: _GlassRimPainter(radius: radius, pressed: pressed),
+        child: Container(
+          width: width,
+          height: height,
+          padding: padding,
+          alignment: alignment,
+          child: child,
+        ),
+      ),
+    );
+
+    if (blur > 0) {
+      body = ClipRRect(
+        borderRadius: shape,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: body,
+        ),
+      );
+    }
+    return body;
+  }
+}
+
+class _GlassRimPainter extends CustomPainter {
+  final double radius;
+  final bool pressed;
+
+  const _GlassRimPainter({required this.radius, required this.pressed});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+    final r = math.min(radius, math.min(size.width, size.height) / 2);
+    final rect = Offset.zero & size;
+    final k = pressed ? 0.7 : 1.0;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect.deflate(0.5), Radius.circular(math.max(0, r - 0.5))),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.62 * k),
+            Colors.white.withValues(alpha: 0.14 * k),
+            Colors.white.withValues(alpha: 0.30 * k),
+          ],
+          stops: const [0.0, 0.55, 1.0],
+        ).createShader(rect),
+    );
+
+    // Specular arc — only along the straight part of the top edge, otherwise
+    // it would stick out past the curved corners.
+    if (size.width - 2 * r > 14) {
+      final x0 = r + 3;
+      final x1 = size.width - r - 3;
+      canvas.drawLine(
+        Offset(x0, 1.3),
+        Offset(x1, 1.3),
+        Paint()
+          ..strokeWidth = 1.2
+          ..strokeCap = StrokeCap.round
+          ..shader = LinearGradient(
+            colors: [
+              Colors.white.withValues(alpha: 0),
+              Colors.white.withValues(alpha: 0.55 * k),
+              Colors.white.withValues(alpha: 0),
+            ],
+          ).createShader(Rect.fromLTRB(x0, 0, x1, 2)),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _GlassRimPainter old) =>
+      old.radius != radius || old.pressed != pressed;
+}
+
+/// Ambient background — neutral dark-grey gradient, with an optional grid
+/// pattern. No colored glow orbs (Sir 2026-08-11). The grid is opt-in — Home
+/// is the only screen with the textured grid; every other screen is the flat
+/// grey gradient alone.
 class RfGlassBackground extends StatelessWidget {
   final Widget? child;
   final bool showGrid;
@@ -172,10 +303,10 @@ class RfGlassBackground extends StatelessWidget {
 }
 
 class _GlassGridPainter extends CustomPainter {
-  // 2026-10-05 (Sir): 1.5x denser (spacing 32 -> 32/1.5) and much fainter
-  // (0.18 -> 0.08) — more lines at the old opacity would read as a busier
-  // texture, so the fade drops with the density.
-  static const _opacity = 0.08;
+  // 2026-10-05 (Sir): 1.5x denser (spacing 32 -> 32/1.5) and much fainter.
+  // 2026-10-10: the lines are now a light warm grey on a lighter canvas, so
+  // the alpha drops again to keep the same faint look.
+  static const _opacity = 0.06;
   static const _spacing = 32.0 / 1.5;
   static const _stroke = 0.5;
 
@@ -202,44 +333,9 @@ class _GlassGridPainter extends CustomPainter {
   bool shouldRepaint(covariant _GlassGridPainter old) => old.color != color;
 }
 
-/// Frosted pill / toast over camera or modal content.
-class RfGlassPill extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-  final Color? tint;
-  final Color? borderColor;
-  final double radius;
-
-  const RfGlassPill({
-    super.key,
-    required this.child,
-    this.padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    this.tint,
-    this.borderColor,
-    this.radius = RfRadius.button,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: RfGlass.blurLight, sigmaY: RfGlass.blurLight),
-        child: DecoratedBox(
-          decoration: RfGlass.decoration(
-            radius: radius,
-            tint: tint ?? RfGlass.fill(0.22),
-            borderColor: borderColor,
-            showHighlight: false,
-          ),
-          child: Padding(padding: padding, child: child),
-        ),
-      ),
-    );
-  }
-}
-
-/// Frosted panel with backdrop blur.
+/// Translucent panel. Backdrop blur only when [blurEnabled] — a zero-sigma
+/// BackdropFilter used to be inserted anyway, which still cost a compositing
+/// layer per card for nothing.
 class RfGlassContainer extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -268,25 +364,25 @@ class RfGlassContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final inner = DecoratedBox(
+      decoration: RfGlass.decoration(
+        radius: radius,
+        tint: tint,
+        borderColor: borderColor,
+      ),
+      child: Padding(
+        padding: padding ?? EdgeInsets.zero,
+        child: child,
+      ),
+    );
     final content = ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: BackdropFilter(
-        filter: blurEnabled
-            ? ImageFilter.blur(sigmaX: blur, sigmaY: blur)
-            : ImageFilter.blur(),
-        child: DecoratedBox(
-          decoration: RfGlass.decoration(
-            radius: radius,
-            tint: tint,
-            borderColor: borderColor,
-            showHighlight: blurEnabled,
-          ),
-          child: Padding(
-            padding: padding ?? EdgeInsets.zero,
-            child: child,
-          ),
-        ),
-      ),
+      child: blurEnabled
+          ? BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+              child: inner,
+            )
+          : inner,
     );
 
     final wrapped = margin != null
@@ -312,9 +408,8 @@ class RfGlassContainer extends StatelessWidget {
 /// Liquid-glass card/container — heavier blur, specular top highlight,
 /// larger radius, and (when tappable) a press-morph: scale + the same
 /// 200ms/easeOut timing as the rest of the app's press feedback, evoking
-/// soft glass giving slightly under a touch. New widget for the
-/// design-system revamp (Feature 6 pilot on Home) — existing
-/// [RfGlassContainer] usages elsewhere in the app are untouched.
+/// soft glass giving slightly under a touch. [blur] <= 0 skips the
+/// BackdropFilter entirely (use that over a live camera).
 class RfLiquidGlassContainer extends StatefulWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -361,27 +456,30 @@ class _RfLiquidGlassContainerState extends State<RfLiquidGlassContainer> with Si
 
   @override
   Widget build(BuildContext context) {
+    final inner = Stack(
+      children: [
+        DecoratedBox(
+          decoration: RfGlass.liquidDecoration(
+            radius: widget.radius,
+            tint: widget.tint,
+            borderColor: widget.borderColor,
+          ),
+          child: Padding(
+            padding: widget.padding ?? EdgeInsets.zero,
+            child: widget.child,
+          ),
+        ),
+        RfGlass.specularArc(radius: widget.radius),
+      ],
+    );
     final content = ClipRRect(
       borderRadius: BorderRadius.circular(widget.radius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: widget.blur, sigmaY: widget.blur),
-        child: Stack(
-          children: [
-            DecoratedBox(
-              decoration: RfGlass.liquidDecoration(
-                radius: widget.radius,
-                tint: widget.tint,
-                borderColor: widget.borderColor,
-              ),
-              child: Padding(
-                padding: widget.padding ?? EdgeInsets.zero,
-                child: widget.child,
-              ),
-            ),
-            RfGlass.specularArc(radius: widget.radius),
-          ],
-        ),
-      ),
+      child: widget.blur > 0
+          ? BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: widget.blur, sigmaY: widget.blur),
+              child: inner,
+            )
+          : inner,
     );
 
     if (widget.onTap == null && widget.onLongPress == null) return content;
@@ -408,10 +506,10 @@ class _RfLiquidGlassContainerState extends State<RfLiquidGlassContainer> with Si
   }
 }
 
-/// App scaffold with glass mesh background.
+/// App scaffold with the neutral grey background.
 ///
 /// [showGrid] defaults to false — the textured grid is a Home-only accent
-/// (Sir 2026-08-11); every other screen renders the flat charcoal gradient.
+/// (Sir 2026-08-11); every other screen renders the flat grey gradient.
 class RfGlassScaffold extends StatelessWidget {
   final PreferredSizeWidget? appBar;
   final Widget body;
@@ -443,7 +541,9 @@ class RfGlassScaffold extends StatelessWidget {
   }
 }
 
-/// Frosted app bar — translucent with blur.
+/// App bar — transparent over the page with a hairline underneath, the way
+/// the Claude desktop header sits on its canvas. (It used to blur; there is
+/// nothing behind it to blur, so that was pure compositing cost.)
 class RfGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final Widget? titleWidget;
@@ -470,39 +570,31 @@ class RfGlassAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: RfGlass.blurStandard,
-          sigmaY: RfGlass.blurStandard,
-        ),
-        child: AppBar(
-          backgroundColor: RfGlass.fillElevated(0.55),
-          foregroundColor: RfColors.textPrimary,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          centerTitle: centerTitle,
-          leading: leading,
-          leadingWidth: leadingWidth,
-          title: titleWidget ??
-              (title != null
-                  ? Text(
-                      title!,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    )
-                  : null),
-          actions: actions,
-          bottom: bottom,
-          shape: Border(
-            bottom: BorderSide(color: RfGlass.border(0.12)),
-          ),
-        ),
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      foregroundColor: RfColors.textPrimary,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: centerTitle,
+      leading: leading,
+      leadingWidth: leadingWidth,
+      title: titleWidget ??
+          (title != null
+              ? Text(
+                  title!,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                )
+              : null),
+      actions: actions,
+      bottom: bottom,
+      shape: Border(
+        bottom: BorderSide(color: RfGlass.border(0.08)),
       ),
     );
   }
 }
 
-/// Bottom sheet shell with heavy glass blur.
+/// Bottom sheet shell — near-opaque elevated grey with a light blur.
 class RfGlassSheet extends StatelessWidget {
   final Widget child;
   final double? maxHeightFactor;
@@ -523,8 +615,8 @@ class RfGlassSheet extends StatelessWidget {
       borderRadius: const BorderRadius.vertical(top: Radius.circular(RfRadius.lg)),
       child: BackdropFilter(
         filter: ImageFilter.blur(
-          sigmaX: RfGlass.blurHeavy,
-          sigmaY: RfGlass.blurHeavy,
+          sigmaX: RfGlass.blurStandard,
+          sigmaY: RfGlass.blurStandard,
         ),
         child: Container(
           constraints: maxH != null ? BoxConstraints(maxHeight: maxH) : null,
@@ -533,14 +625,14 @@ class RfGlassSheet extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                RfGlass.fillElevated(0.72),
-                RfGlass.fillElevated(0.88),
+                RfGlass.fillElevated(0.90),
+                RfGlass.fillElevated(0.96),
               ],
             ),
             border: Border(
-              top: BorderSide(color: RfGlass.border(0.25)),
-              left: BorderSide(color: RfGlass.border(0.12)),
-              right: BorderSide(color: RfGlass.border(0.12)),
+              top: BorderSide(color: RfGlass.border(0.22)),
+              left: BorderSide(color: RfGlass.border(0.10)),
+              right: BorderSide(color: RfGlass.border(0.10)),
             ),
           ),
           child: child,
@@ -561,9 +653,9 @@ class RfGlassDialog extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(RfRadius.lg),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: RfGlass.blurHeavy, sigmaY: RfGlass.blurHeavy),
+        filter: ImageFilter.blur(sigmaX: RfGlass.blurStandard, sigmaY: RfGlass.blurStandard),
         child: DecoratedBox(
-          decoration: RfGlass.decoration(radius: RfRadius.lg, tint: RfGlass.fillElevated(0.75)),
+          decoration: RfGlass.decoration(radius: RfRadius.lg, tint: RfGlass.fillElevated(0.94)),
           child: child,
         ),
       ),

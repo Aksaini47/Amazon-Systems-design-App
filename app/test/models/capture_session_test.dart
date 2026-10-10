@@ -71,9 +71,9 @@ void main() {
       expect(pk(front: 'f', back: 'b').isPhotoComplete, isTrue);
     });
 
-    test('RT OK needs front + back only', () {
+    test('RT OK needs no photos at all', () {
+      expect(rt(QCVerdict.ok).isPhotoComplete, isTrue);
       expect(rt(QCVerdict.ok, front: 'f', back: 'b').isPhotoComplete, isTrue);
-      expect(rt(QCVerdict.ok, front: 'f').isPhotoComplete, isFalse);
     });
 
     test('RT claim verdicts need label + contents + front + back', () {

@@ -429,7 +429,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: Text(
                       label,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: RfColors.textPrimary,
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
@@ -506,7 +506,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                    style: const TextStyle(color: RfColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w500),
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 3),
@@ -580,7 +580,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             Text(
               items[value] ?? value.toString(),
-              style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w600),
+              style: const TextStyle(color: RfColors.textPrimary, fontSize: 13.5, fontWeight: FontWeight.w600),
             ),
             const SizedBox(width: 6),
             const Icon(Icons.expand_more_rounded, color: RfColors.textSecondary, size: 17),
@@ -662,7 +662,6 @@ class _AboutCardState extends State<_AboutCard> {
           Expanded(child: Text(r.message)),
         ]),
         duration: const Duration(seconds: 5),
-        backgroundColor: Colors.black87,
       ));
       return;
     }
@@ -690,7 +689,6 @@ class _AboutCardState extends State<_AboutCard> {
         Expanded(child: Text(r.message)),
       ]),
       duration: Duration(seconds: r.outcome == UpdateOutcome.unavailable ? 5 : 3),
-      backgroundColor: Colors.black87,
     ));
   }
 
@@ -703,9 +701,9 @@ class _AboutCardState extends State<_AboutCard> {
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(RfRadius.lg)),
           title: const Row(children: [
-            Icon(Icons.history_rounded, color: RfColors.rtAccent, size: 22),
+            Icon(Icons.history_rounded, color: RfColors.action, size: 22),
             SizedBox(width: 10),
-            Text('What\'s new', style: TextStyle(color: Colors.white)),
+            Text('What\'s new', style: TextStyle(color: RfColors.textPrimary)),
           ]),
           content: SingleChildScrollView(
             child: Text(
@@ -759,7 +757,7 @@ class _AboutCardState extends State<_AboutCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(appName,
-                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                      style: const TextStyle(color: RfColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 3),
                   Text('v$version',
                       style: const TextStyle(color: RfColors.textSecondary, fontSize: 12, fontFamily: 'monospace')),
@@ -827,7 +825,7 @@ class _AboutCardState extends State<_AboutCard> {
             textAlign: TextAlign.right,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: valueColor ?? Colors.white,
+              color: valueColor ?? RfColors.textPrimary,
               fontSize: 13,
               fontWeight: FontWeight.w600,
               fontFamily: monospace ? 'monospace' : null,
@@ -845,13 +843,13 @@ class _AboutCardState extends State<_AboutCard> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
         child: Row(children: [
-          Icon(icon, size: 19, color: disabled ? RfColors.textMuted : RfColors.rtAccent),
+          Icon(icon, size: 19, color: disabled ? RfColors.textMuted : RfColors.action),
           const SizedBox(width: 13),
           Expanded(
             child: Text(
               label,
               style: TextStyle(
-                color: disabled ? RfColors.textSecondary : Colors.white,
+                color: disabled ? RfColors.textSecondary : RfColors.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
