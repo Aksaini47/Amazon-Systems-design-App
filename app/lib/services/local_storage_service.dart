@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -111,9 +112,58 @@ class LocalStorageService {
   /// file touched seconds ago may be a live capture, not crash debris.
   static const _orphanMinAge = Duration(minutes: 2);
 
+  /// How long after a cache file's last write its normally-saved copy can
+  /// still carry ITS mtime: the copy time (seconds), or the promotion time
+  /// when the draft→order rename had to fall back to copy+delete across
+  /// volumes (minutes, after the label scan).
+  static const _twinWindow = Duration(minutes: 60);
+
+  /// True when a kept video is the SAME recording as a cache file: an
+  /// identical byte length AND written shortly after the cache file's last
+  /// write. Two different recordings sharing an exact byte length inside that
+  /// window is not a real-world collision.
+  @visibleForTesting
+  static bool isSameRecording({
+    required int cacheLength,
+    required DateTime cacheModified,
+    required int keptLength,
+    required DateTime keptModified,
+  }) {
+    if (cacheLength != keptLength) return false;
+    final lag = keptModified.difference(cacheModified);
+    return lag >= const Duration(seconds: -5) && lag <= _twinWindow;
+  }
+
+  /// Every .mp4 the app already keeps — drafts/ plus every order folder.
+  static Future<List<({String path, int length, DateTime modified})>> _keptVideos(
+    Directory draftsDir,
+    Directory ordersDir,
+  ) async {
+    final seen = <String>{};
+    final out = <({String path, int length, DateTime modified})>[];
+    for (final root in [draftsDir, ordersDir]) {
+      if (!await root.exists()) continue;
+      for (final e in root.listSync(recursive: true, followLinks: false)) {
+        if (e is! File || !e.path.toLowerCase().endsWith('.mp4')) continue;
+        if (!seen.add(e.path)) continue;
+        try {
+          final st = await e.stat();
+          out.add((path: e.path, length: st.size, modified: st.modified));
+        } catch (_) {/* unreadable — skip */}
+      }
+    }
+    return out;
+  }
+
   /// Scan the camera plugin's cache directory for orphan recording files
-  /// left over from an app crash mid-recording, and migrate any valid ones
-  /// to drafts/. Called once on app launch.
+  /// left over from an app crash / dead phone mid-recording, and migrate the
+  /// REAL orphans to drafts/. Called once on app launch.
+  ///
+  /// A cache file whose twin (same byte length, written moments later) is
+  /// already a draft or a saved order is NOT an orphan — it is the leftover
+  /// original of a recording that was saved normally, and is simply dropped.
+  /// Before 2026-10-10 the original was never deleted after the copy, so every
+  /// saved video was "recovered" a second time as a RECOVERED_ draft.
   /// Returns the number of files recovered.
   Future<int> recoverOrphanVideos() async {
     // Never race a live recording — see [recordingInFlight].
@@ -124,56 +174,174 @@ class LocalStorageService {
     try {
       final tempDir = await getTemporaryDirectory();
       if (!await tempDir.exists()) return 0;
-      // Camera plugin writes to subdirs like "CameraXCaptures" / direct .mp4
-      final candidates = <File>[];
-      for (final entity in tempDir.listSync(recursive: true, followLinks: false)) {
-        if (entity is File && entity.path.toLowerCase().endsWith('.mp4')) {
-          candidates.add(entity);
-        }
-      }
-      if (candidates.isEmpty) return 0;
-
       final draftsDir = await getDraftsFolder();
-      int recovered = 0;
-      final now = DateTime.now();
-      for (final file in candidates) {
-        try {
-          if (recordingInFlight) break;  // a recording started mid-sweep
-          final age = now.difference((await file.stat()).modified);
-          if (age < _orphanMinAge) {
-            debugPrint('Skipping ${file.path} — only ${age.inSeconds}s old, may be live');
-            continue;
-          }
-          final size = await file.length();
-          if (size < 50000) {
-            // <50KB → almost certainly not a valid video. Only now that the
-            // age gate above proves it is not mid-flush is deleting safe;
-            // a single small read on a live file is NOT proof of failure
-            // (the lesson of the 2026-07-24 video-loss fix, which was
-            // applied to _stopRecording but never backported here).
-            try { await file.delete(); } catch (_) {}
-            continue;
-          }
-          final stat = await file.stat();
-          String two(int v) => v.toString().padLeft(2, '0');
-          final t = stat.modified;
-          final stamp = '${t.year}-${two(t.month)}-${two(t.day)}_'
-                        '${two(t.hour)}-${two(t.minute)}-${two(t.second)}';
-          final suffix = (t.millisecondsSinceEpoch & 0xFFFFFF).toRadixString(16);
-          final destPath = '${draftsDir.path}/RECOVERED_${stamp}_$suffix.mp4';
-          await file.copy(destPath);
-          try { await file.delete(); } catch (_) {}
-          await _scanFile(destPath);
-          recovered++;
-          debugPrint('Recovered orphan video: ${file.path} -> $destPath');
-        } catch (e) {
-          debugPrint('Recovery failed for ${file.path}: $e');
-        }
+      final ordersDir = await _ordersDir();
+
+      // Clear RECOVERED_ drafts made by the old sweep that duplicate a video
+      // saved normally.
+      final stale = await dropDuplicateRecoveriesIn(draftsDir: draftsDir, ordersDir: ordersDir);
+      for (final p in stale) {
+        await _removeFromMediaStore(p);
       }
-      return recovered;
+
+      final result = await sweepOrphansIn(
+        cacheDir: tempDir,
+        draftsDir: draftsDir,
+        ordersDir: ordersDir,
+        now: DateTime.now(),
+      );
+      for (final p in result.recovered) {
+        debugPrint('Recovered orphan video -> $p');
+        await _scanFile(p);
+      }
+
+      if (stale.isNotEmpty || result.duplicatesDropped > 0 || result.recovered.isNotEmpty) {
+        unawaited(ActivityLogService.log(
+          event: 'orphan_sweep',
+          extra: {
+            'recovered': '${result.recovered.length}',
+            'cache_duplicates_dropped': '${result.duplicatesDropped}',
+            'old_recoveries_dropped': '${stale.length}',
+          },
+        ));
+      }
+      return result.recovered.length;
     } catch (e) {
       debugPrint('recoverOrphanVideos failed: $e');
       return 0;
+    }
+  }
+
+  /// Directory-injected core of [recoverOrphanVideos] (testable).
+  @visibleForTesting
+  static Future<({List<String> recovered, int duplicatesDropped})> sweepOrphansIn({
+    required Directory cacheDir,
+    required Directory draftsDir,
+    required Directory ordersDir,
+    required DateTime now,
+  }) async {
+    final candidates = <File>[];
+    for (final entity in cacheDir.listSync(recursive: true, followLinks: false)) {
+      if (entity is File && entity.path.toLowerCase().endsWith('.mp4')) {
+        candidates.add(entity);
+      }
+    }
+    final recovered = <String>[];
+    var duplicates = 0;
+    if (candidates.isEmpty) return (recovered: recovered, duplicatesDropped: 0);
+
+    final kept = await _keptVideos(draftsDir, ordersDir);
+    if (!await draftsDir.exists()) await draftsDir.create(recursive: true);
+    for (final file in candidates) {
+      try {
+        if (recordingInFlight) break;  // a recording started mid-sweep
+        final stat = await file.stat();
+        final age = now.difference(stat.modified);
+        if (age < _orphanMinAge) {
+          debugPrint('Skipping ${file.path} — only ${age.inSeconds}s old, may be live');
+          continue;
+        }
+        if (stat.size < 50000) {
+          // <50KB → almost certainly not a valid video. Only now that the
+          // age gate above proves it is not mid-flush is deleting safe;
+          // a single small read on a live file is NOT proof of failure
+          // (the lesson of the 2026-07-24 video-loss fix, which was
+          // applied to _stopRecording but never backported here).
+          try { await file.delete(); } catch (_) {}
+          continue;
+        }
+        final isLeftover = kept.any((k) => isSameRecording(
+              cacheLength: stat.size,
+              cacheModified: stat.modified,
+              keptLength: k.length,
+              keptModified: k.modified,
+            ));
+        if (isLeftover) {
+          try {
+            await file.delete();
+            duplicates++;
+          } catch (_) {}
+          continue;
+        }
+        String two(int v) => v.toString().padLeft(2, '0');
+        final t = stat.modified;
+        final stamp = '${t.year}-${two(t.month)}-${two(t.day)}_'
+                      '${two(t.hour)}-${two(t.minute)}-${two(t.second)}';
+        final suffix = (t.millisecondsSinceEpoch & 0xFFFFFF).toRadixString(16);
+        final destPath = '${draftsDir.path}/RECOVERED_${stamp}_$suffix.mp4';
+        await file.copy(destPath);
+        try { await file.delete(); } catch (_) {}
+        recovered.add(destPath);
+      } catch (e) {
+        debugPrint('Recovery failed for ${file.path}: $e');
+      }
+    }
+    return (recovered: recovered, duplicatesDropped: duplicates);
+  }
+
+  /// Deletes RECOVERED_ drafts that duplicate a recording already kept as a
+  /// saved order or another draft (same byte length, mtime within the twin
+  /// window of the cache mtime encoded in the RECOVERED_ name). Returns the
+  /// deleted paths. Directory-injected for tests.
+  @visibleForTesting
+  static Future<List<String>> dropDuplicateRecoveriesIn({
+    required Directory draftsDir,
+    required Directory ordersDir,
+  }) async {
+    if (!await draftsDir.exists()) return const [];
+    final re = RegExp(r'^RECOVERED_(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})-(\d{2})_[0-9a-f]+\.mp4$');
+    final recovered = <File>[];
+    for (final e in draftsDir.listSync(followLinks: false)) {
+      if (e is File && re.hasMatch(e.uri.pathSegments.last)) recovered.add(e);
+    }
+    if (recovered.isEmpty) return const [];
+
+    final kept = await _keptVideos(draftsDir, ordersDir);
+    final dropped = <String>[];
+    for (final e in recovered) {
+      final m = re.firstMatch(e.uri.pathSegments.last)!;
+      final cacheModified = DateTime(
+        int.parse(m[1]!), int.parse(m[2]!), int.parse(m[3]!),
+        int.parse(m[4]!), int.parse(m[5]!), int.parse(m[6]!),
+      );
+      try {
+        final len = await e.length();
+        final hasTwin = kept.any((k) =>
+            k.path != e.path &&
+            isSameRecording(
+              cacheLength: len,
+              cacheModified: cacheModified,
+              keptLength: k.length,
+              keptModified: k.modified,
+            ));
+        if (!hasTwin) continue;
+        await e.delete();
+        dropped.add(e.path);
+      } catch (_) {/* leave it — a stray duplicate beats a lost video */}
+    }
+    return dropped;
+  }
+
+  /// The camera plugin records into the app CACHE dir and `XFile.saveTo()`
+  /// only COPIES, so once the copy is safely in drafts/ the cache original is
+  /// redundant. Deletes it — but only if it lives inside [cacheDir] and the
+  /// copy is byte-for-byte the same length. Returns whether it deleted.
+  @visibleForTesting
+  static Future<bool> discardCacheOriginal({
+    required String sourcePath,
+    required int copiedLength,
+    required Directory cacheDir,
+  }) async {
+    try {
+      if (!sourcePath.startsWith(cacheDir.path)) return false;
+      final src = File(sourcePath);
+      if (!await src.exists()) return false;
+      if (await src.length() != copiedLength) return false;
+      await src.delete();
+      return true;
+    } catch (e) {
+      debugPrint('discardCacheOriginal failed (non-fatal): $e');
+      return false;
     }
   }
 
@@ -503,6 +671,15 @@ class LocalStorageService {
     final size = await dest.length();
     debugPrint('Draft video saved: $destPath (${_formatBytes(size)})');
     await _scanFile(destPath);
+    // saveTo() copied; the cache original used to be left behind and got
+    // "recovered" as a duplicate RECOVERED_ draft on the next launch.
+    try {
+      await discardCacheOriginal(
+        sourcePath: videoFile.path,
+        copiedLength: size,
+        cacheDir: await getTemporaryDirectory(),
+      );
+    } catch (_) {/* best effort */}
     return destPath;
   }
 

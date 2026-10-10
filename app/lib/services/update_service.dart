@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:15 - App ka naya look: warm dark-grey aur glass buttons\n- Poora app ab Claude desktop jaisa dark-grey theme mein hai (sirf dark mode)\n- Saare buttons, chips aur icon buttons ab glass pill style mein hain\n- Camera screen ke pills dark glass mein hain taaki video ke upar saaf dikhein\n- QC verdict sheet se blur hataya, camera par halka chalega';
+      '2.1.0+14:16 - Draft mein duplicate "Recovered" videos ka fix\n- Properly save hui video ki copy ab draft mein nahi aati; camera ki purani cache file save ke baad hat jaati hai\n- App khulte hi sirf asli orphan (crash ya phone band) wali video draft mein recover hoti hai\n- Pehle ke duplicate Recovered drafts jinka order saved hai, unhe app khud saaf kar dega';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
