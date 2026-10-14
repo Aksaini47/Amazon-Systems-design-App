@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:16 - Draft mein duplicate "Recovered" videos ka fix\n- Properly save hui video ki copy ab draft mein nahi aati; camera ki purani cache file save ke baad hat jaati hai\n- App khulte hi sirf asli orphan (crash ya phone band) wali video draft mein recover hoti hai\n- Pehle ke duplicate Recovered drafts jinka order saved hai, unhe app khud saaf kar dega';
+      '2.1.0+14:17 - Activity log: har din ka blue block + Google jaisa fast scroller\n- Har din ki date aur separator ab blue hain; start aur end mein margin se har din ka alag block dikhta hai\n- Right side mein fast scroller: thumb pakad ke kheencho, bubble mein date dikhti hai (jaldi se purane din tak)\n- Lamba log ho to naye din turant khulte hain, purane din peeche load hote rehte hain';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

@@ -147,7 +147,9 @@ class ActivityLogService {
       final dir = await _logsDir();
       final file = File('${dir.path}/${_fileNameFor(day)}');
       if (!await file.exists()) return '';
-      return file.readAsString();
+      // await: a read that fails (file pruned mid-read) must land in the catch
+      // below and give '', not escape to the caller as an unhandled error.
+      return await file.readAsString();
     } catch (e) {
       debugPrint('ActivityLogService: readDay failed: $e');
       return '';
