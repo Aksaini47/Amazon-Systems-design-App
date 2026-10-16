@@ -49,7 +49,8 @@ const _pages = <_TourPage>[
     icon: Icons.qr_code_scanner_rounded,
     title: 'Order ID auto-detect',
     body: 'Barcode + OCR scan the shipping label together right after you '
-        'stop recording — no manual typing of Order IDs.',
+        'stop recording (RT: after the claim photos) — no manual typing of '
+        'Order IDs.',
   ),
   _TourPage(
     icon: Icons.volume_up_rounded,

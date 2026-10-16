@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:17 - Activity log: har din ka blue block + Google jaisa fast scroller\n- Har din ki date aur separator ab blue hain; start aur end mein margin se har din ka alag block dikhta hai\n- Right side mein fast scroller: thumb pakad ke kheencho, bubble mein date dikhti hai (jaldi se purane din tak)\n- Lamba log ho to naye din turant khulte hain, purane din peeche load hote rehte hain';
+      '2.1.0+14:18 - RT unpack flow sahi kiya: QC reason ? images ? label scan ? save\n- Damaged/Different mein pehle claim images (label, contents, front, back, serial), uske baad label scan aur save\n- Camera reason ke baad band nahi hota: images usi camera par, beech ka camera restart wait khatam\n- QC OK ka flow wahi: reason ? label scan ? save';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

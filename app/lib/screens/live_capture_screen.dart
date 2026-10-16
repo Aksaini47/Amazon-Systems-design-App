@@ -346,7 +346,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
   /// Minimum gap between the label popup handing the camera back and this
   /// screen initialising a new controller. Android/CameraX closes the device
   /// asynchronously after dispose(); the old RT flow got this gap for free
-  /// from its claim photos, and a fast save (QC OK has none) must top it up.
+  /// from its claim photos, which now come BEFORE the popup — so every save
+  /// (the RT ones included) must top the gap up.
   static const _hardwareSettle = Duration(milliseconds: 900);
 
   Future<void> _awaitHardwareSettle() async {
@@ -1570,10 +1571,18 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     unawaited(_saveSession());
   }
 
-  // ─── RT post-video: verdict → order-ID scan → claim photos ───────────
+  // ─── RT post-video: verdict → claim photos → order-ID scan ───────────
 
-  /// RT only. User picks QC verdict, scans return label / order ID,
-  /// then captures claim photos (QC OK: none; others: the full set).
+  /// RT only. User picks the QC verdict; a non-OK verdict then walks through
+  /// the claim photos, and the return label is scanned for the Order ID / AWB
+  /// LAST, right before the save. QC OK has no photos: verdict → scan → save.
+  ///
+  /// The scan used to come before the photos (Sir, 2026-10-16: reason →
+  /// images → label). Photos need no Order ID — they sit in drafts/ until the
+  /// save — and moving them first means the camera the verdict sheet kept
+  /// alive serves them as-is: no dispose + re-init (and its settle delays) in
+  /// the middle of the flow, and the only camera hand-over left is the one to
+  /// the scanner popup at the end.
   Future<void> _openRtPostVideoFlow() async {
     final verdictResult = await showModalBottomSheet<QcVerdictResult>(
       context: context,
@@ -1599,6 +1608,14 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
         'qc_sub': verdictResult.subReasons.map((r) => r.name).join('+'),
     });
 
+    // Non-OK: claim photos first, on the camera the verdict sheet kept alive.
+    // QC OK takes no photos (the video is the record) and goes straight to
+    // the scan.
+    if (verdictResult.verdict != QCVerdict.ok) {
+      await _runClaimPhotoSequence();
+      if (!mounted) return;
+    }
+
     await _disposeCameraForModal();
     if (!mounted) return;
     // Same camera-device-release race as _openBarcodePopup — see comment
@@ -1614,6 +1631,8 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
     _modalClosedAt = DateTime.now();
 
     if (result == null || result['orderId'] == null) {
+      // Cancelled at the scan: the photos taken above stay in drafts/ next to
+      // the video, so Gallery → Drafts → Finish save finds the whole session.
       await _retainDraftOnCancel();
       await _disposeCameraForModal();
       if (mounted) setState(() => _phase = CapturePhase.stopped);
@@ -1624,26 +1643,23 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
     _session.orderId = result['orderId'];
     _session.awb = result['awb'];
-
-    // QC OK needs no claim photos — save straight away, same as the PK path
-    // (no camera re-init, no capture screens). That also removes the seconds
-    // of photo-taking that used to sit between the popup closing and the next
-    // camera init; _resetForNextCapture now enforces that gap explicitly.
-    if (verdictResult.verdict != QCVerdict.ok) {
-      await _runClaimPhotoSequence();
-      if (!mounted) return;
-    }
     unawaited(_saveSession());
   }
 
   // ─── RT claim-photo flow ─────────────────────────────────────────────
   /// Manual capture only (no auto countdown) — user taps CAPTURE or Skip.
-  /// If camera fails to init, saves what we have without photos.
+  /// Runs on the camera the verdict sheet kept alive; only if that camera is
+  /// gone does it re-open one. If no camera can be had, the photos are
+  /// skipped and the flow carries on to the label scan without them.
   Future<void> _runClaimPhotoSequence() async {
     if (mounted) setState(() => _phase = CapturePhase.stopped);
-    // Let barcode popup release the camera hardware before we re-open it.
-    await Future<void>.delayed(const Duration(milliseconds: 500));
-    await _initCameraWithAudio(false);
+    final reusingCamera = _camera != null && _cameraReady && !_isCameraTransitioning;
+    if (!reusingCamera) {
+      // Normally not reached. The pause lets the hardware finish releasing
+      // whatever held the camera before we open it again.
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      await _initCameraWithAudio(false);
+    }
     if (!mounted) return;
     if (_camera == null || !_cameraReady) {
       debugPrint('Claim photo flow: camera unavailable, skipping photos');
@@ -1663,7 +1679,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       location: 'live_capture_screen.dart:_runClaimPhotoSequence',
       message: 'claim camera ready',
       hypothesisId: 'H9-claim-blank',
-      data: {'orderId': _session.orderId},
+      data: {'orderId': _session.orderId, 'reusedCamera': reusingCamera},
     );
 
     _inClaimFlow = true;
@@ -1674,10 +1690,11 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       // after a camera re-init. 350ms is a starting estimate matching this
       // file's other hardware-settle delays (300ms/500ms above); tune on a
       // real low/mid-tier device if the texture is still visibly black.
+      // A camera that was never re-initialised has no such window.
       // If the camera drops out during this wait, the per-photo checks
       // below (`if (... _camera == null || !_cameraReady) return;`) catch
       // it on the first iteration — `finally` still resets state correctly.
-      await Future<void>.delayed(const Duration(milliseconds: 350));
+      if (!reusingCamera) await Future<void>.delayed(const Duration(milliseconds: 350));
       if (mounted && _camera != null && _cameraReady) {
         setState(() => _claimPreviewSettled = true);
       }
@@ -1770,6 +1787,9 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       debugPrint('Claim photo captured: ${side.name} → $savedPath');
     } catch (e) {
       debugPrint('Claim photo capture failed for ${side.name}: $e');
+      // In the tracker too: the photos now run on the camera that just
+      // recorded the video, and a failure here used to leave no trace at all.
+      _logActivity('photo_failed', extra: {'type': side.name, 'error': '$e'});
     }
 
     if (mounted) await Future<void>.delayed(const Duration(milliseconds: 600));

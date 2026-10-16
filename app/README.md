@@ -10,8 +10,9 @@ on the phone (backend sync was removed in 2.0.0 patch 8).
 - **PK** — scan the order label (barcode/OCR) → record packing video →
   front/back photos → saved to `{orderId}-PK/`.
 - **RT** — record unpacking → QC verdict (OK / DAMAGED / DIFFERENT /
-  DAMAGED + DIFFERENT) → claim photos when the verdict is not OK → saved to
-  `{orderId}-RT/` with `claim_trigger` in `meta.json`.
+  DAMAGED + DIFFERENT) → claim photos when the verdict is not OK (return label
+  first, as the parcel is unpacked) → scan the return label (Order ID + AWB) →
+  saved to `{orderId}-RT/` with `claim_trigger` in `meta.json`.
 - Gallery: browse, edit, re-tag, pinch-zoom; drafts auto-recovered after a
   crash.
 
