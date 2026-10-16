@@ -26,6 +26,28 @@ library;
 
 import 'package:flutter/foundation.dart';
 
+import '../models/capture_session.dart';
+
+// ─── Save rule ──────────────────────────────────────────────────────────────
+
+/// An RT (return) AWB must be exactly 12 digits to be SAVED (Sir, 2026-10-16).
+///
+/// A faded return label once made the app save an AWB two characters short,
+/// and the office's PK/RT merge and SAFE-T claim script could not repair it.
+/// The carrier patterns below could never have caught that: Trackon
+/// (`[A-Z0-9]{9,14}`) and "Unknown carrier" (`\d{9,16}`) accept almost any
+/// 9-16 character value, so a truncated AWB still looked valid. PK keeps the
+/// open rule — its AWBs come in many carrier formats (11, 13 and 14 digits
+/// too).
+bool isValidReturnAwb(String awb) => _returnAwb.hasMatch(awb.trim());
+
+final _returnAwb = RegExp(r'^\d{12}$');
+
+/// Whether [awb] is acceptable for SAVING an order of [mode]: RT needs a
+/// 12-digit AWB ([isValidReturnAwb]); PK takes any AWB, or none.
+bool awbAllowsSave(CaptureMode mode, String awb) =>
+    mode != CaptureMode.rt || isValidReturnAwb(awb);
+
 class CarrierPattern {
   /// Display name shown to the user.
   final String name;
@@ -212,12 +234,15 @@ class CarrierPatterns {
   ///   [barcodeValues] — every raw barcode value detected in the frame
   ///   [hint] — optional carrier detected from label-text OCR; boosts that
   ///            carrier's confidence so its pattern wins ties
+  ///   [accept] — values it rejects are never picked (RT passes
+  ///            [isValidReturnAwb], so a truncated read cannot become the AWB)
   ///
   /// Returns the value + matched carrier + confidence, or null if no
   /// non-Order-ID barcode passes any pattern.
   static AwbClassification? pickAwbFromBarcodes(
     List<String> barcodeValues, {
     CarrierPattern? hint,
+    bool Function(String value)? accept,
   }) {
     AwbClassification? best;
     double bestScore = -1;
@@ -225,6 +250,7 @@ class CarrierPatterns {
       final clean = v.trim();
       if (clean.isEmpty) continue;
       if (orderIdRegex.hasMatch(clean)) continue;  // skip Order ID barcodes
+      if (accept != null && !accept(clean)) continue;
       // Score every carrier that matches this value
       for (final c in all) {
         if (!c.matchesValue(clean)) continue;
@@ -245,8 +271,12 @@ class CarrierPatterns {
 
   /// Fallback path: scan free-form OCR text for any AWB-shaped substring
   /// (when no barcode was successfully decoded). Returns the best match
-  /// or null.
-  static AwbClassification? findAwbInText(String ocrText, {CarrierPattern? hint}) {
+  /// or null. [accept] filters candidates as in [pickAwbFromBarcodes].
+  static AwbClassification? findAwbInText(
+    String ocrText, {
+    CarrierPattern? hint,
+    bool Function(String value)? accept,
+  }) {
     final upper = ocrText.toUpperCase();
     AwbClassification? best;
     double bestScore = -1;
@@ -256,6 +286,7 @@ class CarrierPatterns {
       final clean = tok.trim();
       if (clean.length < 8 || clean.length > 22) continue;
       if (orderIdRegex.hasMatch(clean)) continue;
+      if (accept != null && !accept(clean)) continue;
       for (final c in all) {
         if (!c.matchesValue(clean)) continue;
         double conf = c.specificity * 0.85;  // OCR text is less reliable than barcode

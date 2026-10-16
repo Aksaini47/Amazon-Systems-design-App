@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
 import '../models/capture_session.dart';
+import '../services/awb_classifier.dart';
 import '../services/draft_save_service.dart';
 import '../services/file_naming_service.dart';
 import '../services/local_storage_service.dart';
@@ -1579,7 +1580,8 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     }
 
     final orderCtrl = TextEditingController(text: bareId);
-    final awbCtrl = TextEditingController(text: meta?['awb'] as String? ?? '');
+    final originalAwb = (meta?['awb'] as String? ?? '').trim();
+    final awbCtrl = TextEditingController(text: originalAwb);
     QCVerdict? selectedVerdict = currentVerdict;
     final originalStartedAt =
         DateTime.tryParse(meta?['session_started_at'] as String? ?? '') ?? DateTime.now();
@@ -1601,6 +1603,14 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
           ),
           child: StatefulBuilder(
             builder: (ctx, setSheetState) {
+              // RT needs a 12-digit AWB to be saved (awbAllowsSave). An
+              // untouched older value is left alone, so a legacy order whose
+              // AWB is empty or another format can still have its Order ID /
+              // verdict / time corrected; changing or clearing the AWB is what
+              // has to meet the rule.
+              final rtAwbBlocked = mode == CaptureMode.rt &&
+                  awbCtrl.text.trim() != originalAwb &&
+                  !awbAllowsSave(mode, awbCtrl.text);
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1624,11 +1634,16 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                   TextField(
                     controller: awbCtrl,
                     style: const TextStyle(color: RfColors.textPrimary, fontFamily: 'monospace'),
-                    decoration: const InputDecoration(
-                      labelText: 'AWB / tracking (optional)',
-                      labelStyle: TextStyle(color: RfColors.textSecondary),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.border)),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: RfColors.action)),
+                    keyboardType: mode == CaptureMode.rt ? TextInputType.number : null,
+                    onChanged: (_) => setSheetState(() {}),
+                    decoration: InputDecoration(
+                      labelText: mode == CaptureMode.rt
+                          ? 'AWB / tracking * (12 digits)'
+                          : 'AWB / tracking (optional)',
+                      labelStyle: const TextStyle(color: RfColors.textSecondary),
+                      errorText: rtAwbBlocked ? 'RT AWB must be exactly 12 digits' : null,
+                      enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: RfColors.border)),
+                      focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: RfColors.action)),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -1705,7 +1720,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                       Expanded(
                         child: RfButton.service(
                           label: _savingEdit ? 'Saving...' : 'Save',
-                          onPressed: _savingEdit
+                          onPressed: (_savingEdit || rtAwbBlocked)
                               ? null
                               : () async {
                                   setSheetState(() => _savingEdit = true);

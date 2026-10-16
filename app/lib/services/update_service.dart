@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:18 - RT unpack flow sahi kiya: QC reason ? images ? label scan ? save\n- Damaged/Different mein pehle claim images (label, contents, front, back, serial), uske baad label scan aur save\n- Camera reason ke baad band nahi hota: images usi camera par, beech ka camera restart wait khatam\n- QC OK ka flow wahi: reason ? label scan ? save';
+      '2.1.0+14:19 - RT AWB ab save ke liye exactly 12 digit zaroori\n- RT mein AWB 12 digit se kam ya zyada ho to SAVE aur auto-save dono band\n- Scan sirf 12-digit AWB uthata hai; AWB box mein sirf numbers (max 12), kam digit par error dikhta hai\n- Gallery mein RT ka AWB badalna ho to bhi 12 digit chahiye\n- PK mein koi badlav nahi';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
