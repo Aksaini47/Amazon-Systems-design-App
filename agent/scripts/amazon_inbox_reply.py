@@ -45,6 +45,9 @@ TEMPLATES = {
     "T4": {"name": "defect / refund asked on a delivered order: ask issue + video and photos", "resolve": False,
            "en": "Hello,\nRegarding your order {order_no}: please share the issue you are facing with the product, along with a clear video and photos that show the problem, so that we can look into your request.\n" + SIGN["en"],
            "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: कृपया बताएं कि आपको प्रोडक्ट में क्या समस्या आ रही है, और समस्या दिखाने वाला साफ़ वीडियो और फोटो भी भेजें, ताकि हम आपके अनुरोध की जांच कर सकें।\n" + SIGN["hi"]},
+    "T6": {"name": "tracker says delivered but buyer says not received: delivery facts + ask to check with family/neighbours/security", "resolve": False, "alert": True,
+           "en": "Hello,\nRegarding your order {order_no}: our records show that this order was delivered by {carrier} (tracking ID {awb}) on {delivered_date}. Please check with your family members, neighbours or building security in case it was received on your behalf.\nIf you still cannot find it, please let us know here.\n" + SIGN["en"],
+           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: हमारे रिकॉर्ड के अनुसार यह ऑर्डर {carrier} (ट्रैकिंग आईडी {awb}) द्वारा {delivered_date} को डिलीवर हो चुका है। कृपया अपने परिवार के सदस्यों, पड़ोसियों या सिक्योरिटी से पूछ लें कि कहीं उन्होंने आपकी तरफ से रिसीव तो नहीं किया।\nअगर फिर भी न मिले तो कृपया हमें यहीं बताएं।\n" + SIGN["hi"]},
     "T5": {"name": "refund already processed (fact from the order page)", "resolve": True,
            "en": "Hello,\nRegarding your order {order_no}: {rto_en}a refund of Rs {amount} has been processed for this order. Please check the refund in your original payment method.\n" + SIGN["en"],
            "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: {rto_hi}इस ऑर्डर के लिए Rs {amount} का रिफंड प्रोसेस कर दिया गया है। कृपया अपने मूल भुगतान माध्यम में रिफंड देखें।\n" + SIGN["hi"]},
@@ -64,7 +67,9 @@ ALLOWED_CHARS = re.compile(r"^[\x20-\x7E\nऀ-ॿ]+$")      # ASCII + Devanagari
 
 def _norm_num(tok: str) -> str:
     t = tok.replace(",", "")
-    return t.rstrip("0").rstrip(".") if "." in t else t
+    if "." in t:
+        return t.rstrip("0").rstrip(".")
+    return t.lstrip("0") or "0" if len(t) < 4 else t          # day numbers: "01" == "1"; long ids (AWB, order numbers) untouched
 
 
 def _fact_numbers(facts: dict) -> set[str]:
@@ -166,7 +171,7 @@ def render(tid: str, lang: str, facts: dict) -> str:
     op, tr = facts.get("order_page") or {}, facts.get("tracking") or {}
     st = tr.get("state")
     f = {"order_no": facts.get("order_no"), "carrier": op.get("carrier") or tr.get("courier"), "awb": op.get("tracking_id") or tr.get("awb"),
-         "deliver_by": fmt_date(op.get("deliver_by")), "amount": f"{max(op.get('refunds') or [0]):,.2f}"}
+         "deliver_by": fmt_date(op.get("deliver_by")), "amount": f"{max(op.get('refunds') or [0]):,.2f}", "delivered_date": fmt_date(tr.get("delivered_at"))}
     d_at = fmt_date(tr.get("delivered_at"))
     f["clause_en"] = {"DELIVERED": f" and was delivered on {d_at}", "OUT_FOR_DELIVERY": " and is out for delivery"}.get(st, f" and is on its way. Amazon's estimated delivery date is {f['deliver_by']}")
     f["clause_hi"] = {"DELIVERED": f" और {d_at} को डिलीवर हो गया है", "OUT_FOR_DELIVERY": " और डिलीवरी के लिए निकल चुका है"}.get(st, f" और रास्ते में है। Amazon की अनुमानित डिलीवरी तारीख {f['deliver_by']} है")
@@ -215,7 +220,8 @@ def decide(case: dict) -> dict:
             return {"scenario": "S3", "template": "T3", "action": "SEND", "code": "ETA", "why": f"tracker {state}"}
         if state == "NOT_MOVING":
             return {"scenario": "S2", "template": "T2", "action": "SEND", "code": "DELAY_NOT_MOVING", "why": "shipment has not started moving"}
-        return esc("DELIVERED_NOT_RECEIVED", "tracker says delivered but the buyer asks where it is / not received: no rule yet", "S11")
+        return {"scenario": "S11", "template": "T6", "action": "SEND", "code": "DELIVERED_NOT_RECEIVED", "alert": True,
+                "why": "tracker says delivered, buyer says not received: delivery facts + check with family/neighbours (Sir 2026-10-17), Sir is alerted"}
     if "defect" in t_last or ("refund" in t_last and "returned" not in t_last):
         if state == "DELIVERED" and tr.get("delivery_verified"):
             return {"scenario": "S4", "template": "T4", "action": "SEND", "code": "ASK_ISSUE_EVIDENCE", "why": "delivered, code verified"}
@@ -314,8 +320,12 @@ def cmd_send(args: list[str]) -> int:
                 p.goto(INBOX, wait_until="domcontentloaded", timeout=60000); p.wait_for_timeout(12000)
                 if "/ap/signin" in p.url:
                     rec["error"] = "LOGIN_REQUIRED"; results.append(rec); break
-                p.get_by_text(it["name"], exact=True).first.click(timeout=8000); p.wait_for_timeout(4000)
+                p.get_by_text(it["name"], exact=True).first.click(timeout=8000); p.wait_for_timeout(3000)
                 pane = p.evaluate("() => document.body.innerText")
+                for _ in range(8):                                    # the pane can take a few seconds to render the clicked case
+                    if it["order_no"] in pane:
+                        break
+                    p.wait_for_timeout(2000); pane = p.evaluate("() => document.body.innerText")
                 if it["order_no"] not in pane:
                     rec["error"] = "case pane does not show the expected order number: not sending"; results.append(rec); continue
                 ta = p.locator("textarea[placeholder^='Please limit your text']")
@@ -389,7 +399,7 @@ def cmd_selftest() -> int:
                 "facts": {"order_no": "400-0000000-0000000", "language": lang, "order_page": op if order_page else None, "tracking": tr, "buyer_names": ["Test"]}}
     dec = [("cancel + in transit -> T1", case("cx want to cancel", "IN_TRANSIT"), "T1"), ("cancel + delivered -> T1", case("cancel the item", "DELIVERED"), "T1"),
            ("cancel + not moving -> escalate", case("cancel", "NOT_MOVING"), None), ("where is my order + in transit -> T3", case("when will I get my package", "IN_TRANSIT"), "T3"),
-           ("delay + not moving -> T2", case("order is too delay", "NOT_MOVING"), "T2"), ("not received + delivered -> escalate", case("customer not received order but showing delivered", "DELIVERED"), None),
+           ("delay + not moving -> T2", case("order is too delay", "NOT_MOVING"), "T2"), ("not received + delivered -> T6", case("customer not received order but showing delivered", "DELIVERED"), "T6"),
            ("defective + delivered verified -> T4", case("received a defective product", "DELIVERED"), "T4"), ("defective + delivered unverified -> escalate", case("received a defective product", "DELIVERED", verified=False), None),
            ("refund + RTO, no refund yet -> escalate", case("want refund", "RTO_RECEIVED"), None), ("refund + refund on page -> T5", case("want refund", "RTO_RECEIVED", refunds=[999.0]), "T5"),
            ("legal wording -> escalate", case("customer will send a lawyer notice", "DELIVERED"), None), ("A to Z claim -> escalate", case("A to Z claim filed", "DELIVERED"), None),
