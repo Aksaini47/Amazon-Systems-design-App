@@ -109,3 +109,7 @@ graphify-out/cache/
 graphify-out/*.py
 # Claude Code local settings (machine-specific)
 .claude/settings.local.json
+
+# sensitive local state (OTP / telegram offsets, raw chat dumps containing credentials)
+agent/storage/
+**/_chat-migration-data/
