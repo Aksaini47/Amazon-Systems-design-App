@@ -1,0 +1,101 @@
+[
+  {
+    "name": "Galaxy A32 4G",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Galaxy A73",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Galaxy J7 2015",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Galaxy J7 2016",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Galaxy J7 Max",
+    "raw": "\u00e2\u0153\u2014 Evaluation error: TypeError: Cannot use 'in' operator to search for 'max' in galaxy j7 max (2017) (black)\n    at <anonymous>:1:436\n    at Array.filter (<anonymous>)\n    at <anonymous>:1:270\n    at <anonymous>:1:906",
+    "error": "Expecting value: line 1 column 1 (char 0)"
+  },
+  {
+    "name": "Galaxy J7 Next",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Galaxy S21 FE",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Honor 7X",
+    "raw": "\u00e2\u0153\u2014 Evaluation error: TypeError: Cannot use 'in' operator to search for '7x' in honor 7x (white)\n    at <anonymous>:1:431\n    at Array.filter (<anonymous>)\n    at <anonymous>:1:265\n    at <anonymous>:1:901",
+    "error": "Expecting value: line 1 column 1 (char 0)"
+  },
+  {
+    "name": "Honor 8X",
+    "exists": true,
+    "id": "A09918911CAM3AZ763ZXP",
+    "enabled": "false",
+    "near": []
+  },
+  {
+    "name": "Infinix Note 10",
+    "exists": true,
+    "id": "A07695821JLG1Q5C69P30",
+    "enabled": "false",
+    "near": []
+  },
+  {
+    "name": "Moto Edge 50 Fusion",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Nokia G21",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Oppo F27",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Poco X3",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Realme 3 Pro",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Realme C21",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Redmi 13 Pro Plus",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Redmi Note 10T",
+    "exists": false,
+    "near": []
+  },
+  {
+    "name": "Vivo V15",
+    "exists": false,
+    "near": []
+  }
+]

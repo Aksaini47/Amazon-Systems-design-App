@@ -1,0 +1,127 @@
+=== NEW TEMPLATE (237 cols) ===
+  1 | SKU
+  2 | Product Type
+  3 | Listing Action
+  5 | Parent SKU
+  7 | Item Name
+  9 | Brand Name
+ 10 | Product Id Type
+ 11 | Product Id
+ 12 | Recommended Browse Nodes
+ 13 | Recommended Browse Nodes
+ 14 | Recommended Browse Nodes
+ 15 | Recommended Browse Nodes
+ 16 | Recommended Browse Nodes
+ 17 | Model Number
+ 18 | Manufacturer
+ 21 | Main Image URL
+ 22 | Other Image URL
+ 23 | Other Image URL
+ 24 | Other Image URL
+ 25 | Other Image URL
+ 26 | Other Image URL
+ 27 | Other Image URL
+ 28 | Other Image URL
+ 29 | Other Image URL
+ 30 | Swatch Image URL
+ 31 | Product Description
+ 32 | Bullet Point
+ 33 | Bullet Point
+ 34 | Bullet Point
+ 35 | Bullet Point
+ 36 | Bullet Point
+ 37 | Generic Keyword
+ 40 | Item Type Name
+ 41 | Color
+ 43 | Part Number
+ 44 | Manufacturer Contact Information
+ 45 | Compatible Phone Models
+ 46 | Compatible Phone Models
+ 47 | Compatible Phone Models
+ 77 | Item Condition
+ 78 | Offer Condition Note
+ 81 | Maximum Order Quantity
+ 84 | Main Image Location
+ 85 | Other Image Location
+ 86 | Other Image Location
+ 87 | Other Image Location
+ 88 | Other Image Location
+ 89 | Other Image Location
+ 91 | Battery Life Percentage
+ 98 | Functional Condition
+101 | Fulfillment Channel Code (IN)
+102 | Quantity (IN)
+106 | Your Price INR (Sell on Amazon, IN)
+107 | Maximum Retail Price (Sell on Amazon, IN)
+109 | Minimum Seller Allowed Price (Sell on Amazon, IN)
+110 | Maximum Seller Allowed Price (Sell on Amazon, IN)
+111 | Sale Price INR (Sell on Amazon, IN)
+116 | Your Price INR (Amazon Business (B2B), IN)
+117 | Maximum Retail Price (Amazon Business (B2B), IN)
+118 | Minimum Seller Allowed Price (Amazon Business (B2B), IN)
+119 | Maximum Seller Allowed Price (Amazon Business (B2B), IN)
+122 | Quantity Price Type (Amazon Business (B2B), IN)
+123 | Quantity Threshold (Lower Bound, Amazon Business (B2B), IN)
+124 | Quantity Price (Fixed Price/Percentage Discount, Amazon Busi
+125 | Quantity Threshold (Lower Bound, Amazon Business (B2B), IN)
+126 | Quantity Price (Fixed Price/Percentage Discount, Amazon Busi
+127 | Quantity Threshold (Lower Bound, Amazon Business (B2B), IN)
+128 | Quantity Price (Fixed Price/Percentage Discount, Amazon Busi
+129 | Quantity Threshold (Lower Bound, Amazon Business (B2B), IN)
+130 | Quantity Price (Fixed Price/Percentage Discount, Amazon Busi
+131 | Quantity Threshold (Lower Bound, Amazon Business (B2B), IN)
+132 | Quantity Price (Fixed Price/Percentage Discount, Amazon Busi
+149 | Country of Origin
+150 | Warranty Description
+151 | Warranty Description
+152 | Warranty Description
+153 | Are batteries required?
+154 | Are batteries included?
+155 | Battery Cell Composition
+156 | Battery Cell Composition Other Than Listed
+157 | Battery Weight
+158 | Battery Weight Unit
+159 | Number of Batteries
+160 | Battery Type
+161 | Number of Batteries
+162 | Battery Type
+163 | Number of Batteries
+164 | Battery Type
+165 | Number of Batteries
+166 | Battery Type
+167 | Number of Batteries
+168 | Battery Type
+171 | Lithium Battery Energy Content
+172 | Lithium Battery Energy Content Unit
+173 | Lithium Battery Packaging
+174 | Lithium Battery Weight
+175 | Lithium Battery Weight Unit
+224 | Compliance Media Source Location (en_IN, Warranty)
+226 | Manufacturer’s Email or Electronic Address
+233 | Base Product Manufacturer Warranty Period
+234 | Base Product Warranty Manufacturer Period Unit
+235 | Base Product Manufacturer Warranty Terms and Conditions
+236 | Steps To Avail Warranty
+237 | Warranty Provider Contact Information
+
+donor row=56 sku=0S-HL4Y-CWSD
+
+=== DONOR VALUES (CAT report) ===
+col  3 SKU = 0S-HL4Y-CWSD
+col  4 Product Type = PHONE_ACCESSORY
+col  5 Listing Action = Edit (Partial Update)
+col  9 Item Name = Compatible for Poco C31 CareOG Display+Touch Screen Combo Folder
+col 10 Brand Name = Generic
+col 29 Main Image URL = https://m.media-amazon.com/images/I/515AUsQS6AL.jpg
+col 39 Product Description = NOTICE: If Any Customer Will Try To Do Any Type Of Fraud/cheating In Terms Of Refund Or Re
+col 44 Bullet Point = ⚠️ Important Warranty & Installation Info 🛡️ 7-Day Replacement Warranty – Covers manufactu
+col419 Fulfillment Channel Code (IN) = Fulfillment by Merchant (Default)
+col420 Quantity (IN) = 0
+col424 Your Price INR (Sell on Amazon, IN) = 2737.0
+col425 Maximum Retail Price (Sell on Amazon, IN) = 4999.0
+col475 Are batteries required? = No
+col 18 Model Number = 0S-HL4Y-CWSD
+col 63 Item Type Name = Mobile Screen Replacement Part
+col469 Country of Origin = China
+
+product types in first 200 rows: {'CELLULAR_PHONE': 4, 'CELLULAR_PHONE_CASE': 45, 'PHONE_ACCESSORY': 144}

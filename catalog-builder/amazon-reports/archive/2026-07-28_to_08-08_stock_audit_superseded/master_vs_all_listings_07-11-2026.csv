@@ -1,0 +1,98 @@
+brand,model,qty,stock_screen,stock_quality,classification,listing_sku,listing_asin,listing_status,listing_qty,listing_screen,listing_quality,listing_title,hit_count
+REALME,Realme C67 Incell,1,Incell LCD,Standard,OK,RMC67TFT,B0FLQGNYJQ,Active,100,TFT LCD,Standard,for Realme C67 Compatible LCD/TFT - Display Screen Replacement Combo Folder,3
+REALME,Realme 7i Incell,1,Incell LCD,Standard,OK,RM7i,B0CPTBQFN9,Active,100,LCD,Standard,Compatible for Realme 7i LCD Display+Touch Screen Combo Folder,2
+REALME,Realme 9 Incell,1,Incell LCD,Standard,OK,RM94G,B0CPTFBWTC,Active,100,LCD,Standard,Compatible for Realme 9 (4G) (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,4
+REALME,Realme C33 Incell,1,Incell LCD,Standard,OK,RMEC33OG,B0C94R2YHG,Active,100,LCD,Standard,Compatible for Realme C33 LCD Display+Touch Screen Combo Folder,5
+REALME,Realme 11 Pro CareOG,1,Not Specified,CareOG,OUT_OF_STOCK,RLM11ProOG,B0F3JJ2LZP,Inactive,0,Not Specified,CareOG,Compatible for Realme 11 Pro CareOG (Fingerprint Support) Display+Touch Screen Combo Folder,1
+REALME,Realme 9i Incell,1,Incell LCD,Standard,OK,RME9iOG,B0C94RJ2YC,Active,100,LCD,Standard,Compatible for Realme 9i (4G) LCD Display+Touch Screen Combo Folder,2
+REALME,Realme C21 Incell,1,Incell LCD,Standard,OK,RMEC21OG,B0C94VX6K9,Active,100,LCD,Standard,Compatible for Realme C21 LCD Display+Touch Screen Combo Folder,5
+REALME,Realme C30 Incell,1,Incell LCD,Standard,QUALITY_GAP,RLMC30WFOG,B0F3JG28WL,Active,100,Not Specified,CareOG+With Frame,Compatible for Realme C30 (with Frame) CareOG Display+Touch Screen Combo Folder,2
+REALME,Realme C53 Incell,1,Incell LCD,Standard,OK,RMC53TFT,B0FLQG1ZJ8,Active,100,TFT LCD,Standard,for Realme C53 Compatible LCD/TFT - Display Screen Replacement Combo Folder,2
+REALME,Realme 8i Incell,1,Incell LCD,Standard,OK,RME8IOG,B0C94VXKB1,Active,1,LCD,Standard,Compatible for Realme 8i LCD Display+Touch Screen Combo Folder,2
+REALME,Realme 13 Pro CareOG,1,Not Specified,CareOG,OUT_OF_STOCK,RLM13ProOG,B0F3JMDNDK,Inactive,0,Not Specified,CareOG,Compatible for Realme 13 Pro CareOG (Fingerprint Support) Display+Touch Screen Combo Folder,1
+REALME,Realme 3 Pro Frame,1,Not Specified,With Frame,QUALITY_GAP,RM3PCARE,B0CPTF5XXM,Active,100,Not Specified,CareOG,Compatible for Realme 3 Pro CareOG Display+Touch Screen Combo Folder,2
+REALME,Realme 7 Pro Incell,1,Incell LCD,Standard,OK,RME7PROG,B0C94R71T4,Active,100,LCD,Standard,Compatible for Realme 7 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,4
+VIVO,Vivo Y33s Incell,1,Incell LCD,Standard,OK,Y33S,B0CPTD9K19,Active,100,LCD,Standard,Compatible for Vivo Y33s LCD Display+Touch Screen Combo Folder,2
+VIVO,Vivo Y22 Incell,1,Incell LCD,Standard,OK,Y22,B0CPTG55LJ,Active,100,LCD,Standard,Compatible for Vivo Y22/Y22s LCD Display+Touch Screen Combo Folder,2
+VIVO,Vivo Y22 CareOG,1,Not Specified,CareOG,OK,Y22CARE,B0CPTF5SGF,Active,100,Not Specified,CareOG,Compatible for Vivo Y22/Y22s CareOG Display+Touch Screen Combo Folder,2
+VIVO,Vivo T1 CareOG,1,Not Specified,CareOG,OK,T12021CARE,B0CPTDDM3B,Active,100,Not Specified,CareOG,Compatible for Vivo T1 (2021) CareOG Display+Touch Screen Combo Folder,3
+VIVO,Vivo T2x CareOG,1,Not Specified,CareOG,OK,T2XCARE,B0CPTFLGXK,Active,1,Not Specified,CareOG,Compatible for Vivo T2x CareOG Display+Touch Screen Combo Folder,1
+VIVO,Vivo X70 Pro Plus CareOG,1,Not Specified,CareOG,OUT_OF_STOCK,VVX70Pro+OG,B0F3JL1YLV,Inactive,0,Not Specified,CareOG,Compatible for Vivo X70 Pro+ CareOG (Fingerprint Support) Display+Touch Screen Combo Folder,2
+VIVO,Vivo V11 Pro CareOG,1,Not Specified,CareOG,OUT_OF_STOCK,V11PROLED,B0CPTBQFNG,Inactive,0,Not Specified,CareOG,Compatible for Vivo V11 Pro (Fingerprint Support) CareOG Display+Touch Screen Combo Folder,2
+VIVO,Vivo V17 CareOG,1,Not Specified,CareOG,OUT_OF_STOCK,V17CARE,B0CPTF6JYW,Inactive,0,Not Specified,CareOG,Compatible for Vivo V17 (Fingerprint Support) CareOG Display+Touch Screen Combo Folder,2
+VIVO,Vivo V15 CareOG,1,Not Specified,CareOG,OK,V15CARE,B0CPTCXZRQ,Active,100,Not Specified,CareOG,Compatible for Vivo V15 CareOG Display+Touch Screen Combo Folder,2
+VIVO,Vivo X80 CareOG,1,Not Specified,CareOG,OUT_OF_STOCK,VVX80OG,B0F3JLSJ8R,Inactive,0,Not Specified,CareOG,Compatible for Vivo X80 CareOG (Fingerprint Support) Display+Touch Screen Combo Folder,1
+OPPO,F17 Pro OLED,1,OLED,Standard,OUT_OF_STOCK,F17PROLED,B0CPWBGWBF,Inactive,0,OLED,Standard,Compatible for Oppo F17 Pro (Fingerprint Support) Amoled Display+Touch Screen Combo Folder,3
+OPPO,A53 CareOG,2,Not Specified,CareOG,OK,OPA53CAREWF,B0CPWDHTKK,Active,100,Not Specified,CareOG+With Frame,Compatible for Oppo A53 (with Frame) CareOG Display+Touch Screen Combo Folder,3
+OPPO,A57 5G CareOG,3,Not Specified,CareOG,OK,OPOA575GCARE,B0C94S6TPD,Active,100,Not Specified,CareOG,Compatible for Oppo A57 (5G) CareOG Display+Touch Screen Combo Folder,1
+OPPO,F19 OLED,1,OLED,Standard,MISSING,,,,,,,,0
+OPPO,A54 5G Incell,1,Incell LCD,Standard,OK,OPOA545GOG,B0C94SVMY3,Active,1,LCD,Standard,Compatible for Oppo A54 (5G) LCD Display+Touch Screen Combo Folder,2
+OPPO,F27 OLED,1,OLED,Standard,OK,OppoF27FOLED,B0FLQH9DSJ,Active,100,OLED,Standard,for Oppo F27 (Fingerprint Support) Compatible OLED - Display Screen Replacement Combo Folder,1
+OPPO,F9 Incell,1,Incell LCD,Standard,MISSING,,,,,,,,0
+OPPO,Reno 10 Pro Plus CareOG,2,Not Specified,CareOG,OUT_OF_STOCK,RNO10Pro+OG,B0F3JKHS6Z,Inactive,0,Not Specified,CareOG,Compatible for Oppo Reno 10 Pro+ CareOG (Fingerprint Support) Display+Touch Screen Combo Folder,1
+OPPO,F5 Frame,1,Not Specified,With Frame,QUALITY_GAP,F5B,B0CPWB47XF,Active,1,LCD,Standard,Compatible for Oppo F5 (Black) LCD Display+Touch Screen Combo Folder,4
+OPPO,F5 Incell,1,Incell LCD,Standard,OK,F5B,B0CPWB47XF,Active,1,LCD,Standard,Compatible for Oppo F5 (Black) LCD Display+Touch Screen Combo Folder,4
+ONEPLUS,OnePlus 8 CareOG,2,Not Specified,CareOG,OUT_OF_STOCK,1+8CARE,B0CPTDCXKC,Inactive,0,Not Specified,CareOG,Compatible for OnePlus 8 (Fingerprint Support) CareOG Display+Touch Screen Combo Folder,3
+ONEPLUS,OnePlus 10 Pro CareOG,1,Not Specified,CareOG,OUT_OF_STOCK,1+10PROCARE,B0CPTFHK5X,Inactive,0,Not Specified,CareOG,Compatible for OnePlus 10 Pro (Fingerprint Support) CareOG Display+Touch Screen Combo Folder,2
+ONEPLUS,OnePlus 7 CareOG,1,Not Specified,CareOG,OUT_OF_STOCK,1+7CARE,B0CPTC1369,Inactive,0,Not Specified,CareOG,Compatible for OnePlus 7 (Fingerprint Support) CareOG Display+Touch Screen Combo Folder,4
+ONEPLUS,OnePlus 7 Incell,1,Incell LCD,Standard,OK,OP7LCD,B0BVJHNFFY,Active,100,LCD,Standard,Compatible for OnePlus 7 (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,4
+ONEPLUS,OnePlus 8 Pro Incell,1,Incell LCD,Standard,OUT_OF_STOCK,1+8ProLCD,B0F3JJKB8C,Inactive,98,LCD,Standard,Compatible for OnePlus 8 Pro LCD (No Fingerprint Support) Display+Touch Screen Combo Folder,2
+ONEPLUS,OnePlus 10R Incell,1,Incell LCD,Standard,OK,1+10RLCD,B0F3JNWJQB,Active,100,LCD,Standard,Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Combo Folder,2
+ONEPLUS,OnePlus 11R CareOG,1,Not Specified,CareOG,OUT_OF_STOCK,1+11RCARE,B0CPTF7PF7,Inactive,0,Not Specified,CareOG,Compatible for OnePlus 11R (Fingerprint Support) CareOG Display+Touch Screen Combo Folder,2
+ONEPLUS,OnePlus Nord CareOG,1,Not Specified,CareOG,OK,NORDN100WF,B0CPTDDBL4,Active,100,Not Specified,CareOG+With Frame,Compatible for OnePlus Nord N100 (with Frame) CareOG Display+Touch Screen Combo Folder,12
+ONEPLUS,OnePlus 9RT Incell,1,Incell LCD,Standard,OK,1+9RtLCD,B0F3JPV6JD,Active,99,LCD,Standard,Compatible for OnePlus 9Rt LCD (No Fingerprint Support) Display+Touch Screen Combo Folder,2
+ONEPLUS,OnePlus 9 CareOG,1,Not Specified,CareOG,OUT_OF_STOCK,1+9CARE,B0CPTDZPDC,Inactive,0,Not Specified,CareOG,Compatible for OnePlus 9 (Fingerprint Support) CareOG Display+Touch Screen Combo Folder,5
+APPLE,iPhone 13 Incell,1,Incell LCD,Standard,OUT_OF_STOCK,IP13OG,B0C5VPK3DN,Inactive,99,LCD,Standard,Compatible for Apple iPhone 13 LCD Display+Touch Screen Combo Folder,3
+APPLE,iPhone 13 Pro OLED,1,OLED,Standard,OUT_OF_STOCK,IP13ProGx,B0F3JKRYPZ,Inactive,0,OLED,Standard,Compatible for Apple iPhone 13 Pro Gx Amoled Display+Touch Screen Combo Folder,3
+APPLE,iPhone 13 Pro Max OLED,1,OLED,Standard,OUT_OF_STOCK,IP13PMGX,B0F3JK2XRW,Inactive,0,OLED,Standard,Compatible for Apple iPhone 13 Pro Max GX Amoled Display+Touch Screen Combo Folder,2
+APPLE,iPhone 13 Pro Max Incell,1,Incell LCD,Standard,OK,IP13PMLCD,B0F3JP385V,Active,99,LCD,Standard,Compatible for Apple iPhone 13 Pro Max LCD Display+Touch Screen Combo Folder,2
+APPLE,iPhone 11 Pro Max OLED,1,OLED,Standard,OUT_OF_STOCK,11PMAXOLED,B0BV85RYF1,Inactive,0,OLED,Standard,Compatible for Apple iPhone 11 Pro Max GX Amoled Display+Touch Screen Combo Folder,3
+APPLE,iPhone 11 Incell,1,Incell LCD,Standard,OK,IP11LCD,B0CP2F5336,Active,100,LCD,Standard,Compatible for Apple iPhone 11 LCD Display+Touch Screen Combo Folder,3
+APPLE,iPhone 8 Plus Incell,1,Incell LCD,Standard,QUALITY_GAP,IPH8PBCARE,B0CYM3YMBZ,Active,100,Not Specified,CareOG,Compatible for Apple iPhone 8 Plus (Black) CareOG Display+Touch Screen Combo Folder,1
+APPLE,iPhone 8 CareOG,1,Not Specified,CareOG,OK,IP8WCARE,B0CP3TMFXC,Active,100,Not Specified,CareOG,Compatible for Apple iPhone 8 (White) CareOG Display+Touch Screen Combo Folder,4
+APPLE,iPhone XS Incell,1,Incell LCD,Standard,OUT_OF_STOCK,IPXSLCD,B0CP2CY6ZD,Inactive,100,LCD,Standard,Compatible for Apple iPhone Xs LCD Display+Touch Screen Combo Folder,3
+APPLE,iPhone 14 Pro Max Incell,1,Incell LCD,Standard,OUT_OF_STOCK,IP14PMLCD,B0F3JK14H5,Inactive,0,LCD,Standard,Compatible for Apple iPhone 14 Pro Max LCD Display+Touch Screen Combo Folder,2
+SAMSUNG,Galaxy A73 OLED,1,OLED,Standard,QUALITY_GAP,SAMA73CARE,B0CPTFBFSK,Inactive,0,Not Specified,CareOG,Compatible for Samsung Galaxy A73 (Fingerprint Support) CareOG Display+Touch Screen Combo Folder,1
+SAMSUNG,Galaxy A32 4G Incell,1,Incell LCD,Standard,OK,A324G,B0CPTFZ1CK,Active,99,LCD,Standard,Compatible for Samsung Galaxy A32 (4G) (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,3
+SAMSUNG,Galaxy A32 4G Internal LCD,1,Incell LCD,Standard,MISSING,,,,,,,,0
+SAMSUNG,Galaxy S21 FE OLED,1,OLED,Standard,QUALITY_GAP,SAMS21FENFPTFT,B0FLQHRQRV,Active,100,TFT LCD,Standard,for Samsung Galaxy S21 FE (No Fingerprint Support) Compatible LCD/TFT - Display Screen Replacement Combo Folder,2
+SAMSUNG,Galaxy S20 FE With Frame OLED,1,OLED,With Frame,OUT_OF_STOCK,GLXS20FeWFLED,B0F3JR7BQ9,Inactive,0,OLED,With Frame,Compatible for Samsung Galaxy S20 FE (with Frame) Amoled (Fingerprint Support) Display+Touch Screen Combo Folder,4
+SAMSUNG,Galaxy J7 Next Incell,2,Incell LCD,Standard,QUALITY_GAP,GJ7NXTBLED,B0CPTCD95W,Active,100,OLED,Standard,Compatible for Samsung Galaxy J7 Nxt (Black) Amoled Display+Touch Screen Combo Folder,2
+SAMSUNG,Galaxy J7 2016 Incell,1,Incell LCD,Standard,QUALITY_GAP,J716GLED,B0CPTBT9FZ,Active,100,OLED,Standard,Compatible for Samsung Galaxy J7 (2016) (Gold) Amoled Display+Touch Screen Combo Folder,3
+SAMSUNG,Galaxy A30s Incell,2,Incell LCD,Standard,OK,A30S,B0CPTBRX46,Active,100,LCD,Standard,Compatible for Samsung Galaxy A30s (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,3
+SAMSUNG,Galaxy J7 Max Incell,1,Incell LCD,Standard,QUALITY_GAP,J7MXBLED,B0CPTD8HG4,Active,100,OLED,Standard,Compatible for Samsung Galaxy J7 Max (2017) (Black) Amoled Display+Touch Screen Combo Folder,3
+SAMSUNG,Galaxy A10 Incell,1,Incell LCD,Standard,OK,A10,B0CPTFBQM4,Active,100,LCD,Standard,Compatible for Samsung Galaxy A10 LCD Display+Touch Screen Combo Folder,7
+XIAOMI/REDMI/POCO,Mi 11X OLED,1,OLED,Standard,OUT_OF_STOCK,Mi11i/11XOLED,B0FLQHV7ZV,Inactive,0,OLED,Standard,for Mi 11i/ 11X Compatible OLED - Display Screen Replacement Combo Folder,3
+XIAOMI/REDMI/POCO,Mi 11X Incell,1,Incell LCD,Standard,OUT_OF_STOCK,XMI11X,B0BZT5FTRQ,Inactive,100,LCD,Standard,Compatible for Xiaomi Mi 11X LCD Display+Touch Screen Combo Folder,3
+XIAOMI/REDMI/POCO,Mi A3 Incell,1,Incell LCD,Standard,OK,XMIA3TFT,B0BZT5V9T8,Active,100,LCD,Standard,Compatible for Xiaomi Mi A3 (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,4
+XIAOMI/REDMI/POCO,Redmi Note 5 With Frame White,1,Not Specified,With Frame,OK,MINOTE5WFCAREW,B0CPTDNJHP,Active,100,Not Specified,CareOG+With Frame,Compatible for Redmi Note 5 (White) (with Frame) CareOG Display+Touch Screen Combo Folder,2
+XIAOMI/REDMI/POCO,Redmi 4A With Frame Incell Black,1,Incell LCD,With Frame,QUALITY_GAP,MI4ABFCARE,B0CPTD5TVV,Active,100,Not Specified,CareOG+With Frame,Compatible for Redmi 4A (Black) (with Frame) CareOG Display+Touch Screen Combo Folder,2
+XIAOMI/REDMI/POCO,Redmi Note 10T With Frame,1,Not Specified,With Frame,QUALITY_GAP,RN10T,B0BYVNQNJP,Active,100,LCD,Standard,Compatible for Redmi Note 10T LCD Display+Touch Screen Combo Folder,1
+XIAOMI/REDMI/POCO,Redmi K20 Incell,1,Incell LCD,Standard,MISSING,,,,,,,,0
+XIAOMI/REDMI/POCO,Redmi 12 With Frame,1,Not Specified,With Frame,QUALITY_GAP,MI12RTFT,B0FLQHWGWC,Active,100,TFT LCD,Standard,for Redmi 12R Compatible LCD/TFT - Display Screen Replacement Combo Folder,4
+XIAOMI/REDMI/POCO,Redmi 12 5G With Frame,1,Not Specified,With Frame,QUALITY_GAP,MI125G,B0CPTCN7VD,Active,100,LCD,Standard,Compatible for Redmi 12 5G LCD Display+Touch Screen Combo Folder,6
+XIAOMI/REDMI/POCO,Redmi 13 Pro+ With Frame,1,Not Specified,With Frame,MISSING,,,,,,,,0
+XIAOMI/REDMI/POCO,Redmi 10 Power Incell,1,Incell LCD,Standard,OK,MI10POWER,B0BYVM95J3,Active,100,LCD,Standard,Compatible for Redmi 10 Power LCD Display+Touch Screen Combo Folder,3
+XIAOMI/REDMI/POCO,Redmi Note 6 Pro Incell,1,Incell LCD,Standard,OK,MIN6PRO,B0CPTBK5J6,Active,99,LCD,Standard,Compatible for Redmi Note 6 Pro LCD Display+Touch Screen Combo Folder,2
+XIAOMI/REDMI/POCO,Redmi Note 7 Incell,1,Incell LCD,Standard,MISSING,,,,,,,,0
+XIAOMI/REDMI/POCO,Poco X3 Incell,1,Incell LCD,Standard,QUALITY_GAP,PocoX3GTCARE,B0CRS394YX,Active,100,Not Specified,CareOG,Compatible for Poco X3 GT CareOG Display+Touch Screen Combo Folder,2
+XIAOMI/REDMI/POCO,Poco M4 Incell,1,Incell LCD,Standard,OUT_OF_STOCK,POCOM4,B0BYVNSQ1Q,Inactive,0,LCD,Standard,Compatible for Poco M4 LCD Display+Touch Screen Combo Folder,3
+MIX,Nothing Phone (1) CareOG,1,Not Specified,CareOG,OK,NTG1OG,B0F3JMKHH4,Active,99,Not Specified,CareOG,Compatible for Nothing Phone 1 CareOG (Fingerprint Support) Display+Touch Screen Combo Folder,3
+MIX,Infinix Note 10 Incell,1,Incell LCD,Standard,OUT_OF_STOCK,INFNOT10TFT,B0FLQHGXMM,Inactive,0,TFT LCD,Standard,for Infinix Note 10 Compatible LCD/TFT - Display Screen Replacement Combo Folder,2
+MIX,Infinix Hot 9 Incell,1,Incell LCD,Standard,MISSING,,,,,,,,0
+MIX,Infinix Note 11S Incell,1,Incell LCD,Standard,OK,INN11S,B0CPTCQN54,Active,100,LCD,Standard,Compatible for Infinix Note 11S LCD Display+Touch Screen Combo Folder,1
+MIX,Honor 7X Incell,1,Incell LCD,Standard,OK,HNR7XB,B0CPTF6LSV,Active,100,LCD,Standard,Compatible for Honor 7X (Black) LCD Display+Touch Screen Combo Folder,2
+MIX,Honor 7X White Incell,1,Incell LCD,Standard,OK,HNR7XW,B0CPTD6JRY,Active,100,LCD,Standard,Compatible for Honor 7X (White) LCD Display+Touch Screen Combo Folder,1
+MIX,Honor 8C Incell,1,Incell LCD,Standard,OK,HNR8C,B0CPTDYBRS,Active,99,LCD,Standard,Compatible for Honor 8C LCD Display+Touch Screen Combo Folder,1
+MIX,Honor 8X Incell,1,Incell LCD,Standard,OK,HNR8X,B0CPTCLK2J,Active,2,LCD,Standard,Compatible for Honor 8X LCD Display+Touch Screen Combo Folder,1
+MIX,Honor X9B Incell,1,Incell LCD,Standard,OUT_OF_STOCK,HNRX9B(5G)LCD,B0F3JLKRFN,Inactive,100,LCD,Standard,Compatible for Honor X9B LCD (No Fingerprint Support) Display+Touch Screen Combo Folder,2
+MIX,Nokia G10 Incell,1,Incell LCD,Standard,OK,NKG10,B0CP9Q6B9V,Active,100,LCD,Standard,Compatible for Nokia G10 LCD Display+Touch Screen Combo Folder,1
+MIX,Nokia G20 Incell,2,Incell LCD,Standard,OK,NKG20,B0CP9QDFHM,Active,100,LCD,Standard,Compatible for Nokia G20 LCD Display+Touch Screen Combo Folder,1
+MIX,Nokia G21 Incell,1,Incell LCD,Standard,OK,NKG21,B0CP9PVS18,Active,100,LCD,Standard,Compatible for Nokia G21 LCD Display+Touch Screen Combo Folder,2
+MIX,Nokia C3 Incell,1,Incell LCD,Standard,OK,NKC3,B0CP9QG19Q,Active,100,LCD,Standard,Compatible for Nokia C3 LCD Display+Touch Screen Combo Folder,5
+MIX,Moto G9 Incell,1,Incell LCD,Standard,OK,MOTOG9P,B0CPTDD29V,Active,100,LCD,Standard,Compatible for Motorola Moto G9 Power LCD Display+Touch Screen Combo Folder,1
+MIX,Moto Edge 50 Fusion Incell,1,Incell LCD,Standard,OK,EDGE50FusionLCD,B0F3JMHMPT,Active,99,LCD,Standard,Compatible for Motorola Moto Edge 50 Fusion LCD (No Fingerprint Support) Display+Touch Screen Combo Folder,4
+MIX,Moto G34 Frame,1,Not Specified,With Frame,OK,MOTOG34WFOG,B0F3JH8QYS,Active,100,Not Specified,CareOG+With Frame,Compatible for Motorola Moto G34 (with Frame) CareOG Display+Touch Screen Combo Folder,1
+MIX,Moto G40 Fusion Incell,1,Incell LCD,Standard,OK,MOTOF40F,B0CPTCZ9Y8,Active,1,LCD,Standard,Compatible for Motorola Moto G40 Fusion LCD Display+Touch Screen Combo Folder,1
+MIX,Asus Zenfone Max M2 Incell,1,Incell LCD,Standard,OK,ZFMXM2TFT,B0CPTCXWK2,Active,100,LCD,Standard,Compatible for Asus Zenfone Max M2 LCD Display+Touch Screen Combo Folder,1
+MIX,Asus ROG Phone 2 Incell,1,Incell LCD,Standard,QUALITY_GAP,ROG2CARE,B0CPTDJPZ9,Inactive,0,Not Specified,CareOG,Compatible for Asus ROG Phone 2 (Fingerprint Support) CareOG Display+Touch Screen Combo Folder,1

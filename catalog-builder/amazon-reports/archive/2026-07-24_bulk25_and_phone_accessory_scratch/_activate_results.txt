@@ -1,0 +1,34 @@
+OnePlus 9RT|enabled
+Oppo A54|already
+Oppo F19 / F19 Pro|already
+Oppo F9|already
+Oppo F5|enabled
+1+ 8 pro|enabled
+1+ 7|enabled
+Oneplus 10R|enabled
+1+ Nord CE 2 Lite|enabled
+iPhone 11|enabled
+Iphone 8|enabled
+iPhone XS|enabled
+Galaxy A30s|enabled
+Redmi Note 5|enabled
+Mi 11X|enabled
+Redmi 4A|enabled
+Redmi K20/K20 Pro|enabled
+Redmi 12|enabled
+Redmi 10 Power|enabled
+Redmi Note 6 Pro|enabled
+Redmi Note 7/7s/7 Pro|enabled
+Poco M4 Pro|enabled
+Nothing Phone 1|enabled
+Infinix Hot 9|enabled
+Infinix Note 11S|enabled
+honor 8c|enabled
+Nokia G10|enabled
+Nokia G20|enabled
+Nokia C3|enabled
+Moto G9|enabled
+Moto G34|enabled
+1+ Nord 2|skipped_ambiguous
+Iphone 13 Pro|skipped_ambiguous
+Oppo A3s|skipped_ambiguous

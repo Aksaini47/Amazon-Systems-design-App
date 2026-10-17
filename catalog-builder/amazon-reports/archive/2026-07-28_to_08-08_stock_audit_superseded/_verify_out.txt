@@ -1,0 +1,95 @@
+7
+  sku : RLMC67LCD
+  pt : PHONE_ACCESSORY
+  action : Create or Replace (Full Update)
+  item_name : Compatible for Realme C67 LCD Display+Touch Screen Combo Folder
+  brand : Generic
+  model# : RLMC67LCD
+  image : https://m.media-amazon.com/images/I/51PmYTzBJ6L.jpg
+  keyword : Realme C67 LCD Display
+  compat1 : Realme C67
+  compat2 : None
+  compat3 : None
+  fulfill : DEFAULT
+  qty : 1
+  handling : 2
+  price : 2399
+  mrp : 4999
+  coo : China
+
+8
+  sku : RLMC30LCD
+  pt : PHONE_ACCESSORY
+  action : Create or Replace (Full Update)
+  item_name : Compatible for Realme C30/C30s LCD Display+Touch Screen Combo Folder
+  brand : Generic
+  model# : RLMC30LCD
+  image : https://m.media-amazon.com/images/I/61hVQBAwIFL.jpg
+  keyword : Realme C30 C30s LCD Display
+  compat1 : Realme C30
+  compat2 : Realme C30s
+  compat3 : None
+  fulfill : DEFAULT
+  qty : 1
+  handling : 2
+  price : 2199
+  mrp : 4499
+  coo : China
+
+9
+  sku : RMC53LCD
+  pt : PHONE_ACCESSORY
+  action : Create or Replace (Full Update)
+  item_name : Compatible for Realme C53 LCD Display+Touch Screen Combo Folder
+  brand : Generic
+  model# : RMC53LCD
+  image : https://m.media-amazon.com/images/I/61BNrToCPeL.jpg
+  keyword : Realme C53 LCD Display
+  compat1 : Realme C53
+  compat2 : None
+  compat3 : None
+  fulfill : DEFAULT
+  qty : 1
+  handling : 2
+  price : 2299
+  mrp : 4499
+  coo : China
+
+10
+  sku : RM3PWFOG
+  pt : PHONE_ACCESSORY
+  action : Create or Replace (Full Update)
+  item_name : Compatible for Realme 3 Pro (with Frame) CareOG Display+Touch Screen Combo Folder
+  brand : Generic
+  model# : RM3PWFOG
+  image : https://m.media-amazon.com/images/I/51ukM6qn7RL.jpg
+  keyword : Realme 3 Pro With Frame CareOG Display
+  compat1 : Realme 3 Pro
+  compat2 : None
+  compat3 : None
+  fulfill : DEFAULT
+  qty : 1
+  handling : 2
+  price : 2999
+  mrp : 5499
+  coo : China
+
+11
+  sku : OPF275GOLED
+  pt : PHONE_ACCESSORY
+  action : Create or Replace (Full Update)
+  item_name : Compatible for Oppo F27 5G Amoled (No Fingerprint Support) Display+Touch Screen Combo Folder
+  brand : Generic
+  model# : OPF275GOLED
+  image : https://m.media-amazon.com/images/I/61yHoDrFsxL.jpg
+  keyword : Oppo F27 5G Amoled Display
+  compat1 : Oppo F27 5G
+  compat2 : None
+  compat3 : None
+  fulfill : DEFAULT
+  qty : 1
+  handling : 2
+  price : 3499
+  mrp : 6999
+  coo : China
+

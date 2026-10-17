@@ -1,0 +1,45 @@
+1 | Status | Active
+2 | Title | Compatible for Oppo F27 5G LCD (No Fingerprint Support) Display+Touch Screen Combo Folder
+3 | SKU | OPF275GLCD
+4 | Product Type | PHONE_ACCESSORY
+5 | Listing Action | Edit (Partial Update)
+9 | Item Name | Compatible For Oppo F27 5G LCD (No Fingerprint Support) Display+Touch Screen Combo Folder
+10 | Brand Name | Generic
+13 | Recommended Browse Nodes | Mobile Screen Guards (1389425031)
+18 | Model Number | OPF275GLCD
+20 | Manufacturer | Generic
+29 | Main Image URL | https://m.media-amazon.com/images/I/61yHoDrFsxL.jpg
+39 | Product Description | NOTICE: If Any Customer Will Try To Do Any Type Of Fraud/cheating In Terms Of Refund Or Replacement Under The Amazon Guarantee Program Then On Prima F
+40 | Bullet Point | 📱 Premium Display Technology 🔹 Grade A LCD/TFT Display – A bright, energy-efficient, and cost-effective alternative with sharp clarity for everyday us
+41 | Bullet Point | 📲 Perfect Compatibility ✅ Designed for Oppo F27 5G – Precise fit
+42 | Bullet Point | 🚫 No Under-Display Fingerprint Support – Works flawlessly with side/power button fingerprint sensors instead.
+43 | Bullet Point | 🔧 Professional Installation STRONGLY Recommended – Improper installation can cause touch issues, dead pixels, or adhesive failure. We are not liable f
+44 | Bullet Point | ⚠️ Important Warranty & Installation Info 🛡️ 7-Day Replacement Warranty – Covers manufacturing defects only (see full terms in description). No refund
+45 | Generic Keyword | Oppo F27 5G LCD Display
+61 | Number of Items | 1
+63 | Item Type Name | Mobile Screen Replacement Part
+70 | Part Number | OPF275GLCD
+114 | External Product Information Entity | HSN Code
+115 | External Product Information | 851770
+121 | Packer Contact Information | ‎RepairFully.com, Import Hub E-Commerce 122503, Pataudi, Haryana
+395 | Item Condition | New
+397 | Product Tax Code | A_ELECTRONICS_GEN
+399 | Maximum Order Quantity | 1
+419 | Fulfillment Channel Code (IN) | Fulfillment by Merchant (Default)
+420 | Quantity (IN) | 100
+421 | Handling Time (IN) | 2
+424 | Your Price INR (Sell on Amazon, IN) | 2799.0
+425 | Maximum Retail Price (Sell on Amazon, IN) | 5799.0
+451 | Shipping Template (IN) | Migrated Template
+452 | Item Package Length | 26.00
+453 | Package Length Unit | Centimetres
+454 | Item Package Width | 13.00
+455 | Package Width Unit | Centimetres
+456 | Item Package Height | 3.00
+457 | Package Height Unit | Centimetres
+458 | Package Weight | 220.00
+459 | Package Weight Unit | Grams
+469 | Country of Origin | China
+470 | Warranty Description | 7 Days QC Testing Warranty Only. If You Have Any Issues With The Product Do Not Install It And Get A Replacement. If We Found That Product Is Pasted O
+475 | Are batteries required? | No
+498 | Dangerous Goods Regulations | Not Applicable

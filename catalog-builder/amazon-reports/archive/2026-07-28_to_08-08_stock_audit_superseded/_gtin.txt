@@ -1,0 +1,3 @@
+col10   | Product Id Type              | amzn1.volt.ca.product_id_type                           | ex=UPC
+col11   | Product Id                   | amzn1.volt.ca.product_id_value                          | ex=714532191586
+col73   | Is Green Purchasing Law Compliant | is_green_purchasing_law_compliant[marketplace_id=A21TJRUUN4KGV]#1.value | ex=Yes

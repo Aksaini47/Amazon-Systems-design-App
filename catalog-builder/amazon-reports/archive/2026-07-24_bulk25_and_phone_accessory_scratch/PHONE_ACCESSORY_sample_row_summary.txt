@@ -1,0 +1,60 @@
+Output: C:\Users\DELL\Downloads\PHONE_ACCESSORY (4).xlsm
+Source: C:\Users\DELL\Downloads\PHONE_ACCESSORY (4)_backup.xlsm (rows 1-6 untouched)
+Data row: 7
+
+Listing Action (col C) — dropdown values:
+  Create or Replace (Full Update)  → NEW listing (used in sample)
+  Edit (Partial Update)            → change existing listing
+  Delete                           → delete listing
+
+Browse node (col L): Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs > Replacement Parts > Mobile Displays (11180541031)
+SKU: SAMPLE-S21FE-OLED
+Price: 2586 MRP: 3700 Qty: 100
+
+Filled columns:
+  col  1 SKU: SAMPLE-S21FE-OLED
+  col  2 Product Type: PHONE_ACCESSORY
+  col  3 Listing Action: Create or Replace (Full Update)
+  col  7 Item Name: Compatible for Samsung Galaxy S21 FE (Fingerprint Support) OLED Display+Touch Screen 
+  col  9 Brand Name: Generic
+  col 12 Recommended Browse Nodes: Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs > Repl
+  col 17 Model Number: SAMPLE-S21FE-OLED
+  col 18 Manufacturer: Generic
+  col 21 Main Image URL: https://m.media-amazon.com/images/I/515AUsQS6AL.jpg
+  col 31 Product Description: Compatible mobile phone OLED display and touch screen combo replacement. Tested for q
+  col 32 Bullet Point: Compatible with Samsung Galaxy S21 FE — Fingerprint supported after fitting — Verify 
+  col 33 Bullet Point: Silver Tier OLED — Premium display with vivid colors and better contrast.
+  col 34 Bullet Point: Quality Tested — Checked for dead pixels, color calibration, touch response. With fra
+  col 35 Bullet Point: Professional installation recommended — Self-install without skills may damage device
+  col 36 Bullet Point: 7-Day replacement warranty — QC tested before dispatch. Film removal = acceptance.
+  col 37 Generic Keyword: galaxy s21 fe oled display touch screen combo folder replacement
+  col 39 Number of Items: 1
+  col 40 Item Type Name: Mobile Screen Replacement Part
+  col 43 Part Number: SAMPLE-S21FE-OLED
+  col 45 Compatible Phone Models: Samsung Galaxy S21 FE
+  col 57 External Product Information Entity: HSN Code
+  col 58 External Product Information: 851770
+  col 68 Packer Contact Information: ‎RepairFully.com, Import Hub E-Commerce 122503, Pataudi, Haryana
+  col 77 Item Condition: New
+  col 79 Product Tax Code: A_GEN_STANDARD
+  col 81 Maximum Order Quantity: 1
+  col101 Fulfillment Channel Code (IN): Fulfillment by Merchant (Default)
+  col102 Quantity (IN): 100
+  col106 Your Price INR (Sell on Amazon, IN): 2586
+  col107 Maximum Retail Price (Sell on Amazon, IN): 3700
+  col140 Item Package Length: 26
+  col141 Package Length Unit: Centimetres
+  col142 Item Package Width: 13
+  col143 Package Width Unit: Centimetres
+  col144 Item Package Height: 3
+  col145 Package Height Unit: Centimetres
+  col146 Package Weight: 220
+  col147 Package Weight Unit: Grams
+  col149 Country of Origin: China
+  col150 Warranty Description: 7 Days QC Testing Warranty Only. If You Have Any Issues With The Product Do Not Insta
+  col153 Are batteries required?: No
+  col176 Dangerous Goods Regulations: Not Applicable
+
+Header check (must be template defaults):
+  C6='(Default) Create or Replace'
+  L6='Diet Bars'

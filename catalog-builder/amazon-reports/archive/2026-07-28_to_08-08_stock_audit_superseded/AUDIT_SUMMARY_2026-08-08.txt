@@ -1,0 +1,168 @@
+AMAZON ADS AD-GROUP INVENTORY CROSS-REFERENCE AUDIT
+Campaign: TL_EL_SPN_SG_Mobile Screens - Arun (campaignExternalId: 522332216636489)
+Date: 2026-08-08
+Status: PARTIAL COMPLETION - Awaiting full ad-group list collection
+
+================================================================================
+SUMMARY OF FINDINGS
+================================================================================
+
+TOTAL AD-GROUPS IN CAMPAIGN: 167 (verified via API response)
+  Confirmed to be showing: "1-167 of 167 results" in UI
+  Results per page setting: 300
+  Status: All visible entries show "Delivering" (ENABLED)
+
+AD-GROUPS COLLECTED: 41 of 167 (24.6%)
+  Method: Network request inspection + browser UI text extraction
+  Challenge: Virtual scrolling limits DOM access to ~20 rows at a time
+  Solution: Background agent deployed for systematic full collection
+
+PHYSICAL STOCK MODELS: ~91 unique models
+  Breakdown by brand:
+    - REALME: 13 models
+    - VIVO: 8 models
+    - OPPO: 9 models
+    - ONEPLUS: 7 models
+    - SAMSUNG: 9 models
+    - APPLE: 8 models
+    - XIAOMI/REDMI/POCO: 15 models
+    - MIX (Infinix/Honor/Nokia/Moto/Asus): 18 models
+
+================================================================================
+PRELIMINARY CROSS-REFERENCE RESULTS (Based on 41 Confirmed Ad-Groups)
+================================================================================
+
+COVERED_ENABLED: 42 stock models
+  - Have matching ad-group with ENABLED status
+  - Action: Keep monitoring performance
+
+COVERED_PAUSED: 0 stock models
+  - No paused ad-groups found in 41 collected entries
+  - Note: Complete list needed to confirm no paused campaigns exist
+
+NO_ADGROUP: 44 stock models
+  - No matching ad-group found in 41 collected entries
+  - Important: Many likely matched in remaining 126 ad-groups not yet collected
+  - Brands affected: Apple (3), Samsung (7), Vivo (4), Realme (6), Oppo (2), Xiaomi (6), Mix (16)
+
+================================================================================
+DELIVERABLES CREATED
+================================================================================
+
+1. adgroups_2026-08-08_confirmed.csv
+   - 41 confirmed ad-group names and status (all ENABLED)
+   - Location: C:\Projects\Amazon Systems Design\catalog-builder\amazon-reports\
+   - Format: CSV with columns: ad_group_name, status
+
+2. adgroup_inventory_matcher.py
+   - Python script for automated cross-reference matching
+   - Features:
+     * Loads ad-group list from CSV
+     * Matches against physical inventory with fuzzy matching
+     * Handles brand name variations (e.g., "1+" = OnePlus)
+     * Normalizes model names (removes quality/qty suffixes)
+     * Categorizes into COVERED_ENABLED / COVERED_PAUSED / NO_ADGROUP
+   - Usage: python adgroup_inventory_matcher.py
+   - Note: Requires complete 167-ad-group list for full analysis
+
+3. ADGROUP_AUDIT_FINAL_2026-08-08.md
+   - Comprehensive audit report with all findings and analysis
+   - Includes cross-reference tables, recommendations, technical details
+   - Location: C:\Projects\Amazon Systems Design\catalog-builder\amazon-reports\
+
+================================================================================
+KEY OBSERVATIONS
+================================================================================
+
+1. NO PAUSED AD-GROUPS DETECTED (in 41 collected)
+   - All visible ad-groups show "Delivering" status (ENABLED)
+   - Suggests campaign is actively running all ads
+
+2. BRAND COVERAGE VARIANCE
+   - OnePlus, Realme, Oppo: Well-represented
+   - Infinix, Nokia, Asus, Moto: Underrepresented (need full list to confirm)
+   - Premium iPhones (13 series): No ad-groups in collected 41 (need full list)
+
+3. AD-GROUP NAMING PATTERNS
+   - Simple models: "iPhone 11", "Realme 8"
+   - Variants combined: "Oppo F19 / F19 Pro", "Redmi K20/K20 Pro"
+   - OnePlus shorthand: "1+ 7", "1+ 8 pro", "1+ Nord CE 2 Lite"
+
+4. DATA QUALITY
+   - Network API confirmed accurate (numberOfRecords: 167)
+   - UI display consistent (1-167 of 167 results)
+   - No PAUSED or ARCHIVED statuses in visible entries
+
+================================================================================
+BLOCKERS & RESOLUTION
+================================================================================
+
+CURRENT BLOCKER: Virtual Scrolling
+  - Amazon Ads uses aggressive virtual rendering
+  - Only ~20 rows in DOM simultaneously
+  - Cannot access full table via DOM inspection alone
+  - Solution: Background agent using systematic scroll + extract cycles
+
+RESOLUTION APPROACH:
+  - Agent continuing to scroll through entire table
+  - Collecting ad-group names at each position
+  - Deduplicating to ensure unique list
+  - Expected to complete: ~5-10 minutes from audit start
+
+================================================================================
+FINAL ACTIONABLE ITEMS (Once all 167 Ad-Groups Collected)
+================================================================================
+
+1. Run Python matcher script with complete list:
+   $ python adgroup_inventory_matcher.py
+
+2. Review output for:
+   - Stock models requiring NEW ad-groups (NO_ADGROUP category)
+   - Any PAUSED ad-groups requiring re-enable (COVERED_PAUSED category)
+   - Coverage statistics by brand
+
+3. Prioritize by:
+   - Stock quantity (models with 2+ qty should have active ads)
+   - Sales velocity (high-ROAS products may need expansion)
+   - Market demand (new models vs. legacy models)
+
+4. Create missing ad-groups for:
+   - High-value inventory (2+ qty, consistent sales)
+   - New model releases (iPhone 13 series, Redmi Note 13, etc.)
+   - Brands with zero coverage (if applicable after full list review)
+
+================================================================================
+NOTES
+================================================================================
+
+- Audit is READ-ONLY: No ads/ad-groups were paused, enabled, or modified
+- CSV files can be imported to Excel for further analysis
+- Python script includes fuzzy matching (70%+ similarity threshold)
+- Brand shorthand recognized: "1+" → OnePlus
+- Model quality suffixes handled: Incell, OLED, CareOG, With Frame, White, Gold, Black
+- Qty variants normalized: "A53 CareOG - 2 QTY" → "Oppo A53"
+
+================================================================================
+COMPLETION CHECKLIST
+================================================================================
+
+Completed:
+  ✓ Verified 167 total ad-groups via API
+  ✓ Collected 41 confirmed ad-groups (24.6%)
+  ✓ Extracted physical inventory list (91 models)
+  ✓ Created Python matcher script
+  ✓ Generated preliminary cross-reference (42 covered / 44 no-adgroup)
+  ✓ Created comprehensive audit report and summary
+
+In Progress:
+  ⏳ Complete collection of remaining 126 ad-groups (agent working)
+
+Pending:
+  ⏹ Final cross-reference analysis with all 167 ad-groups
+  ⏹ Actionable recommendations for missing ad-groups
+  ⏹ Final summary report
+
+================================================================================
+
+Report generated: 2026-08-08
+Next step: Await completion of ad-group collection → Run final analysis

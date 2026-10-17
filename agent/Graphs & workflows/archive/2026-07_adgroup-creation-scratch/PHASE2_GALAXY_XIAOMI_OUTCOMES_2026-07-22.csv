@@ -1,0 +1,27 @@
+stock_model,action,outcome,ad_group,ad_group_id,asin_used,notes
+Galaxy A73 OLED,create,skipped_quality_conflict,,,B0FLQD44CT,stock OLED vs listing LCD/TFT — no force
+Galaxy A32 4G Incell,create,created_fixed,Galaxy A32,A091776017XH8Q480GEKN,B0FRSVSLH4,"VERIFIED live: LCD Delivering; CareOG+OLED WF Paused; BPE @ Rs3; negs Total 6 Phrase pro/max/pro max/plus/5g + Exact 4g"
+Galaxy A31 Incell,create,exists_enabled,Galaxy A31,A02810171EUNHAMIGCSCJ,B0CPTD4KL9,already Enabled; no recreate
+Galaxy S21 FE OLED,create,skipped_quality_conflict,,,B0FLQHRQRV,stock OLED vs listing LCD/TFT — no force
+Galaxy S20 FE With Frame OLED,create,failed_skip,,,B0GKGVNXNL,"plan B0F3JR7BQ9 Inactive; quality ASIN B0GKGVNXNL Inactive (GLXS20FeWFLED); no Active OLED+WF — no LCD force"
+Galaxy J7 Next Incell,create,skipped_quality_conflict_exists_name,Galaxy J7 Nxt,,B0CPTCD95W,stock Incell vs listing AMOLED; live AG name exists — do not recreate
+Galaxy J7 2016 Incell,create,exists_enabled,Galaxy J7 Prime (2016),A07077631NTH1V7TFJ6WV,B0CPTCXZRZ,leave Enabled; LCD quality OK
+Galaxy J7 2015 Incell,create,skipped_quality_conflict_exists_name,Galaxy J7 (2015),,B0CPTCZ1WT,stock Incell vs listing AMOLED; live AG exists
+Galaxy A30s Incell,create,exists_already_on,Galaxy A30s,A088091616JUNTR4QH4A3,B0CPTBRX46,reused; already_on
+Galaxy J7 Max Incell,create,skipped_quality_conflict_exists_name,Galaxy J7 Max (2017),,B0CPTD8HG4,stock Incell vs listing AMOLED; live AG exists
+Galaxy A10 Incell,create,exists_enabled,Galaxy A10,A08727522R6N51EWF5W6Z,B0CPTFBQM4,already Enabled; no recreate
+Redmi Note 5 With Frame White,create,skipped_quality_conflict,,,B0CPTDLP4B,stock White vs listing Black CareOG WF — color conflict
+Redmi 4A With Frame Incell Black,create,skipped_quality_conflict,,,B0CPTD5TVV,stock Incell vs listing CareOG WF — no force
+Redmi Note 10T With Frame,create,skipped_quality_conflict,,,B0BYVNQNJP,stock WF vs listing non-WF LCD
+Redmi 12 With Frame,create,failed_skip,,,B0F3JLHWNR,listing Inactive + title is Redmi 12 Pro (wrong model) ASIN B0F3JLHWNR
+Redmi 12 5G With Frame,create,failed_skip,,,B0F3JLHWNR,listing Inactive + title is Redmi 12 Pro (wrong model) ASIN B0F3JLHWNR
+Redmi 13 Pro Plus With Frame,create,skipped_quality_conflict,,,B0F3JM22F1,stock WF Redmi 13 Pro+ vs listing Note 13 Pro+ LCD non-WF
+Redmi 10 Power Incell,create,exists_already_on,Redmi 10 Power,A05907496B6DKCPQISY2,B0BYVM95J3,reused; already_on
+Redmi Note 6 Pro Incell,create,exists_already_on,Redmi Note 6 Pro,A04782503ALR6BPUN8J5O,B0CPTBK5J6,reused; already_on
+Redmi Note 7 Incell,create,exists_already_on,Redmi Note 7/7s/7 Pro,A02577102Z1S9V7SI2BNU,B0BBZNNN7C,reused; already_on
+Poco X3 Incell,create,skipped_quality_conflict,,,B0CRS394YX,stock Incell X3 vs listing CareOG Poco X3 GT
+Poco M4 Incell,create,skipped_quality_conflict,,,B0BYVKSYDQ,stock Poco M4 vs listing Poco M4 Pro — wrong model; do not create/force
+11X OLED,create,failed_skip,,,B0FLQHV7ZV,listing Inactive — no advertisable ASIN
+11X Incell,create,failed_skip,,,B0BZT5FTRQ,listing Inactive — no advertisable ASIN
+A3 Incell,create,still_blocked,,,B0BZT5V9T8,Active listing; Ads Sign-In after A32 verify — create pending login
+K20 Incell,create,still_blocked,,,B0BYVP2LWV,Active listing; Ads Sign-In after A32 verify — create pending login

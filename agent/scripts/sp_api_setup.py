@@ -214,7 +214,7 @@ def _patch_env(client_id: str, client_secret: str, refresh_token: str) -> None:
 def main() -> int:
     email, password = _admin_creds()
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         context = browser.new_context(viewport={"width": 1280, "height": 900})
         page = context.new_page()
         try:

@@ -1,0 +1,95 @@
+=== RLMC67LCD
+  sku : RLMC67LCD
+  item_name : Compatible for Realme C67 LCD (No Fingerprint Support) Display+Touch Screen Combo Folder
+  browse_node : Mobile Displays (11180541031)
+  num_items : 1
+  item_type : Mobile Screen Replacement Part
+  part_num : RLMC67LCD
+  hsn_entity : HSN Code
+  hsn : 851770
+  packer : RepairFully.com, Import Hub E-Commerce 122503, Pataudi, Haryana
+  item_cond : New
+  tax_code : A_ELECTRONICS_GEN
+  ship_tmpl : Migrated Template
+  pkg_l : 26
+  pkg_w : 13
+  pkg_h : 3
+  pkg_wt : 220
+  batteries : No
+  dg : Not Applicable
+=== RLMC30LCD
+  sku : RLMC30LCD
+  item_name : Compatible for Realme C30/C30s LCD (No Fingerprint Support) Display+Touch Screen Combo Fol
+  browse_node : Mobile Displays (11180541031)
+  num_items : 1
+  item_type : Mobile Screen Replacement Part
+  part_num : RLMC30LCD
+  hsn_entity : HSN Code
+  hsn : 851770
+  packer : RepairFully.com, Import Hub E-Commerce 122503, Pataudi, Haryana
+  item_cond : New
+  tax_code : A_ELECTRONICS_GEN
+  ship_tmpl : Migrated Template
+  pkg_l : 26
+  pkg_w : 13
+  pkg_h : 3
+  pkg_wt : 220
+  batteries : No
+  dg : Not Applicable
+=== RMC53LCD
+  sku : RMC53LCD
+  item_name : Compatible for Realme C53 LCD (No Fingerprint Support) Display+Touch Screen Combo Folder
+  browse_node : Mobile Displays (11180541031)
+  num_items : 1
+  item_type : Mobile Screen Replacement Part
+  part_num : RMC53LCD
+  hsn_entity : HSN Code
+  hsn : 851770
+  packer : RepairFully.com, Import Hub E-Commerce 122503, Pataudi, Haryana
+  item_cond : New
+  tax_code : A_ELECTRONICS_GEN
+  ship_tmpl : Migrated Template
+  pkg_l : 26
+  pkg_w : 13
+  pkg_h : 3
+  pkg_wt : 220
+  batteries : No
+  dg : Not Applicable
+=== RM3PWFOG
+  sku : RM3PWFOG
+  item_name : Compatible for Realme 3 Pro (with Frame) (No Fingerprint Support) CareOG Display+Touch Scr
+  browse_node : Mobile Displays (11180541031)
+  num_items : 1
+  item_type : Mobile Screen Replacement Part
+  part_num : RM3PWFOG
+  hsn_entity : HSN Code
+  hsn : 851770
+  packer : RepairFully.com, Import Hub E-Commerce 122503, Pataudi, Haryana
+  item_cond : New
+  tax_code : A_ELECTRONICS_GEN
+  ship_tmpl : Migrated Template
+  pkg_l : 26
+  pkg_w : 13
+  pkg_h : 3
+  pkg_wt : 220
+  batteries : No
+  dg : Not Applicable
+=== OPF275GOLED
+  sku : OPF275GOLED
+  item_name : Compatible for Oppo F27 5G Amoled (Fingerprint Support) Display+Touch Screen Combo Folder
+  browse_node : Mobile Displays (11180541031)
+  num_items : 1
+  item_type : Mobile Screen Replacement Part
+  part_num : OPF275GOLED
+  hsn_entity : HSN Code
+  hsn : 851770
+  packer : RepairFully.com, Import Hub E-Commerce 122503, Pataudi, Haryana
+  item_cond : New
+  tax_code : A_ELECTRONICS_GEN
+  ship_tmpl : Migrated Template
+  pkg_l : 26
+  pkg_w : 13
+  pkg_h : 3
+  pkg_wt : 220
+  batteries : No
+  dg : Not Applicable

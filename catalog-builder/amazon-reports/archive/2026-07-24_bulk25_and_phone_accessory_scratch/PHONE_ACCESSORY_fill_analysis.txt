@@ -1,0 +1,120 @@
+File: C:\Users\DELL\Downloads\PHONE_ACCESSORY (4).xlsm
+Row 7 — after fix
+
+=== Listing Action (col C) — dropdown rules ===
+  Create or Replace (Full Update)  → NEW listing
+  Edit (Partial Update)            → update existing
+  Delete                           → remove listing
+  Current C7: 'Create or Replace (Full Update)'
+
+=== Images (cols 21-30) ===
+  LEFT BLANK per Sir — Amazon uses donor images on create or add later
+
+=== MANDATORY for CREATE ===
+  [OK] col  1 SKU: SAMPLE-S21FE-OLED
+  [OK] col  2 Product Type: PHONE_ACCESSORY
+  [OK] col  3 Listing Action: Create or Replace (Full Update)
+  [OK] col  7 Item Name: Compatible for Samsung Galaxy S21 FE (Fingerprint Support) OLED Display+Tou
+  [OK] col  9 Brand Name: Generic
+  [OK] col 12 Recommended Browse Nodes: Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repa
+  [OK] col101 Fulfillment Channel: AMAZON_IN
+  [OK] col102 Quantity: 1
+
+=== DATA DEFINITIONS Required ===
+  [OK] col  1 SKU
+  [OK] col  2 Product Type
+  [OK] col  7 Item Name
+  [OK] col  9 Brand Name
+  [OK] col 10 Product Id Type
+  [OK] col 31 Product Description
+  [OK] col 32 Bullet Point
+  [OK] col149 Country of Origin
+  [OK] col176 Dangerous Goods Regulations
+
+=== Sir filled (non-mandatory extras): 43 cols ===
+  col 17 Model Number: SAMPLE-S21FE-OLED
+  col 18 Manufacturer: Generic
+  col 33 Bullet Point: Silver Tier OLED — Premium display with vivid colors and better contra
+  col 34 Bullet Point: Quality Tested — Checked for dead pixels, color calibration, touch res
+  col 35 Bullet Point: Professional installation recommended — Self-install without skills ma
+  col 36 Bullet Point: 7-Day replacement warranty — QC tested before dispatch. Film removal =
+  col 37 Generic Keyword: galaxy s21 fe oled display touch screen combo folder replacement
+  col 39 Number of Items: 1
+  col 40 Item Type Name: Mobile Screen Replacement Part
+  col 43 Part Number: SAMPLE-S21FE-OLED
+  col 45 Compatible Phone Models: Samsung Galaxy S21 FE
+  col 49 Unit Count: 1
+  col 50 Unit Count Type: Piece
+  col 52 Included Components: Mobile Screen
+  col 57 External Product Information Entity: HSN Code
+  col 58 External Product Information: 851770
+  col 63 Importer Contact Information: ‎RepairFully.com, Import Hub E-Commerce 122503, Pataudi, Haryana
+  col 68 Packer Contact Information: ‎RepairFully.com, Import Hub E-Commerce 122503, Pataudi, Haryana
+  col 74 Item Weight: 25
+  col 75 Item Weight Unit: Grams
+  col 77 Item Condition: New
+  col 79 Product Tax Code: A_GEN_STANDARD
+  col 81 Maximum Order Quantity: 1
+  col103 Handling Time (IN): 2
+  col105 Inventory Always Available (IN): Disabled
+  col106 Your Price INR (Sell on Amazon, IN): 2586
+  col107 Maximum Retail Price (Sell on Amazon, IN): 3700
+  col134 Item Length: 26
+  col135 Item Length Unit: Centimetres
+  col136 Item Width: 12
+  col137 Item Width Unit: Centimetres
+  col138 Item Height: 2
+  col139 Item Height Unit: Centimetres
+  col140 Item Package Length: 26
+  col141 Package Length Unit: Centimetres
+  col142 Item Package Width: 12
+  col143 Package Width Unit: Centimetres
+  col144 Item Package Height: 2
+  col145 Package Height Unit: Centimetres
+  col146 Package Weight: 220
+  col147 Package Weight Unit: Grams
+  col150 Warranty Description: 7 Days QC Testing Warranty Only. If You Have Any Issues With The Produ
+  col153 Are batteries required?: No
+
+=== Blank & NOT mandatory: 181 cols ===
+  (safe to leave empty for CREATE — sample):
+  col  4 Parentage Level
+  col  5 Parent SKU
+  col  6 Variation Theme Name
+  col  8 Item Highlight
+  col 11 Product Id
+  col 13 Recommended Browse Nodes
+  col 14 Recommended Browse Nodes
+  col 15 Recommended Browse Nodes
+  col 16 Recommended Browse Nodes
+  col 19 UNSPSC Code
+  col 20 National Stock Number
+  col 21 Main Image URL
+  col 22 Other Image URL
+  col 23 Other Image URL
+  col 24 Other Image URL
+  col 25 Other Image URL
+  col 26 Other Image URL
+  col 27 Other Image URL
+  col 28 Other Image URL
+  col 29 Other Image URL
+  col 30 Swatch Image URL
+  col 38 Style
+  col 41 Color
+  col 42 Size
+  col 44 Manufacturer Contact Information
+  col 46 Compatible Phone Models
+  col 47 Compatible Phone Models
+  col 48 Product Grade
+  col 51 Product Site Launch Date
+  col 53 Included Components
+  col 54 Included Components
+  col 55 Included Components
+  col 56 Included Components
+  col 59 Control Method
+  col 60 Control Method
+  ... +146 more
+
+=== Verdict ===
+Ready for CREATE test upload if mandatory all OK.
+Product Id Type (col 10) = GTIN Exempt recommended when no barcode.

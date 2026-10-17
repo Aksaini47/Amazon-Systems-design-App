@@ -1,0 +1,101 @@
+brand,model,qty,stock_screen,stock_quality,stock_status,listing_match,listing_sku,listing_asin,listing_status,listing_screen,listing_quality,listing_title,amazon_has_qualities,notes
+REALME,Realme C67 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+REALME,Realme 8 CareOG,1,Not Specified,CareOG,available,OK,RM85GCARE,B0FRSYL2BH,active,Not Specified,CareOG,Compatible for Realme 8 (5G) CareOG Display+Touch Screen Combo Folder,,exact quality match
+REALME,Realme 7i Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+REALME,Realme 9 Incell,1,Incell LCD,Standard,available,OK,RME9PRO+OG,B0FRSYLG6V,active,LCD,Standard,Compatible for Realme 9 Pro+ (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,,exact quality match
+REALME,Realme C33 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+REALME,Realme 11 Pro CareOG,1,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+REALME,Realme 9i Incell,1,Incell LCD,Standard,available,OK,RME9iOG,B0FRSXXKGT,active,LCD,Standard,Compatible for Realme 9i (4G) LCD Display+Touch Screen Combo Folder,,exact quality match
+REALME,Realme C21 Incell,1,Incell LCD,Standard,available,OK,RMEC21YOG,B0FRSVNB54,active,LCD,Standard,Compatible for Realme C21Y LCD Display+Touch Screen Combo Folder,,exact quality match
+REALME,Realme C30 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+REALME,Realme C53 Incell,1,Incell LCD,Standard,available,WRONG_QUALITY,RMC53CARE,B0FRSY5984,active,Not Specified,CareOG,Compatible for Realme C53 CareOG Display+Touch Screen Combo Folder,Not Specified/CareOG,model listed but need Incell LCD/Standard; Amazon has other grades
+REALME,Realme 8i Incell,1,Incell LCD,Standard,available,OK,RME8IOG,B0FRSZLTCC,active,LCD,Standard,Compatible for Realme 8i LCD Display+Touch Screen Combo Folder,,exact quality match
+REALME,Realme 13 Pro CareOG,1,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+REALME,Realme 3 Pro Frame,1,Not Specified,With Frame,available,MISSING,,,,,,,,no listing match for model (need Not Specified/With Frame)
+REALME,Realme 7 Pro Incell,1,Incell LCD,Standard,available,OK,RME7PROG,B0FRSZMXD5,active,LCD,Standard,Compatible for Realme 7 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,,exact quality match
+VIVO,Vivo Y33s Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+VIVO,Vivo Y22 Incell,1,Incell LCD,Standard,available,WRONG_QUALITY,Y22CARE,B0FRSVSZ3R,active,Not Specified,CareOG,Compatible for Vivo Y22/Y22s CareOG Display+Touch Screen Combo Folder,Not Specified/CareOG,model listed but need Incell LCD/Standard; Amazon has other grades
+VIVO,Vivo Y22 CareOG,1,Not Specified,CareOG,available,OK,Y22CARE,B0FRSVSZ3R,active,Not Specified,CareOG,Compatible for Vivo Y22/Y22s CareOG Display+Touch Screen Combo Folder,,exact quality match
+VIVO,Vivo T1 CareOG,1,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+VIVO,Vivo T2x CareOG,1,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+VIVO,Vivo X70 Pro Plus CareOG,1,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+VIVO,Vivo V11 Pro CareOG,1,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+VIVO,Vivo V17 CareOG,1,Not Specified,CareOG,available,WRONG_QUALITY,V17LCD,B0FRSZCJLZ,active,LCD,Standard,Compatible for Vivo V17 (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,LCD/Standard,model listed but need Not Specified/CareOG; Amazon has other grades
+VIVO,Vivo V15 CareOG,1,Not Specified,CareOG,available,WRONG_QUALITY,V15PRO,B0FRSXYXFY,active,LCD,Standard,Compatible for Vivo V15 Pro (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,LCD/Standard,model listed but need Not Specified/CareOG; Amazon has other grades
+VIVO,Vivo X80 CareOG,1,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+OPPO,F17 Pro OLED,1,OLED,Standard,available,OK,OPF17POLEDN,B0H8FFSH1R,active,OLED,Standard,Compatible for Oppo F17 Pro (Fingerprint Support) Amoled Display+Touch Screen Combo Folder,,exact quality match
+OPPO,A53 CareOG,2,Not Specified,CareOG,available,OK,OPA535GCARE,B0FRSXC8HC,active,Not Specified,CareOG,Compatible for Oppo A53 (5G) CareOG Display+Touch Screen Combo Folder,,exact quality match
+OPPO,A57 5G CareOG,3,Not Specified,CareOG,available,OK,OPA57/57S4GCARE,B0FRSZC3J6,active,Not Specified,CareOG,Compatible for Oppo A57/A57s (4G) CareOG Display+Touch Screen Combo Folder,,exact quality match
+OPPO,F19 OLED,1,OLED,Standard,available,OK,OPF19PROLEDN,B0H8FKMJWD,active,OLED,Standard,Compatible for Oppo F19/F19 Pro (Fingerprint Support) Amoled Display+Touch Screen Combo Folder,,exact quality match
+OPPO,A54 5G Incell,1,Incell LCD,Standard,available,OK,OPOA545GOG,B0FRT19PJW,active,LCD,Standard,Compatible for Oppo A54 (5G) LCD Display+Touch Screen Combo Folder,,exact quality match
+OPPO,F27 OLED,1,OLED,Standard,available,WRONG_QUALITY,OPF275GLCD,B0FRSY62GZ,active,LCD,Standard,Compatible for Oppo F27 5G LCD (No Fingerprint Support) Display+Touch Screen Combo Folder,LCD/Standard,model listed but need OLED/Standard; Amazon has other grades
+OPPO,F9 Incell,1,Incell LCD,Standard,available,OK,OPF9/proOG,B0FRSZNDP5,active,LCD,Standard,Compatible for Oppo F9/F9 Pro LCD Display+Touch Screen Combo Folder,,exact quality match
+OPPO,Reno 10 Pro Plus CareOG,2,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+OPPO,F5 Frame,1,Not Specified,With Frame,available,WRONG_QUALITY,OPOF5BCARE,B0FRSXBBD1,active,Not Specified,CareOG,Compatible for Oppo F5 (Black) CareOG Display+Touch Screen Combo Folder,Not Specified/CareOG,model listed but need Not Specified/With Frame; Amazon has other grades
+OPPO,F5 Incell,1,Incell LCD,Standard,available,WRONG_QUALITY,OPOF5BCARE,B0FRSXBBD1,active,Not Specified,CareOG,Compatible for Oppo F5 (Black) CareOG Display+Touch Screen Combo Folder,Not Specified/CareOG,model listed but need Incell LCD/Standard; Amazon has other grades
+ONEPLUS,OnePlus 8 CareOG,2,Not Specified,CareOG,available,WRONG_QUALITY,OP8TLCD,B0FRSX51N7,active,LCD,Standard,Compatible for OnePlus 8T (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,LCD/Standard,model listed but need Not Specified/CareOG; Amazon has other grades
+ONEPLUS,OnePlus 10 Pro CareOG,1,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+ONEPLUS,OnePlus 7 CareOG,1,Not Specified,CareOG,available,WRONG_QUALITY,1+7TLCD,B0FRSXJN3R,active,LCD,Standard,Compatible for OnePlus 7T (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,LCD/Standard,model listed but need Not Specified/CareOG; Amazon has other grades
+ONEPLUS,OnePlus 7 Incell,1,Incell LCD,Standard,available,OK,1+7TLCD,B0FRSXJN3R,active,LCD,Standard,Compatible for OnePlus 7T (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,,exact quality match
+ONEPLUS,OnePlus 8 Pro Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+ONEPLUS,OnePlus 10R Incell,1,Incell LCD,Standard,available,OK,1+10RLCD,B0FRSYKD46,active,LCD,Standard,Compatible for OnePlus 10R LCD (No Fingerprint Support) Display+Touch Screen Combo Folder,,exact quality match
+ONEPLUS,OnePlus 11R CareOG,1,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+ONEPLUS,OnePlus Nord CareOG,1,Not Specified,CareOG,available,WRONG_QUALITY,NORD2UNI,B0FRT21V5X,active,LCD,Standard,Compatible for OnePlus Nord 2 (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,LCD/Standard,model listed but need Not Specified/CareOG; Amazon has other grades
+ONEPLUS,OnePlus 9RT Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+ONEPLUS,OnePlus 9 CareOG,1,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+ONEPLUS,OnePlus Nord CE 2 Lite Incell,1,Incell LCD,Standard,available,OK,NORDCE2LYTN,B0H8FKLJWW,active,LCD,Standard,Compatible for OnePlus Nord CE 2 Lite LCD Display+Touch Screen Combo Folder,,exact quality match
+APPLE,iPhone 13 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+APPLE,iPhone 13 Pro OLED,1,OLED,Standard,available,MISSING,,,,,,,,no listing match for model (need OLED/Standard)
+APPLE,iPhone 13 Pro Max OLED,1,OLED,Standard,available,MISSING,,,,,,,,no listing match for model (need OLED/Standard)
+APPLE,iPhone 13 Pro Max Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+APPLE,iPhone 11 Pro Max OLED,1,OLED,Standard,available,OK,IP11PMAXOLEDGX,B0H8FHS4TV,active,OLED,Standard,Compatible for Apple iPhone 11 Pro Max GX Amoled Display+Touch Screen Combo Folder,,exact quality match
+APPLE,iPhone 11 Incell,1,Incell LCD,Standard,available,WRONG_QUALITY,IP11PMAXOLEDGX,B0H8FHS4TV,active,OLED,Standard,Compatible for Apple iPhone 11 Pro Max GX Amoled Display+Touch Screen Combo Folder,OLED/Standard,model listed but need Incell LCD/Standard; Amazon has other grades
+APPLE,iPhone 8 Plus Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+APPLE,iPhone 8 CareOG,1,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+APPLE,iPhone XS Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+APPLE,iPhone 14 Pro Max Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+SAMSUNG,Galaxy A73 OLED,1,OLED,Standard,available,MISSING,,,,,,,,no listing match for model (need OLED/Standard)
+SAMSUNG,Galaxy A32 4G Incell,1,Incell LCD,Standard,available,OK,A324G,B0FRSVSLH4,active,LCD,Standard,Compatible for Samsung Galaxy A32 (4G) (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,,exact quality match
+SAMSUNG,Galaxy A32 4G Incell,1,Incell LCD,Standard,available,OK,A324G,B0FRSVSLH4,active,LCD,Standard,Compatible for Samsung Galaxy A32 (4G) (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,,exact quality match
+SAMSUNG,Galaxy A31 Incell,1,Incell LCD,Standard,available,OK,A31,B0FRSX9LP5,active,LCD,Standard,Compatible for Samsung Galaxy A31 (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,,exact quality match
+SAMSUNG,Galaxy S21 FE OLED,1,OLED,Standard,available,MISSING,,,,,,,,no listing match for model (need OLED/Standard)
+SAMSUNG,Galaxy S20 FE With Frame OLED,1,OLED,With Frame,available,MISSING,,,,,,,,no listing match for model (need OLED/With Frame)
+SAMSUNG,Galaxy J7 Next Incell,3,Incell LCD,Standard,available,WRONG_QUALITY,GJ7NXTBLED,B0FRSYB8HW,active,OLED,Standard,Compatible for Samsung Galaxy J7 Nxt (Black) OLED Display+Touch Screen Combo Folder,OLED/Standard,model listed but need Incell LCD/Standard; Amazon has other grades
+SAMSUNG,Galaxy J7 2016 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+SAMSUNG,Galaxy J7 2015 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+SAMSUNG,Galaxy A30s Incell,2,Incell LCD,Standard,available,OK,A30S,B0FRSVV2N7,active,LCD,Standard,Compatible for Samsung Galaxy A30s (No Fingerprint Support) LCD Display+Touch Screen Combo Folder,,exact quality match
+SAMSUNG,Galaxy J7 Max Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+SAMSUNG,Galaxy A10 Incell,1,Incell LCD,Standard,available,OK,A10S,B0FRSZS4CG,active,LCD,Standard,Compatible for Samsung Galaxy A10s LCD Display+Touch Screen Combo Folder,,exact quality match
+XIAOMI/REDMI/POCO,Redmi Note 5 With Frame White,1,Not Specified,With Frame,available,MISSING,,,,,,,,no listing match for model (need Not Specified/With Frame)
+XIAOMI/REDMI/POCO,11X OLED,1,OLED,Standard,available,MISSING,,,,,,,,no listing match for model (need OLED/Standard)
+XIAOMI/REDMI/POCO,11X Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+XIAOMI/REDMI/POCO,Redmi 4A With Frame Incell Black,1,Incell LCD,With Frame,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/With Frame)
+XIAOMI/REDMI/POCO,A3 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+XIAOMI/REDMI/POCO,Redmi Note 10T With Frame,1,Not Specified,With Frame,available,MISSING,,,,,,,,no listing match for model (need Not Specified/With Frame)
+XIAOMI/REDMI/POCO,K20 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+XIAOMI/REDMI/POCO,Redmi 12 With Frame,1,Not Specified,With Frame,available,MISSING,,,,,,,,no listing match for model (need Not Specified/With Frame)
+XIAOMI/REDMI/POCO,Redmi 12 5G With Frame,1,Not Specified,With Frame,available,MISSING,,,,,,,,no listing match for model (need Not Specified/With Frame)
+XIAOMI/REDMI/POCO,Redmi 13 Pro Plus With Frame,1,Not Specified,With Frame,available,MISSING,,,,,,,,no listing match for model (need Not Specified/With Frame)
+XIAOMI/REDMI/POCO,Redmi 10 Power Incell,1,Incell LCD,Standard,available,OK,MI10POWER,B0FR2B4XRC,active,LCD,Standard,Compatible for Redmi 10 Power LCD Display+Touch Screen Combo Folder,,exact quality match
+XIAOMI/REDMI/POCO,Redmi Note 6 Pro Incell,1,Incell LCD,Standard,available,OK,MIN6PRO,B0FR2698G9,active,LCD,Standard,Compatible for Redmi Note 6 Pro LCD Display+Touch Screen Combo Folder,,exact quality match
+XIAOMI/REDMI/POCO,Redmi Note 7 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+XIAOMI/REDMI/POCO,Poco X3 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+XIAOMI/REDMI/POCO,Poco M4 Incell,1,Incell LCD,Standard,available,OK,POCOM4,B0FRSZGRSH,active,LCD,Standard,Compatible for Poco M4 LCD Display+Touch Screen Combo Folder,,exact quality match
+MIX,Nothing Phone 1 CareOG,1,Not Specified,CareOG,available,MISSING,,,,,,,,no listing match for model (need Not Specified/CareOG)
+MIX,Infinix Note 10 Incell,1,Incell LCD,Standard,available,OK,INN10P,B0FRSYH75Q,active,LCD,Standard,Compatible for Infinix Note 10 Pro LCD Display+Touch Screen Combo Folder,,exact quality match
+MIX,Infinix Hot 9 Incell,1,Incell LCD,Standard,available,OK,INH9PLAY,B0FR272K3Y,active,LCD,Standard,Compatible for Infinix Hot 9 Play LCD Display+Touch Screen Combo Folder,,exact quality match
+MIX,Infinix Note 11S Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+MIX,Honor 7X Incell,1,Incell LCD,Standard,available,OK,HNR7XW,B0FRSX81NL,active,LCD,Standard,Compatible for Honor 7X (White) LCD Display+Touch Screen Combo Folder,,exact quality match
+MIX,Honor 7X White Incell,1,Incell LCD,Standard,available,OK,HNR7XW,B0FRSX81NL,active,LCD,Standard,Compatible for Honor 7X (White) LCD Display+Touch Screen Combo Folder,,exact quality match
+MIX,Honor 8C Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+MIX,Honor 8X Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+MIX,Honor X9B Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+MIX,Nokia G10 Incell,1,Incell LCD,Standard,available,OK,NKG10,B0FRSYWCXX,active,LCD,Standard,Compatible for Nokia G10 LCD Display+Touch Screen Combo Folder,,exact quality match
+MIX,Nokia G20 Incell,2,Incell LCD,Standard,available,OK,NKG20,B0FRSYRD92,active,LCD,Standard,Compatible for Nokia G20 LCD Display+Touch Screen Combo Folder,,exact quality match
+MIX,Nokia G21 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+MIX,Nokia C3 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+MIX,Moto G9 Incell,1,Incell LCD,Standard,available,OK,MOTOG9,B0FRSZXCZ9,active,LCD,Standard,Compatible for Motorola Moto G9/G9 Play LCD Display+Touch Screen Combo Folder,,exact quality match
+MIX,Moto Edge 50 Fusion Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+MIX,Moto G34 Frame,1,Not Specified,With Frame,available,MISSING,,,,,,,,no listing match for model (need Not Specified/With Frame)
+MIX,Asus Zenfone Max M2 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)
+MIX,Asus ROG Phone 2 Incell,1,Incell LCD,Standard,available,MISSING,,,,,,,,no listing match for model (need Incell LCD/Standard)

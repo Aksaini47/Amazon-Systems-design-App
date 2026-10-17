@@ -1,0 +1,294 @@
+
+============================================================
+FILE: PHONE_ACCESSORY (4)_backup.xlsm (978,388 bytes)
+
+--- Sheet: Changes to the template (rows=23, cols=1) ---
+  row4[:19]: ['In order to improve the shopping experience for Customers, we are changing how we collect, categorise and display product data from Sellers. This includes the types of data that are required and optional. ']
+
+--- Sheet: Instructions (rows=40, cols=1) ---
+  row4[:19]: ['Save a copy of this file as an Excel worksheet on your hard drive. Then proceed to enter your product data into the Template tab, using the guidelines below.']
+
+--- Sheet: Images (rows=47, cols=2) ---
+  row4[:19]: ['We reserve the right to reject images that do not meet our image standards.', None]
+
+--- Sheet: Data Definitions (rows=181, cols=6) ---
+  row4[:19]: [None, 'contribution_sku#1.value', 'SKU', 'This attribute indicates the SKU number as assigned by the contributor', 'ABC123', 'Required']
+  r1: ['How to complete your inventory template', None, None, None, None]
+  r2: ['Group Name', 'Field Name', 'Local Label Name', 'Accepted Values', 'Example']
+  r3: ['Listing Identity', None, None, None, None]
+  r4: [None, 'contribution_sku#1.value', 'SKU', 'This attribute indicates the SKU number as assigned by the contributor', 'ABC123']
+  r5: [None, 'product_type#1.value', 'Product Type', 'Select the appropriate product type that best suits the item', 'ACCESSORY']
+  r6: [None, '::record_action', 'Listing Action', 'Specify the type of operation to be actioned on the data provided', '(Default) Create or Replace']
+  r7: ['Variations', None, None, None, None]
+  r8: [None, 'parentage_level[marketplace_id=A21TJRUUN4KGV]#1.value', 'Parentage Level', 'Specify whether a SKU is a parent or child', 'Parent']
+  r9: [None, 'child_parent_sku_relationship[marketplace_id=A21TJRUUN4KGV]#1.parent_sku', 'Parent SKU', 'The SKU of the parent item', 'ABC123']
+  r10: [None, 'variation_theme#1.name', 'Variation Theme Name', "Specify the variation theme that the product will use. The theme's attributes must be populated for all items in the grouping.", 'Color, Size']
+  r11: ['Product Identity', None, None, None, None]
+  r12: [None, 'item_name[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value', 'Item Name', 'Provide a title for the item that may be customer facing', 'Sony QuietComfort Noise Cancelling Wireless Headphones']
+  r13: [None, 'title_differentiation[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value', 'Item Highlight', 'Provide product features or benefit driven phrases, not a full sentence. Information will appear only when the item name is under 75 characters. Do not repeat information already in the item name.', 'Breathable material']
+  r14: [None, 'brand[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value', 'Brand Name', 'Provide the brand name of the product', 'Sony']
+  r15: [None, 'amzn1.volt.ca.product_id_type', 'Product Id Type', 'Select the type of external ID (barcode) type or ASIN that is being used to identify this product. If the product is exempt from external ID, select GTIN Exempt.', 'UPC']
+  r16: [None, 'amzn1.volt.ca.product_id_value', 'Product Id', 'Provide the corresponding product id value based on the type that was selected', '714532191586']
+  r17: [None, 'recommended_browse_nodes[marketplace_id=A21TJRUUN4KGV]#1.value', 'Recommended Browse Nodes', "Indicate the browse node or section of the Amazon website where the product will be assigned. This allows customers to find the product on the website easily. If you don't provide a node or if you provide an incorrect node, customers may not be able to find your product.", 'Diet Bars']
+  r18: [None, 'model_number[marketplace_id=A21TJRUUN4KGV]#1.value', 'Model Number', "Provide the manufacturer 's model number for the item", 'RXZER23']
+  r19: [None, 'manufacturer[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value', 'Manufacturer', 'Provide the company that manufactures the product.', 'Nike, Procter & Gamble']
+  r20: [None, 'unspsc_code[marketplace_id=A21TJRUUN4KGV]#1.value', 'UNSPSC Code', 'The UN specified purchasing/taxonomy code corresponding to the item', '27876546']
+  r21: [None, 'national_stock_number[marketplace_id=A21TJRUUN4KGV]#1.value', 'National Stock Number', "Provide the product's NSN identifier", '850519-S01, 783360-S01']
+  r22: ['Images', None, None, None, None]
+  r23: [None, 'main_product_image_locator[marketplace_id=A21TJRUUN4KGV]#1.media_location', 'Main Image URL', "Provide the URL for your product's main image. This is the first image customers see on the detail page.", 'http://www.companyname.com/images/1250.main.jpg']
+  r24: [None, 'other_product_image_locator_1[marketplace_id=A21TJRUUN4KGV]#1.media_location', 'Other Image URL', 'The URL for additional images of your product. These images will be shown on the detail page when the customer clicks through to see other views associated with the product.', 'http://www.companyname.com/images/1250.other1.jpg']
+
+--- Sheet: Template (rows=6, cols=237) ---
+  row4[:19]: ['SKU', 'Product Type', 'Listing Action', 'Parentage Level', 'Parent SKU', 'Variation Theme Name', 'Item Name', 'Item Highlight', 'Brand Name', 'Product Id Type', 'Product Id', 'Recommended Browse Nodes', 'Recommended Browse Nodes', 'Recommended Browse Nodes', 'Recommended Browse Nodes', 'Recommended Browse Nodes', 'Model Number', 'Manufacturer', 'UNSPSC Code']
+  Template row5 cols 1-16:
+    col1: r4='SKU' r5='contribution_sku#1.value'
+    col2: r4='Product Type' r5='product_type#1.value'
+    col3: r4='Listing Action' r5='::record_action'
+    col4: r4='Parentage Level' r5='parentage_level[marketplace_id=A21TJRUUN4KGV]#1.value'
+    col5: r4='Parent SKU' r5='child_parent_sku_relationship[marketplace_id=A21TJRUUN4KGV]#1.parent_s'
+    col6: r4='Variation Theme Name' r5='variation_theme#1.name'
+    col7: r4='Item Name' r5='item_name[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value'
+    col8: r4='Item Highlight' r5='title_differentiation[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN'
+    col9: r4='Brand Name' r5='brand[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value'
+    col10: r4='Product Id Type' r5='amzn1.volt.ca.product_id_type'
+    col11: r4='Product Id' r5='amzn1.volt.ca.product_id_value'
+    col12: r4='Recommended Browse Nodes' r5='recommended_browse_nodes[marketplace_id=A21TJRUUN4KGV]#1.value'
+    col13: r4='Recommended Browse Nodes' r5='recommended_browse_nodes[marketplace_id=A21TJRUUN4KGV]#2.value'
+    col14: r4='Recommended Browse Nodes' r5='recommended_browse_nodes[marketplace_id=A21TJRUUN4KGV]#3.value'
+    col15: r4='Recommended Browse Nodes' r5='recommended_browse_nodes[marketplace_id=A21TJRUUN4KGV]#4.value'
+    col16: r4='Recommended Browse Nodes' r5='recommended_browse_nodes[marketplace_id=A21TJRUUN4KGV]#5.value'
+  Template row7 cols 1-16:
+
+--- Sheet: Browse Data (rows=31, cols=2) ---
+  row4[:19]: ['21529669031', 'Electronics > Accessories > Mobile Accessories > Décor']
+  r1: ['Browse Node', 'BrowsePath']
+  r2: ['21529686031', 'Electronics > Accessories > Mobile Accessories > Gaming Accessories > Finger Sleeves']
+  r3: ['1389408031', 'Electronics > Accessories > Car & Vehicle Electronics Accessories > Mobile Phone Accessories > Kits']
+  r4: ['21529669031', 'Electronics > Accessories > Mobile Accessories > Décor']
+  r5: ['11180538031', 'Electronics > Accessories > Mobile Accessories > Photo & Video Accessories > Flashes & Selfie Lights']
+  r6: ['1389402031', 'Electronics > Accessories > Mobile Accessories']
+  r7: ['1389406031', 'Electronics > Accessories > Car & Vehicle Electronics Accessories > Mobile Phone Accessories']
+  r8: ['21529693031', 'Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs > SIM Card Tools & Accessories']
+  r9: ['21701662031', 'Electronics > Accessories > Mobile Accessories > UV Phone Steriliser Boxes']
+  r10: ['21529670031', 'Electronics > Accessories > Mobile Accessories > Gaming Accessories']
+  r11: ['11180541031', 'Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs > Replacement Parts > Mobile Displays']
+  r12: ['1389482031', 'Electronics > Accessories > Telephone Accessories']
+  r13: ['21529695031', 'Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs > Repair Kits']
+  r14: ['21529676031', 'Electronics > Accessories > Mobile Accessories > Cables & Adapters']
+  r15: ['21529691031', 'Electronics > Accessories > Computer Accessories > Tablet Accessories > Stylus Parts & Accessories > Tips']
+  r16: ['21529674031', 'Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs']
+  r17: ['21529689031', 'Electronics > Accessories > Mobile Accessories > Gaming Accessories > Triggers']
+  r18: ['12538061031', 'Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs > Replacement Parts > Back Covers']
+  r19: ['1375328031', 'Electronics > Accessories > Computer Accessories > Tablet Accessories']
+  r20: ['21529668031', 'Electronics > Accessories > Mobile Accessories > Photo & Video Accessories']
+  r21: ['11180539031', 'Electronics > Accessories > Mobile Accessories > Anti Radiation Stickers & Chips']
+  r22: ['21529683031', 'Electronics > Accessories > Mobile Accessories > Photo & Video Accessories > Photo & Video Kits']
+  r23: ['1389424031', 'Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs > Replacement Parts']
+  r24: ['976420031', 'Electronics']
+
+--- Sheet: Conditions List (rows=14, cols=16) ---
+  row4[:19]: [None, None, None, 'COLOR', 'SIZE/COLOR', 'STYLE/PRODUCT_GRADE', None, None, None, None, None, 'lithium_cobalt', 'Lithium Metal', 'lithium_cobalt', None, None]
+
+--- Sheet: Valid Values (rows=64, cols=270) ---
+  row4[:19]: ['Variations', None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+  r1: ['Listing Identity', None, None, None, None, None, None]
+  r2: [None, 'Product Type - [  ]', 'PHONE_ACCESSORY', None, None, None, None]
+  r3: [None, 'Listing Action - [  ]', 'Create or Replace (Full Update)', 'Edit (Partial Update)', 'Delete', None, None]
+  r4: ['Variations', None, None, None, None, None, None]
+  r5: [None, 'Parentage Level - [ PHONE_ACCESSORY ]', 'Parent', 'Child', None, None, None]
+  r6: [None, 'Variation Theme Name - [ PHONE_ACCESSORY ]', 'COLOR', 'ITEM_WEIGHT', 'NUMBER_OF_ITEMS', 'SIZE', 'SIZE/COLOR']
+  r7: ['Product Identity', None, None, None, None, None, None]
+  r9: [None, 'Product Id Type - [ PHONE_ACCESSORY ]', 'EAN', 'GTIN', 'UPC', 'ASIN', 'GTIN Exempt']
+  r10: [None, 'Recommended Browse Nodes - [ PHONE_ACCESSORY ]', 'Electronics > Accessories > Mobile Accessories > Gaming Accessories > Finger Sleeves (21529686031)', 'Electronics > Accessories > Car & Vehicle Electronics Accessories > Mobile Phone Accessories > Kits (1389408031)', 'Electronics > Accessories > Mobile Accessories > Décor (21529669031)', 'Electronics > Accessories > Mobile Accessories > Photo & Video Accessories > Flashes & Selfie Lights (11180538031)', 'Electronics > Accessories > Mobile Accessories (1389402031)']
+  r11: ['Product Details', None, None, None, None, None, None]
+  r12: [None, 'Unit Count Type - [ PHONE_ACCESSORY ]', 'Can', 'Case', 'Count', 'Feet', 'fluid ounce(s)']
+  r13: [None, 'External Product Information Entity - [ PHONE_ACCESSORY ]', 'HSN Code', None, None, None, None]
+  r14: [None, 'Control Method - [ PHONE_ACCESSORY ]', 'App', 'Gesture', 'Push Button', 'Remote', 'Touch']
+  r15: [None, 'Is Green Purchasing Law Compliant - [ PHONE_ACCESSORY ]', 'Yes', 'No', None, None, None]
+  r16: [None, 'Item Weight Unit - [ PHONE_ACCESSORY ]', 'Milligrams', 'Grams', 'Kilograms', 'Ounces', 'Hundredths Pounds']
+  r17: ['Offer', None, None, None, None, None, None]
+  r18: [None, 'Skip Offer - [ PHONE_ACCESSORY ]', 'Yes', 'No', None, None, None]
+  r19: [None, 'Item Condition - [ PHONE_ACCESSORY ]', 'New', None, None, None, None]
+  r20: [None, 'Product Tax Code - [ PHONE_ACCESSORY ]', 'A_GEN_EXEMPT', 'A_GEN_HIGHPEAK', 'A_GEN_JEWELLERY', 'A_GEN_PEAK', 'A_GEN_PEAK_CESS12']
+  r21: [None, 'Offering Can Be Gift Messaged - [ PHONE_ACCESSORY ]', 'Yes', 'No', None, None, None]
+  r22: [None, 'Is Gift Wrap Available - [ PHONE_ACCESSORY ]', 'Yes', 'No', None, None, None]
+  r23: [None, 'Accessories - [ PHONE_ACCESSORY ]', 'Generic', 'Not Applicable', 'Not Included', 'OEM', None]
+  r24: [None, 'Battery Life Percentage - [ PHONE_ACCESSORY ]', 'No Battery', '>90%', '>80%', '>70%', '>60%']
+  r25: [None, 'Cosmetic - [ PHONE_ACCESSORY ]', 'Unknown', 'No Sign Of Use', 'Almost No Sign Of Use', 'Light Sign Of Use', 'Moderately Visible Sign Of Use']
+  r26: [None, 'Features - [ PHONE_ACCESSORY ]', 'Green Refurbishment', 'Parts Inspected', 'Parts Replaced', 'With Tags', None]
+  r27: [None, 'Functional Condition - [ PHONE_ACCESSORY ]', 'Unknown', 'Fully Functional', 'Partly Functional', None, None]
+  r28: [None, 'Packaging - [ PHONE_ACCESSORY ]', 'Amazon', 'Generic', 'Not Applicable', 'OEM Original', 'OEM Pre-Owned']
+  r29: [None, 'Source Type - [ PHONE_ACCESSORY ]', 'No Data', 'Returned Never Used', 'Returned Used', 'Refurbished OEM', 'CPO']
+
+--- Sheet: Dropdown Lists (rows=271, cols=90) ---
+  row4[:19]: [None, None, 'Create or Replace (Full Update)', 'Parent', 'COLOR', 'EAN', 'Centimeters', 'Animal Print', 'Can', 'HSN Code', 'App', 'App', 'App', 'App', 'Yes', 'Milligrams', 'Yes', 'AMAZON_IN', 'Enabled']
+  r2: [None, None, '', 'PHONE_ACCESSORY', 'PHONE_ACCESSORY']
+  r3: [None, None, '::record_action', 'parentage_level[marketplace_id=A21TJRUUN4KGV]#1.value', 'variation_theme#1.name']
+  r4: [None, None, 'Create or Replace (Full Update)', 'Parent', 'COLOR']
+  r5: [None, None, 'Edit (Partial Update)', 'Child', 'ITEM_WEIGHT']
+  r6: [None, None, 'Delete', None, 'NUMBER_OF_ITEMS']
+  r7: [None, None, None, None, 'SIZE']
+  r8: [None, None, None, None, 'SIZE/COLOR']
+
+--- Sheet: AttributePTDMAP (rows=36, cols=2) ---
+  row4[:19]: ['', 'PHONE_ACCESSORY']
+
+  sheet5 dataValidations count: 94
+    dv0: type=list sqref=A7:A1048576 formula1=?
+    dv1: type=list sqref=B4 formula1=?
+    dv2: type=list sqref=C4 formula1=?
+    dv3: type=list sqref=D4 formula1=?
+    dv4: type=list sqref=F4 formula1=?
+    dv5: type=list sqref=I4 formula1=?
+    dv6: type=list sqref=J4 formula1=?
+    dv7: type=list sqref=L4 formula1=?
+
+============================================================
+FILE: PHONE_ACCESSORY (4).xlsm (979,586 bytes)
+
+--- Sheet: Changes to the template (rows=23, cols=1) ---
+  row4[:19]: ['In order to improve the shopping experience for Customers, we are changing how we collect, categorise and display product data from Sellers. This includes the types of data that are required and optional. ']
+
+--- Sheet: Instructions (rows=40, cols=1) ---
+  row4[:19]: ['Save a copy of this file as an Excel worksheet on your hard drive. Then proceed to enter your product data into the Template tab, using the guidelines below.']
+
+--- Sheet: Images (rows=47, cols=2) ---
+  row4[:19]: ['We reserve the right to reject images that do not meet our image standards.', None]
+
+--- Sheet: Data Definitions (rows=181, cols=6) ---
+  row4[:19]: [None, 'contribution_sku#1.value', 'SKU', 'This attribute indicates the SKU number as assigned by the contributor', 'ABC123', 'Required']
+  r1: ['How to complete your inventory template', None, None, None, None]
+  r2: ['Group Name', 'Field Name', 'Local Label Name', 'Accepted Values', 'Example']
+  r3: ['Listing Identity', None, None, None, None]
+  r4: [None, 'contribution_sku#1.value', 'SKU', 'This attribute indicates the SKU number as assigned by the contributor', 'ABC123']
+  r5: [None, 'product_type#1.value', 'Product Type', 'Select the appropriate product type that best suits the item', 'ACCESSORY']
+  r6: [None, '::record_action', 'Listing Action', 'Specify the type of operation to be actioned on the data provided', '(Default) Create or Replace']
+  r7: ['Variations', None, None, None, None]
+  r8: [None, 'parentage_level[marketplace_id=A21TJRUUN4KGV]#1.value', 'Parentage Level', 'Specify whether a SKU is a parent or child', 'Parent']
+  r9: [None, 'child_parent_sku_relationship[marketplace_id=A21TJRUUN4KGV]#1.parent_sku', 'Parent SKU', 'The SKU of the parent item', 'ABC123']
+  r10: [None, 'variation_theme#1.name', 'Variation Theme Name', "Specify the variation theme that the product will use. The theme's attributes must be populated for all items in the grouping.", 'Color, Size']
+  r11: ['Product Identity', None, None, None, None]
+  r12: [None, 'item_name[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value', 'Item Name', 'Provide a title for the item that may be customer facing', 'Sony QuietComfort Noise Cancelling Wireless Headphones']
+  r13: [None, 'title_differentiation[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value', 'Item Highlight', 'Provide product features or benefit driven phrases, not a full sentence. Information will appear only when the item name is under 75 characters. Do not repeat information already in the item name.', 'Breathable material']
+  r14: [None, 'brand[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value', 'Brand Name', 'Provide the brand name of the product', 'Sony']
+  r15: [None, 'amzn1.volt.ca.product_id_type', 'Product Id Type', 'Select the type of external ID (barcode) type or ASIN that is being used to identify this product. If the product is exempt from external ID, select GTIN Exempt.', 'UPC']
+  r16: [None, 'amzn1.volt.ca.product_id_value', 'Product Id', 'Provide the corresponding product id value based on the type that was selected', '714532191586']
+  r17: [None, 'recommended_browse_nodes[marketplace_id=A21TJRUUN4KGV]#1.value', 'Recommended Browse Nodes', "Indicate the browse node or section of the Amazon website where the product will be assigned. This allows customers to find the product on the website easily. If you don't provide a node or if you provide an incorrect node, customers may not be able to find your product.", 'Diet Bars']
+  r18: [None, 'model_number[marketplace_id=A21TJRUUN4KGV]#1.value', 'Model Number', "Provide the manufacturer 's model number for the item", 'RXZER23']
+  r19: [None, 'manufacturer[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value', 'Manufacturer', 'Provide the company that manufactures the product.', 'Nike, Procter & Gamble']
+  r20: [None, 'unspsc_code[marketplace_id=A21TJRUUN4KGV]#1.value', 'UNSPSC Code', 'The UN specified purchasing/taxonomy code corresponding to the item', '27876546']
+  r21: [None, 'national_stock_number[marketplace_id=A21TJRUUN4KGV]#1.value', 'National Stock Number', "Provide the product's NSN identifier", '850519-S01, 783360-S01']
+  r22: ['Images', None, None, None, None]
+  r23: [None, 'main_product_image_locator[marketplace_id=A21TJRUUN4KGV]#1.media_location', 'Main Image URL', "Provide the URL for your product's main image. This is the first image customers see on the detail page.", 'http://www.companyname.com/images/1250.main.jpg']
+  r24: [None, 'other_product_image_locator_1[marketplace_id=A21TJRUUN4KGV]#1.media_location', 'Other Image URL', 'The URL for additional images of your product. These images will be shown on the detail page when the customer clicks through to see other views associated with the product.', 'http://www.companyname.com/images/1250.other1.jpg']
+
+--- Sheet: Template (rows=7, cols=237) ---
+  row4[:19]: ['SKU', 'Product Type', 'Listing Action', 'Parentage Level', 'Parent SKU', 'Variation Theme Name', 'Item Name', 'Item Highlight', 'Brand Name', 'Product Id Type', 'Product Id', 'Recommended Browse Nodes', 'Recommended Browse Nodes', 'Recommended Browse Nodes', 'Recommended Browse Nodes', 'Recommended Browse Nodes', 'Model Number', 'Manufacturer', 'UNSPSC Code']
+  Template row5 cols 1-16:
+    col1: r4='SKU' r5='contribution_sku#1.value'
+    col2: r4='Product Type' r5='product_type#1.value'
+    col3: r4='Listing Action' r5='::record_action'
+    col4: r4='Parentage Level' r5='parentage_level[marketplace_id=A21TJRUUN4KGV]#1.value'
+    col5: r4='Parent SKU' r5='child_parent_sku_relationship[marketplace_id=A21TJRUUN4KGV]#1.parent_s'
+    col6: r4='Variation Theme Name' r5='variation_theme#1.name'
+    col7: r4='Item Name' r5='item_name[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value'
+    col8: r4='Item Highlight' r5='title_differentiation[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN'
+    col9: r4='Brand Name' r5='brand[marketplace_id=A21TJRUUN4KGV][language_tag=en_IN]#1.value'
+    col10: r4='Product Id Type' r5='amzn1.volt.ca.product_id_type'
+    col11: r4='Product Id' r5='amzn1.volt.ca.product_id_value'
+    col12: r4='Recommended Browse Nodes' r5='recommended_browse_nodes[marketplace_id=A21TJRUUN4KGV]#1.value'
+    col13: r4='Recommended Browse Nodes' r5='recommended_browse_nodes[marketplace_id=A21TJRUUN4KGV]#2.value'
+    col14: r4='Recommended Browse Nodes' r5='recommended_browse_nodes[marketplace_id=A21TJRUUN4KGV]#3.value'
+    col15: r4='Recommended Browse Nodes' r5='recommended_browse_nodes[marketplace_id=A21TJRUUN4KGV]#4.value'
+    col16: r4='Recommended Browse Nodes' r5='recommended_browse_nodes[marketplace_id=A21TJRUUN4KGV]#5.value'
+  Template row7 cols 1-16:
+    col1: 'SAMPLE-S21FE-OLED'
+    col2: 'PHONE_ACCESSORY'
+    col3: 'Create or Replace (Full Update)'
+    col7: 'Compatible for Samsung Galaxy S21 FE (Fingerprint Support) OLED Display+Touch Sc'
+    col9: 'Generic'
+    col12: 'Mobile Screen Guards (1389425031)'
+
+--- Sheet: Browse Data (rows=31, cols=2) ---
+  row4[:19]: ['21529669031', 'Electronics > Accessories > Mobile Accessories > Décor']
+  r1: ['Browse Node', 'BrowsePath']
+  r2: ['21529686031', 'Electronics > Accessories > Mobile Accessories > Gaming Accessories > Finger Sleeves']
+  r3: ['1389408031', 'Electronics > Accessories > Car & Vehicle Electronics Accessories > Mobile Phone Accessories > Kits']
+  r4: ['21529669031', 'Electronics > Accessories > Mobile Accessories > Décor']
+  r5: ['11180538031', 'Electronics > Accessories > Mobile Accessories > Photo & Video Accessories > Flashes & Selfie Lights']
+  r6: ['1389402031', 'Electronics > Accessories > Mobile Accessories']
+  r7: ['1389406031', 'Electronics > Accessories > Car & Vehicle Electronics Accessories > Mobile Phone Accessories']
+  r8: ['21529693031', 'Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs > SIM Card Tools & Accessories']
+  r9: ['21701662031', 'Electronics > Accessories > Mobile Accessories > UV Phone Steriliser Boxes']
+  r10: ['21529670031', 'Electronics > Accessories > Mobile Accessories > Gaming Accessories']
+  r11: ['11180541031', 'Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs > Replacement Parts > Mobile Displays']
+  r12: ['1389482031', 'Electronics > Accessories > Telephone Accessories']
+  r13: ['21529695031', 'Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs > Repair Kits']
+  r14: ['21529676031', 'Electronics > Accessories > Mobile Accessories > Cables & Adapters']
+  r15: ['21529691031', 'Electronics > Accessories > Computer Accessories > Tablet Accessories > Stylus Parts & Accessories > Tips']
+  r16: ['21529674031', 'Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs']
+  r17: ['21529689031', 'Electronics > Accessories > Mobile Accessories > Gaming Accessories > Triggers']
+  r18: ['12538061031', 'Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs > Replacement Parts > Back Covers']
+  r19: ['1375328031', 'Electronics > Accessories > Computer Accessories > Tablet Accessories']
+  r20: ['21529668031', 'Electronics > Accessories > Mobile Accessories > Photo & Video Accessories']
+  r21: ['11180539031', 'Electronics > Accessories > Mobile Accessories > Anti Radiation Stickers & Chips']
+  r22: ['21529683031', 'Electronics > Accessories > Mobile Accessories > Photo & Video Accessories > Photo & Video Kits']
+  r23: ['1389424031', 'Electronics > Accessories > Mobile Accessories > Maintenance, Upkeep & Repairs > Replacement Parts']
+  r24: ['976420031', 'Electronics']
+
+--- Sheet: Conditions List (rows=14, cols=16) ---
+  row4[:19]: [None, None, None, 'COLOR', 'SIZE/COLOR', 'STYLE/PRODUCT_GRADE', None, None, None, None, None, 'lithium_cobalt', 'Lithium Metal', 'lithium_cobalt', None, None]
+
+--- Sheet: Valid Values (rows=64, cols=270) ---
+  row4[:19]: ['Variations', None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+  r1: ['Listing Identity', None, None, None, None, None, None]
+  r2: [None, 'Product Type - [  ]', 'PHONE_ACCESSORY', None, None, None, None]
+  r3: [None, 'Listing Action - [  ]', 'Create or Replace (Full Update)', 'Edit (Partial Update)', 'Delete', None, None]
+  r4: ['Variations', None, None, None, None, None, None]
+  r5: [None, 'Parentage Level - [ PHONE_ACCESSORY ]', 'Parent', 'Child', None, None, None]
+  r6: [None, 'Variation Theme Name - [ PHONE_ACCESSORY ]', 'COLOR', 'ITEM_WEIGHT', 'NUMBER_OF_ITEMS', 'SIZE', 'SIZE/COLOR']
+  r7: ['Product Identity', None, None, None, None, None, None]
+  r9: [None, 'Product Id Type - [ PHONE_ACCESSORY ]', 'EAN', 'GTIN', 'UPC', 'ASIN', 'GTIN Exempt']
+  r10: [None, 'Recommended Browse Nodes - [ PHONE_ACCESSORY ]', 'Electronics > Accessories > Mobile Accessories > Gaming Accessories > Finger Sleeves (21529686031)', 'Electronics > Accessories > Car & Vehicle Electronics Accessories > Mobile Phone Accessories > Kits (1389408031)', 'Electronics > Accessories > Mobile Accessories > Décor (21529669031)', 'Electronics > Accessories > Mobile Accessories > Photo & Video Accessories > Flashes & Selfie Lights (11180538031)', 'Electronics > Accessories > Mobile Accessories (1389402031)']
+  r11: ['Product Details', None, None, None, None, None, None]
+  r12: [None, 'Unit Count Type - [ PHONE_ACCESSORY ]', 'Can', 'Case', 'Count', 'Feet', 'fluid ounce(s)']
+  r13: [None, 'External Product Information Entity - [ PHONE_ACCESSORY ]', 'HSN Code', None, None, None, None]
+  r14: [None, 'Control Method - [ PHONE_ACCESSORY ]', 'App', 'Gesture', 'Push Button', 'Remote', 'Touch']
+  r15: [None, 'Is Green Purchasing Law Compliant - [ PHONE_ACCESSORY ]', 'Yes', 'No', None, None, None]
+  r16: [None, 'Item Weight Unit - [ PHONE_ACCESSORY ]', 'Milligrams', 'Grams', 'Kilograms', 'Ounces', 'Hundredths Pounds']
+  r17: ['Offer', None, None, None, None, None, None]
+  r18: [None, 'Skip Offer - [ PHONE_ACCESSORY ]', 'Yes', 'No', None, None, None]
+  r19: [None, 'Item Condition - [ PHONE_ACCESSORY ]', 'New', None, None, None, None]
+  r20: [None, 'Product Tax Code - [ PHONE_ACCESSORY ]', 'A_GEN_EXEMPT', 'A_GEN_HIGHPEAK', 'A_GEN_JEWELLERY', 'A_GEN_PEAK', 'A_GEN_PEAK_CESS12']
+  r21: [None, 'Offering Can Be Gift Messaged - [ PHONE_ACCESSORY ]', 'Yes', 'No', None, None, None]
+  r22: [None, 'Is Gift Wrap Available - [ PHONE_ACCESSORY ]', 'Yes', 'No', None, None, None]
+  r23: [None, 'Accessories - [ PHONE_ACCESSORY ]', 'Generic', 'Not Applicable', 'Not Included', 'OEM', None]
+  r24: [None, 'Battery Life Percentage - [ PHONE_ACCESSORY ]', 'No Battery', '>90%', '>80%', '>70%', '>60%']
+  r25: [None, 'Cosmetic - [ PHONE_ACCESSORY ]', 'Unknown', 'No Sign Of Use', 'Almost No Sign Of Use', 'Light Sign Of Use', 'Moderately Visible Sign Of Use']
+  r26: [None, 'Features - [ PHONE_ACCESSORY ]', 'Green Refurbishment', 'Parts Inspected', 'Parts Replaced', 'With Tags', None]
+  r27: [None, 'Functional Condition - [ PHONE_ACCESSORY ]', 'Unknown', 'Fully Functional', 'Partly Functional', None, None]
+  r28: [None, 'Packaging - [ PHONE_ACCESSORY ]', 'Amazon', 'Generic', 'Not Applicable', 'OEM Original', 'OEM Pre-Owned']
+  r29: [None, 'Source Type - [ PHONE_ACCESSORY ]', 'No Data', 'Returned Never Used', 'Returned Used', 'Refurbished OEM', 'CPO']
+
+--- Sheet: Dropdown Lists (rows=271, cols=90) ---
+  row4[:19]: [None, None, 'Create or Replace (Full Update)', 'Parent', 'COLOR', 'EAN', 'Centimeters', 'Animal Print', 'Can', 'HSN Code', 'App', 'App', 'App', 'App', 'Yes', 'Milligrams', 'Yes', 'AMAZON_IN', 'Enabled']
+  r2: [None, None, '', 'PHONE_ACCESSORY', 'PHONE_ACCESSORY']
+  r3: [None, None, '::record_action', 'parentage_level[marketplace_id=A21TJRUUN4KGV]#1.value', 'variation_theme#1.name']
+  r4: [None, None, 'Create or Replace (Full Update)', 'Parent', 'COLOR']
+  r5: [None, None, 'Edit (Partial Update)', 'Child', 'ITEM_WEIGHT']
+  r6: [None, None, 'Delete', None, 'NUMBER_OF_ITEMS']
+  r7: [None, None, None, None, 'SIZE']
+  r8: [None, None, None, None, 'SIZE/COLOR']
+
+--- Sheet: AttributePTDMAP (rows=36, cols=2) ---
+  row4[:19]: ['', 'PHONE_ACCESSORY']
+
+  sheet5 dataValidations count: 94
+    dv0: type=list sqref=A7:A1048576 formula1=?
+    dv1: type=list sqref=B4 formula1=?
+    dv2: type=list sqref=C4 formula1=?
+    dv3: type=list sqref=D4 formula1=?
+    dv4: type=list sqref=F4 formula1=?
+    dv5: type=list sqref=I4 formula1=?
+    dv6: type=list sqref=J4 formula1=?
+    dv7: type=list sqref=L4 formula1=?

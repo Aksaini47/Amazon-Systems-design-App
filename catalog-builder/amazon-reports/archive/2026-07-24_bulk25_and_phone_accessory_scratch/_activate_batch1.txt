@@ -1,0 +1,62 @@
+Oppo F19 / F19 Pro|agent-browser-win32-x64.exe : [agent-browser] restore: loaded; save: saved
+At C:\Users\DELL\AppData\Roaming\npm\agent-browser.ps1:3 char:1
++ & "$basedir\node_modules\agent-browser\bin\agent-browser-win32-x64.ex ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([agent-browser]...ed; save: saved:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+"not_found
+Oppo A54|agent-browser-win32-x64.exe : [agent-browser] restore: loaded; save: saved
+At C:\Users\DELL\AppData\Roaming\npm\agent-browser.ps1:3 char:1
++ & "$basedir\node_modules\agent-browser\bin\agent-browser-win32-x64.ex ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([agent-browser]...ed; save: saved:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+"not_found
+Oppo F9|agent-browser-win32-x64.exe : [agent-browser] restore: loaded; save: saved
+At C:\Users\DELL\AppData\Roaming\npm\agent-browser.ps1:3 char:1
++ & "$basedir\node_modules\agent-browser\bin\agent-browser-win32-x64.ex ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([agent-browser]...ed; save: saved:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+"not_found
+Oppo F5|not_found"
+agent-browser-win32-x64.exe : [agent-browser] restore: loaded; save: saved
+At C:\Users\DELL\AppData\Roaming\npm\agent-browser.ps1:3 char:1
++ & "$basedir\node_modules\agent-browser\bin\agent-browser-win32-x64.ex ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([agent-browser]...ed; save: saved:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+1+ 8 pro|agent-browser-win32-x64.exe : [agent-browser] restore: loaded; save: saved
+At C:\Users\DELL\AppData\Roaming\npm\agent-browser.ps1:3 char:1
++ & "$basedir\node_modules\agent-browser\bin\agent-browser-win32-x64.ex ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([agent-browser]...ed; save: saved:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+"not_found
+1+ 7|agent-browser-win32-x64.exe : [agent-browser] restore: loaded; save: saved
+At C:\Users\DELL\AppData\Roaming\npm\agent-browser.ps1:3 char:1
++ & "$basedir\node_modules\agent-browser\bin\agent-browser-win32-x64.ex ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([agent-browser]...ed; save: saved:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+"not_found
+Oneplus 10R|agent-browser-win32-x64.exe : [agent-browser] restore: loaded; save: saved
+At C:\Users\DELL\AppData\Roaming\npm\agent-browser.ps1:3 char:1
++ & "$basedir\node_modules\agent-browser\bin\agent-browser-win32-x64.ex ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([agent-browser]...ed; save: saved:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+"not_found
+OnePlus 9RT|not_found"
+agent-browser-win32-x64.exe : [agent-browser] restore: loaded; save: saved
+At C:\Users\DELL\AppData\Roaming\npm\agent-browser.ps1:3 char:1
++ & "$basedir\node_modules\agent-browser\bin\agent-browser-win32-x64.ex ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([agent-browser]...ed; save: saved:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError

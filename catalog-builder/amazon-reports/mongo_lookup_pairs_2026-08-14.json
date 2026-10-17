@@ -1,0 +1,6373 @@
+[
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g6",
+   "play"
+  ],
+  "skus": [
+   "MOTOG6PLAYG",
+   "MOTOG6PLAY"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "5"
+  ],
+  "skus": [
+   "OP5OLED",
+   "1+5CARE",
+   "OP5LCDWF"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "3",
+   "reno"
+  ],
+  "skus": [
+   "RENO3P5GLED",
+   "RENO3",
+   "RENO3P5GLCD",
+   "RENO3PRO4GLCD",
+   "RENO3PROOG",
+   "RNO3LED"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a30s"
+  ],
+  "skus": [
+   "A30SLED",
+   "A30S"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a32"
+  ],
+  "skus": [
+   "A324GWFLED",
+   "A324G",
+   "SAMA324GCARE",
+   "SAMA325G",
+   "SAMA325GCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a70"
+  ],
+  "skus": [
+   "A70LED",
+   "SAMA70"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "2018",
+   "a7"
+  ],
+  "skus": [
+   "A718BSLED",
+   "A718B"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "f41"
+  ],
+  "skus": [
+   "F41WFLED",
+   "F41LED"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "8",
+   "lite"
+  ],
+  "skus": [
+   "HNR8LYTBLUE"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "gx",
+   "xs"
+  ],
+  "skus": [
+   "IPXSGX"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "j4"
+  ],
+  "skus": [
+   "J4SLED",
+   "J4+",
+   "J4BLED",
+   "J4BSLED",
+   "J4GLED",
+   "SAMJ4+CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "2016",
+   "j7"
+  ],
+  "skus": [
+   "J716GLED",
+   "J716W",
+   "J716LEDG"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m20"
+  ],
+  "skus": [
+   "M20",
+   "SAM20CARE",
+   "SAM20WFCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "10",
+   "prime"
+  ],
+  "skus": [
+   "MI10PRM"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "10",
+   "note"
+  ],
+  "skus": [
+   "MIN104G",
+   "MINOTE105GCARE",
+   "MIN10P5GCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "8",
+   "note"
+  ],
+  "skus": [
+   "MIN8WFCARE",
+   "MINOTE8CARE",
+   "MINOTE8PCARE",
+   "RN8OG"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "y3"
+  ],
+  "skus": [
+   "MIY3WFCARE",
+   "MIY3CARE"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "e7",
+   "power"
+  ],
+  "skus": [
+   "MOTOE7PowerWFOG"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g3"
+  ],
+  "skus": [
+   "MOTOG3"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g4",
+   "play"
+  ],
+  "skus": [
+   "MOTOG4PLAYGWF",
+   "MOTOG4PLAYWF"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g5s"
+  ],
+  "skus": [
+   "MOTOG5SB",
+   "MOTOG5S+B",
+   "MOTOG5S+G",
+   "MOTOG5SG"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "x4"
+  ],
+  "skus": [
+   "MOTOX4B",
+   "MOTOX4BL"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "2020",
+   "a5"
+  ],
+  "skus": [
+   "OPA520WFCARE",
+   "OPA52020CARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a53"
+  ],
+  "skus": [
+   "OPA53CAREWF",
+   "OPA534G",
+   "OPA535GCARE",
+   "OPOA53CARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a83"
+  ],
+  "skus": [
+   "OPA83BWFCARE",
+   "OPA83WFCAREW"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "f27"
+  ],
+  "skus": [
+   "OPF275GOLED",
+   "OPF275GLCD",
+   "OPF27Pro+LCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a7"
+  ],
+  "skus": [
+   "OPOA7OG",
+   "OPA7CARE",
+   "OPA7CAREWF"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "f11"
+  ],
+  "skus": [
+   "OPOF11OG",
+   "F11CARE",
+   "OPF11PCARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "k1"
+  ],
+  "skus": [
+   "OPOK1OLED",
+   "OPOK1OG"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "m4"
+  ],
+  "skus": [
+   "PCM4WFOG",
+   "POCOM4PRO",
+   "PCM4ProWFOG",
+   "PocoM4P5GCARE"
+  ]
+ },
+ {
+  "brand": "google",
+  "tokens": [
+   "4"
+  ],
+  "skus": [
+   "PIXL4WFLED"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c2"
+  ],
+  "skus": [
+   "RMC2WFCARE",
+   "RMEC2CARE",
+   "RMEC2OG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "6"
+  ],
+  "skus": [
+   "RME6WFCARE",
+   "RM6PROCARE",
+   "RME6PROG"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "10t",
+   "note"
+  ],
+  "skus": [
+   "RN10TOG",
+   "RN10T"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a22"
+  ],
+  "skus": [
+   "SAMA225GWFCARE",
+   "A224G",
+   "A224GWFLED",
+   "A225G",
+   "SAMA224GCARE",
+   "A225GCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a31"
+  ],
+  "skus": [
+   "SAMA31WFLED",
+   "A31"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v25"
+  ],
+  "skus": [
+   "V25LED",
+   "V25",
+   "VVV25ProLCD"
+  ]
+ },
+ {
+  "brand": "mi",
+  "tokens": [
+   "a2",
+   "xiaomi"
+  ],
+  "skus": [
+   "XMIA2TFT",
+   "MIA2WFCAREW",
+   "MIA2WHITE"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "c31"
+  ],
+  "skus": [
+   "0S-HL4Y-CWSD"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "10"
+  ],
+  "skus": [
+   "1+10ProLCD"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "10r"
+  ],
+  "skus": [
+   "1+10RLCD"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "11"
+  ],
+  "skus": [
+   "1+11LCD"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "11r"
+  ],
+  "skus": [
+   "1+11RLCD"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "7t"
+  ],
+  "skus": [
+   "1+7TLCD",
+   "OP7TOLED"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "8"
+  ],
+  "skus": [
+   "1+8ProLCD",
+   "OP8LCD"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "9"
+  ],
+  "skus": [
+   "1+9ProLCD"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "9rt"
+  ],
+  "skus": [
+   "1+9RtLCD"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "ace"
+  ],
+  "skus": [
+   "1+AceLCD"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "3",
+   "ce",
+   "lite",
+   "nord"
+  ],
+  "skus": [
+   "1+CE3LYT",
+   "CE3LYTCARE"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "n10"
+  ],
+  "skus": [
+   "1+N105GWFOG"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "n200"
+  ],
+  "skus": [
+   "1+N200CARE"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "n20",
+   "se"
+  ],
+  "skus": [
+   "1+N20SECARE"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "nord"
+  ],
+  "skus": [
+   "1+NORDCARE",
+   "FN-NWHF-1PHU"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "ce4",
+   "nord"
+  ],
+  "skus": [
+   "1+NordCE4LCD"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "ce4",
+   "lite",
+   "nord"
+  ],
+  "skus": [
+   "1+NordCE4LiteLCD"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "ce3",
+   "nord"
+  ],
+  "skus": [
+   "1+NordCe3LCD"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "11"
+  ],
+  "skus": [
+   "11PMAXLCD",
+   "11PROLCD",
+   "IP11CARE",
+   "IP11LCD"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "5"
+  ],
+  "skus": [
+   "2A-9BW9-XY4K",
+   "6W-DP16-V03T"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a01"
+  ],
+  "skus": [
+   "A01",
+   "SAMA01CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a02"
+  ],
+  "skus": [
+   "A02",
+   "SAMA02CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a02s"
+  ],
+  "skus": [
+   "A02S",
+   "SAMA02SCARE",
+   "SAMA02SWFCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a03",
+   "core"
+  ],
+  "skus": [
+   "A03CORE",
+   "SAMA03CCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a03s"
+  ],
+  "skus": [
+   "A03S",
+   "SAMA03SCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a04"
+  ],
+  "skus": [
+   "A04"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a04e"
+  ],
+  "skus": [
+   "A04ECARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a10"
+  ],
+  "skus": [
+   "A10",
+   "SAMA10CARE",
+   "SAMA10WFCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a10s"
+  ],
+  "skus": [
+   "A10S",
+   "SAMA10SCARE",
+   "SAMA10SWFCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a11"
+  ],
+  "skus": [
+   "A11",
+   "A11CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a12"
+  ],
+  "skus": [
+   "A12",
+   "SAMA12CARE",
+   "SAMA12WFCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a13"
+  ],
+  "skus": [
+   "A135G",
+   "A135GCARE",
+   "SAMA13WFCARE",
+   "A134GCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a13",
+   "lite"
+  ],
+  "skus": [
+   "A13LYTCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a14"
+  ],
+  "skus": [
+   "A145GCARE",
+   "SAMA144GCARE",
+   "SAMA14WFCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a20"
+  ],
+  "skus": [
+   "A20",
+   "A20LED"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a20s"
+  ],
+  "skus": [
+   "A20S",
+   "SAMA20SCARE",
+   "SAMA20SWFCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a21"
+  ],
+  "skus": [
+   "A21"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a23"
+  ],
+  "skus": [
+   "A234GCARE",
+   "A234GLCD",
+   "A235GCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a23",
+   "lite"
+  ],
+  "skus": [
+   "A23LYTCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a2",
+   "core"
+  ],
+  "skus": [
+   "A2CORE",
+   "SAMA02CCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a30"
+  ],
+  "skus": [
+   "A30WF"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a51"
+  ],
+  "skus": [
+   "A51",
+   "A51LED",
+   "A51WF",
+   "A51WFLED"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a52"
+  ],
+  "skus": [
+   "A524G"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a60"
+  ],
+  "skus": [
+   "A60",
+   "SAMA60CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a71"
+  ],
+  "skus": [
+   "A71",
+   "SAMA71WFLED"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "2016",
+   "a7"
+  ],
+  "skus": [
+   "A716BLED"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "2019",
+   "a9"
+  ],
+  "skus": [
+   "A919CARE",
+   "OPOA92019OG"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "c20"
+  ],
+  "skus": [
+   "C20+WF"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "c30"
+  ],
+  "skus": [
+   "C30WF",
+   "NKC30"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "2",
+   "ce",
+   "lite",
+   "nord"
+  ],
+  "skus": [
+   "CE2LYTCARE",
+   "P2-NAQO-T7PA"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "e13"
+  ],
+  "skus": [
+   "E13WFCARE",
+   "MOTOE13"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "e40"
+  ],
+  "skus": [
+   "E40WFCARE"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "2021",
+   "edge"
+  ],
+  "skus": [
+   "EDGE2021WFCARE"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "30",
+   "edge",
+   "fusion"
+  ],
+  "skus": [
+   "EDGE30FusionLCD"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "30",
+   "edge"
+  ],
+  "skus": [
+   "EDGE30ProLCD",
+   "MEDGE30"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "50",
+   "edge",
+   "fusion"
+  ],
+  "skus": [
+   "EDGE50FusionLCD",
+   "EDGE50FusionOG"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "2016",
+   "5s",
+   "se"
+  ],
+  "skus": [
+   "EH02021958",
+   "HV-HNKB-JCA6"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "6"
+  ],
+  "skus": [
+   "EH02021997",
+   "EH02022036",
+   "EH29011991",
+   "EH29012004",
+   "IP6+BCARE",
+   "IP6+WCARE",
+   "IP6BOG",
+   "IP6WOG"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "7"
+  ],
+  "skus": [
+   "EH02022075",
+   "IP7+BCARE",
+   "IP7BCARE",
+   "IP7WAAA",
+   "IPH7B",
+   "IPH7PWCARE",
+   "IPH7WCARE"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "6s"
+  ],
+  "skus": [
+   "EH02022080",
+   "IP6S+BCARE",
+   "IP6S+WCARE",
+   "IP6SBCARE",
+   "IP6SWCARE",
+   "J2-UX7K-WFHB"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "8"
+  ],
+  "skus": [
+   "EH02022114",
+   "EH02022115",
+   "IP8+WCARE",
+   "IP8B",
+   "IP8W",
+   "IP8WCARE",
+   "IPH8BCARE",
+   "IPH8PBCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "f04"
+  ],
+  "skus": [
+   "F04CARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "f17"
+  ],
+  "skus": [
+   "F17OG",
+   "OPF17LED",
+   "OPOF17PROG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "f21"
+  ],
+  "skus": [
+   "F21PRO4G"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "f22"
+  ],
+  "skus": [
+   "F224G"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "f23"
+  ],
+  "skus": [
+   "F235GCARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "f5"
+  ],
+  "skus": [
+   "F5B",
+   "F5W",
+   "OPOF5BCARE",
+   "OPOF5WCARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "find",
+   "lite",
+   "x3"
+  ],
+  "skus": [
+   "FINDX3LITEOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "find",
+   "lite",
+   "x5"
+  ],
+  "skus": [
+   "FINDX5LITE"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g10",
+   "power"
+  ],
+  "skus": [
+   "G10POWERWFCARE"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "g21"
+  ],
+  "skus": [
+   "G21WF",
+   "NKG21"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g22"
+  ],
+  "skus": [
+   "G22WFCARE"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g40"
+  ],
+  "skus": [
+   "G40WFCARE"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "2021"
+  ],
+  "skus": [
+   "G5G21WFCARE"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g60"
+  ],
+  "skus": [
+   "G60WFCARE",
+   "MOTOG60F"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "j7",
+   "nxt"
+  ],
+  "skus": [
+   "GJ7NXTBLED",
+   "J7NXTGLED"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a05"
+  ],
+  "skus": [
+   "GLXA05OG"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a06"
+  ],
+  "skus": [
+   "GLXA06OG"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "fe",
+   "s21"
+  ],
+  "skus": [
+   "GLXS21FeWFLED"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "flash",
+   "gt",
+   "neo"
+  ],
+  "skus": [
+   "GTNEOFLASHOG"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "10",
+   "lite"
+  ],
+  "skus": [
+   "HNR10LYT"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "5x"
+  ],
+  "skus": [
+   "HNR5XB",
+   "HNR5XG",
+   "HNR5XW"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "6"
+  ],
+  "skus": [
+   "HNR6B",
+   "HNR6W"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "7a"
+  ],
+  "skus": [
+   "HNR7A"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "7"
+  ],
+  "skus": [
+   "HNR7B",
+   "HNR7G",
+   "HNR7W"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "7c"
+  ],
+  "skus": [
+   "HNR7C"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "7s"
+  ],
+  "skus": [
+   "HNR7S"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "7x"
+  ],
+  "skus": [
+   "HNR7XB",
+   "HNR7XW"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "8"
+  ],
+  "skus": [
+   "HNR8B",
+   "HNR8BL",
+   "HNR8G"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "8x"
+  ],
+  "skus": [
+   "HNR8X"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "90"
+  ],
+  "skus": [
+   "HNR90LCD"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "9i"
+  ],
+  "skus": [
+   "HNR9IB",
+   "HNR9iW"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "9n"
+  ],
+  "skus": [
+   "HNR9NBLU"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "9x"
+  ],
+  "skus": [
+   "HNR9X"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "9",
+   "lite"
+  ],
+  "skus": [
+   "HNRLYTBLUE"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "6",
+   "lite",
+   "magic"
+  ],
+  "skus": [
+   "HNRMagic6LiteLCD"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "x9b"
+  ],
+  "skus": [
+   "HNRX9B(5G)LCD"
+  ]
+ },
+ {
+  "brand": "honor",
+  "tokens": [
+   "prime",
+   "y9"
+  ],
+  "skus": [
+   "HNRY9PRM"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "11",
+   "hot",
+   "play"
+  ],
+  "skus": [
+   "HOT11PLAY"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "8i",
+   "hot"
+  ],
+  "skus": [
+   "HOT8i"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "10",
+   "note"
+  ],
+  "skus": [
+   "IN10CARE",
+   "INN10P"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "20",
+   "hot"
+  ],
+  "skus": [
+   "INFH20"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "20i",
+   "hot"
+  ],
+  "skus": [
+   "INFH20I"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "7",
+   "lite",
+   "note"
+  ],
+  "skus": [
+   "INFN7LYT"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "3",
+   "smart"
+  ],
+  "skus": [
+   "INFS3"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "7",
+   "smart"
+  ],
+  "skus": [
+   "INFSmart7OG",
+   "INS7"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "10",
+   "hot",
+   "lite"
+  ],
+  "skus": [
+   "INH10",
+   "INH10CARE"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "11",
+   "hot"
+  ],
+  "skus": [
+   "INH11"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "11",
+   "2022",
+   "hot"
+  ],
+  "skus": [
+   "INH1122"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "12",
+   "hot"
+  ],
+  "skus": [
+   "INH12",
+   "INH12P"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "12i",
+   "hot"
+  ],
+  "skus": [
+   "INH12I"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "12",
+   "hot",
+   "play"
+  ],
+  "skus": [
+   "INH12PLAYCARE"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "20",
+   "hot",
+   "play"
+  ],
+  "skus": [
+   "INH20P"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "20s",
+   "hot"
+  ],
+  "skus": [
+   "INH20S"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "6",
+   "hot"
+  ],
+  "skus": [
+   "INH6",
+   "INH6P"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "7",
+   "hot"
+  ],
+  "skus": [
+   "INH7"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "hot",
+   "s3"
+  ],
+  "skus": [
+   "INHS3"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "11",
+   "note"
+  ],
+  "skus": [
+   "INN11"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "11s",
+   "note"
+  ],
+  "skus": [
+   "INN11S"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "12",
+   "2023",
+   "note"
+  ],
+  "skus": [
+   "INN1223"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "12",
+   "note"
+  ],
+  "skus": [
+   "INN12P"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "4",
+   "note"
+  ],
+  "skus": [
+   "INN4"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "5",
+   "note",
+   "stylus"
+  ],
+  "skus": [
+   "INN5"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "7",
+   "note"
+  ],
+  "skus": [
+   "INN7"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "8",
+   "note"
+  ],
+  "skus": [
+   "INN8"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "2",
+   "hd",
+   "smart"
+  ],
+  "skus": [
+   "INS2"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "lite",
+   "s5"
+  ],
+  "skus": [
+   "INS5"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "s5"
+  ],
+  "skus": [
+   "INS5P"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "2021",
+   "hd",
+   "smart"
+  ],
+  "skus": [
+   "INSHD21"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "zero"
+  ],
+  "skus": [
+   "INZ5G",
+   "INZXP"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "2023",
+   "zero"
+  ],
+  "skus": [
+   "INZ5G23"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "8i",
+   "zero"
+  ],
+  "skus": [
+   "INZ8I"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "neo",
+   "zero"
+  ],
+  "skus": [
+   "INZXNEO"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "11",
+   "gx"
+  ],
+  "skus": [
+   "IP11GX"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "12"
+  ],
+  "skus": [
+   "IP12PMLCD"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "13",
+   "mini"
+  ],
+  "skus": [
+   "IP13MiniLCD"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "13"
+  ],
+  "skus": [
+   "IP13OG",
+   "IP13PMLCD",
+   "IP13ProLCD"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "14"
+  ],
+  "skus": [
+   "IP14+LCD(Black)",
+   "IP14LCD"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "15"
+  ],
+  "skus": [
+   "IP15+LCD",
+   "IP15LCD",
+   "IP15ProLCD"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "5s"
+  ],
+  "skus": [
+   "IP5SBCARE",
+   "IP5SWCARE"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "2020",
+   "se"
+  ],
+  "skus": [
+   "IPSE20BCARE",
+   "IPSE20WCARE"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "gx"
+  ],
+  "skus": [
+   "IPXGX"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "xr"
+  ],
+  "skus": [
+   "IPXRCARE",
+   "IPXRLCD"
+  ]
+ },
+ {
+  "brand": "apple",
+  "tokens": [
+   "xs"
+  ],
+  "skus": [
+   "IPXSLCD",
+   "XSMXLCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "iqoo",
+   "u3"
+  ],
+  "skus": [
+   "IQU3"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "iqoo",
+   "z3"
+  ],
+  "skus": [
+   "IQZ3"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "iqoo",
+   "z5"
+  ],
+  "skus": [
+   "IQZ5CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "core",
+   "j2"
+  ],
+  "skus": [
+   "J2COREB",
+   "SAMJ2CCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "2015",
+   "j5",
+   "prime"
+  ],
+  "skus": [
+   "J5PRIME15CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "j5",
+   "prime"
+  ],
+  "skus": [
+   "J5PRIMEB",
+   "J5PRIMEG",
+   "J5PRIMEW"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "j6"
+  ],
+  "skus": [
+   "J6",
+   "J6+",
+   "SAMJ6+CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "2015",
+   "j7"
+  ],
+  "skus": [
+   "J715BLED",
+   "J715GLED"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "2017",
+   "j7"
+  ],
+  "skus": [
+   "J7MXBLED",
+   "J7MXGLED"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "j7"
+  ],
+  "skus": [
+   "J7MXCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "2015",
+   "j7",
+   "prime"
+  ],
+  "skus": [
+   "J7PRIME15CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "2016",
+   "j7",
+   "prime"
+  ],
+  "skus": [
+   "J7PRIME16G",
+   "J7PRIMEB16"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "j8"
+  ],
+  "skus": [
+   "J8"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "k40s"
+  ],
+  "skus": [
+   "K40S"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "k9s"
+  ],
+  "skus": [
+   "K9SCARE",
+   "OPK9SLCD"
+  ]
+ },
+ {
+  "brand": "lava",
+  "tokens": [
+   "blaze"
+  ],
+  "skus": [
+   "LVBlazePro5GWFOG"
+  ]
+ },
+ {
+  "brand": "lava",
+  "tokens": [
+   "2",
+   "yuva"
+  ],
+  "skus": [
+   "LVYuva2OG"
+  ]
+ },
+ {
+  "brand": "lava",
+  "tokens": [
+   "star",
+   "yuva"
+  ],
+  "skus": [
+   "LVYuvaStarWFOG"
+  ]
+ },
+ {
+  "brand": "lava",
+  "tokens": [
+   "z3"
+  ],
+  "skus": [
+   "LVZ3WFOG"
+  ]
+ },
+ {
+  "brand": "lava",
+  "tokens": [
+   "z2"
+  ],
+  "skus": [
+   "LZ2WF"
+  ]
+ },
+ {
+  "brand": "lava",
+  "tokens": [
+   "z4"
+  ],
+  "skus": [
+   "LZ4WF"
+  ]
+ },
+ {
+  "brand": "lava",
+  "tokens": [
+   "z70"
+  ],
+  "skus": [
+   "LZ70CARE"
+  ]
+ },
+ {
+  "brand": "lava",
+  "tokens": [
+   "z61"
+  ],
+  "skus": [
+   "LavaZ61B",
+   "LavaZ61W"
+  ]
+ },
+ {
+  "brand": "lava",
+  "tokens": [
+   "z90"
+  ],
+  "skus": [
+   "LavaZ90B",
+   "LavaZ90W"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m01"
+  ],
+  "skus": [
+   "M01"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "core",
+   "m01"
+  ],
+  "skus": [
+   "M01CORE",
+   "SAM01CCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m02"
+  ],
+  "skus": [
+   "M02",
+   "SAM02CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m02s"
+  ],
+  "skus": [
+   "M02S",
+   "SAM02SCARE",
+   "SAMM02SWFCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m04"
+  ],
+  "skus": [
+   "M04CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m10"
+  ],
+  "skus": [
+   "M10"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m11"
+  ],
+  "skus": [
+   "M11CARE",
+   "SAMM11WFCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m12"
+  ],
+  "skus": [
+   "M12",
+   "SAM12CARE",
+   "SAM12WFCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m13"
+  ],
+  "skus": [
+   "M135GCARE",
+   "M134GCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m22"
+  ],
+  "skus": [
+   "M224G",
+   "SAM22CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m23"
+  ],
+  "skus": [
+   "M235GCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m31s"
+  ],
+  "skus": [
+   "M31S"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m33"
+  ],
+  "skus": [
+   "M335GCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m40"
+  ],
+  "skus": [
+   "M40",
+   "SAM40CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m51"
+  ],
+  "skus": [
+   "M51"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g5"
+  ],
+  "skus": [
+   "MG5G",
+   "MOTOG5+B",
+   "MOTOG5+G",
+   "MOTOG5B",
+   "MOTOG5G"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "10",
+   "10c",
+   "power"
+  ],
+  "skus": [
+   "MI10CWFCARE"
+  ]
+ },
+ {
+  "brand": "mi",
+  "tokens": [
+   "10t",
+   "lite",
+   "xiaomi"
+  ],
+  "skus": [
+   "MI10TLYTCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "11a"
+  ],
+  "skus": [
+   "MI11ACARE"
+  ]
+ },
+ {
+  "brand": "mi",
+  "tokens": [
+   "11i",
+   "xiaomi"
+  ],
+  "skus": [
+   "MI11I"
+  ]
+ },
+ {
+  "brand": "mi",
+  "tokens": [
+   "11",
+   "lite",
+   "xiaomi"
+  ],
+  "skus": [
+   "MI11LYT"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "11",
+   "prime"
+  ],
+  "skus": [
+   "MI11PRIME"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "12"
+  ],
+  "skus": [
+   "MI125G",
+   "MI12CARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "12c"
+  ],
+  "skus": [
+   "MI12CCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "4a"
+  ],
+  "skus": [
+   "MI4ABFCARE",
+   "MI4AWFCARE",
+   "REDMI4AB",
+   "REDMI4AW"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "5a"
+  ],
+  "skus": [
+   "MI5ABCARE",
+   "MI5ABFCARE",
+   "MI5AWCARE",
+   "MI5AWFCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "5"
+  ],
+  "skus": [
+   "MI5B",
+   "MI5BWFCARE",
+   "MI5W",
+   "MI5WCAREWF"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "6"
+  ],
+  "skus": [
+   "MI6PROCARE",
+   "MI6PROLCD",
+   "Redmi6PWFCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "7a"
+  ],
+  "skus": [
+   "MI7AOG",
+   "MI7AWFCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "7"
+  ],
+  "skus": [
+   "MI7WFCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "7",
+   "y3"
+  ],
+  "skus": [
+   "MI7Y3"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "9a"
+  ],
+  "skus": [
+   "MI9AWFCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "9",
+   "prime"
+  ],
+  "skus": [
+   "MI9PCARE",
+   "MI9PWFCARE",
+   "WL-7XA4-9FKS"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "9",
+   "9t",
+   "power"
+  ],
+  "skus": [
+   "MI9POWERCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "9",
+   "power"
+  ],
+  "skus": [
+   "MI9POWERWFCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "go"
+  ],
+  "skus": [
+   "MIGOBWFCARE",
+   "MIGOWFCAREW"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "k40"
+  ],
+  "skus": [
+   "MIK40P+"
+  ]
+ },
+ {
+  "brand": "mi",
+  "tokens": [
+   "xiaomi"
+  ],
+  "skus": [
+   "MIMAX",
+   "MIMAX2W"
+  ]
+ },
+ {
+  "brand": "mi",
+  "tokens": [
+   "2",
+   "xiaomi"
+  ],
+  "skus": [
+   "MIMAX2B"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "11",
+   "note"
+  ],
+  "skus": [
+   "MINOTE115GCARE",
+   "MIRN11PRO5G"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "11e",
+   "note"
+  ],
+  "skus": [
+   "MINOTE11ECARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "3",
+   "note"
+  ],
+  "skus": [
+   "MINOTE3BWFCARE",
+   "MINOTE3GWFCARE",
+   "MIRN3B",
+   "MIRN3G",
+   "MIRN3W"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "5",
+   "note"
+  ],
+  "skus": [
+   "MINOTE5BWFCARE",
+   "MINOTE5PROBWFCARE",
+   "MINOTE5WFCAREW",
+   "RN5OGB",
+   "RN5OGW",
+   "RN5PROGB",
+   "RN5PROGW"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "9",
+   "note"
+  ],
+  "skus": [
+   "MINOTE9CARE",
+   "MINOTE9WFCARE",
+   "MIRN9"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "lite",
+   "y1"
+  ],
+  "skus": [
+   "MIY1B",
+   "MIY1W"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "y1"
+  ],
+  "skus": [
+   "MIY1BCARE",
+   "MIY1WCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "s2",
+   "y2"
+  ],
+  "skus": [
+   "MIY2WFCAREB",
+   "MIY2WFCAREW",
+   "REDMIS2Y2"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "action"
+  ],
+  "skus": [
+   "MOTO1AC"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "fusion"
+  ],
+  "skus": [
+   "MOTO1F",
+   "MOTO1F+"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "power"
+  ],
+  "skus": [
+   "MOTO1P"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "vision"
+  ],
+  "skus": [
+   "MOTO1V"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "e2"
+  ],
+  "skus": [
+   "MOTOE2"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "e20"
+  ],
+  "skus": [
+   "MOTOE20"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "20",
+   "edge",
+   "fusion"
+  ],
+  "skus": [
+   "MOTOE20F"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "e3",
+   "power"
+  ],
+  "skus": [
+   "MOTOE3",
+   "MOTOE3PowerOG"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "e32s"
+  ],
+  "skus": [
+   "MOTOE32SWFCARE"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "e4"
+  ],
+  "skus": [
+   "MOTOE4+",
+   "MOTOE4+G",
+   "MOTOE4+WFOG",
+   "MOTOE4B",
+   "MOTOE4W"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "e5"
+  ],
+  "skus": [
+   "MOTOE5",
+   "MOTOE5+WFOG",
+   "MOTOE5+B"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "e6"
+  ],
+  "skus": [
+   "MOTOE6+"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "e6s"
+  ],
+  "skus": [
+   "MOTOE6S"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "fusion",
+   "g40"
+  ],
+  "skus": [
+   "MOTOF40F"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g62"
+  ],
+  "skus": [
+   "MOTOF625G"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g2"
+  ],
+  "skus": [
+   "MOTOG2WF"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g32"
+  ],
+  "skus": [
+   "MOTOG32"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g34"
+  ],
+  "skus": [
+   "MOTOG34WFOG"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g4"
+  ],
+  "skus": [
+   "MOTOG4+",
+   "MOTOG4+WFOG"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g51"
+  ],
+  "skus": [
+   "MOTOG515G"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g52"
+  ],
+  "skus": [
+   "MOTOG52"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g6"
+  ],
+  "skus": [
+   "MOTOG6",
+   "MOTOG6+"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g7"
+  ],
+  "skus": [
+   "MOTOG7+"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g71s"
+  ],
+  "skus": [
+   "MOTOG71S"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g72"
+  ],
+  "skus": [
+   "MOTOG72"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g73"
+  ],
+  "skus": [
+   "MOTOG735G"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g8"
+  ],
+  "skus": [
+   "MOTOG8+",
+   "MOTOG8+G",
+   "MOTOG8"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g82"
+  ],
+  "skus": [
+   "MOTOG82"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g85"
+  ],
+  "skus": [
+   "MOTOG85LCD"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g8",
+   "lite",
+   "power"
+  ],
+  "skus": [
+   "MOTOG8PLYT",
+   "MOTOG8PowerLiteWFOG"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g8",
+   "power"
+  ],
+  "skus": [
+   "MOTOG8POWER"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g9",
+   "play"
+  ],
+  "skus": [
+   "MOTOG9"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g9",
+   "power"
+  ],
+  "skus": [
+   "MOTOG9P"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "2022",
+   "power"
+  ],
+  "skus": [
+   "MOTOGPower2022WFOG"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "play"
+  ],
+  "skus": [
+   "MOTOXPLAY",
+   "MOTOZPLAY"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "4",
+   "5"
+  ],
+  "skus": [
+   "N5.4WF",
+   "NK5.4"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "1",
+   "7"
+  ],
+  "skus": [
+   "N7.1WF",
+   "NK7.1",
+   "NK7.1WFOG"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "c21"
+  ],
+  "skus": [
+   "NC21+WF",
+   "NKC21+",
+   "NKC21+WFOG",
+   "NKC21WFOG"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "c3"
+  ],
+  "skus": [
+   "NC3WF",
+   "NKC3"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "2"
+  ],
+  "skus": [
+   "NK2",
+   "NK2.2",
+   "NK2OG"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "1",
+   "2"
+  ],
+  "skus": [
+   "NK2.1"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "2",
+   "3"
+  ],
+  "skus": [
+   "NK2.3",
+   "NK3.2"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "2",
+   "4"
+  ],
+  "skus": [
+   "NK2.4",
+   "NK4.2"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "3"
+  ],
+  "skus": [
+   "NK3",
+   "NKW"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "1",
+   "3"
+  ],
+  "skus": [
+   "NK3.1"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "1",
+   "3"
+  ],
+  "skus": [
+   "NK3.1+",
+   "NK3.1+CARE"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "3",
+   "4"
+  ],
+  "skus": [
+   "NK3.4"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "5"
+  ],
+  "skus": [
+   "NK5"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "1",
+   "5"
+  ],
+  "skus": [
+   "NK5.1"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "1",
+   "5"
+  ],
+  "skus": [
+   "NK5.1+"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "3",
+   "5"
+  ],
+  "skus": [
+   "NK5.3"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "1",
+   "6"
+  ],
+  "skus": [
+   "NK6.1+"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "2",
+   "6"
+  ],
+  "skus": [
+   "NK6.2"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "620"
+  ],
+  "skus": [
+   "NK620"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "650"
+  ],
+  "skus": [
+   "NK650"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "7"
+  ],
+  "skus": [
+   "NK7",
+   "NK7+CARE"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "1",
+   "7"
+  ],
+  "skus": [
+   "NK7.1+"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "2",
+   "7"
+  ],
+  "skus": [
+   "NK7.2"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "8"
+  ],
+  "skus": [
+   "NK8"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "1",
+   "8"
+  ],
+  "skus": [
+   "NK8.1CARE"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "c01"
+  ],
+  "skus": [
+   "NKC01+"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "g10"
+  ],
+  "skus": [
+   "NKG10"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "g11"
+  ],
+  "skus": [
+   "NKG11",
+   "NKG11+",
+   "NKG11+WFOG"
+  ]
+ },
+ {
+  "brand": "nokia",
+  "tokens": [
+   "g20"
+  ],
+  "skus": [
+   "NKG20"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "2",
+   "nord"
+  ],
+  "skus": [
+   "NORD2UNI"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "ce",
+   "nord"
+  ],
+  "skus": [
+   "NORDCE5G"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "n100",
+   "nord"
+  ],
+  "skus": [
+   "NORDN100WF"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "n10",
+   "nord"
+  ],
+  "skus": [
+   "NORDN105GCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "12r",
+   "note"
+  ],
+  "skus": [
+   "NOTE12RCARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "30a",
+   "narzo"
+  ],
+  "skus": [
+   "NRZ30AWFOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "50a",
+   "narzo"
+  ],
+  "skus": [
+   "NRZ50AWFOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "n55",
+   "narzo"
+  ],
+  "skus": [
+   "NRZN55CARE"
+  ]
+ },
+ {
+  "brand": "nothing",
+  "tokens": [
+   "1",
+   "phone"
+  ],
+  "skus": [
+   "NTG1OG"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "5t"
+  ],
+  "skus": [
+   "OP5TLCDWF",
+   "OP5TOLED"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "6"
+  ],
+  "skus": [
+   "OP6LCD",
+   "OP6OLED"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "6t"
+  ],
+  "skus": [
+   "OP6TLCD",
+   "OP6TOLED"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "7"
+  ],
+  "skus": [
+   "OP7LCD",
+   "OP7OLED"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "8t"
+  ],
+  "skus": [
+   "OP8TLCD"
+  ]
+ },
+ {
+  "brand": "oneplus",
+  "tokens": [
+   "9r"
+  ],
+  "skus": [
+   "OP9RLCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a11k"
+  ],
+  "skus": [
+   "OPA11KOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a12"
+  ],
+  "skus": [
+   "OPA12CARE",
+   "OPA12WFCARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a16k"
+  ],
+  "skus": [
+   "OPA16KOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a71"
+  ],
+  "skus": [
+   "OPA17",
+   "OPA71B",
+   "OPA71W"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a1k"
+  ],
+  "skus": [
+   "OPA1KWFCARE",
+   "OPOA1KCARE",
+   "OPOA1KOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a1"
+  ],
+  "skus": [
+   "OPA1ProLCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a31"
+  ],
+  "skus": [
+   "OPA31WFCARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a32"
+  ],
+  "skus": [
+   "OPA32"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "2020",
+   "a32"
+  ],
+  "skus": [
+   "OPA322020CARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "2020",
+   "a33"
+  ],
+  "skus": [
+   "OPA332020",
+   "OPA332020CARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a37"
+  ],
+  "skus": [
+   "OPA37BWFCARE",
+   "OPA37WFCAREW",
+   "OPOA37BOG",
+   "OPOA37WOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a3"
+  ],
+  "skus": [
+   "OPA3ProLCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a3s"
+  ],
+  "skus": [
+   "OPA3SWFCARE",
+   "OPOA3SOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a3x"
+  ],
+  "skus": [
+   "OPA3XOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a52"
+  ],
+  "skus": [
+   "OPA52WFCARE",
+   "OPOA52CARE",
+   "OPOA52OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a55"
+  ],
+  "skus": [
+   "OPA554GCARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "2016",
+   "a57"
+  ],
+  "skus": [
+   "OPA57B16CARE",
+   "OPA57W16CARE",
+   "OPOA57B2016OG",
+   "OPOA57W2016OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a5s"
+  ],
+  "skus": [
+   "OPA5SCARE",
+   "OPA5SWFCARE",
+   "OPOA5SOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a72"
+  ],
+  "skus": [
+   "OPA725G",
+   "OPA725GCARE",
+   "OPOA72OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a76"
+  ],
+  "skus": [
+   "OPA76WFCARE",
+   "OPOA76CARE",
+   "OPOA76OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a78"
+  ],
+  "skus": [
+   "OPA784G",
+   "OPA784GCARE",
+   "OPA78CARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "2020",
+   "a9"
+  ],
+  "skus": [
+   "OPA92020CARE",
+   "OPA920WFCARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "ace",
+   "reno"
+  ],
+  "skus": [
+   "OPAssOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "f15"
+  ],
+  "skus": [
+   "OPF15LED",
+   "OPF15OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "f1s"
+  ],
+  "skus": [
+   "OPF1SCARE",
+   "OPF1SWCARE",
+   "OPOF1SBOG",
+   "OPOF1SWOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "f25"
+  ],
+  "skus": [
+   "OPF25ProLCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "find",
+   "x2"
+  ],
+  "skus": [
+   "OPFindX2LCD",
+   "OPFindX2ProLCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "find",
+   "x6"
+  ],
+  "skus": [
+   "OPFindX6LCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "k10"
+  ],
+  "skus": [
+   "OPK105G",
+   "OPK10Pro(5G)LCD",
+   "K104GCARE",
+   "OPOK105GCARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "k11"
+  ],
+  "skus": [
+   "OPK11LCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "k12"
+  ],
+  "skus": [
+   "OPK12LCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "k12x"
+  ],
+  "skus": [
+   "OPK12XLCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "k7x"
+  ],
+  "skus": [
+   "OPK7X",
+   "OPK7XCARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a16"
+  ],
+  "skus": [
+   "OPOA16CARE",
+   "OPOA16OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "2015",
+   "a33"
+  ],
+  "skus": [
+   "OPOA33BOG",
+   "OPOA33WOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a36"
+  ],
+  "skus": [
+   "OPOA36CARE",
+   "OPOA36OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "2018",
+   "a5",
+   "ax5"
+  ],
+  "skus": [
+   "OPOA52018OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a54"
+  ],
+  "skus": [
+   "OPOA545GCARE",
+   "OPOA545GOG",
+   "OPA54WFCARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a56"
+  ],
+  "skus": [
+   "OPOA56OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a74"
+  ],
+  "skus": [
+   "OPOA74OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a92"
+  ],
+  "skus": [
+   "OPOA92OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a92s"
+  ],
+  "skus": [
+   "OPOA92s"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a93"
+  ],
+  "skus": [
+   "OPOA93OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "f3"
+  ],
+  "skus": [
+   "OPOF3+BOG",
+   "OPOF3+WOG",
+   "OPOF3OGB",
+   "OPOF3OGW"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "f7"
+  ],
+  "skus": [
+   "OPOF7CARE",
+   "OPOF7OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "k9"
+  ],
+  "skus": [
+   "OPOK9INCELL",
+   "OPOK9PROOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "7",
+   "neo"
+  ],
+  "skus": [
+   "OPONEO7B",
+   "OPONEO7W"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "11",
+   "reno"
+  ],
+  "skus": [
+   "OPRNO11LCD",
+   "RNO11ProLCD"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "c3"
+  ],
+  "skus": [
+   "PCC3WFOG",
+   "POCOC3",
+   "PocoC3CARE"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "f5"
+  ],
+  "skus": [
+   "PCF5OG"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "x5"
+  ],
+  "skus": [
+   "PCX5ProOG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a58"
+  ],
+  "skus": [
+   "PO-XV36-7D7Y"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "c55"
+  ],
+  "skus": [
+   "POCOC55/40"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "m2"
+  ],
+  "skus": [
+   "POCOM2PROG",
+   "PocoM2CARE",
+   "PocoM2WFCARE"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "x3"
+  ],
+  "skus": [
+   "POCOX3LCD",
+   "PocoX3WFCARE"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "5",
+   "pop"
+  ],
+  "skus": [
+   "POP5"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "6",
+   "pop"
+  ],
+  "skus": [
+   "POP6"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "7",
+   "pop"
+  ],
+  "skus": [
+   "POP7"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "2",
+   "pova"
+  ],
+  "skus": [
+   "POVA2WFCARE"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "c40"
+  ],
+  "skus": [
+   "PocoC40CARE"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "f1"
+  ],
+  "skus": [
+   "PocoF1CARE",
+   "SZ-W2KK-QRFW"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "f2"
+  ],
+  "skus": [
+   "PocoF2CARE"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "f3"
+  ],
+  "skus": [
+   "PocoF3",
+   "PocoF3OG"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "f4"
+  ],
+  "skus": [
+   "PocoF4"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "m3"
+  ],
+  "skus": [
+   "PocoM3CARE",
+   "PocoM3P5GCARE",
+   "PocoM3PROG"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "m5"
+  ],
+  "skus": [
+   "PocoM5",
+   "PocoM5CARE",
+   "PCM5WFOG"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "x2"
+  ],
+  "skus": [
+   "PocoX2WFCARE"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "gt",
+   "x3"
+  ],
+  "skus": [
+   "PocoX3GTCARE"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "10a"
+  ],
+  "skus": [
+   "RED10AWFOG",
+   "SR-NFT6-QN4E"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "9c"
+  ],
+  "skus": [
+   "RED9CWFOG"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "4x"
+  ],
+  "skus": [
+   "REDMI4XB",
+   "REDMI4XW"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "5a",
+   "go"
+  ],
+  "skus": [
+   "REDMI5AGOB",
+   "REDMI5AGOW"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "13",
+   "note"
+  ],
+  "skus": [
+   "REDNT13(5G)OG",
+   "REDNT13Pro+LCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "7",
+   "reno"
+  ],
+  "skus": [
+   "RENO74G5GOG",
+   "RENO7PLCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "7a",
+   "reno"
+  ],
+  "skus": [
+   "RENO7A"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "7",
+   "reno",
+   "se"
+  ],
+  "skus": [
+   "RENO7SE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "8",
+   "reno"
+  ],
+  "skus": [
+   "RENO85G",
+   "RNO8ProLCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "10"
+  ],
+  "skus": [
+   "RLM10Pro+LCD",
+   "RME105GCARE",
+   "RME10OG",
+   "RME10PROG",
+   "RME10PROCARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "11"
+  ],
+  "skus": [
+   "RLM11Pro+LCD",
+   "RLM11ProLCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "12"
+  ],
+  "skus": [
+   "RLM12+LCD",
+   "RLM12Pro+LCD",
+   "RLM12ProLCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "13"
+  ],
+  "skus": [
+   "RLM135GOG",
+   "RLM13ProOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c11"
+  ],
+  "skus": [
+   "RLMC11WFOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c20"
+  ],
+  "skus": [
+   "RLMC20WFOG",
+   "RMEC20CARE",
+   "RMEC20OG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c21"
+  ],
+  "skus": [
+   "RLMC21WFOG",
+   "RMEC21CARE",
+   "RMEC21OG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c25"
+  ],
+  "skus": [
+   "RLMC25WFOG",
+   "RMEC25CARE",
+   "RMEC25OG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c30"
+  ],
+  "skus": [
+   "RLMC30LCD",
+   "RLMC30WFOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c30s"
+  ],
+  "skus": [
+   "RLMC30SWFOG",
+   "RMEC30SCARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c33"
+  ],
+  "skus": [
+   "RLMC33WFOG",
+   "RMEC33CARE",
+   "RMEC33OG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c35"
+  ],
+  "skus": [
+   "RLMC35WFOG",
+   "RMEC35CARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c65"
+  ],
+  "skus": [
+   "RLMC654G/5GOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c67"
+  ],
+  "skus": [
+   "RLMC67LCD",
+   "RLMC67WFOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "gt2"
+  ],
+  "skus": [
+   "RLMGt2LCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "2",
+   "gt"
+  ],
+  "skus": [
+   "RLMGt2ProLCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "2",
+   "gt",
+   "neo"
+  ],
+  "skus": [
+   "RLMGtNeo2LCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "3",
+   "gt",
+   "neo"
+  ],
+  "skus": [
+   "RLMGtNeo3LCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "3t",
+   "gt",
+   "neo"
+  ],
+  "skus": [
+   "RLMGtNeo3TLCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "60",
+   "narzo"
+  ],
+  "skus": [
+   "RLMNRZ60ProLCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "70",
+   "narzo"
+  ],
+  "skus": [
+   "RLMNRZ70LCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "p1"
+  ],
+  "skus": [
+   "RLMP1LCD",
+   "RLMP1ProLCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "q5"
+  ],
+  "skus": [
+   "RLMQ5ProLCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "x7"
+  ],
+  "skus": [
+   "RLMX7ProLCD",
+   "RMEX7MXOG",
+   "RMEX7OG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "2"
+  ],
+  "skus": [
+   "RM2WFCARE",
+   "RME2OG",
+   "RME2PROCARE",
+   "RME2PROG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "3"
+  ],
+  "skus": [
+   "RM3PCARE",
+   "RM3PWFOG",
+   "RME3OG",
+   "RM3PROOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "7i"
+  ],
+  "skus": [
+   "RM7i",
+   "RME7ICARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "8"
+  ],
+  "skus": [
+   "RM85GCARE",
+   "RME8OG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "9"
+  ],
+  "skus": [
+   "RM94G",
+   "RM9PROCARE",
+   "RME95GCARE",
+   "RME9PRO+OG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c17"
+  ],
+  "skus": [
+   "RMC17",
+   "RMEC17CARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c53"
+  ],
+  "skus": [
+   "RMC53CARE",
+   "RMC53LCD"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "5"
+  ],
+  "skus": [
+   "RME5PCARE",
+   "RME5PROG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "7"
+  ],
+  "skus": [
+   "RME7CARE",
+   "RME7OG",
+   "RME7PROG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "8i"
+  ],
+  "skus": [
+   "RME8IOG",
+   "RME8iCARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "9i"
+  ],
+  "skus": [
+   "RME9I5GOG",
+   "RME9iCARE",
+   "RME9iOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "2021",
+   "c11"
+  ],
+  "skus": [
+   "RMEC1121CARE",
+   "RMEC112021OG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "2020",
+   "c11"
+  ],
+  "skus": [
+   "RMEC11CARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c12"
+  ],
+  "skus": [
+   "RMEC12CARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c15"
+  ],
+  "skus": [
+   "RMEC15CARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c1"
+  ],
+  "skus": [
+   "RMEC1CARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c21y"
+  ],
+  "skus": [
+   "RMEC21YCARE",
+   "RMEC21YOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c25y"
+  ],
+  "skus": [
+   "RMEC25YCARE",
+   "RMEC25YOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c31"
+  ],
+  "skus": [
+   "RMEC31CARE",
+   "RMEC31OG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c3"
+  ],
+  "skus": [
+   "RMEC3CARE",
+   "RMEC3OG",
+   "RMEC3WFCARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "c55"
+  ],
+  "skus": [
+   "RMEC55CARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "gt",
+   "master"
+  ],
+  "skus": [
+   "RMEGTMASTROG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "2t",
+   "gt",
+   "neo"
+  ],
+  "skus": [
+   "RMEGTNEO2TOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "gt",
+   "neo"
+  ],
+  "skus": [
+   "RMEGTNEOG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "q2"
+  ],
+  "skus": [
+   "RMEQ2PRO"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "q3"
+  ],
+  "skus": [
+   "RMEQ3PROG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "u1"
+  ],
+  "skus": [
+   "RMEU1CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "u20"
+  ],
+  "skus": [
+   "RMEU20",
+   "U20CARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "v11"
+  ],
+  "skus": [
+   "RMEV11OG"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "v20"
+  ],
+  "skus": [
+   "RMEV20CARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "2020",
+   "v5"
+  ],
+  "skus": [
+   "RMEV5G20CARE",
+   "RMEV520"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "x2"
+  ],
+  "skus": [
+   "RMEX2OG",
+   "RMEX2OLED",
+   "RMEX2PROINCELL",
+   "RMEX2PROLED"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "x3"
+  ],
+  "skus": [
+   "RMEX3CARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "x50"
+  ],
+  "skus": [
+   "RMEX50CARE"
+  ]
+ },
+ {
+  "brand": "realme",
+  "tokens": [
+   "xt"
+  ],
+  "skus": [
+   "RMEXTOG",
+   "RMEXTOLED"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "11t",
+   "note"
+  ],
+  "skus": [
+   "RN11T5G"
+  ]
+ },
+ {
+  "brand": "redmi",
+  "tokens": [
+   "6",
+   "note"
+  ],
+  "skus": [
+   "RN6PROG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "10",
+   "reno"
+  ],
+  "skus": [
+   "RNO10LCD",
+   "RNO10ProLCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "11f",
+   "reno"
+  ],
+  "skus": [
+   "RNO11FLCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "12f",
+   "reno"
+  ],
+  "skus": [
+   "RNO12F(4G,5G)LCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "13",
+   "reno"
+  ],
+  "skus": [
+   "RNO13Pro+OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "2f",
+   "reno"
+  ],
+  "skus": [
+   "RNO2FINCELL"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "2z",
+   "reno"
+  ],
+  "skus": [
+   "RNO2ZINCELL"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "4",
+   "reno"
+  ],
+  "skus": [
+   "RNO4OG"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "5",
+   "reno"
+  ],
+  "skus": [
+   "RNO5OG",
+   "RNO5ProLCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "6",
+   "reno"
+  ],
+  "skus": [
+   "RNO6OG",
+   "RNO6ProLCD"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "8t",
+   "reno"
+  ],
+  "skus": [
+   "RNO8TLCD"
+  ]
+ },
+ {
+  "brand": "poco",
+  "tokens": [
+   "c50"
+  ],
+  "skus": [
+   "RT-7ZJ3-R4C4"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m32"
+  ],
+  "skus": [
+   "SAM325GCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a04",
+   "core"
+  ],
+  "skus": [
+   "SAMA04CCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a10e"
+  ],
+  "skus": [
+   "SAMA10ECARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a20e"
+  ],
+  "skus": [
+   "SAMA20ECARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a21s"
+  ],
+  "skus": [
+   "SAMA21SCARE",
+   "SAMA21SWFCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a73"
+  ],
+  "skus": [
+   "SAMA73LED"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a8"
+  ],
+  "skus": [
+   "SAMA8+"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "f02s"
+  ],
+  "skus": [
+   "SAMF02SWFCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "f12"
+  ],
+  "skus": [
+   "SAMF12CARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "2015",
+   "j2"
+  ],
+  "skus": [
+   "SAMJ215"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "2021",
+   "go",
+   "spark"
+  ],
+  "skus": [
+   "SPARKGO21WFCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "2021",
+   "t1"
+  ],
+  "skus": [
+   "T12021CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "t1x"
+  ],
+  "skus": [
+   "T1XCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "t2x"
+  ],
+  "skus": [
+   "T2XCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "t3x"
+  ],
+  "skus": [
+   "T3x4GCARE"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "19",
+   "camon"
+  ],
+  "skus": [
+   "TCCM19WFOG",
+   "TCNC19",
+   "TCNC195G",
+   "TCNC19P5G"
+  ]
+ },
+ {
+  "brand": "infinix",
+  "tokens": [
+   "10s",
+   "hot"
+  ],
+  "skus": [
+   "TCHot10SOG"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "17",
+   "camon"
+  ],
+  "skus": [
+   "TCN17P",
+   "TCNC17"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "15",
+   "camon"
+  ],
+  "skus": [
+   "TCNC15P"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "16",
+   "camon"
+  ],
+  "skus": [
+   "TCNC16"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "17p",
+   "camon"
+  ],
+  "skus": [
+   "TCNC17P"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "18",
+   "camon"
+  ],
+  "skus": [
+   "TCNC18",
+   "TCNC18CARE"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "18t",
+   "camon"
+  ],
+  "skus": [
+   "TCNC18T"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "19",
+   "camon",
+   "neo"
+  ],
+  "skus": [
+   "TCNC19NEO"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "camon",
+   "i2"
+  ],
+  "skus": [
+   "TCNCI2"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "2",
+   "camon",
+   "iace"
+  ],
+  "skus": [
+   "TCNCIACE2"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "2",
+   "camon",
+   "iair"
+  ],
+  "skus": [
+   "TCNCIAIR2+"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "3",
+   "camon",
+   "isky"
+  ],
+  "skus": [
+   "TCNCISKY3"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "i4"
+  ],
+  "skus": [
+   "TCNI4"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "1",
+   "in"
+  ],
+  "skus": [
+   "TCNIN1"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "2",
+   "in"
+  ],
+  "skus": [
+   "TCNIN2"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "3",
+   "in"
+  ],
+  "skus": [
+   "TCNIN3",
+   "TCNIN3WF"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "5",
+   "in"
+  ],
+  "skus": [
+   "TCNIN5",
+   "TCNIN5WF"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "6",
+   "in"
+  ],
+  "skus": [
+   "TCNIN6"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "3",
+   "spark"
+  ],
+  "skus": [
+   "TCNS3PRO"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "5",
+   "air",
+   "spark"
+  ],
+  "skus": [
+   "TCNS5AIR"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "6",
+   "air",
+   "spark"
+  ],
+  "skus": [
+   "TCNS6AIR"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "7",
+   "spark"
+  ],
+  "skus": [
+   "TCNS7P",
+   "TECS7WFCARE"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "8",
+   "spark"
+  ],
+  "skus": [
+   "TCNS8"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "go",
+   "spark"
+  ],
+  "skus": [
+   "TCNSGO+"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "2023",
+   "go",
+   "spark"
+  ],
+  "skus": [
+   "TCNSGO23"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "4",
+   "air",
+   "spark"
+  ],
+  "skus": [
+   "TCNSP4AIR"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "8c",
+   "spark"
+  ],
+  "skus": [
+   "TCNSP8C"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "7",
+   "poppo"
+  ],
+  "skus": [
+   "TCPop7ProOG"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "8p",
+   "spark"
+  ],
+  "skus": [
+   "TECS8PWFCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "u10"
+  ],
+  "skus": [
+   "U10",
+   "U10CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v11"
+  ],
+  "skus": [
+   "V11LCD",
+   "V11PRO"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v15"
+  ],
+  "skus": [
+   "V15",
+   "V15CARE",
+   "V15PRO"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v17"
+  ],
+  "skus": [
+   "V17LCD",
+   "VY17P"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v20"
+  ],
+  "skus": [
+   "V20",
+   "V20PRO"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "se",
+   "v20"
+  ],
+  "skus": [
+   "V20SE",
+   "V20SELED"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v21"
+  ],
+  "skus": [
+   "V21",
+   "V21LED"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v23"
+  ],
+  "skus": [
+   "V235G",
+   "VVV23Pro(5G)LCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v5"
+  ],
+  "skus": [
+   "V5+B",
+   "V5+W",
+   "V5B",
+   "V5BCARE",
+   "V5W",
+   "V5WCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "lite",
+   "v5"
+  ],
+  "skus": [
+   "V5LYT",
+   "V5LYTW"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v7"
+  ],
+  "skus": [
+   "V7+B",
+   "V7+BCARE",
+   "V7+W",
+   "V7+WCARE",
+   "V7B",
+   "V7W"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v9"
+  ],
+  "skus": [
+   "V9CARE",
+   "V9LCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "nex"
+  ],
+  "skus": [
+   "VNEX"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "s16"
+  ],
+  "skus": [
+   "VVS16LCD",
+   "VVS16ProLCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "s17"
+  ],
+  "skus": [
+   "VVS17LCD",
+   "VVS17ProLCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v27"
+  ],
+  "skus": [
+   "VVV27LCD",
+   "VVV27ProLCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v29"
+  ],
+  "skus": [
+   "VVV29LCD",
+   "VVV29ProLCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "v30e"
+  ],
+  "skus": [
+   "VVV30ELCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "x100s"
+  ],
+  "skus": [
+   "VVX100SLCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "x90"
+  ],
+  "skus": [
+   "VVX90LCD",
+   "VVX90ProLCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "x90s"
+  ],
+  "skus": [
+   "VVX90SLCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y03"
+  ],
+  "skus": [
+   "VVY03OG"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y17s"
+  ],
+  "skus": [
+   "VVY17SOG"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y18"
+  ],
+  "skus": [
+   "VVY18OG"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y28"
+  ],
+  "skus": [
+   "VVY285GOG",
+   "VVY28OG"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y28s"
+  ],
+  "skus": [
+   "VVY28SOG"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y58"
+  ],
+  "skus": [
+   "VVY58OG"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y78"
+  ],
+  "skus": [
+   "VVY78+LCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y02s"
+  ],
+  "skus": [
+   "VY02",
+   "Y02SCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y16"
+  ],
+  "skus": [
+   "VY16",
+   "Y16CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y19"
+  ],
+  "skus": [
+   "VY19",
+   "Y19CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y56"
+  ],
+  "skus": [
+   "VY565G"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y11",
+   "y12",
+   "y15"
+  ],
+  "skus": [
+   "XB-XQNW-NAJK",
+   "Y11CARE"
+  ]
+ },
+ {
+  "brand": "mi",
+  "tokens": [
+   "10t",
+   "xiaomi"
+  ],
+  "skus": [
+   "XMI10TOG"
+  ]
+ },
+ {
+  "brand": "mi",
+  "tokens": [
+   "11x",
+   "xiaomi"
+  ],
+  "skus": [
+   "XMI11X"
+  ]
+ },
+ {
+  "brand": "mi",
+  "tokens": [
+   "a1",
+   "xiaomi"
+  ],
+  "skus": [
+   "XMIA1B",
+   "XMIA1W"
+  ]
+ },
+ {
+  "brand": "mi",
+  "tokens": [
+   "a3",
+   "xiaomi"
+  ],
+  "skus": [
+   "XMIA3TFT"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y01"
+  ],
+  "skus": [
+   "Y01"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y100"
+  ],
+  "skus": [
+   "Y100"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y12s"
+  ],
+  "skus": [
+   "Y12SCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y12"
+  ],
+  "skus": [
+   "Y12WFCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y15"
+  ],
+  "skus": [
+   "Y15CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y17"
+  ],
+  "skus": [
+   "Y17"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y27"
+  ],
+  "skus": [
+   "Y27CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y3"
+  ],
+  "skus": [
+   "Y3",
+   "Y3CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y30"
+  ],
+  "skus": [
+   "Y30",
+   "Y30CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "2020",
+   "y31"
+  ],
+  "skus": [
+   "Y312020",
+   "Y3120CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y31s"
+  ],
+  "skus": [
+   "Y31S",
+   "Y31SCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y32"
+  ],
+  "skus": [
+   "Y32"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y33e"
+  ],
+  "skus": [
+   "Y33E"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y33s"
+  ],
+  "skus": [
+   "Y33S",
+   "Y33SCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y33t"
+  ],
+  "skus": [
+   "Y33TCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y35"
+  ],
+  "skus": [
+   "Y35",
+   "Y35CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y36"
+  ],
+  "skus": [
+   "Y36CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y50"
+  ],
+  "skus": [
+   "Y50",
+   "Y50CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "2020",
+   "y51"
+  ],
+  "skus": [
+   "Y512020",
+   "Y512020CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y52s"
+  ],
+  "skus": [
+   "Y52S",
+   "Y52SCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y53"
+  ],
+  "skus": [
+   "Y53B",
+   "Y53G"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "2017",
+   "y53"
+  ],
+  "skus": [
+   "Y53BCARE",
+   "Y53WCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y53s"
+  ],
+  "skus": [
+   "Y53S",
+   "Y53SCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "2022",
+   "y55"
+  ],
+  "skus": [
+   "Y554GCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y55"
+  ],
+  "skus": [
+   "Y55B",
+   "Y55W"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "2017",
+   "y55"
+  ],
+  "skus": [
+   "Y55BCARE",
+   "Y55WCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y55s"
+  ],
+  "skus": [
+   "Y55SCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y66"
+  ],
+  "skus": [
+   "Y66",
+   "Y66W"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y67"
+  ],
+  "skus": [
+   "Y67B",
+   "Y67W"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y69"
+  ],
+  "skus": [
+   "Y69B",
+   "Y69W"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y71"
+  ],
+  "skus": [
+   "Y71B",
+   "Y71BCARE",
+   "Y71W",
+   "Y71WCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y72"
+  ],
+  "skus": [
+   "Y725G"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y72t"
+  ],
+  "skus": [
+   "Y72T"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y75"
+  ],
+  "skus": [
+   "Y755GCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y79"
+  ],
+  "skus": [
+   "Y79BCARE",
+   "Y79WCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y81",
+   "y83"
+  ],
+  "skus": [
+   "Y81CARE",
+   "Y81LCD"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y85"
+  ],
+  "skus": [
+   "Y85CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y91",
+   "y93",
+   "y95"
+  ],
+  "skus": [
+   "Y91CARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "y91"
+  ],
+  "skus": [
+   "Y91WFCARE"
+  ]
+ },
+ {
+  "brand": "asus",
+  "tokens": [
+   "m2",
+   "zenfone"
+  ],
+  "skus": [
+   "ZFMXM2TFT"
+  ]
+ },
+ {
+  "brand": "asus",
+  "tokens": [
+   "m1",
+   "zenfone"
+  ],
+  "skus": [
+   "ZFMXPROM1TFT",
+   "ZFMXPROM1WFCARE"
+  ]
+ },
+ {
+  "brand": "itel",
+  "tokens": [
+   "a23"
+  ],
+  "skus": [
+   "iTelA23",
+   "iTelA23P"
+  ]
+ },
+ {
+  "brand": "itel",
+  "tokens": [
+   "a25"
+  ],
+  "skus": [
+   "iTelA25"
+  ]
+ },
+ {
+  "brand": "itel",
+  "tokens": [
+   "a26"
+  ],
+  "skus": [
+   "iTelA26"
+  ]
+ },
+ {
+  "brand": "itel",
+  "tokens": [
+   "a27"
+  ],
+  "skus": [
+   "iTelA27"
+  ]
+ },
+ {
+  "brand": "itel",
+  "tokens": [
+   "a44"
+  ],
+  "skus": [
+   "iTelA44"
+  ]
+ },
+ {
+  "brand": "itel",
+  "tokens": [
+   "a46"
+  ],
+  "skus": [
+   "iTelA46"
+  ]
+ },
+ {
+  "brand": "itel",
+  "tokens": [
+   "a48"
+  ],
+  "skus": [
+   "iTelA48"
+  ]
+ },
+ {
+  "brand": "itel",
+  "tokens": [
+   "a49"
+  ],
+  "skus": [
+   "iTelA49"
+  ]
+ },
+ {
+  "brand": "itel",
+  "tokens": [
+   "1",
+   "vision"
+  ],
+  "skus": [
+   "iTelV1"
+  ]
+ },
+ {
+  "brand": "itel",
+  "tokens": [
+   "2",
+   "vision"
+  ],
+  "skus": [
+   "iTelV2"
+  ]
+ },
+ {
+  "brand": "itel",
+  "tokens": [
+   "3",
+   "vision"
+  ],
+  "skus": [
+   "iTelV3"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "a04s"
+  ],
+  "skus": [
+   "A04SCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "core",
+   "j7"
+  ],
+  "skus": [
+   "J7COREBLED",
+   "J7COREGLED"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m14"
+  ],
+  "skus": [
+   "M145GCARE"
+  ]
+ },
+ {
+  "brand": "samsung",
+  "tokens": [
+   "m31"
+  ],
+  "skus": [
+   "M31LED"
+  ]
+ },
+ {
+  "brand": "mi",
+  "tokens": [
+   "2022",
+   "a1",
+   "xiaomi"
+  ],
+  "skus": [
+   "MIA122CARE"
+  ]
+ },
+ {
+  "brand": "motorola",
+  "tokens": [
+   "g71"
+  ],
+  "skus": [
+   "MOTOG71"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a56s"
+  ],
+  "skus": [
+   "OPOA56S5GCARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a57"
+  ],
+  "skus": [
+   "OPOA575GCARE"
+  ]
+ },
+ {
+  "brand": "oppo",
+  "tokens": [
+   "a77"
+  ],
+  "skus": [
+   "OPOA775GCARE"
+  ]
+ },
+ {
+  "brand": "vivo",
+  "tokens": [
+   "2022",
+   "t1"
+  ],
+  "skus": [
+   "T1CARE"
+  ]
+ },
+ {
+  "brand": "tecno",
+  "tokens": [
+   "12",
+   "air",
+   "camon"
+  ],
+  "skus": [
+   "TCNC12AIR"
+  ]
+ }
+]

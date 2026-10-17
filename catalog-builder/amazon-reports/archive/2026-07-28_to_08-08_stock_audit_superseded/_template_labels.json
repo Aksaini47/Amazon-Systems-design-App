@@ -1,0 +1,560 @@
+{
+  "SKU": [
+    1
+  ],
+  "Product Type": [
+    2
+  ],
+  "Listing Action": [
+    3
+  ],
+  "Parentage Level": [
+    4
+  ],
+  "Parent SKU": [
+    5
+  ],
+  "Variation Theme Name": [
+    6
+  ],
+  "Item Name": [
+    7
+  ],
+  "Item Highlight": [
+    8
+  ],
+  "Brand Name": [
+    9
+  ],
+  "Product Id Type": [
+    10
+  ],
+  "Product Id": [
+    11
+  ],
+  "Recommended Browse Nodes": [
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "Model Number": [
+    17
+  ],
+  "Manufacturer": [
+    18
+  ],
+  "UNSPSC Code": [
+    19
+  ],
+  "National Stock Number": [
+    20
+  ],
+  "Main Image URL": [
+    21
+  ],
+  "Other Image URL": [
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29
+  ],
+  "Swatch Image URL": [
+    30
+  ],
+  "Product Description": [
+    31
+  ],
+  "Bullet Point": [
+    32,
+    33,
+    34,
+    35,
+    36
+  ],
+  "Generic Keyword": [
+    37
+  ],
+  "Style": [
+    38
+  ],
+  "Number of Items": [
+    39
+  ],
+  "Item Type Name": [
+    40
+  ],
+  "Color": [
+    41
+  ],
+  "Size": [
+    42
+  ],
+  "Part Number": [
+    43
+  ],
+  "Manufacturer Contact Information": [
+    44
+  ],
+  "Compatible Phone Models": [
+    45,
+    46,
+    47
+  ],
+  "Product Grade": [
+    48
+  ],
+  "Unit Count": [
+    49
+  ],
+  "Unit Count Type": [
+    50
+  ],
+  "Product Site Launch Date": [
+    51
+  ],
+  "Included Components": [
+    52,
+    53,
+    54,
+    55,
+    56
+  ],
+  "External Product Information Entity": [
+    57
+  ],
+  "External Product Information": [
+    58
+  ],
+  "Control Method": [
+    59,
+    60,
+    61,
+    62
+  ],
+  "Importer Contact Information": [
+    63,
+    64,
+    65,
+    66,
+    67
+  ],
+  "Packer Contact Information": [
+    68,
+    69,
+    70,
+    71,
+    72
+  ],
+  "Is Green Purchasing Law Compliant": [
+    73
+  ],
+  "Item Weight": [
+    74
+  ],
+  "Item Weight Unit": [
+    75
+  ],
+  "Skip Offer": [
+    76
+  ],
+  "Item Condition": [
+    77
+  ],
+  "Offer Condition Note": [
+    78
+  ],
+  "Product Tax Code": [
+    79
+  ],
+  "Merchant Release Date": [
+    80
+  ],
+  "Maximum Order Quantity": [
+    81
+  ],
+  "Offering Can Be Gift Messaged": [
+    82
+  ],
+  "Is Gift Wrap Available": [
+    83
+  ],
+  "Main Image Location": [
+    84
+  ],
+  "Other Image Location": [
+    85,
+    86,
+    87,
+    88,
+    89
+  ],
+  "Accessories": [
+    90
+  ],
+  "Battery Life Percentage": [
+    91
+  ],
+  "Cosmetic": [
+    92
+  ],
+  "Features": [
+    93,
+    94,
+    95,
+    96,
+    97
+  ],
+  "Functional Condition": [
+    98
+  ],
+  "Packaging": [
+    99
+  ],
+  "Renewed Grade": [
+    100
+  ],
+  "Source Type": [
+    101
+  ],
+  "Fulfillment Channel Code (IN)": [
+    102
+  ],
+  "Quantity (IN)": [
+    103
+  ],
+  "Handling Time (IN)": [
+    104
+  ],
+  "Restock Date (IN)": [
+    105
+  ],
+  "Inventory Always Available (IN)": [
+    106
+  ],
+  "Your Price INR (Sell on Amazon, IN)": [
+    107
+  ],
+  "Maximum Retail Price (Sell on Amazon, IN)": [
+    108
+  ],
+  "Pricing Rule (Sell on Amazon, IN)": [
+    109
+  ],
+  "Minimum Seller Allowed Price (Sell on Amazon, IN)": [
+    110
+  ],
+  "Maximum Seller Allowed Price (Sell on Amazon, IN)": [
+    111
+  ],
+  "Sale Price INR (Sell on Amazon, IN)": [
+    112
+  ],
+  "Sale Start Date (Sell on Amazon, IN)": [
+    113
+  ],
+  "Sale End Date (Sell on Amazon, IN)": [
+    114
+  ],
+  "Offering Release Date (Sell on Amazon, IN)": [
+    115
+  ],
+  "Stop Selling Date (Sell on Amazon, IN)": [
+    116
+  ],
+  "Your Price INR (Amazon Business (B2B), IN)": [
+    117
+  ],
+  "Maximum Retail Price (Amazon Business (B2B), IN)": [
+    118
+  ],
+  "Minimum Seller Allowed Price (Amazon Business (B2B), IN)": [
+    119
+  ],
+  "Maximum Seller Allowed Price (Amazon Business (B2B), IN)": [
+    120
+  ],
+  "Offering Release Date (Amazon Business (B2B), IN)": [
+    121
+  ],
+  "Stop Selling Date (Amazon Business (B2B), IN)": [
+    122
+  ],
+  "Quantity Price Type (Amazon Business (B2B), IN)": [
+    123
+  ],
+  "Quantity Threshold (Lower Bound, Amazon Business (B2B), IN)": [
+    124,
+    126,
+    128,
+    130,
+    132
+  ],
+  "Quantity Price (Fixed Price/Percentage Discount, Amazon Business (B2B), IN)": [
+    125,
+    127,
+    129,
+    131,
+    133
+  ],
+  "Shipping Template (IN)": [
+    134
+  ],
+  "Item Length": [
+    135
+  ],
+  "Item Length Unit": [
+    136
+  ],
+  "Item Width": [
+    137
+  ],
+  "Item Width Unit": [
+    138
+  ],
+  "Item Height": [
+    139
+  ],
+  "Item Height Unit": [
+    140
+  ],
+  "Item Package Length": [
+    141
+  ],
+  "Package Length Unit": [
+    142
+  ],
+  "Item Package Width": [
+    143
+  ],
+  "Package Width Unit": [
+    144
+  ],
+  "Item Package Height": [
+    145
+  ],
+  "Package Height Unit": [
+    146
+  ],
+  "Package Weight": [
+    147
+  ],
+  "Package Weight Unit": [
+    148
+  ],
+  "Number of Boxes": [
+    149
+  ],
+  "Country of Origin": [
+    150
+  ],
+  "Warranty Description": [
+    151,
+    152,
+    153
+  ],
+  "Are batteries required?": [
+    154
+  ],
+  "Are batteries included?": [
+    155
+  ],
+  "Battery Cell Composition": [
+    156
+  ],
+  "Battery Cell Composition Other Than Listed": [
+    157
+  ],
+  "Battery Weight": [
+    158
+  ],
+  "Battery Weight Unit": [
+    159
+  ],
+  "Number of Batteries": [
+    160,
+    162,
+    164,
+    166,
+    168
+  ],
+  "Battery Type": [
+    161,
+    163,
+    165,
+    167,
+    169
+  ],
+  "Number of Lithium Metal Cells": [
+    170
+  ],
+  "Number of Lithium-ion Cells": [
+    171
+  ],
+  "Lithium Battery Energy Content": [
+    172
+  ],
+  "Lithium Battery Energy Content Unit": [
+    173
+  ],
+  "Lithium Battery Packaging": [
+    174
+  ],
+  "Lithium Battery Weight": [
+    175
+  ],
+  "Lithium Battery Weight Unit": [
+    176
+  ],
+  "Dangerous Goods Regulations": [
+    177,
+    178,
+    179,
+    180,
+    181
+  ],
+  "GHS Class": [
+    182,
+    183,
+    184,
+    185,
+    186
+  ],
+  "Hazmat Aspect": [
+    187
+  ],
+  "Hazmat": [
+    188
+  ],
+  "Safety Data Sheet (SDS or MSDS) URL": [
+    189
+  ],
+  "Is This Product Subject To Buyer Age Restrictions": [
+    190
+  ],
+  "Compliance Regulation Type": [
+    191,
+    193,
+    195,
+    197,
+    199
+  ],
+  "Regulatory Identification": [
+    192,
+    194,
+    196,
+    198,
+    200
+  ],
+  "Responsible Person's Email or Electronic Address": [
+    201
+  ],
+  "Compliance Media Source Location (en_IN, Application Guide)": [
+    202
+  ],
+  "Compliance Media Source Location (en_IN, ECGT - Bio-based & Biodegradable Claims - Substantiation Document)": [
+    203
+  ],
+  "Compliance Media Source Location (en_IN, Certificate of Analysis)": [
+    204
+  ],
+  "Compliance Media Source Location (en_IN, Certificate of Compliance)": [
+    205
+  ],
+  "Compliance Media Source Location (en_IN, Compatibility Guide)": [
+    206
+  ],
+  "Compliance Media Source Location (en_IN, Data Act Transparency Declaration)": [
+    207
+  ],
+  "Compliance Media Source Location (en_IN, Emergency Use Authorization)": [
+    208
+  ],
+  "Compliance Media Source Location (en_IN, Emergency Use Authorization Amendment)": [
+    209
+  ],
+  "Compliance Media Source Location (en_IN, ECGT - Energy Efficiency Claims - Substantiation Document)": [
+    210
+  ],
+  "Compliance Media Source Location (en_IN, Installation Manual)": [
+    211
+  ],
+  "Compliance Media Source Location (en_IN, Instructions for Use)": [
+    212
+  ],
+  "Compliance Media Source Location (en_IN, Patient Fact Sheet)": [
+    213
+  ],
+  "Compliance Media Source Location (en_IN, ECGT - PFAS-Free Claims - Substantiation Document)": [
+    214
+  ],
+  "Compliance Media Source Location (en_IN, Product Certificate of Conformity)": [
+    215
+  ],
+  "Compliance Media Source Location (en_IN, Provider Fact Sheet)": [
+    216
+  ],
+  "Compliance Media Source Location (en_IN, ECGT - Recyclability Claims - Substantiation Document)": [
+    217
+  ],
+  "Compliance Media Source Location (en_IN, ECGT - Durability & Repairability Claims - Substantiation Document)": [
+    218
+  ],
+  "Compliance Media Source Location (en_IN, Safety Data Sheet)": [
+    219
+  ],
+  "Compliance Media Source Location (en_IN, Safety Information)": [
+    220
+  ],
+  "Compliance Media Source Location (en_IN, Specification Sheet)": [
+    221
+  ],
+  "Compliance Media Source Location (en_IN, Troubleshooting Guide)": [
+    222
+  ],
+  "Compliance Media Source Location (en_IN, User Guide)": [
+    223
+  ],
+  "Compliance Media Source Location (en_IN, User Manual)": [
+    224
+  ],
+  "Compliance Media Source Location (en_IN, Warranty)": [
+    225
+  ],
+  "Safety Attestation": [
+    226
+  ],
+  "Manufacturer’s Email or Electronic Address": [
+    227
+  ],
+  "Ships Globally": [
+    228
+  ],
+  "GHS Chemical H Code": [
+    229,
+    230,
+    231,
+    232,
+    233
+  ],
+  "Base Product Manufacturer Warranty Period": [
+    234
+  ],
+  "Base Product Warranty Manufacturer Period Unit": [
+    235
+  ],
+  "Base Product Manufacturer Warranty Terms and Conditions": [
+    236
+  ],
+  "Steps To Avail Warranty": [
+    237
+  ],
+  "Warranty Provider Contact Information": [
+    238
+  ]
+}

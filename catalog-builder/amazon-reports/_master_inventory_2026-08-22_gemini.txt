@@ -1,0 +1,95 @@
+==================================================
+MASTER INVENTORY — WORKING SOURCE FILE
+[LAST AUDIT STAMP: INV-28092026-1438 | 28-SEP-2026 02:38 PM IST]
+==================================================
+
+REALME
+Realme C67 Incell
+Realme 7i Incell
+Realme 9 Incell
+Realme C33 Incell
+Realme 9i Incell
+Realme C21 Incell
+Realme C30 Incell
+Realme C53 Incell
+Realme 8i Incell
+Realme 3 Pro Frame
+
+VIVO
+Vivo Y33s Incell
+Vivo Y22 Incell
+Vivo Y22 CareOG
+Vivo T1 CareOG
+Vivo T2x CareOG
+Vivo X70 Pro Plus CareOG
+Vivo V15 CareOG
+Vivo Y71 Incell
+Vivo Y20 Incell
+
+OPPO
+A53 CareOG - 2 QTY
+A57 4G/5G CareOG - 3 QTY
+A54 CareOG
+A54 5G Incell
+F5 With Frame
+Reno 10 Pro Plus CareOG
+
+ONEPLUS
+OnePlus 11 CareOG
+OnePlus Nord CareOG
+OnePlus 8 CareOG
+OnePlus 8 Pro Incell
+OnePlus 9 CareOG
+OnePlus 7 Incell
+OnePlus 10 Pro CareOG
+OnePlus 9RT Incell
+
+SAMSUNG
+Galaxy J7 Next Gold Incell - 2 QTY
+Galaxy A73 OLED
+Galaxy A23 4G Incell - 2 QTY
+Galaxy A32 4G Incell
+Galaxy J7 (2016) Gold Incell
+Galaxy A30s Incell - 2 QTY
+Galaxy J7 Max Gold Incell
+Galaxy S20 FE With Frame OLED
+Galaxy S21 FE With Frame OLED
+Galaxy A13 5G
+
+APPLE
+iPhone 13 Pro Max OLED
+iPhone 8 CareOG
+iPhone 11 Incell
+iPhone 13 Pro Max Incell
+iPhone 8 Plus Incell White
+iPhone XS Incell
+iPhone 14 Pro Max Incell
+
+XIAOMI / REDMI / POCO
+Mi A3 Incell
+Redmi Note 5 With Frame White
+Redmi 4A With Frame Incell Black
+Redmi 12 CareOG
+Redmi 12 Incell
+Redmi 13 Pro Plus CareOG
+Redmi 10 Power Incell
+Redmi Note 6 Pro Incell
+Redmi 6 Pro
+Poco M4 Incell
+Redmi Note 10T CareOG
+
+MIX
+Infinix Note 10 Incell
+Infinix Hot 9 Incell
+Infinix Note 11S Incell
+Honor 7A Black Incell
+Honor 7X White Incell
+Nokia G10 Incell
+Nokia G20 Incell - 2 QTY
+Nokia G21 Incell
+Nokia C3 Incell
+Moto G9 Incell
+Moto G40 Fusion Incell
+Moto G34 With Frame Incell
+Asus Zenfone Max M2 Incell
+Asus ROG Phone 2 CareOG

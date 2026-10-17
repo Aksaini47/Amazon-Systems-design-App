@@ -1,0 +1,34 @@
+=== row 7 : RLMC67LCD ===
+TITLE (63 chars): Compatible for Realme C67 LCD Display+Touch Screen Combo Folder
+BULLET3: 🔬 Rigorously Tested for Performance – Each display undergoes strict quality checks for touch sensitivity, color uniformity, and brightness levels to ensure flawless performance right out of the box!
+desc has "+ Frame": False
+desc warranty OK: True
+compat: ['Realme C67', None, None]
+
+=== row 8 : RLMC30LCD ===
+TITLE (63 chars): Compatible for Realme C30 LCD Display+Touch Screen Combo Folder
+BULLET3: 🔬 Rigorously Tested for Performance – Each display undergoes strict quality checks for touch sensitivity, color uniformity, and brightness levels to ensure flawless performance right out of the box!
+desc has "+ Frame": False
+desc warranty OK: True
+compat: ['Realme C30', None, None]
+
+=== row 9 : RMC53LCD ===
+TITLE (63 chars): Compatible for Realme C53 LCD Display+Touch Screen Combo Folder
+BULLET3: 🔬 Rigorously Tested for Performance – Each display undergoes strict quality checks for touch sensitivity, color uniformity, and brightness levels to ensure flawless performance right out of the box!
+desc has "+ Frame": False
+desc warranty OK: True
+compat: ['Realme C53', None, None]
+
+=== row 10 : RM3PWFOG ===
+TITLE (81 chars): Compatible for Realme 3 Pro (with Frame) CareOG Display+Touch Screen Combo Folder
+BULLET3: 🖼️ Comes With Frame (Pre-Assembled or Separate) – Frame color varies (black, silver, etc.) depending on stock availability.
+desc has "+ Frame": True
+desc warranty OK: True
+compat: ['Realme 3 Pro', None, None]
+
+=== row 11 : OPF275GOLED ===
+TITLE (89 chars): Compatible for Oppo F27 5G Amoled (Fingerprint Support) Display+Touch Screen Combo Folder
+BULLET3: 🔓 Under-Display Fingerprint Support (Where Applicable) – Fast, secure unlock with seamless integration (only on select models).
+desc has "+ Frame": False
+desc warranty OK: True
+compat: ['Oppo F27 5G', None, None]

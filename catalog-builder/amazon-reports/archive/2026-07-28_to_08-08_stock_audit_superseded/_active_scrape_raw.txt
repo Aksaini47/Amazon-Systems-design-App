@@ -1,0 +1,10 @@
+﻿agent-browser-win32-x64.exe : Γ£ù Evaluation error: SyntaxError: Failed to execute 'querySelectorAll' on 'Document': 
+'a[href*=/inventory], a[href*=asin], a' is not a valid selector.
+At C:\Users\DELL\AppData\Roaming\npm\agent-browser.ps1:3 char:1
++ & "$basedir\node_modules\agent-browser\bin\agent-browser-win32-x64.ex ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Γ£ù Evaluation ...valid selector.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    at <anonymous>:6:42
+    at <anonymous>:60:3

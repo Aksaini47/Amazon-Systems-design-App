@@ -1,5 +1,7 @@
 # Amazon SP-API — Registration Checklist (Badeja / Mahika)
 
+**Canonical flow:** `agent/Graphs & workflows/mahika-sp-api/FLOW.md`
+
 Last verified: 2026-05-20 via Solution Provider Portal (admin: Trendylifestyle46@gmail.com)
 
 ## Current status

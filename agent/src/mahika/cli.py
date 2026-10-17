@@ -717,6 +717,41 @@ def cmd_reports_analyze(args: argparse.Namespace) -> int:
     return 0 if not bundle.errors else 1
 
 
+def cmd_sp_api_status(_: argparse.Namespace) -> int:
+    """Print SP-API credential + connectivity summary (no secrets)."""
+    from mahika.sp_api.client import check_status
+
+    sp = check_status()
+    mode = "sandbox" if sp.sandbox_mode else "production"
+    print("=== Mahika SP-API ===")
+    print(f"Mode:         {mode}")
+    print(f"Marketplace:  {settings.sp_api_marketplace_id}")
+    print(f"Region:       {settings.sp_api_region}")
+    print(f"Configured:   {sp.configured}")
+    if sp.configured:
+        print(f"LWA OK:       {sp.lwa_ok}")
+        print(f"API reachable:{sp.api_reachable}")
+        print(f"Detail:       {sp.detail}")
+        cid = settings.sp_api_lwa_client_id
+        if cid:
+            print(f"LWA Client ID:{cid[:24]}...{cid[-8:]}")
+    else:
+        print("Detail:       credentials missing — see agent/Graphs & workflows/mahika-sp-api/FLOW.md")
+    print()
+    print("Next: python -m mahika.cli sp-api probe  |  doctor [8/10]")
+    return 0 if sp.configured and sp.api_reachable else 1
+
+
+def cmd_sp_api_probe(_: argparse.Namespace) -> int:
+    """Run full SP-API endpoint matrix (delegates to scripts/sp_api_probe.py)."""
+    import runpy
+    from pathlib import Path
+
+    probe = Path(__file__).resolve().parents[2] / "scripts" / "sp_api_probe.py"
+    runpy.run_path(str(probe), run_name="__main__")
+    return 0
+
+
 # ─── Top-level parser ────────────────────────────────────────────────────
 
 
@@ -750,6 +785,15 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_doctor = subs.add_parser("doctor", help="Self-diagnostic — verify wiring before launch")
     p_doctor.set_defaults(func=cmd_doctor)
+
+    p_sp_api = subs.add_parser("sp-api", help="Amazon SP-API setup verify (Project Alpha)")
+    sp_api_subs = p_sp_api.add_subparsers(dest="sp_api_command", required=True)
+
+    p_sp_status = sp_api_subs.add_parser("status", help="Credential + connectivity summary")
+    p_sp_status.set_defaults(func=cmd_sp_api_status)
+
+    p_sp_probe = sp_api_subs.add_parser("probe", help="Full sandbox/production endpoint probe (JSON)")
+    p_sp_probe.set_defaults(func=cmd_sp_api_probe)
 
     p_mode = subs.add_parser("mode", help="Flip MAHIKA_MODE (shadow/manual/live/paused) in .env")
     p_mode.add_argument("new_mode", choices=["shadow", "manual", "live", "paused"],

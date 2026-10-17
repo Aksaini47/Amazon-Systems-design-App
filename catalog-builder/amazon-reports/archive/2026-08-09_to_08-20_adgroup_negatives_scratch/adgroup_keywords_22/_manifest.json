@@ -1,0 +1,222 @@
+[
+  {
+    "brand": "REALME",
+    "model": "Realme 13 Pro",
+    "asin": "B0HDFZZ5B4",
+    "sku": "RLM13ProOG",
+    "adgroup_name": "Realme 13 Pro",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Realme 13 Pro.txt"
+  },
+  {
+    "brand": "REALME",
+    "model": "Realme 3 Pro",
+    "asin": "B0HCK366XC",
+    "sku": "RM3PWFOG",
+    "adgroup_name": "Realme 3 Pro",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Realme 3 Pro.txt"
+  },
+  {
+    "brand": "VIVO",
+    "model": "Vivo T1",
+    "asin": "B0FRSXRHT1",
+    "sku": "T12021CARE",
+    "adgroup_name": "Vivo T1",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Vivo T1.txt"
+  },
+  {
+    "brand": "VIVO",
+    "model": "Vivo X70 Pro Plus",
+    "asin": "B0GKGJYJB8",
+    "sku": "VVX70Pro+OG",
+    "adgroup_name": "Vivo X70 Pro Plus",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Vivo X70 Pro Plus.txt"
+  },
+  {
+    "brand": "VIVO",
+    "model": "Vivo V15",
+    "asin": "B0FRSX29JG",
+    "sku": "V15CARE",
+    "adgroup_name": "Vivo V15",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Vivo V15.txt"
+  },
+  {
+    "brand": "OPPO",
+    "model": "Oppo F27",
+    "asin": "B0HCLLHS21",
+    "sku": "OPF275GOLED",
+    "adgroup_name": "Oppo F27",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Oppo F27.txt"
+  },
+  {
+    "brand": "OPPO",
+    "model": "Oppo Reno 13 Pro Plus",
+    "asin": "B0HDFVL6LH",
+    "sku": "RNO13Pro+OG",
+    "adgroup_name": "Oppo Reno 13 Pro Plus",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Oppo Reno 13 Pro Plus.txt"
+  },
+  {
+    "brand": "ONEPLUS",
+    "model": "OnePlus 9",
+    "asin": "B0GKGHFWJR",
+    "sku": "1+9CARE",
+    "adgroup_name": "OnePlus 9",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\OnePlus 9.txt"
+  },
+  {
+    "brand": "SAMSUNG",
+    "model": "Galaxy J7 Next",
+    "asin": "B0FRSXD3DJ",
+    "sku": "J7NXTGLED",
+    "adgroup_name": "Galaxy J7 Next",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Galaxy J7 Next.txt"
+  },
+  {
+    "brand": "SAMSUNG",
+    "model": "Galaxy A73",
+    "asin": "B0HDGCQ6WM",
+    "sku": "SAMA73LED",
+    "adgroup_name": "Galaxy A73",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Galaxy A73.txt"
+  },
+  {
+    "brand": "SAMSUNG",
+    "model": "Galaxy S21 FE",
+    "asin": "B0HDG1TG28",
+    "sku": "GLXS21FeWFLED",
+    "adgroup_name": "Galaxy S21 FE",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Galaxy S21 FE.txt"
+  },
+  {
+    "brand": "SAMSUNG",
+    "model": "Galaxy A23",
+    "asin": "B0HDFPKK2R",
+    "sku": "A234GLCD",
+    "adgroup_name": "Galaxy A23",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Galaxy A23.txt"
+  },
+  {
+    "brand": "SAMSUNG",
+    "model": "Galaxy J7 (2016)",
+    "asin": "B0FRSX38GS",
+    "sku": "J716LEDG",
+    "adgroup_name": "Galaxy J7 (2016)",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Galaxy J7 2016.txt"
+  },
+  {
+    "brand": "SAMSUNG",
+    "model": "Galaxy J7 Max",
+    "asin": "B0FRSVDZ3C",
+    "sku": "J7MXGLED",
+    "adgroup_name": "Galaxy J7 Max",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Galaxy J7 Max.txt"
+  },
+  {
+    "brand": "SAMSUNG",
+    "model": "Galaxy S20 FE",
+    "asin": "B0GKGVNXNL",
+    "sku": "GLXS20FeWFLED",
+    "adgroup_name": "Galaxy S20 FE",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Galaxy S20 FE.txt"
+  },
+  {
+    "brand": "APPLE",
+    "model": "iPhone 13",
+    "asin": "B0FRSZG47F",
+    "sku": "IP13OG",
+    "adgroup_name": "iPhone 13",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\iPhone 13.txt"
+  },
+  {
+    "brand": "XIAOMI",
+    "model": "Redmi Note 10T",
+    "asin": "B0FRSYSSLR",
+    "sku": "RN10T",
+    "adgroup_name": "Redmi Note 10T",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Redmi Note 10T.txt"
+  },
+  {
+    "brand": "XIAOMI",
+    "model": "Poco X3",
+    "asin": "B0HDG1FW2K",
+    "sku": "POCOX3LCD",
+    "adgroup_name": "Poco X3",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Poco X3.txt"
+  },
+  {
+    "brand": "XIAOMI",
+    "model": "Poco M4",
+    "asin": "B0FRSZGRSH",
+    "sku": "POCOM4",
+    "adgroup_name": "Poco M4",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Poco M4.txt"
+  },
+  {
+    "brand": "MIX",
+    "model": "Nokia G21",
+    "asin": "B0FRSX4KTN",
+    "sku": "NKG21",
+    "adgroup_name": "Nokia G21",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Nokia G21.txt"
+  },
+  {
+    "brand": "MIX",
+    "model": "Moto Edge 50 Fusion",
+    "asin": "B0HDG8C19K",
+    "sku": "EDGE50FusionOG",
+    "adgroup_name": "Moto Edge 50 Fusion",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Moto Edge 50 Fusion.txt"
+  },
+  {
+    "brand": "MIX",
+    "model": "Asus ROG Phone 2",
+    "asin": "B0GKH32FK8",
+    "sku": "ROG2CARE",
+    "adgroup_name": "Asus ROG Phone 2",
+    "bid": 3.0,
+    "keyword_count_unique": 13,
+    "keyword_file": "C:\\Projects\\Amazon Systems Design\\catalog-builder\\amazon-reports\\adgroup_keywords_22\\Asus ROG Phone 2.txt"
+  }
+]

@@ -1,0 +1,37 @@
+Bulk Create 25 — Verification Summary
+=====================================
+
+Upload
+------
+- File: bulk_create_25_quality.xlsm (25 CREATE rows)
+- Submitted: 6 Jul 2026 12:05 am IST
+- Batch ID: 50001020639
+- Status page: https://sellercentral.amazon.in/listing/status
+- Last check: In Progress (SKUs N/A until Amazon finishes)
+
+Processing report
+-----------------
+- Download from listing/status when status = Done
+- Save as: bulk_create_25_processing_report.xlsm
+
+Projected quality match (merged listings simulation)
+----------------------------------------------------
+- Injected 25 new SKUs from bulk_create_25_review.csv into All Listings
+- Exact quality match: 75 → 92 models (+17)
+- Still missing: 8 models (all *Frame* stock lines — stock name has no LCD/Incell token so matcher uses screen=Not Specified vs listing LCD)
+  - Realme 3 Pro Frame, Oppo F5 Frame, Redmi Note 5/10T/12/12 5G/13 Pro+ Frame, Moto G34 Frame
+- Listings were created with "(with Frame) LCD" titles — live on Amazon after processing; matcher needs Not Specified↔LCD rule for frame-only stock names
+
+Sir follow-up
+-------------
+1. Refresh listing/status in ~30 min — confirm 25/25 processed
+2. Download processing report — fix any rejected SKUs
+3. Download fresh All Listings report → re-run stock_inventory_check.py
+4. Skim bulk_create_25_review.csv for 7 flagged price rows
+
+Scripts added
+-------------
+- create_bulk_new_listings.py — generator
+- upload_bulk_to_sc.py — Playwright upload (Glass CDP blocks file input)
+- check_bulk_upload_status.py / poll_bulk_upload_status.py — status at /listing/status
+- verify_post_bulk.py — merged-listings quality projection

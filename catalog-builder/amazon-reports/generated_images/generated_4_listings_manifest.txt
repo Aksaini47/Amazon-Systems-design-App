@@ -1,0 +1,18 @@
+Generated images — 4 listings
+Format: 1600x1600 JPEG RGB (matched Mongo ref)
+
+## RMREALMEC6LCD
+  https://pub-2be59690485b49cdae3ba428a423bf95.r2.dev/products/GEN_RMREALMEC6LCD/RMREALMEC6LCD_1.jpg
+  https://pub-2be59690485b49cdae3ba428a423bf95.r2.dev/products/GEN_RMREALMEC6LCD/RMREALMEC6LCD_2.jpg
+
+## OPF17PROOLED
+  https://pub-2be59690485b49cdae3ba428a423bf95.r2.dev/products/GEN_OPF17PROOLED/OPF17PROOLED_1.jpg
+  https://pub-2be59690485b49cdae3ba428a423bf95.r2.dev/products/GEN_OPF17PROOLED/OPF17PROOLED_2.jpg
+
+## MXMOTOG34WF
+  https://pub-2be59690485b49cdae3ba428a423bf95.r2.dev/products/GEN_MXMOTOG34WF/MXMOTOG34WF_1.jpg
+  https://pub-2be59690485b49cdae3ba428a423bf95.r2.dev/products/GEN_MXMOTOG34WF/MXMOTOG34WF_2.jpg
+
+## MXASUSROGPLCD
+  https://pub-2be59690485b49cdae3ba428a423bf95.r2.dev/products/GEN_MXASUSROGPLCD/MXASUSROGPLCD_1.jpg
+  https://pub-2be59690485b49cdae3ba428a423bf95.r2.dev/products/GEN_MXASUSROGPLCD/MXASUSROGPLCD_2.jpg

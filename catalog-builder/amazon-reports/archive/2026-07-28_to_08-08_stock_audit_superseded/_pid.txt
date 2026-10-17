@@ -1,0 +1,1 @@
+R9 | Product Id Type - [ PHONE_ACCESSORY ] -> ['EAN', 'GTIN', 'UPC', 'ASIN', 'GTIN Exempt']

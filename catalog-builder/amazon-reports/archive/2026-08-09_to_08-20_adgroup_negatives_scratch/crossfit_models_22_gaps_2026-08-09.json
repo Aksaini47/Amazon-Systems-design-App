@@ -1,0 +1,330 @@
+[
+  {
+    "brand": "REALME",
+    "target_model": "Realme 13 Pro",
+    "device_matches": [
+      {
+        "_id": "69db9ab3117f1ef67dd9ac94",
+        "modelName": "13 Pro",
+        "brandSlug": "xiaomi"
+      },
+      {
+        "_id": "69db9ab4117f1ef67dd9b0b5",
+        "modelName": "13 Pro",
+        "brandSlug": "realme"
+      }
+    ],
+    "compatible_models": []
+  },
+  {
+    "brand": "REALME",
+    "target_model": "Realme 3 Pro",
+    "device_matches": [
+      {
+        "_id": "6a0769d6487d46c8054d3d9f",
+        "modelName": "Realme 3 Pro",
+        "brandSlug": "oppo"
+      },
+      {
+        "_id": "69db9ab4117f1ef67dd9b0cb",
+        "modelName": "3 Pro",
+        "brandSlug": "realme"
+      }
+    ],
+    "compatible_models": [
+      "Realme X Lite"
+    ]
+  },
+  {
+    "brand": "VIVO",
+    "target_model": "Vivo T1",
+    "device_matches": [
+      {
+        "_id": "69db9ab2117f1ef67dd9a9fd",
+        "modelName": "T1",
+        "brandSlug": "vivo"
+      }
+    ],
+    "compatible_models": []
+  },
+  {
+    "brand": "VIVO",
+    "target_model": "Vivo X70 Pro Plus",
+    "device_matches": [],
+    "compatible_models": [],
+    "note": "NO_EXACT_DEVICE_MATCH",
+    "loose_candidates": []
+  },
+  {
+    "brand": "VIVO",
+    "target_model": "Vivo V15",
+    "device_matches": [
+      {
+        "_id": "69db9ab2117f1ef67dd9a930",
+        "modelName": "V15",
+        "brandSlug": "vivo"
+      }
+    ],
+    "compatible_models": []
+  },
+  {
+    "brand": "OPPO",
+    "target_model": "Oppo F27",
+    "device_matches": [
+      {
+        "_id": "69db9ab3117f1ef67dd9ae34",
+        "modelName": "F27",
+        "brandSlug": "oppo"
+      }
+    ],
+    "compatible_models": []
+  },
+  {
+    "brand": "OPPO",
+    "target_model": "Oppo Reno 13 Pro Plus",
+    "device_matches": [],
+    "compatible_models": [],
+    "note": "NO_EXACT_DEVICE_MATCH",
+    "loose_candidates": []
+  },
+  {
+    "brand": "ONEPLUS",
+    "target_model": "OnePlus 9",
+    "device_matches": [
+      {
+        "_id": "69db9ab3117f1ef67dd9af06",
+        "modelName": "9",
+        "brandSlug": "honor"
+      },
+      {
+        "_id": "69db9ab4117f1ef67dd9b0e1",
+        "modelName": "9",
+        "brandSlug": "realme"
+      },
+      {
+        "_id": "69db9ab5117f1ef67dd9b504",
+        "modelName": "9",
+        "brandSlug": "oneplus"
+      }
+    ],
+    "compatible_models": []
+  },
+  {
+    "brand": "SAMSUNG",
+    "target_model": "Galaxy J7 Next",
+    "device_matches": [],
+    "compatible_models": [],
+    "note": "NO_EXACT_DEVICE_MATCH",
+    "loose_candidates": []
+  },
+  {
+    "brand": "SAMSUNG",
+    "target_model": "Galaxy A73",
+    "device_matches": [
+      {
+        "_id": "69db9aaf117f1ef67dd99ce0",
+        "modelName": "A73",
+        "brandSlug": "micromax"
+      },
+      {
+        "_id": "69db9ab0117f1ef67dd99ebc",
+        "modelName": "A73",
+        "brandSlug": "lava"
+      },
+      {
+        "_id": "69db9ab3117f1ef67dd9ada7",
+        "modelName": "A73",
+        "brandSlug": "oppo"
+      }
+    ],
+    "compatible_models": []
+  },
+  {
+    "brand": "SAMSUNG",
+    "target_model": "Galaxy S21 FE",
+    "device_matches": [],
+    "compatible_models": [],
+    "note": "NO_EXACT_DEVICE_MATCH",
+    "loose_candidates": [
+      "Galaxy S21 FE 5G"
+    ]
+  },
+  {
+    "brand": "SAMSUNG",
+    "target_model": "Galaxy A23",
+    "device_matches": [
+      {
+        "_id": "69db9ab0117f1ef67dd9a1d6",
+        "modelName": "Galaxy A23",
+        "brandSlug": "samsung"
+      }
+    ],
+    "compatible_models": []
+  },
+  {
+    "brand": "SAMSUNG",
+    "target_model": "Galaxy J7 (2016)",
+    "device_matches": [
+      {
+        "_id": "69db9ab1117f1ef67dd9a316",
+        "modelName": "Galaxy J7 (2016)",
+        "brandSlug": "samsung"
+      }
+    ],
+    "compatible_models": [
+      "Galaxy On7",
+      "Galaxy On8",
+      "J7 Duos, J710F, J710FN, J710M, J710MN(White",
+      "J7 Duos, J710F, J710FN, J710M, J710MN, J7108(Black",
+      "J700"
+    ]
+  },
+  {
+    "brand": "SAMSUNG",
+    "target_model": "Galaxy J7 Max",
+    "device_matches": [
+      {
+        "_id": "69db9ab1117f1ef67dd9a31a",
+        "modelName": "Galaxy J7 Max",
+        "brandSlug": "samsung"
+      }
+    ],
+    "compatible_models": []
+  },
+  {
+    "brand": "SAMSUNG",
+    "target_model": "Galaxy S20 FE",
+    "device_matches": [
+      {
+        "_id": "69db9ab0117f1ef67dd9a237",
+        "modelName": "Galaxy S20 FE",
+        "brandSlug": "samsung"
+      }
+    ],
+    "compatible_models": []
+  },
+  {
+    "brand": "APPLE",
+    "target_model": "iPhone 13",
+    "device_matches": [
+      {
+        "_id": "69db9ab5117f1ef67dd9b4a9",
+        "modelName": "iPhone 13",
+        "brandSlug": "apple"
+      },
+      {
+        "_id": "69db9ab3117f1ef67dd9ac92",
+        "modelName": "13",
+        "brandSlug": "xiaomi"
+      },
+      {
+        "_id": "69db9ab4117f1ef67dd9b0b3",
+        "modelName": "13",
+        "brandSlug": "realme"
+      },
+      {
+        "_id": "69db9ab5117f1ef67dd9b4ea",
+        "modelName": "13",
+        "brandSlug": "oneplus"
+      }
+    ],
+    "compatible_models": []
+  },
+  {
+    "brand": "XIAOMI",
+    "target_model": "Redmi Note 10T",
+    "device_matches": [],
+    "compatible_models": [],
+    "note": "NO_EXACT_DEVICE_MATCH",
+    "loose_candidates": [
+      "Redmi Note 10T 5G"
+    ]
+  },
+  {
+    "brand": "XIAOMI",
+    "target_model": "Poco X3",
+    "device_matches": [
+      {
+        "_id": "69db9ab0117f1ef67dd99ee6",
+        "modelName": "X3",
+        "brandSlug": "lava"
+      },
+      {
+        "_id": "69db9ab1117f1ef67dd9a5df",
+        "modelName": "X3",
+        "brandSlug": "lg"
+      },
+      {
+        "_id": "69db9ab4117f1ef67dd9b134",
+        "modelName": "X3",
+        "brandSlug": "realme"
+      },
+      {
+        "_id": "6a071ec3bef6d06ede30cdaf",
+        "modelName": "X3",
+        "brandSlug": "cubot"
+      },
+      {
+        "_id": "6a071f10bef6d06ede30d594",
+        "modelName": "X3",
+        "brandSlug": "nokia"
+      },
+      {
+        "_id": "6a071f17bef6d06ede30d65a",
+        "modelName": "X3",
+        "brandSlug": "o2"
+      },
+      {
+        "_id": "69db9ab3117f1ef67dd9acfc",
+        "modelName": "Poco X3",
+        "brandSlug": "poco"
+      },
+      {
+        "_id": "6a071f8bbef6d06ede30e1b0",
+        "modelName": "Poco X3",
+        "brandSlug": "poco"
+      }
+    ],
+    "compatible_models": [
+      "Mi 10T Lite 5G",
+      "Redmi Note 9 Pro 5G"
+    ]
+  },
+  {
+    "brand": "XIAOMI",
+    "target_model": "Poco M4",
+    "device_matches": [],
+    "compatible_models": [],
+    "note": "NO_EXACT_DEVICE_MATCH",
+    "loose_candidates": [
+      "Poco M4 5G",
+      "Poco M4 5G (India)",
+      "Poco M4 Pro",
+      "Poco M4 Pro 5G"
+    ]
+  },
+  {
+    "brand": "MIX",
+    "target_model": "Nokia G21",
+    "device_matches": [],
+    "compatible_models": [],
+    "note": "NO_EXACT_DEVICE_MATCH",
+    "loose_candidates": []
+  },
+  {
+    "brand": "MIX",
+    "target_model": "Moto Edge 50 Fusion",
+    "device_matches": [],
+    "compatible_models": [],
+    "note": "NO_EXACT_DEVICE_MATCH",
+    "loose_candidates": []
+  },
+  {
+    "brand": "MIX",
+    "target_model": "Asus ROG Phone 2",
+    "device_matches": [],
+    "compatible_models": [],
+    "note": "NO_EXACT_DEVICE_MATCH",
+    "loose_candidates": []
+  }
+]

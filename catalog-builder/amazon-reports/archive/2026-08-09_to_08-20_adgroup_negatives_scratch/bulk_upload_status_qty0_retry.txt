@@ -1,0 +1,44 @@
+Checked: 2026-07-31 ~01:20 IST
+Account: Badeja Enterprises · India
+URL: https://sellercentral.amazon.in/listing/status?reference_id=107438020664
+Also: https://sellercentral.amazon.in/product-search/bulk-upload-status
+Source: Glass browser (logged-in session) — Add Products via Upload / Check Upload Status
+
+FILE
+  Name: PHONE_ACCESSORY_oos_qty0_partial.xlsm
+  Uploaded: 31 July 2026 at 1:13 am
+  File type: Product Spreadsheet File
+  Batch ID: 107438020664
+  Local project: catalog-builder/amazon-reports/PHONE_ACCESSORY_oos_qty0_partial.xlsm
+  Downloads copy: C:\Users\DELL\Downloads\PHONE_ACCESSORY_oos_qty0_partial.xlsm
+
+STATUS (final)
+  UI status: Done
+  SKUs successful / submitted: 21 / 21
+  Processing summary: Download Processing Summary available (no Action required)
+  Error 99022: GONE — not present on this batch (fix confirmed)
+
+TIMELINE
+  ~01:13 IST — submitted; In Queue → In Progress; SKUs N/A
+  ~01:16 IST — still In Progress (recheck 1)
+  ~01:20 IST — Done · 21 / 21 (recheck 2 after ~4–5 min wait)
+
+FIX APPLIED (vs failed batch 107425020664 / Error 99022)
+  Template sheet5 only (not Instructions/sheet1)
+  A = SKU (21 from manifest)
+  B = PHONE_ACCESSORY
+  C = Edit (Partial Update)
+  CX = DEFAULT  (Fulfillment Channel Code IN / MFN)  ← was empty, caused 99022
+  CY = set_qty 1 or 2 from master (restock intent — NOT 0)
+
+PREVIOUS FAILED BATCH (ignore for primary result)
+  Batch ID: 107425020664
+  Status: Action required · 0/21
+  Error 99022: missing fulfillment_channel_code on all 21 rows
+
+SCREENSHOT
+  catalog-builder/amazon-reports/bulk_upload_oos_retry_status_done.png
+
+BUILD
+  Script: catalog-builder/amazon-reports/_build_oos_qty0_partial.py
+  Manifest: catalog-builder/amazon-reports/PHONE_ACCESSORY_oos_qty0_manifest.csv

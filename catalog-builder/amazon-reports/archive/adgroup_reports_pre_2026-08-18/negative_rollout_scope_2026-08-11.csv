@@ -1,0 +1,69 @@
+ad_group_name,ad_group_id,term,match_type_added,origin_batch,notes
+Realme 9,,4g,PHRASE,2026-08-11,
+Galaxy S21 FE,,5g,PHRASE,2026-08-11,
+Vivo Y22/Y22s,,4g,PHRASE,2026-08-11,
+Oppo A53,,4g,PHRASE,2026-08-11,
+Oppo A53,,5g,PHRASE,2026-08-11,
+Realme 8,,4g,PHRASE,2026-08-11,
+Realme 8,,5g,PHRASE,2026-08-11,
+Realme 8,,pro,PHRASE,2026-08-11,
+Oppo A57,,4g,PHRASE,2026-08-11,
+Oppo A57,,5g,PHRASE,2026-08-11,
+Poco M4,,4g,PHRASE,2026-08-11,
+1+ 7,,pro,PHRASE,2026-08-11,
+Mi 11X,,pro,PHRASE,2026-08-11,
+Realme 8i,,5g,PHRASE,2026-08-11,
+Oppo A54,,4g,PHRASE,2026-08-11,
+Vivo V15,,pro,PHRASE,2026-08-11,
+Galaxy A23,,5g,PHRASE,2026-08-11,
+1+ Nord CE 2 Lite,,5g,PHRASE,2026-08-11,
+1+ Nord CE 2 Lite,,plus,PHRASE,2026-08-11,
+Vivo T2x,,5g,PHRASE,2026-08-11,
+Redmi Note 10T,,5g,PHRASE,2026-08-11,
+Redmi Note 5,,pro,PHRASE,2026-08-11,
+Galaxy A73,,5g,PHRASE,2026-08-11,
+OnePlus 9,,5g,PHRASE,2026-08-11,
+OnePlus 9,,pro,PHRASE,2026-08-11,
+Vivo V17,,max,PHRASE,2026-08-11,
+Vivo V17,,pro,PHRASE,2026-08-11,
+Redmi 12,,4g,PHRASE,2026-08-11,
+Redmi 12,,5g,PHRASE,2026-08-11,
+Redmi 12,,pro,PHRASE,2026-08-11,
+Oppo F5,,5g,PHRASE,2026-08-11,
+Oppo F5,,pro,PHRASE,2026-08-11,
+Oppo F19 / F19 Pro,,4g,PHRASE,2026-08-11,
+Oppo F19 / F19 Pro,,5g,PHRASE,2026-08-11,
+Oppo F19 / F19 Pro,,plus,PHRASE,2026-08-11,
+Galaxy A32,,4g,PHRASE,2026-08-11,"DOUBLE ORIGIN: also has 07-22 batch negatives (pro/max/plus/5g phrase + 4g exact) - verify live state carefully, may have duplicate 4g rows (phrase from today + exact from 07-22)"
+OnePlus 9RT,,5g,PHRASE,2026-08-11,
+Realme 9i,,4g,PHRASE,2026-08-11,
+Realme 9i,,5g,PHRASE,2026-08-11,
+Poco X3,,pro,PHRASE,2026-08-11,
+Infinix Hot 9,,pro,PHRASE,2026-08-11,
+Oppo F27,,5g,PHRASE,2026-08-11,
+Oppo F27,,plus,PHRASE,2026-08-11,
+Oppo F27,,pro,PHRASE,2026-08-11,
+Vivo T1 (2022),,4g,PHRASE,2026-08-11,
+Vivo T1 (2022),,5g,PHRASE,2026-08-11,
+Vivo T1 (2022),,pro,PHRASE,2026-08-11,
+OnePlus 10 Pro,,5g,PHRASE,2026-08-11,
+Oneplus 10R,,5g,PHRASE,2026-08-11,
+Realme 13 Pro,,5g,PHRASE,2026-08-11,
+Realme 13 Pro,,plus,PHRASE,2026-08-11,
+Moto Edge 50 Fusion,,5g,PHRASE,2026-08-11,
+Galaxy A30s,,4g,PHRASE,2026-08-11,
+Oppo F9,,5g,PHRASE,2026-08-11,
+Oppo F9,,plus,PHRASE,2026-08-11,
+Oppo F9,,pro,PHRASE,2026-08-11,
+Asus Zenfone Max M2,A08680473JXEFV7KTWPKK,pro,PHRASE,2026-07-22,"New to scope per Sir's 'dono batches' decision (not in 08-11 bleed file, expected - different batch)"
+Asus Zenfone Max M2,A08680473JXEFV7KTWPKK,plus,PHRASE,2026-07-22,"New to scope per Sir's 'dono batches' decision (not in 08-11 bleed file, expected - different batch)"
+Honor 7X (Black),A020003114YZJSET85GCA,pro,PHRASE,2026-07-22,"New to scope per Sir's 'dono batches' decision (not in 08-11 bleed file, expected - different batch)"
+Honor 7X (Black),A020003114YZJSET85GCA,max,PHRASE,2026-07-22,"New to scope per Sir's 'dono batches' decision (not in 08-11 bleed file, expected - different batch)"
+Honor 7X (Black),A020003114YZJSET85GCA,plus,PHRASE,2026-07-22,"New to scope per Sir's 'dono batches' decision (not in 08-11 bleed file, expected - different batch)"
+Honor 7X (Black),A020003114YZJSET85GCA,5g,PHRASE,2026-07-22,"New to scope per Sir's 'dono batches' decision (not in 08-11 bleed file, expected - different batch)"
+Honor 7X (Black),A020003114YZJSET85GCA,4g,PHRASE,2026-07-22,"New to scope per Sir's 'dono batches' decision (not in 08-11 bleed file, expected - different batch)"
+Honor 7X (White),A02297261MRLB24UL9RO4,pro,PHRASE,2026-07-22,"New to scope per Sir's 'dono batches' decision (not in 08-11 bleed file, expected - different batch)"
+Honor 7X (White),A02297261MRLB24UL9RO4,max,PHRASE,2026-07-22,"New to scope per Sir's 'dono batches' decision (not in 08-11 bleed file, expected - different batch)"
+Honor 7X (White),A02297261MRLB24UL9RO4,plus,PHRASE,2026-07-22,"New to scope per Sir's 'dono batches' decision (not in 08-11 bleed file, expected - different batch)"
+Honor 7X (White),A02297261MRLB24UL9RO4,5g,PHRASE,2026-07-22,"New to scope per Sir's 'dono batches' decision (not in 08-11 bleed file, expected - different batch)"
+Honor 7X (White),A02297261MRLB24UL9RO4,4g,PHRASE,2026-07-22,"New to scope per Sir's 'dono batches' decision (not in 08-11 bleed file, expected - different batch)"

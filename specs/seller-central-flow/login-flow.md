@@ -4,6 +4,23 @@
 **Troubleshooting:** `specs/cursor-browser-troubleshooting.md`  
 **Verified Glass login:** 2026-06-25 (Cursor built-in browser, side panel)
 
+## Hard rule — agent owns login (never ask Sir)
+
+- **Never ask Sir to complete login / Sign-In manually.** Agent runs S1→S7 (or Ads Console Sign-In equivalent) end-to-end.
+- OTP only via Telegram `@mahika_arun_bot` + `otp-watch --force` (poll `data/mahika/sessions/cursor_otp.txt`). Sir may paste OTP to the bot; agent never asks Sir to type credentials or click through Sign-In.
+- Same Amazon auth applies when **Ads Console** shows Sign-In. After auth, land on the target **Ads campaign URL** (ad-groups / create), not only Seller Central `/home`.
+
+## Canonical homes (Sir 2026-07-22 evening)
+
+| Role | ONLY landing URL |
+|---|---|
+| **Normal Seller Central** | `https://sellercentral-europe.amazon.com/` |
+| **Ads homepage** | `https://advertising.amazon.in/campaign-manager/all-campaigns?entityId=ENTITY37NJTG1VOHVTB` |
+
+- **Never** open retail `www.amazon.in` / `amazon.in` for SC or Ads work.
+- India **signin** URL below is still valid for auth when needed; after login, land on **europe SC** or **Ads homepage / deep link** as the task requires — not retail amazon.in.
+- Login stuck → stay in this doc (S1→S7 + `otp-watch --force`); never ask Sir to login manually.
+
 ---
 
 ## Lanes (pick one)
@@ -126,7 +143,8 @@ OTP ke baad seedha `/home` aa sakta hai (account already selected). Agar `/accou
 
 ### Success criteria
 
-- URL: `sellercentral.amazon.in/home` (India dashboard), **or**
+- Landed on Sir’s normal SC home `sellercentral-europe.amazon.com` (or `/home` after switcher), **or**
+- Task is Ads → `advertising.amazon.in` Ads homepage / campaign deep link (never retail amazon.in), **or**
 - S7 completed → home
 - Sir confirms in chat
 

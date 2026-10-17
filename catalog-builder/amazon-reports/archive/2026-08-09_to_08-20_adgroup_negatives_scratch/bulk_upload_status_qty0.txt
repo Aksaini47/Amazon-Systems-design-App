@@ -1,0 +1,46 @@
+Checked: 2026-07-31 ~01:04 IST
+Account: Badeja Enterprises · India
+URL: https://sellercentral.amazon.in/listing/status?reference_id=107425020664&account_id=amzn1.merchant.o.AF2WD92BX5KMB
+Also: https://sellercentral.amazon.in/product-search/bulk-upload-status
+Source: Chrome for Testing (logged-in session) + Download Processing Summary
+
+FILE
+  Name: PHONE_ACCESSORY_oos_qty0_partial.xlsm
+  Uploaded: 31 July 2026 at 12:26 am
+  File type: Product Spreadsheet File
+  Batch ID: 107425020664
+
+STATUS
+  UI status: Action required
+  SKUs successful / submitted: 0 / 21
+  NOT Done / NOT In Progress / NOT Failed (hard fail badge) — Action required
+
+PROCESSING SUMMARY (downloaded)
+  Local copy: catalog-builder/amazon-reports/PHONE_ACCESSORY_oos_qty0_partial-processing-summary.xlsm
+  Downloads: C:\Users\DELL\Downloads\PHONE_ACCESSORY_oos_qty0_partial-processing-summary.xlsm
+  Number of SKUs processed: 21
+  Number of SKUs successful: 0
+  Number of SKUs successful with other errors: 0
+  Number of SKUs unsuccessful due to errors: 21
+  Number of SKUs with warnings: 0
+
+ERROR (all 21 SKUs — same)
+  Error code: 99022
+  Category: ERROR
+  Message: The field 'fulfillment_channel_code' for the attribute 'Fulfillment Channel Code' does not have enough values. The required minimum is '1' value(s).
+  Affected field: Fulfillment Channel Code (IN) (column DA)
+
+AFFECTED SKUs
+  11PMAXOLED, IP13PMGX, IP13ProGx, IP14PMLCD, INFNOT10TFT,
+  1+10PROCARE, 1+11RCARE, 1+7CARE, 1+8CARE, 1+9CARE,
+  F17PROLED, RNO10Pro+OG, RLM11ProOG, RLM13ProOG, GLXS20FeWFLED,
+  V11PROLED, V17CARE, VVX70Pro+OG, VVX80OG, Mi11i/11XOLED, POCOM4
+
+NOTE
+  Listing Action on rows: Edit (Partial Update)
+  Fulfillment Channel Code (IN) column was EMPTY on all 21 rows (root fail).
+  Quantity (IN) in uploaded/summary rows was 1 or 2 — NOT 0. OOS qty=0 was not applied in this feed.
+  Fix for re-upload: set Fulfillment Channel Code (IN) = DEFAULT (MFN) on every row, set Quantity (IN) = 0, then re-submit Partial Update.
+
+SCREENSHOT
+  catalog-builder/amazon-reports/bulk_upload_status_qty0.png

@@ -1,0 +1,105 @@
+2 | Title | Compatible for Motorola Moto G6 Play (Gold) LCD Display+Touch Screen C
+3 | SKU | MOTOG6PLAYG
+4 | Product Type | CELLULAR_PHONE
+5 | Listing Action | Edit (Partial Update)
+6 | Parentage Level | None
+7 | Parent SKU | None
+9 | Item Name | Compatible for Motorola Moto G6 Play (Gold) LCD Display+Touch Screen C
+10 | Brand Name | Generic
+11 | Product Id Type | None
+12 | Product Id | None
+13 | Recommended Browse Nodes | Mobile Screen Guards (1389425031)
+14 | Recommended Browse Nodes | None
+15 | Recommended Browse Nodes | None
+16 | Recommended Browse Nodes | None
+17 | Recommended Browse Nodes | None
+18 | Model Number | MOTOG6PLAYG
+19 | Model Name | None
+20 | Manufacturer | Generic
+29 | Main Image URL | https://m.media-amazon.com/images/I/51YaowaZIiL.jpg
+30 | Other Image URL | None
+31 | Other Image URL | None
+32 | Other Image URL | None
+33 | Other Image URL | None
+34 | Other Image URL | None
+35 | Other Image URL | None
+36 | Other Image URL | None
+37 | Other Image URL | None
+39 | Product Description | NOTICE: If Any Customer Will Try To Do Any Type Of Fraud/cheating In T
+40 | Bullet Point | 📱 Premium Display Technology 🔹 Grade A LCD/TFT Display – A bright, ene
+41 | Bullet Point | 📲 Perfect Compatibility ✅ Designed for Motorola Moto G6 Play (Gold) – 
+42 | Bullet Point | 🔧 Professional Installation STRONGLY Recommended – Improper installati
+43 | Bullet Point | 🔬 Rigorously Tested for Performance – Each display undergoes strict qu
+44 | Bullet Point | ⚠️ Important Warranty & Installation Info 🛡️ 7-Day Replacement Warrant
+45 | Generic Keyword | Moto G6 Play (Gold) LCD Display
+46 | Generic Keyword | None
+47 | Generic Keyword | None
+48 | Generic Keyword | None
+49 | Generic Keyword | None
+62 | Item Package Quantity | None
+72 | Manufacturer Contact Information | None
+78 | Compatible Phone Models | None
+79 | Compatible Phone Models | None
+80 | Compatible Phone Models | None
+81 | Compatible Phone Models | None
+82 | Compatible Phone Models | None
+232 | Product Grade | None
+283 | Version for Country | None
+284 | Version for Country | None
+285 | Version for Country | None
+286 | Version for Country | None
+287 | Version for Country | None
+399 | Maximum Order Quantity | 1
+402 | Main Image Location | None
+403 | Other Image Location | None
+404 | Other Image Location | None
+405 | Other Image Location | None
+406 | Other Image Location | None
+407 | Other Image Location | None
+419 | Fulfillment Channel Code (IN) | Fulfillment by Merchant (Default)
+420 | Quantity (IN) | None
+421 | Handling Time (IN) | 2
+424 | Your Price INR (Sell on Amazon, IN) | 2226.0
+425 | Maximum Retail Price (Sell on Amazon, IN) | 2999.0
+427 | Minimum Seller Allowed Price (Sell on Amazon, IN) | None
+428 | Maximum Seller Allowed Price (Sell on Amazon, IN) | None
+429 | Sale Price INR (Sell on Amazon, IN) | None
+434 | Your Price INR (Amazon Business (B2B), IN) | None
+435 | Maximum Retail Price (Amazon Business (B2B), IN) | None
+436 | Minimum Seller Allowed Price (Amazon Business (B2B), IN) | None
+437 | Maximum Seller Allowed Price (Amazon Business (B2B), IN) | None
+440 | Quantity Price Type (Amazon Business (B2B), IN) | None
+441 | Quantity Threshold (Lower Bound, Amazon Business (B2B), IN) | None
+442 | Quantity Price (Fixed Price/Percentage Discount, Amazon Business (B2B), IN) | None
+443 | Quantity Threshold (Lower Bound, Amazon Business (B2B), IN) | None
+444 | Quantity Price (Fixed Price/Percentage Discount, Amazon Business (B2B), IN) | None
+445 | Quantity Threshold (Lower Bound, Amazon Business (B2B), IN) | None
+446 | Quantity Price (Fixed Price/Percentage Discount, Amazon Business (B2B), IN) | None
+447 | Quantity Threshold (Lower Bound, Amazon Business (B2B), IN) | None
+448 | Quantity Price (Fixed Price/Percentage Discount, Amazon Business (B2B), IN) | None
+449 | Quantity Threshold (Lower Bound, Amazon Business (B2B), IN) | None
+450 | Quantity Price (Fixed Price/Percentage Discount, Amazon Business (B2B), IN) | None
+458 | Package Weight | 220.00
+459 | Package Weight Unit | Grams
+460 | Master Pack Layers per Pallet Quantity | None
+461 | Master Packs Per Layer Quantity | None
+468 | Number of Boxes | None
+469 | Country of Origin | China
+470 | Warranty Description | 7 Days QC Testing Warranty Only. If You Have Any Issues With The Produ
+471 | Warranty Description | None
+472 | Warranty Description | None
+473 | Warranty Description | None
+474 | Warranty Description | None
+511 | Item Weight | None
+512 | Item Weight Unit | None
+543 | Compliance Media Source Location (en_IN, Warranty) | None
+545 | Manufacturer’s Email or Electronic Address | None
+553 | Base Product Manufacturer Warranty Period | None
+554 | Base Product Warranty Manufacturer Period Unit | None
+555 | Base Product Manufacturer Warranty Terms and Conditions | None
+556 | Steps To Avail Warranty | None
+557 | Warranty Provider Contact Information | None
+579 | Warranty Part Name | None
+580 | Part Warranty Duration | None
+581 | Part Warranty Duration Unit | None
+582 | Part Warranty Terms and Conditions | None

@@ -1,0 +1,110 @@
+MASTER INVENTORY (Reconciled GPT vs Gemini, 2026-08-07)
+# Sir's corrections applied: X80 + Mi 11X Incell + OnePlus 7 CareOG = soldout (dropped);
+# remaining With-Frame conflicts (Redmi 12 / 12 5G / 13 Pro+ / Note 10T) -> non-frame, confirmed by Sir.
+
+REALME
+Realme C67 Incell
+Realme 7i Incell
+Realme 9 Incell
+Realme C33 Incell
+Realme 11 Pro CareOG
+Realme 9i Incell
+Realme C21 Incell
+Realme C30 Incell
+Realme C53 Incell
+Realme 8i Incell
+Realme 13 Pro CareOG
+Realme 3 Pro Frame
+Realme 7 Pro Incell
+
+VIVO
+Vivo Y33s Incell
+Vivo Y22 Incell
+Vivo Y22 CareOG
+Vivo T1 CareOG
+Vivo T2x CareOG
+Vivo X70 Pro Plus CareOG
+Vivo V17 CareOG
+Vivo V15 CareOG
+Vivo Y71 Incell
+
+OPPO
+F17 Pro OLED
+A53 CareOG - 2 QTY
+A57 4G/5G CareOG - 3 QTY
+F19 OLED
+A54 CareOG
+A54 5G Incell
+F27 OLED
+Reno 10 Pro Plus CareOG - 2 QTY
+Reno 13 Pro Plus CareOG
+F5 Black Incell
+
+ONEPLUS
+OnePlus Nord CareOG
+OnePlus 8 CareOG - 2 QTY
+OnePlus 10 Pro CareOG
+OnePlus 8 Pro Incell
+OnePlus 9RT Incell
+OnePlus 9 CareOG
+OnePlus 7 Incell
+
+SAMSUNG
+Galaxy J7 Next Gold Incell - 2 QTY
+Galaxy A73 OLED
+Galaxy S21 FE With Frame OLED
+Galaxy A23 4G Incell - 2 QTY
+Galaxy A32 4G Incell
+Galaxy J7 (2016) Gold Incell
+Galaxy A30s Incell - 2 QTY
+Galaxy J7 Max Gold Incell
+Galaxy S20 FE With Frame OLED
+
+APPLE
+iPhone 13 Pro Max OLED
+iPhone 13 Incell
+iPhone 13 Pro OLED
+iPhone 8 CareOG
+iPhone 11 Incell
+iPhone 13 Pro Max Incell
+iPhone 8 Plus Incell White
+iPhone XS Incell
+iPhone 14 Pro Max Incell
+
+XIAOMI/REDMI/POCO
+Mi 11X OLED
+Mi A3 Incell
+Redmi Note 5 With Frame White
+Redmi 4A With Frame Incell Black
+Redmi Note 10T
+Redmi 12 CareOG
+Redmi 12 Incell
+Redmi 12 5G Incell
+Redmi Note 13 Pro Plus CareOG
+Redmi K20 Incell
+Redmi 10 Power Incell
+Redmi Note 6 Pro Incell
+Redmi Note 7 Incell
+Redmi 6 Pro Incell
+Poco X3 Incell
+Poco M4 Incell
+
+MIX
+Nothing Phone (1) CareOG
+Infinix Note 10 Incell
+Infinix Hot 9 Incell
+Infinix Note 11S Incell
+Honor 7X Incell
+Honor 7X White Incell
+Honor 8C Incell
+Honor X9B CareOG
+Nokia G10 Incell
+Nokia G20 Incell - 2 QTY
+Nokia G21 Incell
+Nokia C3 Incell
+Moto G9 Incell
+Moto G40 Fusion Incell
+Moto Edge 50 Fusion CareOG
+Moto G34 With Frame Incell
+Asus Zenfone Max M2 Incell
+Asus ROG Phone 2 CareOG

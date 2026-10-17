@@ -1,0 +1,362 @@
+[
+  {
+    "ag": "Asus Zenfone Max M2",
+    "asin": "B0CPTCXWK2",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, plus, 5g, 4g",
+    "stock": "Asus Zenfone Max M2 Incell",
+    "brand": "MIX",
+    "model_kw": "Asus Zenfone Max M2"
+  },
+  {
+    "ag": "Galaxy A10",
+    "asin": "B0CPTFBQM4",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Galaxy A10 Incell",
+    "brand": "SAMSUNG",
+    "model_kw": "Galaxy A10"
+  },
+  {
+    "ag": "Galaxy A31",
+    "asin": "B0CPTD4KL9",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Galaxy A31 Incell",
+    "brand": "SAMSUNG",
+    "model_kw": "Galaxy A31"
+  },
+  {
+    "ag": "Galaxy A32 4G",
+    "asin": "B0CPTFZ1CK",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g",
+    "stock": "Galaxy A32 4G Incell",
+    "brand": "SAMSUNG",
+    "model_kw": "Galaxy A32 4G"
+  },
+  {
+    "ag": "Galaxy A73",
+    "asin": "B0FLQD44CT",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Galaxy A73 OLED",
+    "brand": "SAMSUNG",
+    "model_kw": "Galaxy A73"
+  },
+  {
+    "ag": "Galaxy J7 2015",
+    "asin": "B0CPTCZ1WT",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Galaxy J7 2015 Incell",
+    "brand": "SAMSUNG",
+    "model_kw": "Galaxy J7 2015"
+  },
+  {
+    "ag": "Galaxy J7 2016",
+    "asin": "B0CPTCXZRZ",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Galaxy J7 2016 Incell",
+    "brand": "SAMSUNG",
+    "model_kw": "Galaxy J7 2016"
+  },
+  {
+    "ag": "Galaxy J7 Max",
+    "asin": "B0CPTD8HG4",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, plus, 5g, 4g",
+    "stock": "Galaxy J7 Max Incell",
+    "brand": "SAMSUNG",
+    "model_kw": "Galaxy J7 Max"
+  },
+  {
+    "ag": "Galaxy J7 Next",
+    "asin": "B0CPTCD95W",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Galaxy J7 Next Incell",
+    "brand": "SAMSUNG",
+    "model_kw": "Galaxy J7 Next"
+  },
+  {
+    "ag": "Galaxy S21 FE",
+    "asin": "B0FLQHRQRV",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Galaxy S21 FE OLED",
+    "brand": "SAMSUNG",
+    "model_kw": "Galaxy S21 FE"
+  },
+  {
+    "ag": "Honor 7X",
+    "asin": "B0CPTF6LSV",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Honor 7X Incell",
+    "brand": "MIX",
+    "model_kw": "Honor 7X"
+  },
+  {
+    "ag": "Honor 8X",
+    "asin": "B0CPTCLK2J",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Honor 8X Incell",
+    "brand": "MIX",
+    "model_kw": "Honor 8X"
+  },
+  {
+    "ag": "Infinix Note 10",
+    "asin": "B0CPTDDK55",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Infinix Note 10 Incell",
+    "brand": "MIX",
+    "model_kw": "Infinix Note 10"
+  },
+  {
+    "ag": "Moto Edge 50 Fusion",
+    "asin": "B0F3JMHMPT",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Moto Edge 50 Fusion Incell",
+    "brand": "MIX",
+    "model_kw": "Moto Edge 50 Fusion"
+  },
+  {
+    "ag": "Nokia G21",
+    "asin": "B0CP9PVS18",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Nokia G21 Incell",
+    "brand": "MIX",
+    "model_kw": "Nokia G21"
+  },
+  {
+    "ag": "Oppo F27",
+    "asin": "B0FLQH9DSJ",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "F27 OLED",
+    "brand": "OPPO",
+    "model_kw": "Oppo F27"
+  },
+  {
+    "ag": "Poco X3",
+    "asin": "B0CRS394YX",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Poco X3 Incell",
+    "brand": "XIAOMI/REDMI/POCO",
+    "model_kw": "Poco X3"
+  },
+  {
+    "ag": "Realme 3 Pro",
+    "asin": "B0CPTF5XXM",
+    "status": "Active",
+    "group_type": "pro",
+    "negatives": "Never Phrase base substring; Exact insurance from STR if available",
+    "stock": "Realme 3 Pro Frame",
+    "brand": "REALME",
+    "model_kw": "Realme 3 Pro"
+  },
+  {
+    "ag": "Realme C21",
+    "asin": "B0C94VX6K9",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Realme C21 Incell",
+    "brand": "REALME",
+    "model_kw": "Realme C21"
+  },
+  {
+    "ag": "Realme C33",
+    "asin": "B0C94R2YHG",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Realme C33 Incell",
+    "brand": "REALME",
+    "model_kw": "Realme C33"
+  },
+  {
+    "ag": "Realme C67",
+    "asin": "B0F3JNPFFN",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Realme C67 Incell",
+    "brand": "REALME",
+    "model_kw": "Realme C67"
+  },
+  {
+    "ag": "Redmi 13 Pro Plus",
+    "asin": "B0F3JM22F1",
+    "status": "Active",
+    "group_type": "pro",
+    "negatives": "Never Phrase base substring; Exact insurance from STR if available",
+    "stock": "Redmi 13 Pro Plus With Frame",
+    "brand": "XIAOMI/REDMI/POCO",
+    "model_kw": "Redmi 13 Pro Plus"
+  },
+  {
+    "ag": "Redmi Note 10T",
+    "asin": "B0BYVNQNJP",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Redmi Note 10T With Frame",
+    "brand": "XIAOMI/REDMI/POCO",
+    "model_kw": "Redmi Note 10T"
+  },
+  {
+    "ag": "Vivo V15",
+    "asin": "B0CPTCXZRQ",
+    "status": "Active",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Vivo V15 CareOG",
+    "brand": "VIVO",
+    "model_kw": "Vivo V15"
+  },
+  {
+    "ag": "Asus ROG Phone 2",
+    "asin": "B0CPTDJPZ9",
+    "status": "Inactive",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Asus ROG Phone 2 Incell",
+    "brand": "MIX",
+    "model_kw": "Asus ROG Phone 2"
+  },
+  {
+    "ag": "Galaxy S20 FE With Frame",
+    "asin": "B0F3JR7BQ9",
+    "status": "Inactive",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Galaxy S20 FE With Frame OLED",
+    "brand": "SAMSUNG",
+    "model_kw": "Galaxy S20 FE With Frame"
+  },
+  {
+    "ag": "Honor X9B",
+    "asin": "B0F3JLKRFN",
+    "status": "Inactive",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Honor X9B Incell",
+    "brand": "MIX",
+    "model_kw": "Honor X9B"
+  },
+  {
+    "ag": "OnePlus 10 Pro",
+    "asin": "B0CPTFHK5X",
+    "status": "Inactive",
+    "group_type": "pro",
+    "negatives": "Never Phrase base substring; Exact insurance from STR if available",
+    "stock": "OnePlus 10 Pro CareOG",
+    "brand": "ONEPLUS",
+    "model_kw": "OnePlus 10 Pro"
+  },
+  {
+    "ag": "OnePlus 11R",
+    "asin": "B0CPTF7PF7",
+    "status": "Inactive",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, 5g, 4g",
+    "stock": "OnePlus 11R CareOG",
+    "brand": "ONEPLUS",
+    "model_kw": "OnePlus 11R"
+  },
+  {
+    "ag": "Oppo Reno 10 Pro Plus",
+    "asin": "B0F3JKHS6Z",
+    "status": "Inactive",
+    "group_type": "pro",
+    "negatives": "Never Phrase base substring; Exact insurance from STR if available",
+    "stock": "Reno 10 Pro Plus CareOG",
+    "brand": "OPPO",
+    "model_kw": "Oppo Reno 10 Pro Plus"
+  },
+  {
+    "ag": "Realme 11 Pro",
+    "asin": "B0F3JM7ZB1",
+    "status": "Inactive",
+    "group_type": "pro",
+    "negatives": "Never Phrase base substring; Exact insurance from STR if available",
+    "stock": "Realme 11 Pro CareOG",
+    "brand": "REALME",
+    "model_kw": "Realme 11 Pro"
+  },
+  {
+    "ag": "Realme 13 Pro",
+    "asin": "B0F3JKYJMY",
+    "status": "Inactive",
+    "group_type": "pro",
+    "negatives": "Never Phrase base substring; Exact insurance from STR if available",
+    "stock": "Realme 13 Pro CareOG",
+    "brand": "REALME",
+    "model_kw": "Realme 13 Pro"
+  },
+  {
+    "ag": "Vivo V11 Pro",
+    "asin": "B0CPTBQFNG",
+    "status": "Inactive",
+    "group_type": "pro",
+    "negatives": "Never Phrase base substring; Exact insurance from STR if available",
+    "stock": "Vivo V11 Pro CareOG",
+    "brand": "VIVO",
+    "model_kw": "Vivo V11 Pro"
+  },
+  {
+    "ag": "Vivo X70 Pro Plus",
+    "asin": "B0F3JL1YLV",
+    "status": "Inactive",
+    "group_type": "pro",
+    "negatives": "Never Phrase base substring; Exact insurance from STR if available",
+    "stock": "Vivo X70 Pro Plus CareOG",
+    "brand": "VIVO",
+    "model_kw": "Vivo X70 Pro Plus"
+  },
+  {
+    "ag": "Vivo X80",
+    "asin": "B0F3JLSJ8R",
+    "status": "Inactive",
+    "group_type": "base",
+    "negatives": "Phrase: pro, max, pro max, plus, 5g, 4g",
+    "stock": "Vivo X80 CareOG",
+    "brand": "VIVO",
+    "model_kw": "Vivo X80"
+  },
+  {
+    "ag": "iPhone 14 Pro Max",
+    "asin": "B0F3JK14H5",
+    "status": "Inactive",
+    "group_type": "pro_max",
+    "negatives": "Never Phrase base substring; Exact insurance from STR if available",
+    "stock": "iPhone 14 Pro Max Incell",
+    "brand": "APPLE",
+    "model_kw": "iPhone 14 Pro Max"
+  }
+]

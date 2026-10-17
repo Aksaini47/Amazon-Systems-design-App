@@ -1,0 +1,110 @@
+﻿AMAZON ADS AD-GROUP AUDIT REPORT
+Campaign: TL_EL_SPN_SG_Mobile Screens - Arun
+Date: 2026-08-08
+
+=== DATA COLLECTION SUMMARY ===
+
+Successfully Verified:
+✓ Total ad-groups in campaign: 167 (confirmed from API: numberOfRecords=167)
+✓ Campaign verified as showing all 1-167 of 167 results in UI (Results per page: 300)
+✓ Ad-groups collected via network inspection: 41 confirmed entries
+✓ Physical inventory models in stock: ~91 models across 8 brands
+
+Challenge Encountered:
+- Table uses virtualized rendering (only ~20 rows in DOM at any time)
+- Dynamic scrolling loads/unloads rows making complete DOM collection difficult
+- Network response truncated in tool output display (but data present in API)
+- Background agent deployed to systematically collect all 167 via repeated scrolling
+
+=== COLLECTED AD-GROUPS (41 of 167) ===
+
+Status: ALL ENABLED
+
+1. Nothing Phone 1
+2. 1+ 7
+3. Oppo F19 / F19 Pro
+4. Redmi Note 7/7s/7 Pro
+5. Realme 8
+6. Vivo V17
+7. Redmi K20/K20 Pro
+8. Oppo A57
+9. 1+ Nord CE 2 Lite
+10. Vivo Y22/Y22s
+11. iPhone XS
+12. iPhone 14 Pro Max
+13. Redmi Note 5
+14. Mi A3
+15. Realme 8i
+16. Oppo A53
+17. 1+ 8 pro
+18. OnePlus 10 Pro
+19. Oppo A54
+20. Galaxy A30s
+21. Realme 9i
+22. OnePlus 9RT
+23. Realme 7 Pro
+24. iPhone 11
+25. Realme C53
+26. Oneplus 10R
+27. Oppo F9
+28. Redmi 12
+29. Oppo F17 Pro
+30. Redmi Note 6 Pro
+31. Vivo Y33s
+32. Vivo T2x
+33. Oppo F5
+34. Mi 11X
+35. Realme 7i
+36. Oppo Reno 10 Pro Plus
+37. Iphone 8
+38. Realme C33
+39. Realme 9
+40. Redmi 10 Power
+41. Galaxy A32
+
+=== INITIAL CROSS-REFERENCE AGAINST PHYSICAL INVENTORY ===
+
+Stock Models with Confirmed ENABLED ad-groups (Partial Match):
+  REALME:      Realme 7i, Realme 9, Realme C33, Realme 9i, Realme C53, Realme 8i, Realme 7 Pro
+  VIVO:        Vivo V17, Vivo Y22, Vivo Y33s, Vivo T2x
+  OPPO:        Oppo F19, Oppo A57, Oppo A54, Oppo F17 Pro, Oppo F9, Oppo F5, Oppo Reno 10 Pro Plus, Oppo A53
+  ONEPLUS:     OnePlus 7, OnePlus 8, OnePlus 10 Pro, OnePlus 9RT
+  SAMSUNG:     Galaxy A30s, Galaxy A32
+  APPLE:       iPhone XS, iPhone 8, iPhone 11, iPhone 14 Pro Max
+  XIAOMI:      Mi 11X, Mi A3, Redmi Note 5, Redmi 12, Redmi Note 6 Pro, Redmi 10 Power
+
+Observations:
+- 1+ shorthand confirmed (1+ 7 = OnePlus 7, 1+ 8 pro = OnePlus 8 Pro, etc.)
+- "Oneplus 10R" in ad-groups not found in standard inventory (likely variant/region code)
+- All collected ad-groups show status "ENABLED" (Delivering)
+- No PAUSED ad-groups found in the 41 collected so far
+
+=== NEXT STEPS FOR COMPLETE AUDIT ===
+
+1. REQUIRED: Obtain complete list of all 167 ad-group names
+   - Option A (Active): Background agent collecting via systematic scrolling
+   - Option B (If needed): Make direct API request with authentication
+   
+2. COMPLETE CROSS-REFERENCE: Once full list available, run complete matching against physical inventory
+   - Expected outcome: Identify which stock models have NO ad-group
+   - Identify any PAUSED ad-groups (if any exist beyond the 41 collected)
+   
+3. GENERATE FINAL REPORT with:
+   - Total count by category (COVERED_ENABLED / COVERED_PAUSED / NO_ADGROUP)
+   - Complete lists of stock models in each category
+   - Recommendations for missing ad-groups
+
+=== OUTPUT FILES ===
+
+✓ C:\Projects\Amazon Systems Design\catalog-builder\amazon-reports\adgroups_partial.csv
+  - 41 confirmed ad-groups with status
+  
+✓ C:\Projects\Amazon Systems Design\catalog-builder\amazon-reports\adgroup_inventory_matcher.py
+  - Analysis script ready to process complete list
+  - Automated fuzzy matching for brand/model variations
+  
+Pending:
+⏳ C:\Projects\Amazon Systems Design\catalog-builder\amazon-reports\adgroups_2026-08-08.csv
+  - Will contain complete list once collection completes
+  
+⏳ Final audit report with complete cross-reference results
