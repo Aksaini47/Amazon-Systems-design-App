@@ -73,4 +73,4 @@ memory: project
 
 ## 7. Open items (Sir)
 
-S6 pre-sales auto-answers from listing facts · S9 review requests · whether Resolve case should be switched on (still OFF) · Sir-side: Rakesh refund (RTO received 9 Oct), Kanta Bluedart POD check.
+S6 pre-sales auto-answers from listing facts · S9 review requests · whether Resolve case should be switched on (still OFF) · Sir-side: Rakesh refund (RTO received 9 Oct), Kanta Bluedart POD check. · **Disputed delivery (Sir 2026-10-20):** Sir wants the Nimbus status + tracking link + tracking-page screenshot shown to the buyer; NOT enabled (R-5 bans links/attachments). Until Sir decides: do not send either, escalate the case and save the tracker screenshot for Sir (details in memory `project_samvaad_agent.md`).
