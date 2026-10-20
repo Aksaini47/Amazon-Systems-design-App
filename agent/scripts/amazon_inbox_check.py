@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from playwright.sync_api import sync_playwright  # noqa: E402
 from mahika.playwright.session import CHROMIUM_PROFILE_DIR  # noqa: E402
 import nimbus_track  # noqa: E402  (public tracker: no login)
+from amazon_inbox_reply import msg_by, msg_text, thread_order  # noqa: E402  (who wrote a message / its text / the thread's order number)
 
 OUT = ROOT / "data" / "mahika" / "inbox"
 INBOX = "https://sellercentral.amazon.in/messaging/inbox"
@@ -45,8 +46,11 @@ def parse_messages(pane: str) -> list[dict]:
         def grab(label):
             r = re.search(label + r":\s*(.*)", body)
             return r.group(1).strip() if r else None
-        out.append({"at": m["at"], "product_asin": grab("Product"), "order_no": grab("Order number"),
-                    "return_requested": grab("Return requested"), "reason": grab("Reason for contact"), "raw": body[:1500]})
+        rec = {"at": m["at"], "product_asin": grab("Product"), "order_no": grab("Order number"),
+               "return_requested": grab("Return requested"), "reason": grab("Reason for contact"), "raw": body[:1500]}
+        rec["by"] = msg_by(rec)                      # amazon (CS forward) | seller (our reply) | buyer (customer follow-up)
+        rec["text"] = msg_text(rec)[:1200]
+        out.append(rec)
     return out
 
 
@@ -87,8 +91,7 @@ def parse_order_page(t: str) -> dict:
 
 def collect_facts(p, case: dict) -> dict:
     """Order page + Nimbus public tracker facts for one case. Read-only."""
-    last = (case.get("messages") or [{}])[-1]
-    order_no = last.get("order_no")
+    order_no = thread_order(case.get("messages") or [])         # buyer follow-ups carry no order number
     facts = {"order_no": order_no, "language": case.get("language"), "order_page": None, "tracking": None, "buyer_names": []}
     names = {case.get("name")}
     m = re.search(r"customer\s+(\S+)", case.get("subject") or "")
@@ -170,7 +173,7 @@ def main() -> int:
     seen = set(json.loads(state_f.read_text(encoding="utf-8")).get("seen", [])) if state_f.exists() else set()
     for c in result["cases"]:
         last = (c.get("messages") or [{}])[-1]
-        c["key"] = f"{last.get('order_no')}|{last.get('at')}"
+        c["key"] = f"{thread_order(c.get('messages') or [])}|{last.get('at')}"
         c["new"] = c["key"] not in seen
     result["summary"]["new_cases"] = sum(1 for c in result["cases"] if c["new"])
     result["summary"]["over_sla"] = sum(1 for c in result["cases"] if "over sla" in (c.get("sla") or "").lower())

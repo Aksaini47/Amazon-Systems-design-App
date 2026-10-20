@@ -51,7 +51,13 @@ TEMPLATES = {
     "T5": {"name": "refund already processed (fact from the order page)", "resolve": True,
            "en": "Hello,\nRegarding your order {order_no}: {rto_en}a refund of Rs {amount} has been processed for this order. Please check the refund in your original payment method.\n" + SIGN["en"],
            "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: {rto_hi}इस ऑर्डर के लिए Rs {amount} का रिफंड प्रोसेस कर दिया गया है। कृपया अपने मूल भुगतान माध्यम में रिफंड देखें।\n" + SIGN["hi"]},
+    # Sir 2026-10-20: buyer still disputes delivery after our T6 -> show the courier tracking facts. TEXT ONLY (no link, no attachment: Amazon G1701);
+    # the tracker-page screenshot is saved to data/mahika/inbox/proof/ for Sir. Sent once per order (T7_MARKS detect a repeat), then Sir takes over.
+    "T7": {"name": "buyer disputes a delivered shipment: courier tracking facts (text only, screenshot saved for Sir)", "resolve": False, "alert": True,
+           "en": "Hello,\nRegarding your order {order_no}: in the courier's tracking this shipment ({carrier}, tracking ID {awb}) is marked as Delivered. Delivery was recorded on {when_en}{loc_en}.{ver_en}\nPlease check once more with your family members, neighbours or building security. You can also look up the same tracking ID in the courier's own app or on its tracking page.\n" + SIGN["en"],
+           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: कूरियर की ट्रैकिंग में यह शिपमेंट ({carrier}, ट्रैकिंग आईडी {awb}) डिलीवर्ड दिख रहा है। डिलीवरी {when_hi}{loc_hi} दर्ज हुई है।{ver_hi}\nकृपया एक बार फिर अपने परिवार के सदस्यों, पड़ोसियों या सिक्योरिटी से पूछ लें। आप यही ट्रैकिंग आईडी कूरियर के अपने ऐप या ट्रैकिंग पेज पर भी देख सकते हैं।\n" + SIGN["hi"]},
 }
+T7_MARKS = ("is marked as Delivered", "डिलीवर्ड दिख रहा है")        # a seller message with one of these = T7 already sent in this thread
 
 # ------------------------------------------------------------------ lint
 BANNED_EN = [r"\bwill refund", r"\bwe will (process|issue|refund|replace|send|arrange)", r"\breplac", r"\bdiscount", r"\bcompensat", r"\bcoupon", r"\bvoucher",
@@ -149,14 +155,57 @@ def fmt_date(s: str | None) -> str | None:
 CANCEL = re.compile(r"cancel|रद्द|कैंसल", re.I)
 REFUND = re.compile(r"refund|money back|paise|पैसे|रिफंड", re.I)
 RETURNED = re.compile(r"already returned|returned the|return(ed)? (the )?(item|product|order)|self[- ]?return|return (picked|pick ?up|delivered|reached)|item return|वापस (कर|भेज)", re.I)
-NOTREC = re.compile(r"not (yet )?(received|recieved|delivered|come|arrived)|undeliver|didn.?t (get|receive)|haven.?t (got|received)|mark(ed)? (as )?delivered|showing delivered|shows delivered|never received|नहीं मिला", re.I)
+NOTREC = re.compile(r"not (yet )?(received|recieved|delivered|come|arrived)|undeliver|did(n.?t| not) (get|receive|recieve)|haven.?t (got|received)|mark(ed)? (as )?delivered|showing delivered|shows delivered|never received|नहीं मिला", re.I)
 DELAY = re.compile(r"delay|\blate\b|where is|when (will|can|i will)|how long|\bstatus\b|\btrack|कब (तक|मिलेगा)", re.I)
 DEFECT = re.compile(r"defect|damag|not working|broken|dead|not starting|wrong (item|product|size|model)|not what i ordered|display (is )?not|touch (is )?not|crack|खराब|टूट", re.I)
 ABUSE = re.compile(r"\bpolice\b|\blegal\b|\blawyer\b|\bcourt\b|consumer (forum|court)|\bfraud|\bcheat|\bscam|\ba[\s-]?to[\s-]?z\b|\bharass|complaint (against|to)|action against|\bsue\b|\bsuing\b", re.I)
 
 
+# "I did not receive my refund" is a refund question, not a "parcel not received" claim
+REFUND_NOTREC = re.compile(r"(refund|रिफंड|paise|पैसे)[^.\n]{0,40}\b(not|never|nahi)\b|\b(not|never|nahi)\b[^.\n]{0,25}(receiv\w*|reciev\w*|got|मिला)[^.\n]{0,15}(refund|रिफंड|paise|पैसे)", re.I)
+
+
 def tags_of(text: str) -> set[str]:
-    return {n for n, rx in (("cancel", CANCEL), ("refund", REFUND), ("returned", RETURNED), ("notrec", NOTREC), ("delay", DELAY), ("defect", DEFECT), ("abuse", ABUSE)) if rx.search(text or "")}
+    tags = {n for n, rx in (("cancel", CANCEL), ("refund", REFUND), ("returned", RETURNED), ("notrec", NOTREC), ("delay", DELAY), ("defect", DEFECT), ("abuse", ABUSE)) if rx.search(text or "")}
+    if "notrec" in tags and REFUND_NOTREC.search(text or ""):
+        tags.discard("notrec")
+    return tags
+
+
+# ------------------------------------------------------------------ thread helpers (who wrote what)
+def msg_by(m: dict) -> str:
+    """'amazon' = Amazon CS forward (has 'Reason for contact'), 'seller' = our own reply, 'buyer' = the customer's own message."""
+    if m.get("by"):
+        return m["by"]
+    raw = (m.get("raw") or "").strip()
+    if m.get("reason") or raw.startswith("Dear Amazon Seller"):
+        return "amazon"
+    if raw.endswith("Badeja Enterprises"):
+        return "seller"
+    return "buyer"
+
+
+def msg_text(m: dict) -> str:
+    if m.get("text"):
+        return m["text"]
+    return (m.get("reason") or "") if msg_by(m) == "amazon" else (m.get("raw") or "")
+
+
+def thread_order(msgs: list[dict]) -> str | None:
+    """Buyer follow-ups carry no order number: use the newest one anywhere in the thread."""
+    return next((m.get("order_no") for m in reversed(msgs) if m.get("order_no")), None)
+
+
+def fmt_time(s: str | None) -> str | None:
+    m = re.search(r"(\d{1,2}):(\d{2})\s*$", s or "")
+    return f"{int(m.group(1)):02d}:{m.group(2)}" if m else None
+
+
+def clean_loc(s: str | None) -> str | None:
+    """Courier facility name for the text: 'Jewar_SJRoad_D (Uttar Pradesh)' -> 'Jewar SJRoad D (Uttar Pradesh)'. ASCII only, no @ or links."""
+    t = re.sub(r"[^A-Za-z0-9 ()\-,.]", " ", (s or "").replace("_", " "))
+    t = re.sub(r"\s+", " ", t).strip()
+    return t[:70] or None
 
 
 def status_phrase(tr: dict) -> tuple[str, str]:
@@ -178,6 +227,14 @@ def render(tid: str, lang: str, facts: dict) -> str:
     f["status_en"], f["status_hi"] = status_phrase(tr)
     f["rto_en"] = "the shipment was returned to us and " if st in RTO else ""
     f["rto_hi"] = "शिपमेंट हमें वापस मिल गया है और " if st in RTO else ""
+    t_at = fmt_time(tr.get("delivered_at"))                                  # T7 proof fields
+    loc = clean_loc((tr.get("latest") or {}).get("location")) if st == "DELIVERED" else None
+    f["when_en"] = f"{d_at} at {t_at}" if t_at else f"{d_at}"
+    f["when_hi"] = f"{d_at} को {t_at} बजे" if t_at else f"{d_at} को"
+    f["loc_en"] = f", last scan location: {loc}" if loc else ""
+    f["loc_hi"] = f", आखिरी स्कैन लोकेशन: {loc}" if loc else ""
+    f["ver_en"] = " The courier's record shows this delivery as verified." if tr.get("delivery_verified") else ""
+    f["ver_hi"] = " कूरियर के रिकॉर्ड में यह डिलीवरी वेरिफ़ाइड दर्ज है।" if tr.get("delivery_verified") else ""
     text = TEMPLATES[tid][lang].format(**f)
     if tid == "T5" and not f["rto_en"] and lang == "en":
         text = text.replace(": a refund", ": A refund")
@@ -191,11 +248,17 @@ def decide(case: dict) -> dict:
     msgs, facts = case.get("messages") or [], case.get("facts") or {}
     if case.get("error") or not msgs:
         return esc("FACTS_MISSING", "case could not be read")
-    last = msgs[-1]
-    t_last, t_all = tags_of(last.get("reason") or ""), tags_of(" ".join((m.get("reason") or "") for m in msgs))
+    by = [msg_by(m) for m in msgs]
+    if by[-1] == "seller":
+        return {"scenario": "-", "template": None, "action": "SKIP", "code": "WAITING_BUYER", "why": "the last message in the thread is ours: waiting for the buyer"}
+    buyer_msgs = [m for m, b in zip(msgs, by) if b != "seller"]
+    t_last, t_all = tags_of(msg_text(buyer_msgs[-1])), tags_of(" ".join(msg_text(m) for m in buyer_msgs))
+    last_amz = max((i for i, b in enumerate(by) if b == "amazon"), default=-1)
+    seller_replied = "seller" in by[last_amz + 1:]               # we already answered the newest Amazon forward: this is a follow-up
+    mine = " ".join(m.get("raw") or m.get("text") or "" for m, b in zip(msgs, by) if b == "seller")
     if "abuse" in t_all:
         return esc("SENSITIVE", "legal / fraud / A-to-z wording: Sir only", "S8")
-    if not last.get("order_no"):
+    if not thread_order(msgs):
         return esc("PRESALES_OR_NO_ORDER", "no order in the message (pre-sales question): draft-only, Sir decides", "S6")
     op, tr = facts.get("order_page"), facts.get("tracking")
     if not op:
@@ -211,6 +274,17 @@ def decide(case: dict) -> dict:
         return esc("TRACKING_CONFLICT", "; ".join(tr["notes"]))
     if state in RTO:
         return esc("REFUND_PENDING", "shipment returned to us (RTO) and no refund on the order page: Sir issues the refund", "S5")
+    if seller_replied and state == "DELIVERED" and "notrec" in t_last:             # delivery DISPUTE (Sir 2026-10-20): facts-only proof, once
+        if any(mk in mine for mk in T7_MARKS):
+            return esc("DELIVERY_DISPUTE_REPEAT", "buyer still says not received after our tracking-proof reply: Sir checks the carrier POD / handles the claim", "S11")
+        if not tr.get("delivered_at"):
+            return esc("DELIVERY_UNVERIFIED", "dispute but the tracker has no delivery time", "S11")
+        return {"scenario": "S11", "template": "T7", "action": "SEND", "code": "DELIVERY_DISPUTE_PROOF", "alert": True, "proof": True,
+                "why": "buyer disputes a delivered shipment: text-only courier facts, tracker screenshot saved for Sir (Sir 2026-10-20), Sir is alerted"}
+    if seller_replied:                                                              # templates are first answers; a follow-up is for Sir
+        if "returned" in t_last:
+            return esc("RETURN_CLAIM_UNVERIFIED", "buyer says the item was returned (follow-up after our reply): Sir checks the return", "S5")
+        return esc("FOLLOWUP_NEEDS_SIR", "buyer wrote again after our reply and it is not a delivery dispute: Sir reads it", "S11")
     if "cancel" in t_last:
         if state in MOVING:
             return {"scenario": "S1", "template": "T1", "action": "SEND", "code": "CANCEL_SHIPPED", "why": f"tracker {state}"}
@@ -220,8 +294,12 @@ def decide(case: dict) -> dict:
             return {"scenario": "S3", "template": "T3", "action": "SEND", "code": "ETA", "why": f"tracker {state}"}
         if state == "NOT_MOVING":
             return {"scenario": "S2", "template": "T2", "action": "SEND", "code": "DELAY_NOT_MOVING", "why": "shipment has not started moving"}
-        return {"scenario": "S11", "template": "T6", "action": "SEND", "code": "DELIVERED_NOT_RECEIVED", "alert": True,
-                "why": "tracker says delivered, buyer says not received: delivery facts + check with family/neighbours (Sir 2026-10-17), Sir is alerted"}
+        if state != "DELIVERED":
+            return esc("TRACKING_UNVERIFIED", f"buyer asks about the parcel but the tracker state is {state}: Sir reads it", "S11")
+        if "notrec" in t_last:
+            return {"scenario": "S11", "template": "T6", "action": "SEND", "code": "DELIVERED_NOT_RECEIVED", "alert": True,
+                    "why": "tracker says delivered, buyer says not received: delivery facts + check with family/neighbours (Sir 2026-10-17), Sir is alerted"}
+        return esc("DELIVERED_TRACKING_QUERY", "buyer asks about tracking/status but does not say the parcel is missing and the tracker says delivered: Sir reads it", "S11")
     if "defect" in t_last or ("refund" in t_last and "returned" not in t_last):
         if state == "DELIVERED" and tr.get("delivery_verified"):
             return {"scenario": "S4", "template": "T4", "action": "SEND", "code": "ASK_ISSUE_EVIDENCE", "why": "delivered, code verified"}
@@ -233,9 +311,15 @@ def decide(case: dict) -> dict:
 
 def make_item(case: dict, sent_keys: set[str]) -> dict:
     d = decide(case)
-    facts = case.get("facts") or {}
-    it = {"name": case.get("name"), "order_no": facts.get("order_no"), "key": case.get("key"), "language": facts.get("language"), "sla": case.get("sla"),
-          "reason": ((case.get("messages") or [{}])[-1]).get("reason"), **d, "text": None, "lint": [], "resolve_after": False}
+    msgs = case.get("messages") or []
+    order_no = (case.get("facts") or {}).get("order_no") or thread_order(msgs)
+    facts = {**(case.get("facts") or {}), "order_no": order_no}
+    buyer_msgs = [m for m in msgs if msg_by(m) != "seller"]
+    tr, op = facts.get("tracking") or {}, facts.get("order_page") or {}
+    it = {"name": case.get("name"), "order_no": order_no, "key": case.get("key"), "language": facts.get("language"), "sla": case.get("sla"),
+          "reason": (msg_text(buyer_msgs[-1]) if buyer_msgs else "")[:300], **d, "text": None, "lint": [], "resolve_after": False}
+    if d.get("proof"):
+        it["proof_awb"] = op.get("tracking_id") or tr.get("awb")
     if d["action"] == "SEND":
         lang = "hi" if facts.get("language") == "Hindi" else "en"
         it["text"] = render(d["template"], lang, facts)
@@ -286,6 +370,25 @@ def cmd_templates() -> int:
     return 0
 
 
+def capture_proof(ctx, awb: str, order_no: str) -> tuple[str | None, str | None]:
+    """Screenshot of the public Nimbus tracking page (evidence for Sir; never sent to the buyer). Returns (path, error)."""
+    d = OUT / "proof"
+    d.mkdir(parents=True, exist_ok=True)
+    path = d / f"{order_no}_{awb}_{datetime.now():%Y%m%d-%H%M}.png"
+    pg = ctx.new_page()
+    try:
+        pg.goto(f"https://ship.nimbuspost.com/trk/{awb}", wait_until="domcontentloaded", timeout=45000)
+        pg.wait_for_timeout(5000)
+        if str(awb) not in pg.evaluate("() => document.body.innerText"):
+            return None, "tracker page does not show the tracking id"
+        pg.screenshot(path=str(path), full_page=True)
+        return str(path), None
+    except Exception as e:
+        return None, str(e)[:150]
+    finally:
+        pg.close()
+
+
 # ------------------------------------------------------------------ send (Playwright)
 def cmd_send(args: list[str]) -> int:
     from playwright.sync_api import sync_playwright
@@ -316,6 +419,8 @@ def cmd_send(args: list[str]) -> int:
         for it in items[:budget]:
             rec = {"at": datetime.now().isoformat(timespec="seconds"), "key": it["key"], "order_no": it["order_no"], "name": it["name"], "template": it["template"],
                    "sha16": sha16(it["text"]), "text": it["text"], "dry": dry, "sent": False, "verified": False, "resolved": False}
+            if it.get("proof_awb"):                                   # dispute proof: tracker screenshot saved for Sir (non-fatal if it fails)
+                rec["proof_path"], rec["proof_error"] = capture_proof(ctx, it["proof_awb"], it["order_no"])
             try:
                 p.goto(INBOX, wait_until="domcontentloaded", timeout=60000); p.wait_for_timeout(12000)
                 if "/ap/signin" in p.url:
@@ -363,7 +468,8 @@ def cmd_send(args: list[str]) -> int:
         for r in results:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
     for r in results:
-        print(f"{r['name']:11s} {r['order_no']} {r['template']} dry={r['dry']} sent={r['sent']} verified={r['verified']} resolved={r['resolved']} {r.get('error', '')}")
+        print(f"{r['name']:11s} {r['order_no']} {r['template']} dry={r['dry']} sent={r['sent']} verified={r['verified']} resolved={r['resolved']} {r.get('error', '')}"
+              + (f" proof={r.get('proof_path') or 'MISSING ' + str(r.get('proof_error'))}" if r["template"] == "T7" else ""))
     return 0
 
 
@@ -413,6 +519,37 @@ def cmd_selftest() -> int:
             okd = okd and it["text"].startswith("नमस्ते")
         fails += not okd
         print(("PASS " if okd else "FAIL ") + "decide: " + name + f"  [{it['action']} {it['template']} {it['code']}]")
+    # thread tests: follow-ups, delivery dispute (T7), repeats, tracking-status queries
+    def thread(msgs, state="DELIVERED", lang="English", verified=True):
+        tr = {"awb": "222222222222", "state": state, "courier": "Bluedart", "delivery_verified": verified, "notes": [], "delivered_at": "Oct 01, 2026 12:34",
+              "latest": {"at": "Oct 01, 2026 12:34", "location": "Jewar_SJRoad_D (Uttar Pradesh)", "remark": "Delivered"}}
+        op = {"carrier": "Bluedart", "tracking_id": "222222222222", "deliver_by": "Mon, 12 Oct, 2026 IST", "refunds": [], "status": "Sent"}
+        return {"name": "Test", "key": "408-0000000-0000000|x", "subject": "Order enquiry from Amazon customer Test", "messages": msgs,
+                "facts": {"order_no": "408-0000000-0000000", "language": lang, "order_page": op, "tracking": tr, "buyer_names": ["Test"]}}
+    def AMZ(reason): return {"order_no": "408-0000000-0000000", "reason": reason, "raw": "Dear Amazon Seller,\nReason for contact: " + reason}
+    ME = {"order_no": None, "reason": None, "raw": "Hello,\nRegarding your order 408-0000000-0000000: our records show delivered.\nRegards,\nBadeja Enterprises"}
+    ME7 = {"order_no": None, "reason": None, "raw": "Hello,\nRegarding your order 408-0000000-0000000: in the courier's tracking this shipment is marked as Delivered.\nRegards,\nBadeja Enterprises"}
+    def BUY(t): return {"order_no": None, "reason": None, "raw": "Hello,\n" + t}
+    NR = AMZ("customer not received order but showing delivered")
+    tests = [("dispute after T6 -> T7 (proof, alert)", thread([NR, ME, BUY("still not received the parcel, please check")]), "SEND", "T7", "DELIVERY_DISPUTE_PROOF"),
+             ("dispute repeats after T7 -> escalate", thread([NR, ME, BUY("not received"), ME7, BUY("I did not receive it")]), "ESCALATE", None, "DELIVERY_DISPUTE_REPEAT"),
+             ("tracking-status query on a delivered order -> escalate (T6 misfire fix)", thread([AMZ("Customer receive the item on 1 Oct but the tracking still didnt updated, kindly update the tracking")]), "ESCALATE", None, "DELIVERED_TRACKING_QUERY"),
+             ("follow-up that is not a dispute -> escalate", thread([AMZ("want refund"), ME, BUY("please refund quickly")]), "ESCALATE", None, "FOLLOWUP_NEEDS_SIR"),
+             ("follow-up returned claim -> escalate", thread([AMZ("issue"), ME, BUY("i already returned the item but not received refund")]), "ESCALATE", None, "RETURN_CLAIM_UNVERIFIED"),
+             ("last message is ours -> skip", thread([NR, ME]), "SKIP", None, "WAITING_BUYER"),
+             ("'did not receive my refund' is not a not-received parcel -> not T6", thread([AMZ("I did not receive my refund")]), "SEND", "T4", None),
+             ("fresh Amazon forward after our reply is a new first answer", thread([AMZ("old"), ME, AMZ("cancel the order")]), "SEND", "T1", None),
+             ("not received + tracker EXCEPTION -> escalate", thread([AMZ("order not received")], state="EXCEPTION"), "ESCALATE", None, "TRACKING_UNVERIFIED"),
+             ("T7 in Hindi", thread([NR, ME, BUY("abhi tak nahi mila, not received")], lang="Hindi"), "SEND", "T7", None)]
+    for name, c, want_action, want_tpl, want_code in tests:
+        it = make_item(c, set())
+        okd = it["action"] == want_action and (want_tpl is None or it["template"] == want_tpl) and (want_code is None or it["code"] == want_code)
+        if want_tpl == "T7":
+            okd = okd and it.get("proof") and it.get("alert") and it["proof_awb"] == "222222222222" and it["order_no"] == "408-0000000-0000000" and not it["lint"]
+            okd = okd and "http" not in it["text"] and "12:34" in it["text"] and "Jewar SJRoad D" in it["text"] and any(mk in it["text"] for mk in T7_MARKS)
+            okd = okd and it["text"].startswith("नमस्ते" if "Hindi" in name else "Hello")
+        fails += not okd
+        print(("PASS " if okd else "FAIL ") + "thread: " + name + f"  [{it['action']} {it['template']} {it['code']}]")
     return 1 if fails else 0
 
 

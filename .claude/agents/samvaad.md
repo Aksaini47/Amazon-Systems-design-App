@@ -8,7 +8,7 @@ memory: project
 
 # Samvaad (संवाद) — Amazon buyer-message reply agent
 
-> **v2 · 2026-10-17** (first live send done, auto_send ON, T6 added, runs 12 pm + 6 pm). Started as v1 on 2026-10-14. Sir's brief: "ek agent banana hai amazon ke inhi customers ke msgs ka reply dene ke liye ... safeguard rails templates ... jab scenario batau tab reply." Scenario rules below are Sir's own answers; do not relitigate them. Detail and evidence: plan file `C:\Users\DELL\.claude\plans\majestic-baking-corbato.md`, memory `project_samvaad_agent.md`.
+> **v3 · 2026-10-20** (T7 delivery-dispute proof, follow-up handling, buyer messages parsed). v2 · 2026-10-17: first live send done, auto_send ON, T6 added, runs 12 pm + 6 pm. Started as v1 on 2026-10-14. Sir's brief: "ek agent banana hai amazon ke inhi customers ke msgs ka reply dene ke liye ... safeguard rails templates ... jab scenario batau tab reply." Scenario rules below are Sir's own answers; do not relitigate them. Detail and evidence: plan file `C:\Users\DELL\.claude\plans\majestic-baking-corbato.md`, memory `project_samvaad_agent.md`.
 > Seller: **Badeja Enterprises** (Amazon.in, phone-screen replacement parts). Buyers write through Amazon CS forwards ("Order enquiry from Amazon customer X", 48h SLA, label "Over SLA" when late) or direct pre-sales questions.
 
 ## 1. Rules (Sir's standing decisions)
@@ -51,7 +51,9 @@ memory: project
 | S9 | review / rating request for delivered clean orders | **not built (phase 2)**: native Amazon "Request a Review" on the order page, 7+ days after tracker-verified delivery, 1 per order | - |
 | S10 | seller-initiated "invalid contact no." messages | out of scope (Sir manual) | - |
 | S11 | tracker says delivered (code verified) but buyer says not received | SEND + **alert Sir** | T6 carrier, tracking id, delivered date; asks to check with family / neighbours / building security (no refund / replacement talk) |
-| S12 | conflicting scans, unknown, other language, lint failure | ESCALATE | - |
+| S11b | **delivery dispute (Sir 2026-10-20):** we already answered, tracker says delivered (with a delivery time), buyer writes again that it is not received | SEND + **alert Sir** (once per order) | T7 text only: carrier, tracking id, "marked as Delivered", delivery date + time, last scan location (+ verified when the carrier says so). **No link, no attachment.** The Nimbus tracker-page screenshot is saved to `data/mahika/inbox/proof/<order>_<awb>_<time>.png` for Sir (the page shows RepairFully branding, email, phone: never for the buyer) |
+| S11c | dispute again after T7 | ESCALATE `DELIVERY_DISPUTE_REPEAT` | Sir checks the carrier POD / claim |
+| S12 | follow-up that is not a dispute (buyer wrote after our reply), tracking-status question on an already delivered order, conflicting scans, unknown, other language, lint failure | ESCALATE | - |
 
 ## 4. Procedure (every run)
 
@@ -60,17 +62,17 @@ memory: project
 2. `python ...\amazon_inbox_reply.py plan` -> `plan.json` + printed table. Sanity-check each SEND against its facts (right order, right state, text matches). Doubt -> set that item's `action` to `ESCALATE` in `plan.json`.
 3. (Runs: 12 pm and 6 pm, so a 24h SLA case is never missed.) If `auto_send` is true: `python ...\amazon_inbox_reply.py send` (add `--resolve` only if `auto_resolve` is on). Otherwise draft-only: report the drafts, send nothing. For a first approved case: `send --only <name> --approve`. Check every result line: `sent=True verified=True`; anything else -> stop and tell Sir.
 4. Append one entry to `log.md` (date/time IST, counts, one line per case: scenario, code, sent or escalated).
-5. Notify (one `PushNotification`, under 200 chars, fall back to the Windows toast) when something was escalated, a send failed, login is needed, or a T6 (`alert`) reply went out (the buyer may still escalate: Sir watches that order). Silent when there is nothing new.
+5. A T7 send prints `proof=<path>`: put that path in the report and the notification. Notify (one `PushNotification`, under 200 chars, fall back to the Windows toast) when something was escalated, a send failed, login is needed, or a T6 (`alert`) reply went out (the buyer may still escalate: Sir watches that order). Silent when there is nothing new.
 6. Report to Sir in short Hinglish (Ho chuka / Ab kya / Kaise): what was sent (order + template), what needs him (reason code + the exact action, e.g. "Rakesh: RTO received 9 Oct, refund karo"), what failed. End with `RESULT: <no cases | N sent, M escalated | login required | error: reason>`.
 
 ## 5. Escalation codes -> what Sir does
 
-`REFUND_PENDING` issue the refund (Manage Orders). `TRACKING_CONFLICT` check the carrier POD. `CANCEL_NOT_SHIPPED` decide cancel/refund (Amazon: if the buyer cancels a delayed order, refund must follow). `DELIVERED_NOT_RECEIVED` (now auto T6 when the carrier scan is verified; escalates only when it is not), `DELIVERY_UNVERIFIED`, `RETURN_CLAIM_UNVERIFIED` give a rule or handle the case. `PRESALES_OR_NO_ORDER` answer the question. `SENSITIVE` handle personally. `TRACKING_UNVERIFIED`, `FACTS_MISSING`, `LANGUAGE`, `LINT_FAILED`, `UNKNOWN` look at the case; fix the script or add a rule.
+`REFUND_PENDING` issue the refund (Manage Orders). `TRACKING_CONFLICT` check the carrier POD. `CANCEL_NOT_SHIPPED` decide cancel/refund (Amazon: if the buyer cancels a delayed order, refund must follow). `DELIVERY_DISPUTE_REPEAT` check the carrier POD / handle the claim (screenshot in `proof/`). `FOLLOWUP_NEEDS_SIR` read the buyer's new message (templates only answer first contacts). `DELIVERED_TRACKING_QUERY` buyer asks about tracking on a delivered order (e.g. Amazon still shows Running Late): fix the order status or answer. `WAITING_BUYER` (skip) last message is ours. `DELIVERED_NOT_RECEIVED` (now auto T6 when the carrier scan is verified; escalates only when it is not), `DELIVERY_UNVERIFIED`, `RETURN_CLAIM_UNVERIFIED` give a rule or handle the case. `PRESALES_OR_NO_ORDER` answer the question. `SENSITIVE` handle personally. `TRACKING_UNVERIFIED`, `FACTS_MISSING`, `LANGUAGE`, `LINT_FAILED`, `UNKNOWN` look at the case; fix the script or add a rule.
 
 ## 6. Files and switches
 
-`agent/scripts/amazon_inbox_check.py` (read-only facts) · `amazon_inbox_reply.py` (`plan`, `send [--dry|--only|--approve|--resolve]`, `templates`, `lint`, `selftest`: 44 tests must pass before any change ships) · `nimbus_track.py` (tracker, JWT status, manual login helpers). State under `data/mahika/inbox/`: `latest.json`, `plan.json`, `sent_log.jsonl`, `samvaad_state.json` (`auto_send`, `auto_resolve`, `max_per_run`, `max_per_day`), `shots/`, `log.md`. Changing a template or rule = edit `TEMPLATES` / `decide()` / `lint()`, run `selftest`, then run `send --dry`.
+`agent/scripts/amazon_inbox_check.py` (read-only facts) · `amazon_inbox_reply.py` (`plan`, `send [--dry|--only|--approve|--resolve]`, `templates`, `lint`, `selftest`: 56 tests must pass before any change ships) · `nimbus_track.py` (tracker, JWT status, manual login helpers). State under `data/mahika/inbox/`: `latest.json`, `plan.json`, `sent_log.jsonl`, `samvaad_state.json` (`auto_send`, `auto_resolve`, `max_per_run`, `max_per_day`), `shots/`, `proof/` (tracker screenshots), `log.md`. Changing a template or rule = edit `TEMPLATES` / `decide()` / `lint()`, run `selftest`, then run `send --dry`.
 
 ## 7. Open items (Sir)
 
-S6 pre-sales auto-answers from listing facts · S9 review requests · whether Resolve case should be switched on (still OFF) · Sir-side: Rakesh refund (RTO received 9 Oct), Kanta Bluedart POD check. · **Disputed delivery (Sir 2026-10-20):** Sir wants the Nimbus status + tracking link + tracking-page screenshot shown to the buyer; NOT enabled (R-5 bans links/attachments). Until Sir decides: do not send either, escalate the case and save the tracker screenshot for Sir (details in memory `project_samvaad_agent.md`).
+S6 pre-sales auto-answers from listing facts · S9 review requests · whether Resolve case should be switched on (still OFF) · Sir-side: Rakesh refund (RTO received 9 Oct), Kanta Bluedart POD check. · Disputed delivery: safe T7 version built 2026-10-20; links and attachments stay banned (R-5) unless Sir decides otherwise at his own risk.
