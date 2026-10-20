@@ -1,7 +1,7 @@
 """Samvaad reply pipeline for Amazon Buyer-Seller Messaging (see .claude/agents/samvaad.md).
 
   python agent/scripts/amazon_inbox_reply.py plan        latest.json (facts from amazon_inbox_check.py) -> scenario + draft + lint -> plan.json (offline)
-  python agent/scripts/amazon_inbox_reply.py send [--dry] [--only <name|order>] [--approve] [--resolve]
+  python agent/scripts/amazon_inbox_reply.py send [--dry] [--only <name|order>] [--approve] [--resolve] [--force-template T#]
                                                          sends SEND items through the case composer (visible Playwright).
                                                          --dry fills the composer, screenshots, clears it (nothing is sent).
   python agent/scripts/amazon_inbox_reply.py templates   print every template (EN / HI)
@@ -19,7 +19,7 @@ import io
 import json
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -56,6 +56,15 @@ TEMPLATES = {
     "T7": {"name": "buyer disputes a delivered shipment: courier tracking facts (text only, screenshot saved for Sir)", "resolve": False, "alert": True,
            "en": "Hello,\nRegarding your order {order_no}: in the courier's tracking this shipment ({carrier}, tracking ID {awb}) is marked as Delivered. Delivery was recorded on {when_en}{loc_en}.{ver_en}\nPlease check once more with your family members, neighbours or building security. You can also look up the same tracking ID in the courier's own app or on its tracking page.\n" + SIGN["en"],
            "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: कूरियर की ट्रैकिंग में यह शिपमेंट ({carrier}, ट्रैकिंग आईडी {awb}) डिलीवर्ड दिख रहा है। डिलीवरी {when_hi}{loc_hi} दर्ज हुई है।{ver_hi}\nकृपया एक बार फिर अपने परिवार के सदस्यों, पड़ोसियों या सिक्योरिटी से पूछ लें। आप यही ट्रैकिंग आईडी कूरियर के अपने ऐप या ट्रैकिंग पेज पर भी देख सकते हैं।\n" + SIGN["hi"]},
+    # Sir 2026-10-20: defective product, still inside the return/replacement window (7 days from the courier delivery date):
+    # guide the buyer to share received-product + defect photos here first, then raise a replacement request in Amazon (replaces T4).
+    "T9": {"name": "defect inside the return/replacement window: share received-product + defect photos here, then raise a replacement request", "resolve": False,
+           "en": "Hello,\nRegarding your order {order_no}: we are sorry that the product is not working properly. So that we can look into your request, please share here in this chat clear photos of the product you received (showing the packaging label) and clear photos or a video that show the defect.\nAfter you have shared them, please raise a replacement request for this order from Your Orders in your Amazon account.\n" + SIGN["en"],
+           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: हमें खेद है कि प्रोडक्ट ठीक से काम नहीं कर रहा है। आपके अनुरोध की जांच के लिए कृपया इसी चैट में मिले हुए प्रोडक्ट की साफ़ फोटो (पैकेजिंग लेबल दिखाते हुए) और खराबी दिखाने वाली साफ़ फोटो या वीडियो भेजें।\nइन्हें भेजने के बाद, कृपया अपने Amazon अकाउंट में Your Orders से इस ऑर्डर के लिए रिप्लेसमेंट रिक्वेस्ट डालें।\n" + SIGN["hi"]},
+    # Sir-approved text for a defect claim where Amazon still shows the order as not delivered (ayesha 2026-10-20). Only via `send --only <case> --approve --force-template T8`.
+    "T8": {"name": "defect claim while Amazon's status lags: ask for evidence + state the courier delivery fact (Sir-approved text, manual use)", "resolve": False,
+           "en": "Hello,\nRegarding your order {order_no}: we are sorry that the display is not working properly. So that we can look into your request, please share a clear video and photos that show the problem.\nOur records show that this order was delivered by {carrier} (tracking ID {awb}) on {delivered_date}. The status shown in your Amazon account is updated by Amazon from the courier tracking.\n" + SIGN["en"],
+           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: हमें खेद है कि डिस्प्ले ठीक से काम नहीं कर रहा है। आपके अनुरोध की जांच के लिए कृपया समस्या दिखाने वाला साफ़ वीडियो और फोटो भेजें।\nहमारे रिकॉर्ड के अनुसार यह ऑर्डर {carrier} (ट्रैकिंग आईडी {awb}) द्वारा {delivered_date} को डिलीवर हो चुका है। आपके Amazon अकाउंट में दिखने वाला स्टेटस Amazon द्वारा कूरियर ट्रैकिंग से अपडेट होता है।\n" + SIGN["hi"]},
 }
 T7_MARKS = ("is marked as Delivered", "डिलीवर्ड दिख रहा है")        # a seller message with one of these = T7 already sent in this thread
 
@@ -107,9 +116,13 @@ def lint(text: str, facts: dict | None = None, template: str | None = None, lang
     if PHONE_RE.search(stripped):
         errs.append("phone number")
     for pat in BANNED_EN:
+        if template == "T9" and pat == r"\breplac":            # T9 only guides the buyer to raise a replacement request (promises stay banned below)
+            continue
         if re.search(pat, text, re.I):
             errs.append(f"banned wording /{pat}/")
     for w in BANNED_HI:
+        if template == "T9" and w == "रिप्लेसमेंट":
+            continue
         if w in text:
             errs.append(f"banned wording {w}")
     has_refund = bool((facts.get("order_page") or {}).get("refunds"))
@@ -194,6 +207,17 @@ def msg_text(m: dict) -> str:
 def thread_order(msgs: list[dict]) -> str | None:
     """Buyer follow-ups carry no order number: use the newest one anywhere in the thread."""
     return next((m.get("order_no") for m in reversed(msgs) if m.get("order_no")), None)
+
+
+RETURN_WINDOW_DAYS = 7                      # Sir 2026-10-20: return/replacement window, counted from the courier delivery date
+
+
+def days_since(s: str | None) -> float | None:
+    """'Oct 01, 2026 13:32' (Nimbus format, IST) -> days elapsed since then."""
+    try:
+        return (datetime.now() - datetime.strptime(s or "", "%b %d, %Y %H:%M")).total_seconds() / 86400
+    except ValueError:
+        return None
 
 
 def fmt_time(s: str | None) -> str | None:
@@ -302,7 +326,12 @@ def decide(case: dict) -> dict:
         return esc("DELIVERED_TRACKING_QUERY", "buyer asks about tracking/status but does not say the parcel is missing and the tracker says delivered: Sir reads it", "S11")
     if "defect" in t_last or ("refund" in t_last and "returned" not in t_last):
         if state == "DELIVERED" and tr.get("delivery_verified"):
-            return {"scenario": "S4", "template": "T4", "action": "SEND", "code": "ASK_ISSUE_EVIDENCE", "why": "delivered, code verified"}
+            days = days_since(tr.get("delivered_at"))
+            if days is None:
+                return esc("DELIVERY_UNVERIFIED", "defect asked but the tracker has no delivery date to check the return/replacement window", "S4")
+            if days > RETURN_WINDOW_DAYS:                                           # Sir 2026-10-20: window over -> WhatsApp support guidance, Sir sends it
+                return esc("WINDOW_CROSSED", f"defect/refund asked {days:.0f} days after delivery (window {RETURN_WINDOW_DAYS} days): Sir sends the WhatsApp-support guidance", "S4")
+            return {"scenario": "S4", "template": "T9", "action": "SEND", "code": "DEFECT_IN_WINDOW", "why": f"delivered {days:.0f} days ago, code verified: guide to share photos here, then raise a replacement request"}
         return esc("DELIVERY_UNVERIFIED", f"defect/refund asked but delivery state is {state}, verified={tr.get('delivery_verified')}", "S4")
     if "returned" in t_last:
         return esc("RETURN_CLAIM_UNVERIFIED", "buyer says the item was returned, no refund on the page and no RTO: Sir checks the return", "S5")
@@ -401,6 +430,25 @@ def cmd_send(args: list[str]) -> int:
         print("BLOCKED: auto_send is false. Sir must approve: use --only <case> --approve for a single case, or set auto_send=true in samvaad_state.json."); return 4
     plan = json.loads((OUT / "plan.json").read_text(encoding="utf-8"))
     items = [i for i in plan["items"] if i["action"] == "SEND" and (not only or only.lower() in (i["name"] or "").lower() or only == i["order_no"])]
+    force = args[args.index("--force-template") + 1] if "--force-template" in args else None
+    if force:                                       # Sir picks the template for ONE case (still template + facts + lint, never free text)
+        if not (only and approve) or force not in TEMPLATES:
+            print("BLOCKED: --force-template <T#> needs --only <case> --approve and an existing template"); return 4
+        latest = json.loads((OUT / "latest.json").read_text(encoding="utf-8"))
+        case = next((c for c in latest["cases"] if only.lower() in (c.get("name") or "").lower() or only == thread_order(c.get("messages") or [])), None)
+        if not case:
+            print("NOT_FOUND: no such case in latest.json"); return 4
+        it = make_item(case, {x["key"] for x in read_log() if x.get("sent") and not x.get("dry")})
+        if it["action"] == "SKIP":
+            print(f"SKIPPED: {it['code']} ({it['why']})"); return 0
+        facts = {**(case.get("facts") or {}), "order_no": it["order_no"]}
+        lang = "hi" if facts.get("language") == "Hindi" else "en"
+        text = render(force, lang, facts)
+        errs = lint(text, facts, force, lang)
+        if errs:
+            print("LINT_FAILED:", "; ".join(errs)); return 6
+        it.update(action="SEND", template=force, text=text, lint=[], code="SIR_FORCED_TEMPLATE", why=f"Sir approved template {force} for this case", resolve_after=False)
+        items = [it]
     if not items:
         print("NOTHING_TO_SEND"); return 0
     today = datetime.now().strftime("%Y-%m-%d")
@@ -498,20 +546,22 @@ def cmd_selftest() -> int:
             e = lint(render(tid, lang, good_facts), good_facts, tid)
             print(("PASS " if not e else "FAIL ") + f"{tid}/{lang} renders and lints" + (f" <- {e}" if e else "")); fails += bool(e)
     # decision tests (synthetic cases)
-    def case(reason, state, refunds=(), notes=(), lang="English", verified=True, order_page=True, subject="Order enquiry from Amazon customer Test"):
-        tr = {"awb": "111111111111", "state": state, "courier": "Delhivery", "delivery_verified": verified, "notes": list(notes), "delivered_at": "Sep 22, 2026 17:24", "latest": {"at": "Oct 12, 2026 18:03"}}
+    def case(reason, state, refunds=(), notes=(), lang="English", verified=True, order_page=True, subject="Order enquiry from Amazon customer Test", ago=2):
+        tr = {"awb": "111111111111", "state": state, "courier": "Delhivery", "delivery_verified": verified, "notes": list(notes), "delivered_at": (datetime.now() - timedelta(days=ago)).strftime("%b %d, %Y %H:%M"), "latest": {"at": "Oct 12, 2026 18:03"}}
         op = {"carrier": "Delhivery", "tracking_id": "111111111111", "deliver_by": "Mon, 28 Sept, 2026 IST", "refunds": list(refunds), "status": "Sent"}
         return {"name": "Test", "key": "1|1", "subject": subject, "messages": [{"order_no": "400-0000000-0000000", "reason": reason}],
                 "facts": {"order_no": "400-0000000-0000000", "language": lang, "order_page": op if order_page else None, "tracking": tr, "buyer_names": ["Test"]}}
     dec = [("cancel + in transit -> T1", case("cx want to cancel", "IN_TRANSIT"), "T1"), ("cancel + delivered -> T1", case("cancel the item", "DELIVERED"), "T1"),
            ("cancel + not moving -> escalate", case("cancel", "NOT_MOVING"), None), ("where is my order + in transit -> T3", case("when will I get my package", "IN_TRANSIT"), "T3"),
            ("delay + not moving -> T2", case("order is too delay", "NOT_MOVING"), "T2"), ("not received + delivered -> T6", case("customer not received order but showing delivered", "DELIVERED"), "T6"),
-           ("defective + delivered verified -> T4", case("received a defective product", "DELIVERED"), "T4"), ("defective + delivered unverified -> escalate", case("received a defective product", "DELIVERED", verified=False), None),
+           ("defective + delivered verified, inside window -> T9", case("received a defective product", "DELIVERED"), "T9"), ("defective + delivered unverified -> escalate", case("received a defective product", "DELIVERED", verified=False), None),
            ("refund + RTO, no refund yet -> escalate", case("want refund", "RTO_RECEIVED"), None), ("refund + refund on page -> T5", case("want refund", "RTO_RECEIVED", refunds=[999.0]), "T5"),
            ("legal wording -> escalate", case("customer will send a lawyer notice", "DELIVERED"), None), ("A to Z claim -> escalate", case("A to Z claim filed", "DELIVERED"), None),
            ("tracking conflict -> escalate", case("cancel", "DELIVERED", notes=["refusal scan"]), None), ("Hindi cancel + in transit -> HI T1", case("cancel", "IN_TRANSIT", lang="Hindi"), "T1"),
            ("language Tamil -> escalate", case("cancel", "IN_TRANSIT", lang="Tamil"), None), ("no order page -> escalate", case("cancel", "IN_TRANSIT", order_page=False), None),
-           ("returned claim, no refund, delivered -> escalate", case("customer already returned the item", "DELIVERED"), None)]
+           ("returned claim, no refund, delivered -> escalate", case("customer already returned the item", "DELIVERED"), None),
+           ("defective + window crossed (20 days) -> escalate", case("received a defective product", "DELIVERED", ago=20), None),
+           ("Hindi defective inside window -> HI T9", case("product kharab hai defective", "DELIVERED", lang="Hindi"), "T9")]
     for name, c, want in dec:
         it = make_item(c, set())
         okd = (it["action"] == "SEND" and it["template"] == want) if want else it["action"] == "ESCALATE"
@@ -537,7 +587,7 @@ def cmd_selftest() -> int:
              ("follow-up that is not a dispute -> escalate", thread([AMZ("want refund"), ME, BUY("please refund quickly")]), "ESCALATE", None, "FOLLOWUP_NEEDS_SIR"),
              ("follow-up returned claim -> escalate", thread([AMZ("issue"), ME, BUY("i already returned the item but not received refund")]), "ESCALATE", None, "RETURN_CLAIM_UNVERIFIED"),
              ("last message is ours -> skip", thread([NR, ME]), "SKIP", None, "WAITING_BUYER"),
-             ("'did not receive my refund' is not a not-received parcel -> not T6", thread([AMZ("I did not receive my refund")]), "SEND", "T4", None),
+             ("'did not receive my refund' is not a not-received parcel -> not T6", thread([AMZ("I did not receive my refund")]), "ESCALATE", None, "WINDOW_CROSSED"),
              ("fresh Amazon forward after our reply is a new first answer", thread([AMZ("old"), ME, AMZ("cancel the order")]), "SEND", "T1", None),
              ("not received + tracker EXCEPTION -> escalate", thread([AMZ("order not received")], state="EXCEPTION"), "ESCALATE", None, "TRACKING_UNVERIFIED"),
              ("T7 in Hindi", thread([NR, ME, BUY("abhi tak nahi mila, not received")], lang="Hindi"), "SEND", "T7", None)]
@@ -550,6 +600,19 @@ def cmd_selftest() -> int:
             okd = okd and it["text"].startswith("नमस्ते" if "Hindi" in name else "Hello")
         fails += not okd
         print(("PASS " if okd else "FAIL ") + "thread: " + name + f"  [{it['action']} {it['template']} {it['code']}]")
+    it = make_item(case("received a defective product", "DELIVERED", ago=20), set())
+    okd = it["action"] == "ESCALATE" and it["code"] == "WINDOW_CROSSED"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"window crossed -> WINDOW_CROSSED [{it['action']} {it['code']}]")
+    it = make_item(case("received a defective product", "DELIVERED"), set())
+    okd = it["template"] == "T9" and not it["lint"] and "replacement request" in it["text"] and "photos" in it["text"] and "http" not in it["text"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "T9 text: photos here + replacement request, lint clean")
+    bad = lint(it["text"].replace("Regards,", "We will replace it.\nRegards,"), {"order_no": "400-0000000-0000000"}, "T9")
+    okd = any("banned wording" in e for e in bad)
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "T9 still blocks a replacement promise")
+    t8 = render("T8", "en", {**thread([])["facts"]})
+    e8 = lint(t8, thread([])["facts"], "T8")
+    okd = not e8 and "1 Oct 2026" in t8 and "Bluedart" in t8
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "T8 renders and lints" + (f" <- {e8}" if e8 else ""))
     return 1 if fails else 0
 
 
