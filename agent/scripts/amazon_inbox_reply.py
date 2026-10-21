@@ -35,7 +35,7 @@ MOVING = ("DELIVERED", "IN_TRANSIT", "OUT_FOR_DELIVERY")
 TEMPLATES = {
     # English only, professional and technical (Sir 2026-10-21). One template = one scenario; wording is the single source of truth.
     "T1": {"name": "cancel asked, order already dispatched / delivered", "resolve": True,
-           "en": "Dear Customer,\nRegarding order {order_no}: the shipment was dispatched via {carrier} (tracking ID {awb}){clause_en}. As the order has already been shipped, it can no longer be cancelled.\nIf you have a concern about the product, please share the details in this chat so that we can look into it.\n" + SIGN["en"]},
+           "en": "Dear Customer,\nRegarding order {order_no}: the shipment was dispatched via {carrier} (tracking ID {awb}){clause_en}. As the order has already been shipped, it cannot be cancelled.{t1_tail}\n" + SIGN["en"]},
     "T2": {"name": "shipped-marked but not moving (delay)", "resolve": True,
            "en": "Dear Customer,\nRegarding order {order_no}: we apologise for the delay. The shipment is still being processed for dispatch. The estimated delivery date shown by Amazon for this order is {deliver_by}.\n" + SIGN["en"]},
     "T3": {"name": "where is my order / ETA (moving)", "resolve": True,
@@ -62,6 +62,12 @@ TEMPLATES = {
     # Sir 2026-10-21: refund not received -> the buyer asks Amazon Customer Support by phone (a refund is already issued; follow-up after T5).
     "T11": {"name": "buyer still asks about a refund that is already issued: Amazon Customer Support by phone", "resolve": False,
             "en": "Dear Customer,\nRegarding order {order_no}: a refund of Rs {amount} has already been issued for this order. Refunds are processed by Amazon to the original payment method, and the credit timeline depends on the payment method. To check the refund status, please contact Amazon Customer Support by phone from the Customer Service section of your Amazon account.\n" + SIGN["en"]},
+    # Sir 2026-10-21: pre-sales question without an order -> one generic reply, Sir is alerted to answer the specifics (no link, no price, no stock claim).
+    "T12": {"name": "pre-sales enquiry without an order: generic reply, Sir answers the specifics", "resolve": False, "alert": True,
+            "en": "Dear Customer,\nThank you for your enquiry. Please refer to the product listing for specifications and compatibility. To confirm availability and compatibility for your device, please reply here with your phone brand and model name.\n" + SIGN["en"]},
+    # Sir 2026-10-21: change-of-mind return ('I no longer want the item') on a delivered order -> policy reply. Policy text = Sir's own wording (7 days replacement for defects on arrival, warranty conditions).
+    "T13": {"name": "change of mind on a delivered order: return policy", "resolve": False,
+            "en": "Dear Customer,\nRegarding order {order_no}: as per our return policy, a replacement is available only for a defect on arrival, reported within 7 days of delivery. Returns or refunds for reasons such as a change of mind are not accepted. The warranty does not apply once the screen has been pasted or fitted on the device, or if the warranty protection film or sticker has been removed.\n" + SIGN["en"]},
 }
 T7_MARKS = ("Delivery was recorded on",)         # a seller message containing one of these = T7 already sent in this thread
 T11_MARKS = ("has already been issued",)         # T11 already sent in this thread
@@ -113,19 +119,21 @@ def lint(text: str, facts: dict | None = None, template: str | None = None, lang
     if PHONE_RE.search(stripped):
         errs.append("phone number")
     for pat in BANNED_EN:
-        if template in ("T9", "T10") and pat == r"\breplac":   # T9 guides the buyer to raise a replacement request, T10 names the ended window (promises stay banned)
+        if template in ("T9", "T10", "T13") and pat == r"\breplac":   # T9 guides the buyer to raise a replacement request, T10 names the ended window (promises stay banned)
             continue
         if template == "T10" and pat == r"\bwhatsapp":         # T10 only: Sir's WhatsApp-support rule (his risk decision)
             continue
         if re.search(pat, text, re.I):
             errs.append(f"banned wording /{pat}/")
     has_refund = bool((facts.get("order_page") or {}).get("refunds"))
-    if re.search(r"refund", text, re.I) and not (template in ("T5", "T11") and has_refund):
-        errs.append("refund wording only allowed in T5 / T11 with a refund on the order page")
+    if re.search(r"refund", text, re.I) and not (template in ("T1", "T13") or (template in ("T5", "T11") and has_refund)):
+        errs.append("refund wording only allowed in T1 / T13 (policy) and in T5 / T11 with a refund on the order page")
     if facts:
         allowed = _fact_numbers(facts)
         if template == "T10" and support_number():
             allowed.add(support_number())
+        if template == "T13":
+            allowed.add("7")                                                        # the 7-day replacement window in Sir's policy text
         for tok in re.findall(r"\d[\d,]*(?:\.\d+)?", text):
             if _norm_num(tok) not in allowed:
                 errs.append(f"number {tok} not found in facts")
@@ -174,8 +182,11 @@ ABUSE = re.compile(r"\bpolice\b|\blegal\b|\blawyer\b|\bcourt\b|consumer (forum|c
 REFUND_NOTREC = re.compile(r"(refund|रिफंड|paise|पैसे)[^.,\n]{0,25}\b(not|never|nahi)\b|\b(not|never|nahi)\b[^.,\n]{0,25}(receiv\w*|reciev\w*|got|मिला)[^.,\n]{0,12}(refund|रिफंड|paise|पैसे)", re.I)
 
 
+CHANGEMIND = re.compile(r"no longer (want|need)|don.?t (want|need)|do not (want|need)|changed my mind|change of mind|ordered by mistake|order(ed)? (it )?by mistake|not needed|no need now", re.I)
+
+
 def tags_of(text: str) -> set[str]:
-    tags = {n for n, rx in (("cancel", CANCEL), ("refund", REFUND), ("returned", RETURNED), ("notrec", NOTREC), ("delay", DELAY), ("defect", DEFECT), ("abuse", ABUSE)) if rx.search(text or "")}
+    tags = {n for n, rx in (("cancel", CANCEL), ("refund", REFUND), ("returned", RETURNED), ("notrec", NOTREC), ("delay", DELAY), ("defect", DEFECT), ("abuse", ABUSE), ("changemind", CHANGEMIND)) if rx.search(text or "")}
     if REFUND_NOTREC.search(text or ""):
         tags.discard("notrec")
         tags.add("refundq")                                    # a question about a refund's status, not a new product claim
@@ -250,12 +261,18 @@ def render(tid: str, lang: str, facts: dict) -> str:
     loc = clean_loc((tr.get("latest") or {}).get("location")) if st == "DELIVERED" else None
     f["when_en"] = f"{d_at} at {t_at}" if t_at else f"{d_at}"
     f["loc_en"] = f", last scan location: {loc}" if loc else ""
+    f["t1_tail"] = (" If you have a concern about the product, please share the details in this chat so that we can look into it." if st == "DELIVERED" else
+                    " Please accept the shipment, or refuse it at the time of delivery. The refund will be processed once the return to origin (RTO) has been initiated and the shipment is in transit back to us.")
     f["whatsapp"] = support_number() or ""
     f["ver_en"] = " The courier's record shows this delivery as verified." if tr.get("delivery_verified") else ""
     text = TEMPLATES[tid]["en"].format(**f)
     if tid == "T5" and not f["rto_en"] and lang == "en":
         text = text.replace(": a refund", ": A refund")
     return text
+
+
+def state_of(tr: dict | None) -> str | None:
+    return (tr or {}).get("state")
 
 
 def decide(case: dict) -> dict:
@@ -275,13 +292,22 @@ def decide(case: dict) -> dict:
     mine = " ".join(m.get("raw") or m.get("text") or "" for m, b in zip(msgs, by) if b == "seller")
     if "abuse" in t_all:
         return esc("SENSITIVE", "legal / fraud / A-to-z wording: Sir only", "S8")
+    if facts.get("language") not in ("English", "Hindi"):
+        return esc("LANGUAGE", f"thread language {facts.get('language')}")
     if not thread_order(msgs):
-        return esc("PRESALES_OR_NO_ORDER", "no order in the message (pre-sales question): draft-only, Sir decides", "S6")
+        subj = (case.get("subject") or "").lower()
+        if seller_replied:
+            return esc("FOLLOWUP_NEEDS_SIR", "buyer replied to our pre-sales answer: Sir reads it", "S6")
+        if not msg_text(buyer_msgs[-1]).strip() or subj.startswith(("update from seller", "important update")):
+            return esc("PRESALES_OR_NO_ORDER", "no order and no readable question (seller-initiated / empty forward): Sir decides", "S6")
+        return {"scenario": "S6", "template": "T12", "action": "SEND", "code": "PRESALES_GENERIC", "alert": True,
+                "why": "pre-sales question without an order (Sir 2026-10-21): generic reply, Sir is alerted to answer the specifics"}
     op, tr = facts.get("order_page"), facts.get("tracking")
     if not op:
         return esc("FACTS_MISSING", "order page not read")
-    if facts.get("language") not in ("English", "Hindi"):
-        return esc("LANGUAGE", f"thread language {facts.get('language')}")
+    ret_req = any((m.get("return_requested") or "").lower().startswith("yes") for m in msgs)
+    returned = "returned" in t_last or ret_req                  # a customer-initiated return: NEVER refunded by us (SAFE-T), Sir is informed with the delivery facts
+    delivery_note = f"tracker {state_of(tr)}, delivered {(tr or {}).get('delivered_at')}, code verified={(tr or {}).get('delivery_verified')}"
     state = (tr or {}).get("state")
     if op.get("refunds") and t_last & {"refund", "refundq", "cancel", "returned", "notrec"}:
         if seller_replied:                                                          # Sir 2026-10-21: refund not seen -> Amazon Customer Support by phone (T11), once
@@ -294,8 +320,9 @@ def decide(case: dict) -> dict:
     if tr.get("notes"):
         return esc("TRACKING_CONFLICT", "; ".join(tr["notes"]))
     if state in RTO:
-        return esc("REFUND_PENDING", "shipment returned to us (RTO) and no refund on the order page: Sir issues the refund", "S5")
-    if "refundq" in t_last and not t_last & {"defect", "returned"}:
+        lt = tr.get("latest") or {}
+        return esc("REFUND_PENDING", f"RTO ({state}; customer refused / undelivered, last scan {lt.get('at')} {lt.get('remark')}) and no refund on the order page: refund is eligible, Sir issues it (Sir 2026-10-21: refund only for RTO, verified)", "S5")
+    if "refundq" in t_last and not (t_last & {"defect"} or returned):
         return esc("REFUND_STATUS_QUERY", "buyer asks where a refund is (not a new product claim): Sir checks", "S5")
     if seller_replied and state == "DELIVERED" and "notrec" in t_last:             # delivery DISPUTE (Sir 2026-10-20): facts-only proof, once
         if any(mk in mine for mk in T7_MARKS):
@@ -305,13 +332,15 @@ def decide(case: dict) -> dict:
         return {"scenario": "S11", "template": "T7", "action": "SEND", "code": "DELIVERY_DISPUTE_PROOF", "alert": True, "proof": True,
                 "why": "buyer disputes a delivered shipment: text-only courier facts, tracker screenshot saved for Sir (Sir 2026-10-20), Sir is alerted"}
     if seller_replied:                                                              # templates are first answers; a follow-up is for Sir
-        if "returned" in t_last:
-            return esc("RETURN_CLAIM_UNVERIFIED", "buyer says the item was returned (follow-up after our reply): Sir checks the return", "S5")
+        if returned:
+            return esc("RETURN_CLAIM_UNVERIFIED", f"customer-initiated return (follow-up after our reply): do NOT refund (SAFE-T); {delivery_note}: Sir decides", "S5")
         return esc("FOLLOWUP_NEEDS_SIR", "buyer wrote again after our reply and it is not a delivery dispute: Sir reads it", "S11")
-    if "cancel" in t_last:
+    if "cancel" in t_last or ("changemind" in t_last and state != "DELIVERED"):
         if state in MOVING:
             return {"scenario": "S1", "template": "T1", "action": "SEND", "code": "CANCEL_SHIPPED", "why": f"tracker {state}"}
         return esc("CANCEL_NOT_SHIPPED", f"cancel asked while tracker is {state}: Sir decides", "S2")
+    if "changemind" in t_last and state == "DELIVERED" and not t_last & {"defect", "notrec"}:      # Sir 2026-10-21: change of mind -> policy reply
+        return {"scenario": "S4", "template": "T13", "action": "SEND", "code": "CHANGE_OF_MIND_POLICY", "why": "change of mind on a delivered order: return policy reply"}
     if t_last & {"notrec", "delay"} and "defect" not in t_last:
         if state in ("IN_TRANSIT", "OUT_FOR_DELIVERY"):
             return {"scenario": "S3", "template": "T3", "action": "SEND", "code": "ETA", "why": f"tracker {state}"}
@@ -323,7 +352,7 @@ def decide(case: dict) -> dict:
             return {"scenario": "S11", "template": "T6", "action": "SEND", "code": "DELIVERED_NOT_RECEIVED", "alert": True,
                     "why": "tracker says delivered, buyer says not received: delivery facts + check with family/neighbours (Sir 2026-10-17), Sir is alerted"}
         return esc("DELIVERED_TRACKING_QUERY", "buyer asks about tracking/status but does not say the parcel is missing and the tracker says delivered: Sir reads it", "S11")
-    if "defect" in t_last or ("refund" in t_last and "returned" not in t_last):
+    if "defect" in t_last or ("refund" in t_last and not returned):
         if state == "DELIVERED" and tr.get("delivery_verified"):
             days = days_since(tr.get("delivered_at"))
             if days is None:
@@ -335,8 +364,8 @@ def decide(case: dict) -> dict:
                         "why": f"defect/refund asked {days:.0f} days after delivery (window {RETURN_WINDOW_DAYS} days): WhatsApp-support guidance (Sir 2026-10-21), Sir is alerted"}
             return {"scenario": "S4", "template": "T9", "action": "SEND", "code": "DEFECT_IN_WINDOW", "why": f"delivered {days:.0f} days ago, code verified: guide to share photos here, then raise a replacement request"}
         return esc("DELIVERY_UNVERIFIED", f"defect/refund asked but delivery state is {state}, verified={tr.get('delivery_verified')}", "S4")
-    if "returned" in t_last:
-        return esc("RETURN_CLAIM_UNVERIFIED", "buyer says the item was returned, no refund on the page and no RTO: Sir checks the return", "S5")
+    if returned:
+        return esc("RETURN_CLAIM_UNVERIFIED", f"customer-initiated return / return requested, no RTO: do NOT refund (SAFE-T); {delivery_note}: Sir decides", "S5")
     return esc("UNKNOWN", "no rule matched")
 
 
@@ -543,8 +572,7 @@ def cmd_selftest() -> int:
              ("phone", ok_text.replace("Regards,", "Call 9876543210\nRegards,"), [], False), ("email", ok_text.replace("Regards,", "a@b.com\nRegards,"), [], False), ("emoji", ok_text.replace("Dear Customer,", "Dear 😊,"), [], False),
              ("refund promise", ok_text.replace("Regards,", "We will refund you.\nRegards,"), [], False), ("unknown number", ok_text.replace("Regards,", "Delivery in 5 days.\nRegards,"), [], False),
              ("customer name", ok_text.replace("Dear Customer,", "Dear Himani,"), [], False), ("triple newline", ok_text.replace("Regards,", "\n\nRegards,"), [], False),
-             ("review request", ok_text.replace("Regards,", "Please leave a review.\nRegards,"), [], False), ("refund word outside T5", ok_text.replace("Regards,", "Refund later.\nRegards,"), [], False),
-             ("no sign-off", ok_text.replace("Badeja Enterprises", "Team"), [], False)]
+             ("review request", ok_text.replace("Regards,", "Please leave a review.\nRegards,"), [], False),              ("no sign-off", ok_text.replace("Badeja Enterprises", "Team"), [], False)]
     fails = 0
     for name, text, _, expect_ok in cases:
         errs = lint(text, good_facts, "T1")
@@ -649,6 +677,37 @@ def cmd_selftest() -> int:
         if want_tpl:
             okd = okd and not it["lint"] and "Amazon Customer Support" in it["text"] and "Rs 3,011.00" in it["text"]
         fails += not okd; print(("PASS " if okd else "FAIL ") + "refund: " + name + f"  [{it['action']} {it['template']} {it['code']}] {it['lint']}")
+    # Sir 2026-10-21 round-1 answers: T1 rejection wording, pre-sales T12, change of mind T13, refund policy (never refund a customer return)
+    e_x = lint(ok_text.replace("Regards,", "Refund later." + chr(10) + "Regards,"), good_facts, "T3")
+    fails += not e_x; print(("PASS " if e_x else "FAIL ") + "refund wording is blocked outside T1 / T13 / T5 / T11")
+    ship = [(n, make_item(c, set())) for n, c in (("cancel in transit", case("cancel", "IN_TRANSIT")), ("cancel delivered", case("cancel", "DELIVERED")))]
+    okd = ("accept the shipment, or refuse it" in ship[0][1]["text"] and "return to origin (RTO)" in ship[0][1]["text"] and not ship[0][1]["lint"]
+           and "accept the shipment" not in ship[1][1]["text"] and "concern about the product" in ship[1][1]["text"] and not ship[1][1]["lint"])
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "T1: in transit = accept or refuse + RTO refund line; delivered = product concern line")
+    def PRE(t, subject="Enquiry from Amazon customer X"): return {"name": "Test", "key": "k", "subject": subject, "messages": [{"order_no": None, "reason": None, "raw": t, "by": "buyer"}],
+                                                                  "facts": {"order_no": None, "language": "English", "order_page": None, "tracking": None, "buyer_names": []}}
+    for name, c, want_action, want_tpl, want_code in [("pre-sales without order -> T12 + alert", PRE("Kya aapke pass oppo reno 10 pro ki display available hai"), "SEND", "T12", "PRESALES_GENERIC"),
+                                                      ("empty seller-initiated update -> escalate", PRE("", "Update from Seller on Order ID 403-1"), "ESCALATE", None, "PRESALES_OR_NO_ORDER"),
+                                                      ("Telugu pre-sales -> escalate", {**PRE("hello"), "facts": {"order_no": None, "language": "Telugu", "order_page": None, "tracking": None, "buyer_names": []}}, "ESCALATE", None, "LANGUAGE")]:
+        it = make_item(c, set())
+        okd = it["action"] == want_action and (want_tpl is None or it["template"] == want_tpl) and (want_code is None or it["code"] == want_code) and (not want_tpl or (not it["lint"] and it.get("alert")))
+        fails += not okd; print(("PASS " if okd else "FAIL ") + "pre-sales: " + name + f"  [{it['action']} {it['template']} {it['code']}] {it['lint']}")
+    c2 = PRE("what is the price"); c2["messages"] = [{"order_no": None, "reason": None, "raw": "what is the price", "by": "buyer"}, {"order_no": None, "reason": None, "raw": "Dear Customer, thanks. Regards, Badeja Enterprises", "by": "seller"}, {"order_no": None, "reason": None, "raw": "and cod?", "by": "buyer"}]
+    it = make_item(c2, set()); okd = it["action"] == "ESCALATE" and it["code"] == "FOLLOWUP_NEEDS_SIR"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "pre-sales follow-up after our generic reply -> escalate (one generic reply only)")
+    it = make_item(case("I no longer want the item", "DELIVERED"), set())
+    okd = it["template"] == "T13" and not it["lint"] and "7 days" in it["text"] and "warranty protection film" in it["text"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"change of mind, delivered -> T13 policy reply [{it['action']} {it['template']} {it['code']}] {it['lint']}")
+    it = make_item(case("I no longer want the item", "IN_TRANSIT"), set()); okd = it["template"] == "T1"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "change of mind, still in transit -> T1 (shipped, accept or refuse)")
+    ret = make_item(case("Item return kindly refund asap", "DELIVERED"), set())
+    okd = ret["action"] == "ESCALATE" and ret["code"] == "RETURN_CLAIM_UNVERIFIED" and "SAFE-T" in ret["why"] and "code verified" in ret["why"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "customer return: escalate with delivery facts, never refund (SAFE-T)")
+    c3 = case("want refund", "DELIVERED"); c3["messages"][0]["return_requested"] = "Yes"
+    it = make_item(c3, set()); okd = it["action"] == "ESCALATE" and it["code"] == "RETURN_CLAIM_UNVERIFIED"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "'Return requested: Yes' on the Amazon forward -> customer return, escalate")
+    rto = make_item(case("want refund", "RTO_IN_TRANSIT"), set()); okd = rto["code"] == "REFUND_PENDING" and "refund is eligible" in rto["why"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "RTO (customer refused) without refund -> REFUND_PENDING, refund eligible")
     _support_override = None
     return 1 if fails else 0
 
