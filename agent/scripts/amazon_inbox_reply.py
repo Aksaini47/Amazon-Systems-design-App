@@ -59,8 +59,13 @@ TEMPLATES = {
     # Sir 2026-10-20: defective product, still inside the return/replacement window (7 days from the courier delivery date):
     # guide the buyer to share received-product + defect photos here first, then raise a replacement request in Amazon (replaces T4).
     "T9": {"name": "defect inside the return/replacement window: share received-product + defect photos here, then raise a replacement request", "resolve": False,
-           "en": "Hello,\nRegarding your order {order_no}: we are sorry that the product is not working properly. So that we can look into your request, please share here in this chat clear photos of the product you received (showing the packaging label) and clear photos or a video that show the defect.\nAfter you have shared them, please raise a replacement request for this order from Your Orders in your Amazon account.\n" + SIGN["en"],
-           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: हमें खेद है कि प्रोडक्ट ठीक से काम नहीं कर रहा है। आपके अनुरोध की जांच के लिए कृपया इसी चैट में मिले हुए प्रोडक्ट की साफ़ फोटो (पैकेजिंग लेबल दिखाते हुए) और खराबी दिखाने वाली साफ़ फोटो या वीडियो भेजें।\nइन्हें भेजने के बाद, कृपया अपने Amazon अकाउंट में Your Orders से इस ऑर्डर के लिए रिप्लेसमेंट रिक्वेस्ट डालें।\n" + SIGN["hi"]},
+           "en": "Hello,\nRegarding your order {order_no}: we are sorry about the issue with the product. So that we can look into your request, please share here in this chat clear photos of the product you received (showing the packaging label) and clear photos or a video that show the problem.\nAfter you have shared them, please raise a replacement request for this order from Your Orders in your Amazon account. Replacement requests are raised and processed through Amazon.\n" + SIGN["en"],
+           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: प्रोडक्ट में आई समस्या के लिए हमें खेद है। आपके अनुरोध की जांच के लिए कृपया इसी चैट में मिले हुए प्रोडक्ट की साफ़ फोटो (पैकेजिंग लेबल दिखाते हुए) और समस्या दिखाने वाली साफ़ फोटो या वीडियो भेजें।\nइन्हें भेजने के बाद, कृपया अपने Amazon अकाउंट में Your Orders से इस ऑर्डर के लिए रिप्लेसमेंट रिक्वेस्ट डालें। रिप्लेसमेंट रिक्वेस्ट Amazon के माध्यम से ही डाली और प्रोसेस की जाती है।\n" + SIGN["hi"]},
+    # Sir 2026-10-20/21: defect or refund asked AFTER the 7-day window -> point the buyer to our WhatsApp support (number lives in samvaad_state.json "support_whatsapp",
+    # not in code; remove the key = kill switch, the case then escalates as WINDOW_CROSSED). Amazon G1701 bans phone numbers / moving buyers off Amazon: Sir's own risk decision.
+    "T10": {"name": "defect/refund asked after the return/replacement window: point to WhatsApp support (Sir's risk decision)", "resolve": False, "alert": True,
+            "en": "Hello,\nRegarding your order {order_no}: the return and replacement period for this order has ended. For further help with this product, please contact our WhatsApp support on {whatsapp} and share your order number.\n" + SIGN["en"],
+            "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: इस ऑर्डर की रिटर्न और रिप्लेसमेंट अवधि समाप्त हो चुकी है। इस प्रोडक्ट के लिए आगे की मदद के लिए कृपया हमारे व्हाट्सएप सपोर्ट {whatsapp} पर संपर्क करें और अपना ऑर्डर नंबर बताएं।\n" + SIGN["hi"]},
     # Sir-approved text for a defect claim where Amazon still shows the order as not delivered (ayesha 2026-10-20). Only via `send --only <case> --approve --force-template T8`.
     "T8": {"name": "defect claim while Amazon's status lags: ask for evidence + state the courier delivery fact (Sir-approved text, manual use)", "resolve": False,
            "en": "Hello,\nRegarding your order {order_no}: we are sorry that the display is not working properly. So that we can look into your request, please share a clear video and photos that show the problem.\nOur records show that this order was delivered by {carrier} (tracking ID {awb}) on {delivered_date}. The status shown in your Amazon account is updated by Amazon from the courier tracking.\n" + SIGN["en"],
@@ -106,7 +111,7 @@ def lint(text: str, facts: dict | None = None, template: str | None = None, lang
     if re.search(r"\n{3,}", text):
         errs.append("more than two line breaks in a row")
     stripped = text
-    for known in [facts.get("order_no"), ((facts.get("order_page") or {}).get("tracking_id")), ((facts.get("tracking") or {}).get("awb"))]:
+    for known in [facts.get("order_no"), ((facts.get("order_page") or {}).get("tracking_id")), ((facts.get("tracking") or {}).get("awb")), support_number() if template == "T10" else None]:
         if known:
             stripped = stripped.replace(str(known), " ")
     if URL_RE.search(stripped):
@@ -116,12 +121,14 @@ def lint(text: str, facts: dict | None = None, template: str | None = None, lang
     if PHONE_RE.search(stripped):
         errs.append("phone number")
     for pat in BANNED_EN:
-        if template == "T9" and pat == r"\breplac":            # T9 only guides the buyer to raise a replacement request (promises stay banned below)
+        if template in ("T9", "T10") and pat == r"\breplac":   # T9 guides the buyer to raise a replacement request, T10 names the ended window (promises stay banned)
+            continue
+        if template == "T10" and pat == r"\bwhatsapp":         # T10 only: Sir's WhatsApp-support rule (his risk decision)
             continue
         if re.search(pat, text, re.I):
             errs.append(f"banned wording /{pat}/")
     for w in BANNED_HI:
-        if template == "T9" and w == "रिप्लेसमेंट":
+        if (template in ("T9", "T10") and w == "रिप्लेसमेंट") or (template == "T10" and w == "व्हाट्सएप"):
             continue
         if w in text:
             errs.append(f"banned wording {w}")
@@ -130,6 +137,8 @@ def lint(text: str, facts: dict | None = None, template: str | None = None, lang
         errs.append("refund wording only allowed in T5 with a refund on the order page")
     if facts:
         allowed = _fact_numbers(facts)
+        if template == "T10" and support_number():
+            allowed.add(support_number())
         for tok in re.findall(r"\d[\d,]*(?:\.\d+)?", text):
             if _norm_num(tok) not in allowed:
                 errs.append(f"number {tok} not found in facts")
@@ -175,13 +184,14 @@ ABUSE = re.compile(r"\bpolice\b|\blegal\b|\blawyer\b|\bcourt\b|consumer (forum|c
 
 
 # "I did not receive my refund" is a refund question, not a "parcel not received" claim
-REFUND_NOTREC = re.compile(r"(refund|रिफंड|paise|पैसे)[^.\n]{0,40}\b(not|never|nahi)\b|\b(not|never|nahi)\b[^.\n]{0,25}(receiv\w*|reciev\w*|got|मिला)[^.\n]{0,15}(refund|रिफंड|paise|पैसे)", re.I)
+REFUND_NOTREC = re.compile(r"(refund|रिफंड|paise|पैसे)[^.,\n]{0,25}\b(not|never|nahi)\b|\b(not|never|nahi)\b[^.,\n]{0,25}(receiv\w*|reciev\w*|got|मिला)[^.,\n]{0,12}(refund|रिफंड|paise|पैसे)", re.I)
 
 
 def tags_of(text: str) -> set[str]:
     tags = {n for n, rx in (("cancel", CANCEL), ("refund", REFUND), ("returned", RETURNED), ("notrec", NOTREC), ("delay", DELAY), ("defect", DEFECT), ("abuse", ABUSE)) if rx.search(text or "")}
-    if "notrec" in tags and REFUND_NOTREC.search(text or ""):
+    if REFUND_NOTREC.search(text or ""):
         tags.discard("notrec")
+        tags.add("refundq")                                    # a question about a refund's status, not a new product claim
     return tags
 
 
@@ -257,6 +267,7 @@ def render(tid: str, lang: str, facts: dict) -> str:
     f["when_hi"] = f"{d_at} को {t_at} बजे" if t_at else f"{d_at} को"
     f["loc_en"] = f", last scan location: {loc}" if loc else ""
     f["loc_hi"] = f", आखिरी स्कैन लोकेशन: {loc}" if loc else ""
+    f["whatsapp"] = support_number() or ""
     f["ver_en"] = " The courier's record shows this delivery as verified." if tr.get("delivery_verified") else ""
     f["ver_hi"] = " कूरियर के रिकॉर्ड में यह डिलीवरी वेरिफ़ाइड दर्ज है।" if tr.get("delivery_verified") else ""
     text = TEMPLATES[tid][lang].format(**f)
@@ -313,6 +324,8 @@ def decide(case: dict) -> dict:
         if state in MOVING:
             return {"scenario": "S1", "template": "T1", "action": "SEND", "code": "CANCEL_SHIPPED", "why": f"tracker {state}"}
         return esc("CANCEL_NOT_SHIPPED", f"cancel asked while tracker is {state}: Sir decides", "S2")
+    if "refundq" in t_last and "defect" not in t_last:
+        return esc("REFUND_STATUS_QUERY", "buyer asks where a refund is (not a new product claim): Sir checks", "S5")
     if t_last & {"notrec", "delay"} and "defect" not in t_last:
         if state in ("IN_TRANSIT", "OUT_FOR_DELIVERY"):
             return {"scenario": "S3", "template": "T3", "action": "SEND", "code": "ETA", "why": f"tracker {state}"}
@@ -329,8 +342,11 @@ def decide(case: dict) -> dict:
             days = days_since(tr.get("delivered_at"))
             if days is None:
                 return esc("DELIVERY_UNVERIFIED", "defect asked but the tracker has no delivery date to check the return/replacement window", "S4")
-            if days > RETURN_WINDOW_DAYS:                                           # Sir 2026-10-20: window over -> WhatsApp support guidance, Sir sends it
-                return esc("WINDOW_CROSSED", f"defect/refund asked {days:.0f} days after delivery (window {RETURN_WINDOW_DAYS} days): Sir sends the WhatsApp-support guidance", "S4")
+            if days > RETURN_WINDOW_DAYS:                                           # Sir 2026-10-21: window over -> WhatsApp support guidance (T10), automatic
+                if not support_number():
+                    return esc("WINDOW_CROSSED", f"defect/refund asked {days:.0f} days after delivery (window {RETURN_WINDOW_DAYS} days) and no support_whatsapp number is set: Sir answers", "S4")
+                return {"scenario": "S4", "template": "T10", "action": "SEND", "code": "WINDOW_CROSSED_WHATSAPP", "alert": True,
+                        "why": f"defect/refund asked {days:.0f} days after delivery (window {RETURN_WINDOW_DAYS} days): WhatsApp-support guidance (Sir 2026-10-21), Sir is alerted"}
             return {"scenario": "S4", "template": "T9", "action": "SEND", "code": "DEFECT_IN_WINDOW", "why": f"delivered {days:.0f} days ago, code verified: guide to share photos here, then raise a replacement request"}
         return esc("DELIVERY_UNVERIFIED", f"defect/refund asked but delivery state is {state}, verified={tr.get('delivery_verified')}", "S4")
     if "returned" in t_last:
@@ -362,8 +378,17 @@ def make_item(case: dict, sent_keys: set[str]) -> dict:
 
 
 # ------------------------------------------------------------------ state / log
+_support_override: str | None = None            # selftest only
+
+
+def support_number() -> str | None:
+    """WhatsApp support number for T10, from samvaad_state.json ("support_whatsapp"); None = T10 off (case escalates as WINDOW_CROSSED)."""
+    n = _support_override if _support_override is not None else load_state().get("support_whatsapp")
+    return n if n and re.fullmatch(r"[6-9][0-9]{9}", str(n)) else None
+
+
 def load_state() -> dict:
-    base = {"auto_send": False, "auto_resolve": False, "max_per_run": 12, "max_per_day": 25}
+    base = {"auto_send": False, "auto_resolve": False, "max_per_run": 12, "max_per_day": 25, "support_whatsapp": None}
     if STATE_F.exists():
         base.update(json.loads(STATE_F.read_text(encoding="utf-8")))
     return base
@@ -523,6 +548,8 @@ def cmd_send(args: list[str]) -> int:
 
 # ------------------------------------------------------------------ tests
 def cmd_selftest() -> int:
+    global _support_override
+    _support_override = ""                      # tests never depend on the live samvaad_state.json
     good_facts = {"order_no": "402-1292244-5057153", "buyer_names": ["Himani", "Tushar"], "order_page": {"tracking_id": "4218630821242", "carrier": "Delhivery", "deliver_by": "Mon, 28 Sept, 2026 IST", "refunds": [3149.8]},
                   "tracking": {"awb": "4218630821242", "state": "DELIVERED", "delivered_at": "Sep 22, 2026 17:24", "delivery_verified": True, "latest": {"at": "Sep 22, 2026 17:24"}}}
     ok_text = render("T1", "en", good_facts)
@@ -587,7 +614,7 @@ def cmd_selftest() -> int:
              ("follow-up that is not a dispute -> escalate", thread([AMZ("want refund"), ME, BUY("please refund quickly")]), "ESCALATE", None, "FOLLOWUP_NEEDS_SIR"),
              ("follow-up returned claim -> escalate", thread([AMZ("issue"), ME, BUY("i already returned the item but not received refund")]), "ESCALATE", None, "RETURN_CLAIM_UNVERIFIED"),
              ("last message is ours -> skip", thread([NR, ME]), "SKIP", None, "WAITING_BUYER"),
-             ("'did not receive my refund' is not a not-received parcel -> not T6", thread([AMZ("I did not receive my refund")]), "ESCALATE", None, "WINDOW_CROSSED"),
+             ("'did not receive my refund' is not a not-received parcel -> not T6", thread([AMZ("I did not receive my refund")]), "ESCALATE", None, "REFUND_STATUS_QUERY"),
              ("fresh Amazon forward after our reply is a new first answer", thread([AMZ("old"), ME, AMZ("cancel the order")]), "SEND", "T1", None),
              ("not received + tracker EXCEPTION -> escalate", thread([AMZ("order not received")], state="EXCEPTION"), "ESCALATE", None, "TRACKING_UNVERIFIED"),
              ("T7 in Hindi", thread([NR, ME, BUY("abhi tak nahi mila, not received")], lang="Hindi"), "SEND", "T7", None)]
@@ -609,10 +636,23 @@ def cmd_selftest() -> int:
     bad = lint(it["text"].replace("Regards,", "We will replace it.\nRegards,"), {"order_no": "400-0000000-0000000"}, "T9")
     okd = any("banned wording" in e for e in bad)
     fails += not okd; print(("PASS " if okd else "FAIL ") + "T9 still blocks a replacement promise")
+    for lang_name, lang_tag in (("English", "en"), ("Hindi", "hi")):                # T10 WhatsApp guidance (Sir 2026-10-21), only with a number set
+        _support_override = "9876501234"
+        it = make_item(case("received a defective product", "DELIVERED", ago=20, lang=lang_name), set())
+        okd = it["action"] == "SEND" and it["template"] == "T10" and it.get("alert") and not it["lint"] and "9876501234" in it["text"] and it["code"] == "WINDOW_CROSSED_WHATSAPP"
+        fails += not okd; print(("PASS " if okd else "FAIL ") + f"window crossed + number set -> T10 {lang_tag} [{it['action']} {it['template']} {it['code']}] {it['lint']}")
+        e_other = lint(it["text"], {"order_no": "400-0000000-0000000"}, "T9", lang_tag)
+        okd = any(("phone" in e) or ("whatsapp" in e.lower()) or ("व्हाट्सएप" in e) for e in e_other)
+        fails += not okd; print(("PASS " if okd else "FAIL ") + f"the number / WhatsApp wording is blocked outside T10 ({lang_tag})")
+    _support_override = ""
+    it = make_item(case("want refund asap", "DELIVERED"), set())
+    okd = it["template"] == "T9" and "efund" not in it["text"] and "replacement request" in it["text"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "refund asked first, inside the window -> T9 asks for a replacement request only")
     t8 = render("T8", "en", {**thread([])["facts"]})
     e8 = lint(t8, thread([])["facts"], "T8")
     okd = not e8 and "1 Oct 2026" in t8 and "Bluedart" in t8
     fails += not okd; print(("PASS " if okd else "FAIL ") + "T8 renders and lints" + (f" <- {e8}" if e8 else ""))
+    _support_override = None
     return 1 if fails else 0
 
 
