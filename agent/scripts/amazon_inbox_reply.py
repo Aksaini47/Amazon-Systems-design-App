@@ -75,7 +75,12 @@ TEMPLATES = {
     # Sir 2026-10-21: Sir cancels in Nimbus first, then on Amazon; when both show cancelled, confirm to the buyer and resolve the case. Amazon refunds on cancel by itself (we trigger nothing).
     "T15": {"name": "order cancelled (Amazon + Nimbus): confirmation, then resolve", "resolve": True,
             "en": "Dear Customer,\nRegarding order {order_no}: your order has been cancelled. Any amount paid for this order will be refunded by Amazon to the original payment method.\n" + SIGN["en"]},
+    # Sir 2026-10-21 (Himani): a CUSTOMER return (Amazon return request) -> the buyer gets the return shipment's status; the refund is processed ONLY by Amazon (we are bound by Amazon's policy,
+    # a refund we trigger forfeits SAFE-T). Neutral on purpose: no accusation, no promise, no word about the inspection result (a fake / wrong-item return stays between Sir and Amazon).
+    "T16": {"name": "customer return: return shipment status + the refund is processed by Amazon only (Amazon Customer Support for the status)", "resolve": False, "alert": True,
+            "en": "Dear Customer,\nRegarding order {order_no}: {return_line}\nRefunds for customer returns are processed by Amazon in line with Amazon's return policy, so we cannot process or track this refund from our side. Please contact Amazon Customer Support by phone from the Customer Service section of your Amazon account to check the refund status.\n" + SIGN["en"]},
 }
+T16_MARKS = ("Refunds for customer returns are processed by Amazon",)
 T15_MARKS = ("your order has been cancelled",)
 T14_MARKS = ("could not be delivered and",)
 T7_MARKS = ("Delivery was recorded on",)         # a seller message containing one of these = T7 already sent in this thread
@@ -100,7 +105,7 @@ def _norm_num(tok: str) -> str:
 
 
 def _fact_numbers(facts: dict) -> set[str]:
-    blob = json.dumps({k: facts.get(k) for k in ("order_no", "order_page", "tracking")}, ensure_ascii=False)
+    blob = json.dumps({k: facts.get(k) for k in ("order_no", "order_page", "tracking", "returns")}, ensure_ascii=False)
     nums = set(_norm_num(x) for x in re.findall(r"\d[\d,]*(?:\.\d+)?", blob))
     for r in ((facts.get("order_page") or {}).get("refunds") or []):
         nums.add(_norm_num(f"{r:.2f}"))
@@ -135,8 +140,8 @@ def lint(text: str, facts: dict | None = None, template: str | None = None, lang
         if re.search(pat, text, re.I):
             errs.append(f"banned wording /{pat}/")
     has_refund = bool((facts.get("order_page") or {}).get("refunds"))
-    if re.search(r"refund", text, re.I) and not (template in ("T1", "T13", "T14", "T15") or (template in ("T5", "T11") and has_refund)):
-        errs.append("refund wording only allowed in T1 / T13 / T14 / T15 (policy, RTO, cancel) and in T5 / T11 with a refund on the order page")
+    if re.search(r"refund", text, re.I) and not (template in ("T1", "T13", "T14", "T15", "T16") or (template in ("T5", "T11") and has_refund)):
+        errs.append("refund wording only allowed in T1 / T13 / T14 / T15 / T16 (policy, RTO, cancel, customer return) and in T5 / T11 with a refund on the order page")
     if facts:
         allowed = _fact_numbers(facts)
         if template == "T10" and support_number():
@@ -305,6 +310,14 @@ def render(tid: str, lang: str, facts: dict) -> str:
     past = is_past(op.get("deliver_by"))
     f["eta_clause"] = "" if past else f" The estimated delivery date shown by Amazon for this order is {f['deliver_by']}."
     f["t3_lead"] = "we apologise for the delay. The shipment is in transit with" if past else "your shipment is in transit with"
+    rets = facts.get("returns") or []
+    pick = next((r for r in rets if (r.get("tracking_status") or "").lower() == "delivered"), None) or (rets[0] if rets else None)
+    if not pick:
+        f["return_line"] = "we could not find a return request for this order in our records."
+    elif (pick.get("tracking_status") or "").lower() == "delivered":
+        f["return_line"] = f"your return shipment (tracking ID {pick.get('tracking_id')}) was delivered to us on {fmt_date(pick.get('last_event')) or 'the date shown in the tracking'}."
+    else:
+        f["return_line"] = f"your return shipment (tracking ID {pick.get('tracking_id')}) currently shows the status: {pick.get('tracking_status')}."
     f["whatsapp"] = support_number() or ""
     f["ver_en"] = " The courier's record shows this delivery as verified." if tr.get("delivery_verified") else ""
     text = TEMPLATES[tid]["en"].format(**f)
@@ -356,6 +369,11 @@ def decide(case: dict) -> dict:
     rets = facts.get("returns") or []
     ret_note = " | ".join(f"return request {r.get('requested')} ({r.get('state')}; {r.get('reason')}{': ' + r['comment'] if r.get('comment') else ''}): {r.get('carrier')} {r.get('tracking_id')} = {r.get('tracking_status')} {r.get('last_event') or ''}".strip()
                           for r in rets) or "no return request found in Manage Returns"
+    def customer_return(why_tail: str) -> dict:
+        if facts.get("returns") is None or any(mk in mine for mk in T16_MARKS):
+            return {"scenario": "S5", "template": None, "action": "ESCALATE", "code": "RETURN_CLAIM_UNVERIFIED", "sir_action": ret_card, "why": why_tail}
+        return {"scenario": "S5", "template": "T16", "action": "SEND", "code": "CUSTOMER_RETURN_STATUS", "alert": True, "sir_action": ret_card,
+                "why": "customer-initiated return (Sir 2026-10-21): return shipment status + the refund is processed ONLY by Amazon; Sir gets the inspection / SAFE-T card. " + why_tail}
     ret_card = (f"CUSTOMER RETURN: order {thread_order(msgs)} | {delivery_note} | {ret_note} | Do NOT click Issue refund (a refund we trigger forfeits SAFE-T). "
                 "Inspect the returned item first; if it is not what was sent (wrong / damaged / used) the remedy is a SAFE-T claim.")
     state = (tr or {}).get("state")
@@ -401,8 +419,7 @@ def decide(case: dict) -> dict:
                 "why": "buyer shared photos / video (attachment or wording) after our evidence request: Sir reviews"}
     if seller_replied:                                                              # templates are first answers; a follow-up is for Sir
         if returned:
-            return {"scenario": "S5", "template": None, "action": "ESCALATE", "code": "RETURN_CLAIM_UNVERIFIED", "sir_action": ret_card,
-                    "why": f"customer-initiated return (follow-up after our reply): do NOT refund (SAFE-T); {delivery_note}; {ret_note}: Sir decides"}
+            return customer_return(f"customer-initiated return (follow-up after our reply): do NOT refund (SAFE-T); {delivery_note}; {ret_note}: Sir decides")
         return esc("FOLLOWUP_NEEDS_SIR", "buyer wrote again after our reply and it is not a delivery dispute: Sir reads it", "S11")
     if "cancel" in t_last or ("changemind" in t_last and state != "DELIVERED"):
         if state in MOVING:
@@ -437,8 +454,7 @@ def decide(case: dict) -> dict:
             return {"scenario": "S4", "template": "T9", "action": "SEND", "code": "DEFECT_IN_WINDOW", "why": f"delivered {days:.0f} days ago, code verified: guide to share photos here, then raise a replacement request"}
         return esc("DELIVERY_UNVERIFIED", f"defect/refund asked but delivery state is {state}, verified={tr.get('delivery_verified')}", "S4")
     if returned:
-        return {"scenario": "S5", "template": None, "action": "ESCALATE", "code": "RETURN_CLAIM_UNVERIFIED", "sir_action": ret_card,
-                "why": f"customer-initiated return / return requested, no RTO: do NOT refund (SAFE-T); {delivery_note}; {ret_note}: Sir decides"}
+        return customer_return(f"customer-initiated return / return requested, no RTO: do NOT refund (SAFE-T); {delivery_note}; {ret_note}: Sir decides")
     return esc("UNKNOWN", "no rule matched")
 
 
@@ -890,8 +906,20 @@ def cmd_selftest() -> int:
     c7 = case("Item return kindly refund asap", "DELIVERED")
     c7["facts"]["returns"] = [{"requested": "24 Sep 2026", "state": "Pending refund", "reason": "CR-SWITCHEROO", "comment": "looks used", "carrier": "ATS", "tracking_id": "515245263825", "tracking_status": "Delivered", "last_event": "Oct 06, 2026 09:04:27 PM Pataudi"}]
     it = make_item(c7, set())
-    okd = it["code"] == "RETURN_CLAIM_UNVERIFIED" and "CUSTOMER RETURN" in it["sir_action"] and "515245263825 = Delivered" in it["sir_action"] and "Do NOT click Issue refund" in it["sir_action"]
-    fails += not okd; print(("PASS " if okd else "FAIL ") + "customer return: the card carries the Manage Returns facts (return shipment status)")
+    okd = (it["action"] == "SEND" and it["template"] == "T16" and it["code"] == "CUSTOMER_RETURN_STATUS" and it.get("alert") and not it["lint"]
+           and "CUSTOMER RETURN" in it["sir_action"] and "515245263825 = Delivered" in it["sir_action"] and "Do NOT click Issue refund" in it["sir_action"]
+           and "515245263825" in it["text"] and "6 Oct 2026" in it["text"] and "processed by Amazon" in it["text"] and "Amazon Customer Support" in it["text"] and "SAFE" not in it["text"] and "fake" not in it["text"].lower())
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"customer return with Manage Returns facts -> T16 (return status + Amazon refunds only) + Sir's card [{it['action']} {it['template']} {it['code']}] {it['lint']}")
+    c8 = case("Item return kindly refund asap", "DELIVERED"); c8["facts"]["returns"] = []
+    it = make_item(c8, set()); okd = it["template"] == "T16" and "could not find a return request" in it["text"] and not it["lint"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "customer return, no return request found in Manage Returns -> T16 says so")
+    c9 = thread([AMZ("item return kindly refund"), {"order_no": None, "reason": None, "raw": "Dear Customer, Refunds for customer returns are processed by Amazon in line with policy. Regards, Badeja Enterprises", "by": "seller"}, BUY("I already returned the item, still no refund")])
+    c9["facts"]["returns"] = c7["facts"]["returns"]
+    it = make_item(c9, set()); okd = it["action"] == "ESCALATE" and it["code"] == "RETURN_CLAIM_UNVERIFIED" and "CUSTOMER RETURN" in it["sir_action"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "T16 is sent once: a repeat after it goes to Sir with the card")
+    c10 = thread([AMZ("issue"), ME, BUY("i already returned the item but no refund")]); c10["facts"]["returns"] = c7["facts"]["returns"]
+    it = make_item(c10, set()); okd = it["template"] == "T16"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "Himani-style follow-up (already returned, no refund) with return facts -> T16")
     _support_override = None
     return 1 if fails else 0
     _support_override = None
