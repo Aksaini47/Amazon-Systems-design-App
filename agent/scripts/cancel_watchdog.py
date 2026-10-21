@@ -54,11 +54,16 @@ def classify_status(status: str | None) -> str:
     return "STOP_DISPATCHED"                       # picked / in transit / out for delivery / anything unknown: treated as physically moving
 
 
-def cross_check(canceled: list[dict], shipments: list[dict]) -> list[dict]:
-    """canceled: [{order_id, order_date}], shipments: raw Nimbus records. One verdict per Amazon-cancelled order (worst shipment wins)."""
+def cross_check(canceled: list[dict], shipments: list[dict], orders: list[dict] | None = None) -> list[dict]:
+    """canceled: [{order_id, order_date}], shipments: raw Nimbus shipment records, orders: raw Nimbus order records (fulfillment_status new / booked / cancelled).
+    One verdict per Amazon-cancelled order (worst shipment wins). An order record is used only when the order has NO shipment record (its status then stands for the shipment)."""
     by: dict[str, list[dict]] = {}
     for sh in shipments:
         by.setdefault(str(sh.get("order_id") or ""), []).append(sh)
+    for od in orders or []:
+        oid = str(od.get("order_id") or "")
+        if oid and oid not in by:
+            by.setdefault(oid, []).append({"order_id": oid, "ship_status": od.get("fulfillment_status"), "awb_number": None, "created": od.get("order_date"), "pickup_time": None, "delivered_time": None, "_order_record": True})
     res = []
     for o in canceled:
         ships = by.get(o["order_id"], [])
@@ -126,6 +131,11 @@ def run_live() -> int:
             print("LOGIN_REQUIRED (Seller Central orders API)"); ctx.close(); return 2
         print(f"Amazon: {len(canceled)} Canceled orders in the last 30 days")
         req = nimbus_track.capture_shipments_request(p)
+        orders = []
+        if req is not None:
+            oreq = nimbus_track.capture_orders_request(p)               # orders that have no AWB yet (status new / booked / cancelled)
+            if oreq is not None:
+                orders = nimbus_track.replay_orders(p, oreq, now - timedelta(days=45), now)
         if req is None:
             ctx.close()
             (OUT / "cancel_watchdog_amazon_canceled.json").write_text(json.dumps(canceled, ensure_ascii=False), encoding="utf-8")
@@ -133,14 +143,14 @@ def run_live() -> int:
             print(f"RESULT: watchdog incomplete | canceled={len(canceled)} | Nimbus login required"); return 5
         shipments = nimbus_track.replay_shipments(p, req, now - timedelta(days=45), now, quiet=True)
         ctx.close()
-    print(f"Nimbus: {len(shipments)} shipments (last 45 days)")
-    results = cross_check(canceled, shipments)
+    print(f"Nimbus: {len(shipments)} shipments and {len(orders)} orders (last 45 days)")
+    results = cross_check(canceled, shipments, orders)
     prev = json.loads(STATE_F.read_text(encoding="utf-8")).get("alerted", {}) if STATE_F.exists() else {}
     flagged, alerted = diff_alerts(results, prev)
     crit = [f for f in flagged if SEVERITY[f["verdict"]] >= 3]
     info = [f for f in flagged if SEVERITY[f["verdict"]] == 1]
     matched = sum(1 for r in results if r["verdict"] != "NO_SHIPMENT")
-    STATE_F.write_text(json.dumps({"last_run": now.isoformat(timespec="seconds"), "canceled": len(canceled), "nimbus_shipments": len(shipments), "matched": matched,
+    STATE_F.write_text(json.dumps({"last_run": now.isoformat(timespec="seconds"), "canceled": len(canceled), "nimbus_shipments": len(shipments), "nimbus_orders": len(orders), "matched": matched,
                                    "alerted": alerted, "flagged": flagged}, ensure_ascii=False, indent=1), encoding="utf-8")
     for f in crit:
         sh = f["shipments"][0] if f["shipments"] else {}
@@ -148,7 +158,7 @@ def run_live() -> int:
     for f in info:
         print(f"info RTO_EXPECTED | order {f['order_id']} | Nimbus {[s['status'] for s in f['shipments']]} (buyer refused / undelivered: no action)")
     new_crit = sum(1 for f in crit if f["new"])
-    print(f"RESULT: watchdog ok | canceled={len(canceled)} nimbus={len(shipments)} with-shipment={matched} critical={len(crit)} (new={new_crit}) info={len(info)}")
+    print(f"RESULT: watchdog ok | canceled={len(canceled)} nimbus-shipments={len(shipments)} nimbus-orders={len(orders)} in-nimbus={matched} critical={len(crit)} (new={new_crit}) info={len(info)}")
     return 0
 
 
@@ -172,6 +182,11 @@ def selftest() -> int:
     check("two shipments, one cancelled one picked -> the worst wins", res["D"] == "STOP_DISPATCHED")
     check("no Nimbus shipment at all -> NO_SHIPMENT (no alert)", res["E"] == "NO_SHIPMENT")
     check("a Nimbus shipment for an order Amazon did not cancel is ignored", "Z" not in res)
+    ords = [{"order_id": "E", "fulfillment_status": "new", "order_date": 5}, {"order_id": "A", "fulfillment_status": "booked", "order_date": 1}, {"order_id": "F", "fulfillment_status": "cancelled", "order_date": 6}]
+    res2 = {r["order_id"]: r["verdict"] for r in cross_check(canc + [{"order_id": "F", "order_date": 6}], ships, ords)}
+    check("Nimbus ORDER still 'new' while Amazon cancelled (no shipment yet) -> CANCEL_NOW", res2["E"] == "CANCEL_NOW")
+    check("a shipment record wins over a stale 'booked' order record (A stays OK_CANCELLED)", res2["A"] == "OK_CANCELLED")
+    check("Nimbus order cancelled -> OK", res2["F"] == "OK_CANCELLED")
     flagged, alerted = diff_alerts(cross_check(canc, ships), {})
     check("first run: B, C, D flagged and all new", {f["order_id"] for f in flagged} == {"B", "C", "D"} and all(f["new"] for f in flagged))
     flagged2, alerted2 = diff_alerts(cross_check(canc, ships), alerted)

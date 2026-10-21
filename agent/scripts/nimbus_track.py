@@ -463,6 +463,36 @@ def replay_shipments(p, req, d0, d1, quiet: bool = False) -> list:
     return uniq
 
 
+def capture_orders_request(p):
+    """Open the Nimbus Orders page and capture the app's own POST /mapi/v1/order/list request (url, body, headers). None = login required."""
+    cap = {}
+    p.on("request", lambda r: cap.setdefault("req", (r.url, r.post_data, dict(r.headers))) if "mapi/v1/order/list" in r.url else None)
+    p.goto(APP + "/orders/all", wait_until="domcontentloaded", timeout=60000); p.wait_for_timeout(10000)
+    if _on_signin(p) or "req" not in cap:
+        return None
+    return cap["req"]
+
+
+def replay_orders(p, req, d0, d1) -> list:
+    """Replay the captured order/list request (ecom orders between d0 and d1, 500 per page). Records carry order_id (the Amazon order number) and fulfillment_status (new / booked / cancelled)."""
+    url, body, hdr = req
+    hdr = dict(hdr)
+    for k in ("cookie", "host", "content-length", "accept-encoding", "connection"):
+        hdr.pop(k, None)
+    js = "async ([u, body, h]) => { const r = await fetch(u, {method:'POST', credentials:'include', headers:h, body}); return {s: r.status, j: await r.json()}; }"
+    out, page = [], 1
+    while page < 40:
+        b = json.loads(body)
+        b.update(limit="500", page=str(page), start_date=int(d0.timestamp()), end_date=int(d1.timestamp()))
+        res = p.evaluate(js, [url, json.dumps(b), hdr])
+        recs = ((res.get("j") or {}).get("data") or {}).get("records") or []
+        out += recs
+        if len(recs) < 500 or res.get("s") != 200:
+            break
+        page += 1
+    return out
+
+
 def cmd_export_shipments(start: str, end: str) -> int:
     """Replay the Nimbus app's own POST /mapi/v1/shipment/list (month by month, 500 per page) with the saved login session.
     Saves data/mahika/nimbus/shipments_<start>_<end>.json (order_id, awb, created, pickup, delivered, status, fees, rto...). No credentials typed."""
