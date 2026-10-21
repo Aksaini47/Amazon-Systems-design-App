@@ -353,6 +353,11 @@ def decide(case: dict) -> dict:
     ret_req = any((m.get("return_requested") or "").lower().startswith("yes") for m in msgs)
     returned = "returned" in t_last or ret_req                  # a customer-initiated return: NEVER refunded by us (SAFE-T), Sir is informed with the delivery facts
     delivery_note = f"tracker {state_of(tr)}, delivered {(tr or {}).get('delivered_at')}, code verified={(tr or {}).get('delivery_verified')}"
+    rets = facts.get("returns") or []
+    ret_note = " | ".join(f"return request {r.get('requested')} ({r.get('state')}; {r.get('reason')}{': ' + r['comment'] if r.get('comment') else ''}): {r.get('carrier')} {r.get('tracking_id')} = {r.get('tracking_status')} {r.get('last_event') or ''}".strip()
+                          for r in rets) or "no return request found in Manage Returns"
+    ret_card = (f"CUSTOMER RETURN: order {thread_order(msgs)} | {delivery_note} | {ret_note} | Do NOT click Issue refund (a refund we trigger forfeits SAFE-T). "
+                "Inspect the returned item first; if it is not what was sent (wrong / damaged / used) the remedy is a SAFE-T claim.")
     state = (tr or {}).get("state")
     if re.search("cancel", op.get("status") or "", re.I) and tr and state in ("NOT_MOVING", "IN_TRANSIT", "OUT_FOR_DELIVERY", "DELIVERED", "EXCEPTION"):
         return {"scenario": "S1", "template": None, "action": "ESCALATE", "code": "CANCELLED_BUT_SHIPMENT_ACTIVE", "alert": True,
@@ -396,7 +401,8 @@ def decide(case: dict) -> dict:
                 "why": "buyer shared photos / video (attachment or wording) after our evidence request: Sir reviews"}
     if seller_replied:                                                              # templates are first answers; a follow-up is for Sir
         if returned:
-            return esc("RETURN_CLAIM_UNVERIFIED", f"customer-initiated return (follow-up after our reply): do NOT refund (SAFE-T); {delivery_note}: Sir decides", "S5")
+            return {"scenario": "S5", "template": None, "action": "ESCALATE", "code": "RETURN_CLAIM_UNVERIFIED", "sir_action": ret_card,
+                    "why": f"customer-initiated return (follow-up after our reply): do NOT refund (SAFE-T); {delivery_note}; {ret_note}: Sir decides"}
         return esc("FOLLOWUP_NEEDS_SIR", "buyer wrote again after our reply and it is not a delivery dispute: Sir reads it", "S11")
     if "cancel" in t_last or ("changemind" in t_last and state != "DELIVERED"):
         if state in MOVING:
@@ -431,7 +437,8 @@ def decide(case: dict) -> dict:
             return {"scenario": "S4", "template": "T9", "action": "SEND", "code": "DEFECT_IN_WINDOW", "why": f"delivered {days:.0f} days ago, code verified: guide to share photos here, then raise a replacement request"}
         return esc("DELIVERY_UNVERIFIED", f"defect/refund asked but delivery state is {state}, verified={tr.get('delivery_verified')}", "S4")
     if returned:
-        return esc("RETURN_CLAIM_UNVERIFIED", f"customer-initiated return / return requested, no RTO: do NOT refund (SAFE-T); {delivery_note}: Sir decides", "S5")
+        return {"scenario": "S5", "template": None, "action": "ESCALATE", "code": "RETURN_CLAIM_UNVERIFIED", "sir_action": ret_card,
+                "why": f"customer-initiated return / return requested, no RTO: do NOT refund (SAFE-T); {delivery_note}; {ret_note}: Sir decides"}
     return esc("UNKNOWN", "no rule matched")
 
 
@@ -880,6 +887,11 @@ def cmd_selftest() -> int:
     c6 = thread([AMZ("display not working"), ME, {"order_no": None, "reason": None, "raw": "", "by": "buyer", "attachments": 2}])
     it = make_item(c6, set()); okd = it["code"] == "EVIDENCE_RECEIVED"
     fails += not okd; print(("PASS " if okd else "FAIL ") + "a message with attachments and no text -> EVIDENCE_RECEIVED")
+    c7 = case("Item return kindly refund asap", "DELIVERED")
+    c7["facts"]["returns"] = [{"requested": "24 Sep 2026", "state": "Pending refund", "reason": "CR-SWITCHEROO", "comment": "looks used", "carrier": "ATS", "tracking_id": "515245263825", "tracking_status": "Delivered", "last_event": "Oct 06, 2026 09:04:27 PM Pataudi"}]
+    it = make_item(c7, set())
+    okd = it["code"] == "RETURN_CLAIM_UNVERIFIED" and "CUSTOMER RETURN" in it["sir_action"] and "515245263825 = Delivered" in it["sir_action"] and "Do NOT click Issue refund" in it["sir_action"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "customer return: the card carries the Manage Returns facts (return shipment status)")
     _support_override = None
     return 1 if fails else 0
     _support_override = None

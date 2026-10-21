@@ -422,48 +422,64 @@ def cmd_ui_login(minutes: int = 5) -> int:
         _keep_open(ctx, minutes); ctx.close(); return 0
 
 
+def capture_shipments_request(p):
+    """Open the Nimbus Shipments page and capture the app's own POST /mapi/v1/shipment/list request (url, body, headers). None = login required."""
+    cap = {}
+    p.on("request", lambda r: cap.setdefault("req", (r.url, r.post_data, dict(r.headers))) if "mapi/v1/shipment/list" in r.url else None)
+    p.goto(APP + "/shipping/all", wait_until="domcontentloaded", timeout=60000); p.wait_for_timeout(10000)
+    if _on_signin(p) or "req" not in cap:
+        return None
+    return cap["req"]
+
+
+def replay_shipments(p, req, d0, d1, quiet: bool = False) -> list:
+    """Replay the captured shipment/list request month by month (500 per page) between d0 and d1 (IST datetimes). Returns the raw records."""
+    url, body, hdr = req
+    hdr = dict(hdr)
+    for k in ("cookie", "host", "content-length", "accept-encoding", "connection"):
+        hdr.pop(k, None)
+    js = """async ([u, body, h]) => { const r = await fetch(u, {method:'POST', credentials:'include', headers:h, body}); return {s: r.status, j: await r.json()}; }"""
+    out, cur = [], d0
+    while cur < d1:
+        nxt = min((cur.replace(day=28) + timedelta(days=4)).replace(day=1), d1 + timedelta(days=1))
+        page, got = 1, 0
+        while True:
+            u = re.sub(r"start_date=\d+", f"start_date={int(cur.timestamp())}", url); u = re.sub(r"end_date=\d+", f"end_date={int(nxt.timestamp()) - 1}", u)
+            u = re.sub(r"limit=\d+", "limit=500", u); u = re.sub(r"page=\d+", f"page={page}", u)
+            b = json.loads(body); b["page"], b["limit"] = str(page), "500"
+            res = p.evaluate(js, [u, json.dumps(b), hdr])
+            recs = ((res.get("j") or {}).get("data") or {}).get("records") or []
+            out += recs; got += len(recs)
+            if len(recs) < 500 or res.get("s") != 200:
+                break
+            page += 1
+        if not quiet:
+            print(f"{cur:%Y-%m}: {got}", flush=True)
+        cur = nxt
+    seen, uniq = set(), []
+    for r in out:
+        if r.get("id") not in seen:
+            seen.add(r.get("id")); uniq.append(r)
+    return uniq
+
+
 def cmd_export_shipments(start: str, end: str) -> int:
     """Replay the Nimbus app's own POST /mapi/v1/shipment/list (month by month, 500 per page) with the saved login session.
     Saves data/mahika/nimbus/shipments_<start>_<end>.json (order_id, awb, created, pickup, delivered, status, fees, rto...). No credentials typed."""
     from playwright.sync_api import sync_playwright
     d0, d1 = datetime.strptime(start, "%Y-%m-%d").replace(tzinfo=IST), datetime.strptime(end, "%Y-%m-%d").replace(tzinfo=IST)
-    cap = {}
     with sync_playwright() as pw:
         try:
             ctx = _launch(pw)
         except Exception as e:
             print("PROFILE_BUSY:", str(e)[:150]); return 3
         p = ctx.pages[0] if ctx.pages else ctx.new_page()
-        p.on("request", lambda r: cap.setdefault("req", (r.url, r.post_data, dict(r.headers))) if "mapi/v1/shipment/list" in r.url else None)
-        p.goto(APP + "/shipping/all", wait_until="domcontentloaded", timeout=60000); p.wait_for_timeout(10000)
-        if _on_signin(p) or "req" not in cap:
+        req = capture_shipments_request(p)
+        if req is None:
             print("LOGIN_REQUIRED (or list request not seen)"); ctx.close(); return 2
-        url, body, hdr = cap["req"]
-        for k in ("cookie", "host", "content-length", "accept-encoding", "connection"):
-            hdr.pop(k, None)
-        js = """async ([u, body, h]) => { const r = await fetch(u, {method:'POST', credentials:'include', headers:h, body}); return {s: r.status, j: await r.json()}; }"""
-        out, cur = [], d0
-        while cur < d1:
-            nxt = min((cur.replace(day=28) + timedelta(days=4)).replace(day=1), d1 + timedelta(days=1))
-            page, got = 1, 0
-            while True:
-                u = re.sub(r"start_date=\d+", f"start_date={int(cur.timestamp())}", url); u = re.sub(r"end_date=\d+", f"end_date={int(nxt.timestamp()) - 1}", u)
-                u = re.sub(r"limit=\d+", "limit=500", u); u = re.sub(r"page=\d+", f"page={page}", u)
-                b = json.loads(body); b["page"], b["limit"] = str(page), "500"
-                res = p.evaluate(js, [u, json.dumps(b), hdr])
-                recs = ((res.get("j") or {}).get("data") or {}).get("records") or []
-                out += recs; got += len(recs)
-                if len(recs) < 500 or res.get("s") != 200:
-                    break
-                page += 1
-            print(f"{cur:%Y-%m}: {got}", flush=True)
-            cur = nxt
+        uniq = replay_shipments(p, req, d0, d1)
         ctx.close()
     dest = ROOT / "data" / "mahika" / "nimbus"; dest.mkdir(parents=True, exist_ok=True)
-    seen, uniq = set(), []
-    for r in out:
-        if r.get("id") not in seen:
-            seen.add(r.get("id")); uniq.append(r)
     f = dest / f"shipments_{start}_{end}.json"; f.write_text(json.dumps(uniq, ensure_ascii=False), encoding="utf-8")
     from collections import Counter
     print(f"saved {len(uniq)} shipments -> {f.relative_to(ROOT)} | status: {dict(Counter(r.get('ship_status') for r in uniq))}")

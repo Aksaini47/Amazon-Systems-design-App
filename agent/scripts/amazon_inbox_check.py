@@ -114,6 +114,49 @@ def collect_facts(p, case: dict) -> dict:
     return facts
 
 
+RET_URL = ("https://sellercentral.amazon.in/returns/api/return-requests?pagination.pageSize=100&sort.column=CREATED_DATE&sort.order=DESC&marketplaceIds=ATVPDKIKX0DER&marketplaceIds=A21TJRUUN4KGV"
+           "&returnRequestStates=Approved&returnRequestStates=PendingLabel&returnRequestStates=PendingRefund&returnRequestStates=PendingApproval&returnRequestStates=Completed&returnRequestStates=Closed"
+           "&returnRequestStates=Approving&dateRange.selectedDateRange=90")
+
+
+def collect_returns(p, order_nos: set[str]) -> dict[str, list[dict]]:
+    """Manage Returns API replay (read-only): the return requests of the given orders + the return shipment's tracking. {order_id: [compact request, ...]}."""
+    js = "async (url) => { const r = await fetch(url, {credentials: 'include'}); return {s: r.status, t: await r.text()}; }"
+    out: dict[str, list[dict]] = {}
+    scroll = ""
+    for _ in range(8):
+        r = p.evaluate(js, RET_URL + (f"&pagination.scrollId={scroll}" if scroll else ""))
+        if r["s"] != 200:
+            break
+        j = json.loads(r["t"])
+        for x in j.get("returnRequests") or []:
+            oid = ((x.get("orderInfo") or {}).get("orderId") or {}).get("value")
+            if oid not in order_nos:
+                continue
+            it = (x.get("items") or [{}])[0]
+            lab = x.get("labelInfo") or {}
+            btn = [b.get("textStringId") for b in ((x.get("actions") or {}).get("returnRequestButtons") or [])]
+            rec = {"request_id": x.get("returnRequestId"), "requested": datetime.fromtimestamp((x.get("returnRequestDate") or 0) / 1000).strftime("%d %b %Y"),
+                   "state": "Closed" if x.get("closeDate") else ("Pending refund" if "sc_myr_refund" in btn else "Open"),
+                   "reason": ((it.get("returnReason") or {}).get("value")), "comment": it.get("customerComments"), "resolution": ((it.get("resolution") or {}).get("value")),
+                   "carrier": lab.get("carrierName"), "tracking_id": ((lab.get("carrierTrackingId") or {}).get("value")), "merchant": x.get("merchantPartyId"), "marketplace": x.get("marketplaceId")}
+            out.setdefault(oid, []).append(rec)
+        scroll = ((j.get("metadata") or {}).get("pagination") or {}).get("scrollId") or ""
+        if not scroll or not (j.get("returnRequests") or []):
+            break
+    for recs in out.values():
+        for rec in recs:                                                      # the return shipment's own tracking (Amazon-arranged pickup)
+            try:
+                r = p.evaluate(js, f"https://sellercentral.amazon.in/returns/api/trackingDetails?marketplaceId={rec['marketplace']}&merchantPartyId={rec['merchant']}&returnRequestId={rec['request_id']}")
+                t = json.loads(r["t"]) if r["s"] == 200 else {}
+                ev = (t.get("trackingEvents") or [{}])[0]
+                rec["tracking_status"] = t.get("currentStatus") or "no tracking yet"
+                rec["last_event"] = " ".join(x for x in (ev.get("eventDate"), (ev.get("eventAddress") or {}).get("city")) if x)
+            except Exception:
+                rec["tracking_status"] = "tracking unreadable"; rec["last_event"] = ""
+    return out
+
+
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     now = datetime.now()
@@ -167,6 +210,15 @@ def main() -> int:
                 c["facts"] = collect_facts(p, c)
             except Exception as e:
                 c["facts"] = {"error": str(e)[:150]}
+        try:                                                      # Manage Returns facts for the threads' orders (customer-return decisions need them)
+            nos = {thread_order(c.get("messages") or []) for c in result["cases"]} - {None}
+            if nos:
+                p.goto("https://sellercentral.amazon.in/gp/returns/list/v2", wait_until="domcontentloaded", timeout=60000); p.wait_for_timeout(6000)
+                rets = collect_returns(p, nos)
+                for c in result["cases"]:
+                    c.setdefault("facts", {})["returns"] = rets.get(thread_order(c.get("messages") or []), [])
+        except Exception as e:
+            print("returns facts failed:", str(e)[:100])
         p.goto(NOTIF, wait_until="domcontentloaded", timeout=60000); p.wait_for_timeout(5000)
         try:
             result["notifications"] = json.loads(p.evaluate("() => document.body.innerText"))
