@@ -37,9 +37,9 @@ TEMPLATES = {
     "T1": {"name": "cancel asked, order already dispatched / delivered", "resolve": True,
            "en": "Dear Customer,\nRegarding order {order_no}: the shipment was dispatched via {carrier} (tracking ID {awb}){clause_en}. As the order has already been shipped, it cannot be cancelled.{t1_tail}\n" + SIGN["en"]},
     "T2": {"name": "shipped-marked but not moving (delay)", "resolve": True,
-           "en": "Dear Customer,\nRegarding order {order_no}: we apologise for the delay. The shipment is still being processed for dispatch. The estimated delivery date shown by Amazon for this order is {deliver_by}.\n" + SIGN["en"]},
+           "en": "Dear Customer,\nRegarding order {order_no}: we apologise for the delay. The shipment is still being processed for dispatch.{eta_clause}\n" + SIGN["en"]},
     "T3": {"name": "where is my order / ETA (moving)", "resolve": True,
-           "en": "Dear Customer,\nRegarding order {order_no}: your shipment is in transit with {carrier} (tracking ID {awb}). Current courier status: {status_en}. The estimated delivery date shown by Amazon is {deliver_by}.\n" + SIGN["en"]},
+           "en": "Dear Customer,\nRegarding order {order_no}: {t3_lead} {carrier} (tracking ID {awb}). Current courier status: {status_en}.{eta_clause}\n" + SIGN["en"]},
     "T5": {"name": "refund already issued (fact from the order page): details + Amazon Customer Support for the status", "resolve": True,
            "en": "Dear Customer,\nRegarding order {order_no}: {rto_en}a refund of Rs {amount} has been issued for this order. Refunds are processed by Amazon to the original payment method. If the amount is not reflected in your account, please contact Amazon Customer Support by phone from the Customer Service section of your Amazon account; they can check the refund status with the payment partner.\n" + SIGN["en"]},
     "T6": {"name": "tracker says delivered but buyer says not received: delivery facts + ask to check with family/neighbours/security", "resolve": False, "alert": True,
@@ -222,6 +222,23 @@ def thread_order(msgs: list[dict]) -> str | None:
     return next((m.get("order_no") for m in reversed(msgs) if m.get("order_no")), None)
 
 
+INTENT_F = OUT / "intent_overrides.json"
+VALID_TAGS = {"cancel", "refund", "refundq", "returned", "notrec", "delay", "defect", "changemind", "abuse"}
+
+
+def load_intents() -> dict:
+    return json.loads(INTENT_F.read_text(encoding="utf-8")) if INTENT_F.exists() else {}
+
+
+def is_past(deliver_by: str | None) -> bool:
+    """True when Amazon's deliver-by date is already behind us ('Thu, 15 Oct, 2026 IST')."""
+    d = fmt_date(deliver_by)
+    try:
+        return bool(d) and datetime.strptime(d, "%d %b %Y").date() < datetime.now().date()
+    except ValueError:
+        return False
+
+
 RETURN_WINDOW_DAYS = 7                      # Sir 2026-10-20: return/replacement window, counted from the courier delivery date
 
 
@@ -259,7 +276,7 @@ def render(tid: str, lang: str, facts: dict) -> str:
     f = {"order_no": facts.get("order_no"), "carrier": op.get("carrier") or tr.get("courier"), "awb": op.get("tracking_id") or tr.get("awb"),
          "deliver_by": fmt_date(op.get("deliver_by")), "amount": f"{max(op.get('refunds') or [0]):,.2f}", "delivered_date": fmt_date(tr.get("delivered_at"))}
     d_at = fmt_date(tr.get("delivered_at"))
-    f["clause_en"] = {"DELIVERED": f" and was delivered on {d_at}", "OUT_FOR_DELIVERY": " and is out for delivery"}.get(st, f" and is on its way. Amazon's estimated delivery date is {f['deliver_by']}")
+    f["clause_en"] = {"DELIVERED": f" and was delivered on {d_at}", "OUT_FOR_DELIVERY": " and is out for delivery"}.get(st, " and is on its way" + ("" if is_past(op.get("deliver_by")) else f". Amazon's estimated delivery date is {f['deliver_by']}"))
     f["status_en"] = status_phrase(tr)[0]
     f["rto_en"] = "the shipment was returned to us and " if st in RTO else ""
     t_at = fmt_time(tr.get("delivered_at"))                                  # T7 proof fields
@@ -271,6 +288,9 @@ def render(tid: str, lang: str, facts: dict) -> str:
     rto_d = fmt_date((tr.get("latest") or {}).get("at"))
     f["rto_verb"] = "was returned" if st == "RTO_RECEIVED" else "is being returned"
     f["rto_status"] = (f"returned to the seller on {rto_d}" if st == "RTO_RECEIVED" else f"in transit back to the seller, last updated on {rto_d}")
+    past = is_past(op.get("deliver_by"))
+    f["eta_clause"] = "" if past else f" The estimated delivery date shown by Amazon for this order is {f['deliver_by']}."
+    f["t3_lead"] = "we apologise for the delay. The shipment is in transit with" if past else "your shipment is in transit with"
     f["whatsapp"] = support_number() or ""
     f["ver_en"] = " The courier's record shows this delivery as verified." if tr.get("delivery_verified") else ""
     text = TEMPLATES[tid]["en"].format(**f)
@@ -294,14 +314,15 @@ def decide(case: dict) -> dict:
     if by[-1] == "seller":
         return {"scenario": "-", "template": None, "action": "SKIP", "code": "WAITING_BUYER", "why": "the last message in the thread is ours: waiting for the buyer"}
     buyer_msgs = [m for m, b in zip(msgs, by) if b != "seller"]
-    t_last, t_all = tags_of(msg_text(buyer_msgs[-1])), tags_of(" ".join(msg_text(m) for m in buyer_msgs))
+    intent = {t for t in (case.get("intent_tags") or []) if t in VALID_TAGS}       # set by the agent after reading a message the regexes cannot (other language, Devanagari)
+    t_last, t_all = (set(intent), set(intent)) if intent else (tags_of(msg_text(buyer_msgs[-1])), tags_of(" ".join(msg_text(m) for m in buyer_msgs)))
     last_amz = max((i for i, b in enumerate(by) if b == "amazon"), default=-1)
     seller_replied = "seller" in by[last_amz + 1:]               # we already answered the newest Amazon forward: this is a follow-up
     mine = " ".join(m.get("raw") or m.get("text") or "" for m, b in zip(msgs, by) if b == "seller")
     if "abuse" in t_all:
         return esc("SENSITIVE", "legal / fraud / A-to-z wording: Sir only", "S8")
-    if facts.get("language") not in ("English", "Hindi"):
-        return esc("LANGUAGE", f"thread language {facts.get('language')}")
+    if facts.get("language") not in ("English", "Hindi") and not intent:
+        return esc("LANGUAGE", f"thread language {facts.get('language')}: the agent reads the message, translates the intent and records it with the `intent` command, then re-plans (reply stays English)")
     if not thread_order(msgs):
         subj = (case.get("subject") or "").lower()
         if seller_replied:
@@ -317,6 +338,12 @@ def decide(case: dict) -> dict:
     returned = "returned" in t_last or ret_req                  # a customer-initiated return: NEVER refunded by us (SAFE-T), Sir is informed with the delivery facts
     delivery_note = f"tracker {state_of(tr)}, delivered {(tr or {}).get('delivered_at')}, code verified={(tr or {}).get('delivery_verified')}"
     state = (tr or {}).get("state")
+    if re.search("cancel", op.get("status") or "", re.I) and tr and state in ("NOT_MOVING", "IN_TRANSIT", "OUT_FOR_DELIVERY", "DELIVERED", "EXCEPTION"):
+        return {"scenario": "S1", "template": None, "action": "ESCALATE", "code": "CANCELLED_BUT_SHIPMENT_ACTIVE", "alert": True,
+                "sir_action": f"STOP: order {thread_order(msgs)} is cancelled on Amazon but the Nimbus shipment {op.get('tracking_id')} is {state} (last scan {(tr.get('latest') or {}).get('at')}). Cancel the shipment in Nimbus NOW and make sure nothing is physically dispatched (Amazon cancel does not cancel Nimbus).",
+                "why": f"order cancelled on Amazon but the shipment is still {state} in Nimbus"}
+    if re.search("cancel", op.get("status") or "", re.I) and state == "CANCELLED":
+        return esc("CANCEL_DONE", "order cancelled on Amazon and the Nimbus shipment is cancelled too: what to send / whether to resolve is Sir's call (not decided yet)", "S1")
     if op.get("refunds") and t_last & {"refund", "refundq", "cancel", "returned", "notrec"}:
         if seller_replied:                                                          # Sir 2026-10-21: refund not seen -> Amazon Customer Support by phone (T11), once
             if any(mk in mine for mk in T11_MARKS):
@@ -352,7 +379,10 @@ def decide(case: dict) -> dict:
     if "cancel" in t_last or ("changemind" in t_last and state != "DELIVERED"):
         if state in MOVING:
             return {"scenario": "S1", "template": "T1", "action": "SEND", "code": "CANCEL_SHIPPED", "why": f"tracker {state}"}
-        return esc("CANCEL_NOT_SHIPPED", f"cancel asked while tracker is {state}: Sir decides", "S2")
+        card = (f"CANCEL ORDER (not moving): order {thread_order(msgs)} | {op.get('carrier')} {op.get('tracking_id')} tracker {state}, last scan {((tr or {}).get('latest') or {}).get('at')} | "
+                "STEP 1 Nimbus: cancel the shipment FIRST (confirm it has not been picked up) | STEP 2 Amazon: cancel the order | "
+                "WARNING: cancelling on Amazon does NOT cancel Nimbus (this caused physical dispatches before). Samvaad guides, Sir executes; if the order page already shows Canceled while the Nimbus shipment is active, Samvaad raises a STOP alert.")
+        return {"scenario": "S2", "template": None, "action": "ESCALATE", "code": "CANCEL_NOT_SHIPPED", "sir_action": card, "why": f"cancel asked while tracker is {state}: Sir cancels Nimbus first, then Amazon"}
     if "changemind" in t_last and state == "DELIVERED" and not t_last & {"defect", "notrec"}:      # Sir 2026-10-21: change of mind -> policy reply
         return {"scenario": "S4", "template": "T13", "action": "SEND", "code": "CHANGE_OF_MIND_POLICY", "why": "change of mind on a delivered order: return policy reply"}
     if t_last & {"notrec", "delay"} and "defect" not in t_last:
@@ -436,6 +466,10 @@ def sha16(t: str) -> str:
 def cmd_plan() -> int:
     d = json.loads((OUT / "latest.json").read_text(encoding="utf-8"))
     sent = {x["key"] for x in read_log() if x.get("sent") and not x.get("dry")}
+    intents = load_intents()
+    for c in d["cases"]:
+        if intents.get(c.get("key")):
+            c["intent_tags"] = intents[c["key"]]
     items = [make_item(c, sent) for c in d["cases"]]
     st = load_state()
     (OUT / "plan.json").write_text(json.dumps({"generated_at": datetime.now().isoformat(timespec="seconds"), "checked_at": d.get("checked_at"), "state": st, "items": items}, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -453,6 +487,24 @@ def cmd_templates() -> int:
     for tid, t in TEMPLATES.items():
         print(f"== {tid}: {t['name']} (resolve after send: {t['resolve']})\n{t['en']}\n")
     return 0
+
+
+def cmd_intent(args: list[str]) -> int:
+    """intent --case <name|order> --tags cancel,delay : the agent records the buyer's intent for a message the regexes cannot read (other language, Devanagari).
+    Only the scenario choice changes; the reply is still an English template + facts + lint. Tags: """ + ", ".join(sorted(VALID_TAGS)) + """."""
+    if "--case" not in args or "--tags" not in args:
+        print("usage: intent --case <name|order> --tags tag1,tag2   (tags: " + ", ".join(sorted(VALID_TAGS)) + ")"); return 2
+    who, tags = args[args.index("--case") + 1], [t for t in args[args.index("--tags") + 1].split(",") if t]
+    bad = [t for t in tags if t not in VALID_TAGS]
+    if bad or not tags:
+        print("INVALID tags:", bad or "none given"); return 2
+    d = json.loads((OUT / "latest.json").read_text(encoding="utf-8"))
+    case = next((c for c in d["cases"] if who.lower() in (c.get("name") or "").lower() or who == thread_order(c.get("messages") or [])), None)
+    if not case:
+        print("NOT_FOUND: no such case in latest.json"); return 4
+    cur = load_intents(); cur[case["key"]] = tags
+    INTENT_F.write_text(json.dumps(cur, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"intent saved for {case['name']} ({case['key']}): {tags}; run `plan` again"); return 0
 
 
 def capture_proof(ctx, awb: str, order_no: str) -> tuple[str | None, str | None]:
@@ -737,6 +789,36 @@ def cmd_selftest() -> int:
     it = make_item(case("The package arrived but an item is missing", "DELIVERED"), set())
     okd = it["template"] == "T9" and "unboxing video" in it["text"] and "warranty protection film" in it["text"] and not it["lint"]
     fails += not okd; print(("PASS " if okd else "FAIL ") + f"missing item inside the window -> T9 with unboxing video + warranty conditions [{it['action']} {it['template']} {it['code']}] {it['lint']}")
+    # Sir 2026-10-21 round 3: EDD missed, cancel flow (Nimbus first), other languages via the agent's intent
+    fut = (datetime.now() + timedelta(days=5)).strftime("%a, %d %b, %Y IST")
+    def ship(ago_deliver_by, state="IN_TRANSIT", reason="where is my order", status="Sent", lang="English", tags=None, notes=()):
+        c = case(reason, state, lang=lang, notes=notes); c["facts"]["order_page"]["deliver_by"] = ago_deliver_by; c["facts"]["order_page"]["status"] = status
+        if tags: c["intent_tags"] = tags
+        return c
+    it = make_item(ship("Mon, 28 Sept, 2026 IST"), set()); okd = it["template"] == "T3" and "apologise for the delay" in it["text"] and "estimated delivery date" not in it["text"] and not it["lint"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"EDD missed (deliver-by in the past) -> T3 apology + courier status, no stale date [{it['code']}] {it['lint']}")
+    it = make_item(ship(fut), set()); okd = it["template"] == "T3" and "estimated delivery date shown by Amazon" in it["text"] and "apologise" not in it["text"] and not it["lint"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"deliver-by in the future -> T3 shows the date [{it['code']}] {it['lint']}")
+    it = make_item(ship("Mon, 28 Sept, 2026 IST", state="NOT_MOVING", reason="order is too delay"), set()); okd = it["template"] == "T2" and "estimated delivery date" not in it["text"] and not it["lint"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"T2 with a past deliver-by drops the date [{it['code']}] {it['lint']}")
+    it = make_item(ship(fut, state="NOT_MOVING", reason="kindly cancel this order"), set())
+    okd = it["action"] == "ESCALATE" and it["code"] == "CANCEL_NOT_SHIPPED" and "STEP 1 Nimbus" in it["sir_action"] and "STEP 2 Amazon" in it["sir_action"] and "does NOT cancel Nimbus" in it["sir_action"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "cancel on a not-moving order -> escalate with the Nimbus-first cancel card")
+    it = make_item(ship(fut, state="NOT_MOVING", reason="kindly cancel this order", status="Canceled"), set())
+    okd = it["action"] == "ESCALATE" and it["code"] == "CANCELLED_BUT_SHIPMENT_ACTIVE" and it.get("alert") and it["sir_action"].startswith("STOP")
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "guardrail: cancelled on Amazon but the Nimbus shipment is still active -> STOP alert")
+    it = make_item(ship(fut, state="CANCELLED", reason="kindly cancel this order", status="Canceled"), set())
+    okd = it["action"] == "ESCALATE" and it["code"] == "CANCEL_DONE"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "cancelled on Amazon and in Nimbus -> CANCEL_DONE (Sir decides the closing message)")
+    it = make_item(ship("Mon, 28 Sept, 2026 IST", lang="Telugu", reason="telugu text the regexes cannot read"), set())
+    okd = it["action"] == "ESCALATE" and it["code"] == "LANGUAGE" and "intent" in it["why"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "Telugu without an intent -> LANGUAGE escalate (agent must read it)")
+    it = make_item(ship("Mon, 28 Sept, 2026 IST", lang="Telugu", reason="telugu text the regexes cannot read", tags=["delay"]), set())
+    okd = it["action"] == "SEND" and it["template"] == "T3" and it["text"].startswith("Dear Customer") and not it["lint"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "Telugu + the agent's intent [delay] -> English T3")
+    it = make_item(ship("Mon, 28 Sept, 2026 IST", lang="Telugu", reason="x", tags=["abuse"]), set())
+    okd = it["code"] == "SENSITIVE"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "intent [abuse] -> SENSITIVE, never answered")
     _support_override = None
     return 1 if fails else 0
     _support_override = None
@@ -751,6 +833,8 @@ def main() -> int:
         return cmd_plan()
     if a[0] == "send":
         return cmd_send(a[1:])
+    if a[0] == "intent":
+        return cmd_intent(a[1:])
     if a[0] == "templates":
         return cmd_templates()
     if a[0] == "selftest":

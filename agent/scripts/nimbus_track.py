@@ -146,6 +146,8 @@ def parse(awb: str, html: str, order: str | None = None) -> dict:
                 res["notes"].append(f"conflicting scan {e['at']}: {e['remark']} (shortly before 'delivered')")
     elif "out for delivery" in label:
         res["state"] = "OUT_FOR_DELIVERY"
+    elif "cancel" in label:                       # the shipment was cancelled in Nimbus (Sir cancels there BEFORE cancelling on Amazon)
+        res["state"] = "CANCELLED"
     elif any(w in label for w in ("ndr", "undeliver", "exception", "lost", "damag")):
         res["state"] = "EXCEPTION"
     elif not moved:
