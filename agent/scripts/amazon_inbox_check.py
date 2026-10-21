@@ -151,6 +151,11 @@ def main() -> int:
                 j = pane.find(r["name"] + "\nIndia")
                 pane = pane[j:] if j >= 0 else pane
                 r["messages"] = parse_messages(pane); r["order_panel"] = parse_order_panel(pane); r["language"] = parse_language(pane)
+                sides = p.evaluate("() => [...document.querySelectorAll('.case-message-view-messages .message-component')].map(e => e.classList.contains('sent-message-component') ? 'sent' : 'received')")
+                if len(sides) == len(r["messages"]):                    # the DOM tells who wrote each message (sent = our reply, incl. Sir's manual ones)
+                    for m, sd in zip(r["messages"], sides):
+                        m["side"] = sd
+                        m["by"] = "seller" if sd == "sent" else ("amazon" if (m.get("reason") or m["raw"].startswith("Dear Amazon Seller")) else "buyer")
                 r["amazon_templates"] = p.evaluate("() => [...document.querySelectorAll('kat-button')].map(e => e.getAttribute('label')).filter(l => l && /template/i.test(l))")
             except Exception as e:
                 r["error"] = str(e)[:200]

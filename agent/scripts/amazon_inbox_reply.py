@@ -27,62 +27,54 @@ OUT = ROOT / "data" / "mahika" / "inbox"
 STATE_F = OUT / "samvaad_state.json"
 SENT_LOG = OUT / "sent_log.jsonl"
 INBOX = "https://sellercentral.amazon.in/messaging/inbox"
-SIGN = {"en": "Regards,\nBadeja Enterprises", "hi": "सादर,\nBadeja Enterprises"}
+SIGN = {"en": "Regards,\nBadeja Enterprises"}
 RTO = ("RTO_RECEIVED", "RTO_IN_TRANSIT")
 MOVING = ("DELIVERED", "IN_TRANSIT", "OUT_FOR_DELIVERY")
 
 # ------------------------------------------------------------------ templates (single source of truth)
 TEMPLATES = {
+    # English only, professional and technical (Sir 2026-10-21). One template = one scenario; wording is the single source of truth.
     "T1": {"name": "cancel asked, order already dispatched / delivered", "resolve": True,
-           "en": "Hello,\nRegarding your order {order_no}: this order has already been dispatched with {carrier} (tracking ID {awb}){clause_en}. As it has already been shipped, it cannot be cancelled now.\nIf you face any issue with the product, please share the details with us here.\n" + SIGN["en"],
-           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: यह ऑर्डर पहले ही {carrier} (ट्रैकिंग आईडी {awb}) से डिस्पैच हो चुका है{clause_hi}। ऑर्डर शिप हो चुका है, इसलिए अब इसे रद्द नहीं किया जा सकता।\nअगर आपको प्रोडक्ट में कोई समस्या है तो कृपया उसकी जानकारी हमें यहीं बताएं।\n" + SIGN["hi"]},
+           "en": "Dear Customer,\nRegarding order {order_no}: the shipment was dispatched via {carrier} (tracking ID {awb}){clause_en}. As the order has already been shipped, it can no longer be cancelled.\nIf you have a concern about the product, please share the details in this chat so that we can look into it.\n" + SIGN["en"]},
     "T2": {"name": "shipped-marked but not moving (delay)", "resolve": True,
-           "en": "Hello,\nRegarding your order {order_no}: your order is still being processed for dispatch and there is a delay in shipping. We apologise for the inconvenience.\nAmazon's estimated delivery date for this order is {deliver_by}.\n" + SIGN["en"],
-           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: आपका ऑर्डर अभी डिस्पैच के लिए प्रोसेस हो रहा है और शिपिंग में देरी हो रही है। असुविधा के लिए हमें खेद है।\nइस ऑर्डर की Amazon द्वारा अनुमानित डिलीवरी तारीख {deliver_by} है।\n" + SIGN["hi"]},
+           "en": "Dear Customer,\nRegarding order {order_no}: we apologise for the delay. The shipment is still being processed for dispatch. The estimated delivery date shown by Amazon for this order is {deliver_by}.\n" + SIGN["en"]},
     "T3": {"name": "where is my order / ETA (moving)", "resolve": True,
-           "en": "Hello,\nRegarding your order {order_no}: your order is on its way with {carrier} (tracking ID {awb}). Current status: {status_en}.\nAmazon's estimated delivery date is {deliver_by}.\n" + SIGN["en"],
-           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: आपका ऑर्डर {carrier} (ट्रैकिंग आईडी {awb}) के साथ रास्ते में है। वर्तमान स्थिति: {status_hi}।\nAmazon की अनुमानित डिलीवरी तारीख {deliver_by} है।\n" + SIGN["hi"]},
-    "T4": {"name": "defect / refund asked on a delivered order: ask issue + video and photos", "resolve": False,
-           "en": "Hello,\nRegarding your order {order_no}: please share the issue you are facing with the product, along with a clear video and photos that show the problem, so that we can look into your request.\n" + SIGN["en"],
-           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: कृपया बताएं कि आपको प्रोडक्ट में क्या समस्या आ रही है, और समस्या दिखाने वाला साफ़ वीडियो और फोटो भी भेजें, ताकि हम आपके अनुरोध की जांच कर सकें।\n" + SIGN["hi"]},
+           "en": "Dear Customer,\nRegarding order {order_no}: your shipment is in transit with {carrier} (tracking ID {awb}). Current courier status: {status_en}. The estimated delivery date shown by Amazon is {deliver_by}.\n" + SIGN["en"]},
+    "T5": {"name": "refund already issued (fact from the order page): details + Amazon Customer Support for the status", "resolve": True,
+           "en": "Dear Customer,\nRegarding order {order_no}: {rto_en}a refund of Rs {amount} has been issued for this order. Refunds are processed by Amazon to the original payment method. If the amount is not reflected in your account, please contact Amazon Customer Support by phone from the Customer Service section of your Amazon account; they can check the refund status with the payment partner.\n" + SIGN["en"]},
     "T6": {"name": "tracker says delivered but buyer says not received: delivery facts + ask to check with family/neighbours/security", "resolve": False, "alert": True,
-           "en": "Hello,\nRegarding your order {order_no}: our records show that this order was delivered by {carrier} (tracking ID {awb}) on {delivered_date}. Please check with your family members, neighbours or building security in case it was received on your behalf.\nIf you still cannot find it, please let us know here.\n" + SIGN["en"],
-           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: हमारे रिकॉर्ड के अनुसार यह ऑर्डर {carrier} (ट्रैकिंग आईडी {awb}) द्वारा {delivered_date} को डिलीवर हो चुका है। कृपया अपने परिवार के सदस्यों, पड़ोसियों या सिक्योरिटी से पूछ लें कि कहीं उन्होंने आपकी तरफ से रिसीव तो नहीं किया।\nअगर फिर भी न मिले तो कृपया हमें यहीं बताएं।\n" + SIGN["hi"]},
-    "T5": {"name": "refund already processed (fact from the order page)", "resolve": True,
-           "en": "Hello,\nRegarding your order {order_no}: {rto_en}a refund of Rs {amount} has been processed for this order. Please check the refund in your original payment method.\n" + SIGN["en"],
-           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: {rto_hi}इस ऑर्डर के लिए Rs {amount} का रिफंड प्रोसेस कर दिया गया है। कृपया अपने मूल भुगतान माध्यम में रिफंड देखें।\n" + SIGN["hi"]},
-    # Sir 2026-10-20: buyer still disputes delivery after our T6 -> show the courier tracking facts. TEXT ONLY (no link, no attachment: Amazon G1701);
+           "en": "Dear Customer,\nRegarding order {order_no}: as per the courier tracking, this shipment was delivered by {carrier} (tracking ID {awb}) on {delivered_date}. Please check with your family members, neighbours or building security, as the parcel may have been received on your behalf.\nIf you still cannot locate the parcel, please reply here and we will check further with the courier.\n" + SIGN["en"]},
+    # Sir 2026-10-20: buyer still disputes delivery after T6 -> courier tracking facts. TEXT ONLY (no link, no attachment: Amazon G1701);
     # the tracker-page screenshot is saved to data/mahika/inbox/proof/ for Sir. Sent once per order (T7_MARKS detect a repeat), then Sir takes over.
     "T7": {"name": "buyer disputes a delivered shipment: courier tracking facts (text only, screenshot saved for Sir)", "resolve": False, "alert": True,
-           "en": "Hello,\nRegarding your order {order_no}: in the courier's tracking this shipment ({carrier}, tracking ID {awb}) is marked as Delivered. Delivery was recorded on {when_en}{loc_en}.{ver_en}\nPlease check once more with your family members, neighbours or building security. You can also look up the same tracking ID in the courier's own app or on its tracking page.\n" + SIGN["en"],
-           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: कूरियर की ट्रैकिंग में यह शिपमेंट ({carrier}, ट्रैकिंग आईडी {awb}) डिलीवर्ड दिख रहा है। डिलीवरी {when_hi}{loc_hi} दर्ज हुई है।{ver_hi}\nकृपया एक बार फिर अपने परिवार के सदस्यों, पड़ोसियों या सिक्योरिटी से पूछ लें। आप यही ट्रैकिंग आईडी कूरियर के अपने ऐप या ट्रैकिंग पेज पर भी देख सकते हैं।\n" + SIGN["hi"]},
-    # Sir 2026-10-20: defective product, still inside the return/replacement window (7 days from the courier delivery date):
-    # guide the buyer to share received-product + defect photos here first, then raise a replacement request in Amazon (replaces T4).
-    "T9": {"name": "defect inside the return/replacement window: share received-product + defect photos here, then raise a replacement request", "resolve": False,
-           "en": "Hello,\nRegarding your order {order_no}: we are sorry about the issue with the product. So that we can look into your request, please share here in this chat clear photos of the product you received (showing the packaging label) and clear photos or a video that show the problem.\nAfter you have shared them, please raise a replacement request for this order from Your Orders in your Amazon account. Replacement requests are raised and processed through Amazon.\n" + SIGN["en"],
-           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: प्रोडक्ट में आई समस्या के लिए हमें खेद है। आपके अनुरोध की जांच के लिए कृपया इसी चैट में मिले हुए प्रोडक्ट की साफ़ फोटो (पैकेजिंग लेबल दिखाते हुए) और समस्या दिखाने वाली साफ़ फोटो या वीडियो भेजें।\nइन्हें भेजने के बाद, कृपया अपने Amazon अकाउंट में Your Orders से इस ऑर्डर के लिए रिप्लेसमेंट रिक्वेस्ट डालें। रिप्लेसमेंट रिक्वेस्ट Amazon के माध्यम से ही डाली और प्रोसेस की जाती है।\n" + SIGN["hi"]},
-    # Sir 2026-10-20/21: defect or refund asked AFTER the 7-day window -> point the buyer to our WhatsApp support (number lives in samvaad_state.json "support_whatsapp",
-    # not in code; remove the key = kill switch, the case then escalates as WINDOW_CROSSED). Amazon G1701 bans phone numbers / moving buyers off Amazon: Sir's own risk decision.
-    "T10": {"name": "defect/refund asked after the return/replacement window: point to WhatsApp support (Sir's risk decision)", "resolve": False, "alert": True,
-            "en": "Hello,\nRegarding your order {order_no}: the return and replacement period for this order has ended. For further help with this product, please contact our WhatsApp support on {whatsapp} and share your order number.\n" + SIGN["en"],
-            "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: इस ऑर्डर की रिटर्न और रिप्लेसमेंट अवधि समाप्त हो चुकी है। इस प्रोडक्ट के लिए आगे की मदद के लिए कृपया हमारे व्हाट्सएप सपोर्ट {whatsapp} पर संपर्क करें और अपना ऑर्डर नंबर बताएं।\n" + SIGN["hi"]},
+           "en": "Dear Customer,\nRegarding order {order_no}: the courier tracking shows this shipment ({carrier}, tracking ID {awb}) as Delivered. Delivery was recorded on {when_en}{loc_en}.{ver_en}\nWe request you to check once more with your family members, neighbours or building security. You may also look up the same tracking ID in the courier's own app or on its tracking page.\n" + SIGN["en"]},
     # Sir-approved text for a defect claim where Amazon still shows the order as not delivered (ayesha 2026-10-20). Only via `send --only <case> --approve --force-template T8`.
     "T8": {"name": "defect claim while Amazon's status lags: ask for evidence + state the courier delivery fact (Sir-approved text, manual use)", "resolve": False,
-           "en": "Hello,\nRegarding your order {order_no}: we are sorry that the display is not working properly. So that we can look into your request, please share a clear video and photos that show the problem.\nOur records show that this order was delivered by {carrier} (tracking ID {awb}) on {delivered_date}. The status shown in your Amazon account is updated by Amazon from the courier tracking.\n" + SIGN["en"],
-           "hi": "नमस्ते,\nआपके ऑर्डर {order_no} के बारे में: हमें खेद है कि डिस्प्ले ठीक से काम नहीं कर रहा है। आपके अनुरोध की जांच के लिए कृपया समस्या दिखाने वाला साफ़ वीडियो और फोटो भेजें।\nहमारे रिकॉर्ड के अनुसार यह ऑर्डर {carrier} (ट्रैकिंग आईडी {awb}) द्वारा {delivered_date} को डिलीवर हो चुका है। आपके Amazon अकाउंट में दिखने वाला स्टेटस Amazon द्वारा कूरियर ट्रैकिंग से अपडेट होता है।\n" + SIGN["hi"]},
+           "en": "Dear Customer,\nRegarding order {order_no}: we are sorry that the display is not working properly. To investigate your request, please share a clear video and photos that show the problem.\nOur records show that this order was delivered by {carrier} (tracking ID {awb}) on {delivered_date}. The order status in your Amazon account is updated by Amazon from the courier tracking.\n" + SIGN["en"]},
+    # Sir 2026-10-20: defective product inside the return/replacement window (7 days from the courier delivery date): photos here first, then a replacement request in Amazon.
+    # Replacements and refunds are raised and processed by Amazon and the buyer, never by us; policy = steer to a replacement ONLY, even when the buyer asked for a refund (Sir 2026-10-21).
+    "T9": {"name": "defect inside the return/replacement window: share received-product + defect photos here, then raise a replacement request", "resolve": False,
+           "en": "Dear Customer,\nRegarding order {order_no}: we are sorry about the issue with the product. To investigate your request, please share here in this chat clear photos of the product you received (with the packaging label visible) and clear photos or a video that show the problem.\nAfter sharing them, please raise a replacement request for this order from Your Orders in your Amazon account. Replacement requests are raised and processed through Amazon.\n" + SIGN["en"]},
+    # Sir 2026-10-21: defect/refund asked AFTER the 7-day window -> WhatsApp support (number lives in samvaad_state.json "support_whatsapp", not in code; remove the key = kill switch,
+    # the case then escalates as WINDOW_CROSSED). Amazon G1701 bans phone numbers / moving buyers off Amazon: Sir's own risk decision.
+    "T10": {"name": "defect/refund asked after the return/replacement window: point to WhatsApp support (Sir's risk decision)", "resolve": False, "alert": True,
+            "en": "Dear Customer,\nRegarding order {order_no}: the return and replacement window for this order has ended. For further assistance with this product, please contact our WhatsApp support on {whatsapp} and quote your order number.\n" + SIGN["en"]},
+    # Sir 2026-10-21: refund not received -> the buyer asks Amazon Customer Support by phone (a refund is already issued; follow-up after T5).
+    "T11": {"name": "buyer still asks about a refund that is already issued: Amazon Customer Support by phone", "resolve": False,
+            "en": "Dear Customer,\nRegarding order {order_no}: a refund of Rs {amount} has already been issued for this order. Refunds are processed by Amazon to the original payment method, and the credit timeline depends on the payment method. To check the refund status, please contact Amazon Customer Support by phone from the Customer Service section of your Amazon account.\n" + SIGN["en"]},
 }
-T7_MARKS = ("is marked as Delivered", "डिलीवर्ड दिख रहा है")        # a seller message with one of these = T7 already sent in this thread
+T7_MARKS = ("Delivery was recorded on",)         # a seller message containing one of these = T7 already sent in this thread
+T11_MARKS = ("has already been issued",)         # T11 already sent in this thread
 
 # ------------------------------------------------------------------ lint
 BANNED_EN = [r"\bwill refund", r"\bwe will (process|issue|refund|replace|send|arrange)", r"\breplac", r"\bdiscount", r"\bcompensat", r"\bcoupon", r"\bvoucher",
              r"\bcashback", r"\bfraud", r"\bfake\b", r"\bcheat", r"\bpolice", r"\blegal", r"\bcourt\b", r"\bIPC\b", r"\bscam", r"\breview", r"\brating",
              r"\bfeedback", r"\bstars?\b", r"\bsupplier", r"\bprocure", r"\bwholesale", r"\bwhatsapp", r"call us", r"contact us", r"\bvisit\b", r"repairfully",
              r"\bpromise", r"\bguarantee", r"\bfree\b"]
-BANNED_HI = ["रिप्लेसमेंट", "बदलकर", "बदल कर", "छूट", "डिस्काउंट", "धोखा", "फ्रॉड", "पुलिस", "कानूनी", "रिव्यू", "रेटिंग", "फीडबैक", "व्हाट्सएप", "वादा", "गारंटी", "मुफ्त"]
 URL_RE = re.compile(r"https?://|www\.|\b[A-Za-z0-9-]+\.(?:com|in|co|net|org|store|shop|io|me|app|xyz|info)\b", re.I)
 EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 PHONE_RE = re.compile(r"(?<!\d)(?:\+?91[\s-]?)?[6-9]\d{9}(?!\d)")
-ALLOWED_CHARS = re.compile(r"^[\x20-\x7E\nऀ-ॿ]+$")      # ASCII + Devanagari incl. danda (no emoji, no symbols)
+ALLOWED_CHARS = re.compile(r"^[\x20-\x7E\n]+$")      # plain ASCII only (English only, no emoji, no symbols)
 
 
 def _norm_num(tok: str) -> str:
@@ -127,14 +119,9 @@ def lint(text: str, facts: dict | None = None, template: str | None = None, lang
             continue
         if re.search(pat, text, re.I):
             errs.append(f"banned wording /{pat}/")
-    for w in BANNED_HI:
-        if (template in ("T9", "T10") and w == "रिप्लेसमेंट") or (template == "T10" and w == "व्हाट्सएप"):
-            continue
-        if w in text:
-            errs.append(f"banned wording {w}")
     has_refund = bool((facts.get("order_page") or {}).get("refunds"))
-    if re.search(r"refund|रिफंड", text, re.I) and not (template == "T5" and has_refund):
-        errs.append("refund wording only allowed in T5 with a refund on the order page")
+    if re.search(r"refund", text, re.I) and not (template in ("T5", "T11") and has_refund):
+        errs.append("refund wording only allowed in T5 / T11 with a refund on the order page")
     if facts:
         allowed = _fact_numbers(facts)
         if template == "T10" and support_number():
@@ -145,7 +132,7 @@ def lint(text: str, facts: dict | None = None, template: str | None = None, lang
         for nm in facts.get("buyer_names") or []:
             if len(nm) >= 3 and re.search(rf"\b{re.escape(nm)}\b", text, re.I):
                 errs.append(f"customer name {nm}")
-    if not re.match(r"^(Hello,|नमस्ते,)\n", text):
+    if not re.match(r"^Dear Customer,\n", text):
         errs.append("missing greeting")
     if not text.rstrip().endswith("Badeja Enterprises"):
         errs.append("missing sign-off")
@@ -257,20 +244,15 @@ def render(tid: str, lang: str, facts: dict) -> str:
          "deliver_by": fmt_date(op.get("deliver_by")), "amount": f"{max(op.get('refunds') or [0]):,.2f}", "delivered_date": fmt_date(tr.get("delivered_at"))}
     d_at = fmt_date(tr.get("delivered_at"))
     f["clause_en"] = {"DELIVERED": f" and was delivered on {d_at}", "OUT_FOR_DELIVERY": " and is out for delivery"}.get(st, f" and is on its way. Amazon's estimated delivery date is {f['deliver_by']}")
-    f["clause_hi"] = {"DELIVERED": f" और {d_at} को डिलीवर हो गया है", "OUT_FOR_DELIVERY": " और डिलीवरी के लिए निकल चुका है"}.get(st, f" और रास्ते में है। Amazon की अनुमानित डिलीवरी तारीख {f['deliver_by']} है")
-    f["status_en"], f["status_hi"] = status_phrase(tr)
+    f["status_en"] = status_phrase(tr)[0]
     f["rto_en"] = "the shipment was returned to us and " if st in RTO else ""
-    f["rto_hi"] = "शिपमेंट हमें वापस मिल गया है और " if st in RTO else ""
     t_at = fmt_time(tr.get("delivered_at"))                                  # T7 proof fields
     loc = clean_loc((tr.get("latest") or {}).get("location")) if st == "DELIVERED" else None
     f["when_en"] = f"{d_at} at {t_at}" if t_at else f"{d_at}"
-    f["when_hi"] = f"{d_at} को {t_at} बजे" if t_at else f"{d_at} को"
     f["loc_en"] = f", last scan location: {loc}" if loc else ""
-    f["loc_hi"] = f", आखिरी स्कैन लोकेशन: {loc}" if loc else ""
     f["whatsapp"] = support_number() or ""
     f["ver_en"] = " The courier's record shows this delivery as verified." if tr.get("delivery_verified") else ""
-    f["ver_hi"] = " कूरियर के रिकॉर्ड में यह डिलीवरी वेरिफ़ाइड दर्ज है।" if tr.get("delivery_verified") else ""
-    text = TEMPLATES[tid][lang].format(**f)
+    text = TEMPLATES[tid]["en"].format(**f)
     if tid == "T5" and not f["rto_en"] and lang == "en":
         text = text.replace(": a refund", ": A refund")
     return text
@@ -301,7 +283,11 @@ def decide(case: dict) -> dict:
     if facts.get("language") not in ("English", "Hindi"):
         return esc("LANGUAGE", f"thread language {facts.get('language')}")
     state = (tr or {}).get("state")
-    if op.get("refunds") and t_last & {"refund", "cancel", "returned", "notrec"}:
+    if op.get("refunds") and t_last & {"refund", "refundq", "cancel", "returned", "notrec"}:
+        if seller_replied:                                                          # Sir 2026-10-21: refund not seen -> Amazon Customer Support by phone (T11), once
+            if any(mk in mine for mk in T11_MARKS):
+                return esc("REFUND_QUERY_REPEAT", "buyer asks about the refund again after we pointed to Amazon Customer Support: Sir checks", "S5")
+            return {"scenario": "S5", "template": "T11", "action": "SEND", "code": "REFUND_ISSUED_ASK_AMAZON", "why": f"refund {op['refunds']} is already on the order page; buyer asks again: Amazon Customer Support by phone"}
         return {"scenario": "S5", "template": "T5", "action": "SEND", "code": "REFUND_PROCESSED", "why": f"refund {op['refunds']} is on the order page"}
     if not tr or state in ("ERROR", "NOT_FOUND", "UNKNOWN", "ORDER_MISMATCH"):
         return esc("TRACKING_UNVERIFIED", f"tracker state {state}")
@@ -309,6 +295,8 @@ def decide(case: dict) -> dict:
         return esc("TRACKING_CONFLICT", "; ".join(tr["notes"]))
     if state in RTO:
         return esc("REFUND_PENDING", "shipment returned to us (RTO) and no refund on the order page: Sir issues the refund", "S5")
+    if "refundq" in t_last and not t_last & {"defect", "returned"}:
+        return esc("REFUND_STATUS_QUERY", "buyer asks where a refund is (not a new product claim): Sir checks", "S5")
     if seller_replied and state == "DELIVERED" and "notrec" in t_last:             # delivery DISPUTE (Sir 2026-10-20): facts-only proof, once
         if any(mk in mine for mk in T7_MARKS):
             return esc("DELIVERY_DISPUTE_REPEAT", "buyer still says not received after our tracking-proof reply: Sir checks the carrier POD / handles the claim", "S11")
@@ -324,8 +312,6 @@ def decide(case: dict) -> dict:
         if state in MOVING:
             return {"scenario": "S1", "template": "T1", "action": "SEND", "code": "CANCEL_SHIPPED", "why": f"tracker {state}"}
         return esc("CANCEL_NOT_SHIPPED", f"cancel asked while tracker is {state}: Sir decides", "S2")
-    if "refundq" in t_last and "defect" not in t_last:
-        return esc("REFUND_STATUS_QUERY", "buyer asks where a refund is (not a new product claim): Sir checks", "S5")
     if t_last & {"notrec", "delay"} and "defect" not in t_last:
         if state in ("IN_TRANSIT", "OUT_FOR_DELIVERY"):
             return {"scenario": "S3", "template": "T3", "action": "SEND", "code": "ETA", "why": f"tracker {state}"}
@@ -366,7 +352,7 @@ def make_item(case: dict, sent_keys: set[str]) -> dict:
     if d.get("proof"):
         it["proof_awb"] = op.get("tracking_id") or tr.get("awb")
     if d["action"] == "SEND":
-        lang = "hi" if facts.get("language") == "Hindi" else "en"
+        lang = "en"
         it["text"] = render(d["template"], lang, facts)
         it["lint"] = lint(it["text"], facts, d["template"], lang)
         it["resolve_after"] = TEMPLATES[d["template"]]["resolve"]
@@ -420,7 +406,7 @@ def cmd_plan() -> int:
 
 def cmd_templates() -> int:
     for tid, t in TEMPLATES.items():
-        print(f"== {tid}: {t['name']} (resolve after send: {t['resolve']})\n-- EN\n{t['en']}\n-- HI\n{t['hi']}\n")
+        print(f"== {tid}: {t['name']} (resolve after send: {t['resolve']})\n{t['en']}\n")
     return 0
 
 
@@ -467,7 +453,7 @@ def cmd_send(args: list[str]) -> int:
         if it["action"] == "SKIP":
             print(f"SKIPPED: {it['code']} ({it['why']})"); return 0
         facts = {**(case.get("facts") or {}), "order_no": it["order_no"]}
-        lang = "hi" if facts.get("language") == "Hindi" else "en"
+        lang = "en"
         text = render(force, lang, facts)
         errs = lint(text, facts, force, lang)
         if errs:
@@ -554,9 +540,9 @@ def cmd_selftest() -> int:
                   "tracking": {"awb": "4218630821242", "state": "DELIVERED", "delivered_at": "Sep 22, 2026 17:24", "delivery_verified": True, "latest": {"at": "Sep 22, 2026 17:24"}}}
     ok_text = render("T1", "en", good_facts)
     cases = [("good T1 passes", ok_text, [], True), ("url", ok_text.replace("Regards,", "Visit https://x.com\nRegards,"), [], False), ("domain repairfully.com", ok_text.replace("Regards,", "repairfully.com\nRegards,"), [], False),
-             ("phone", ok_text.replace("Regards,", "Call 9876543210\nRegards,"), [], False), ("email", ok_text.replace("Regards,", "a@b.com\nRegards,"), [], False), ("emoji", ok_text.replace("Hello,", "Hello 😊,"), [], False),
+             ("phone", ok_text.replace("Regards,", "Call 9876543210\nRegards,"), [], False), ("email", ok_text.replace("Regards,", "a@b.com\nRegards,"), [], False), ("emoji", ok_text.replace("Dear Customer,", "Dear 😊,"), [], False),
              ("refund promise", ok_text.replace("Regards,", "We will refund you.\nRegards,"), [], False), ("unknown number", ok_text.replace("Regards,", "Delivery in 5 days.\nRegards,"), [], False),
-             ("customer name", ok_text.replace("Hello,", "Hello Himani,"), [], False), ("triple newline", ok_text.replace("Regards,", "\n\nRegards,"), [], False),
+             ("customer name", ok_text.replace("Dear Customer,", "Dear Himani,"), [], False), ("triple newline", ok_text.replace("Regards,", "\n\nRegards,"), [], False),
              ("review request", ok_text.replace("Regards,", "Please leave a review.\nRegards,"), [], False), ("refund word outside T5", ok_text.replace("Regards,", "Refund later.\nRegards,"), [], False),
              ("no sign-off", ok_text.replace("Badeja Enterprises", "Team"), [], False)]
     fails = 0
@@ -569,7 +555,7 @@ def cmd_selftest() -> int:
     e5 = lint(t5, good_facts, "T5"); print(("PASS " if not e5 else "FAIL ") + "T5 passes with refund on page" + (f" <- {e5}" if e5 else "")); fails += bool(e5)
     e5b = lint(t5, {**good_facts, "order_page": {**good_facts["order_page"], "refunds": []}}, "T5"); print(("PASS " if e5b else "FAIL ") + "T5 blocked without a refund on the page"); fails += not e5b
     for tid in TEMPLATES:
-        for lang in ("en", "hi"):
+        for lang in ("en",):
             e = lint(render(tid, lang, good_facts), good_facts, tid)
             print(("PASS " if not e else "FAIL ") + f"{tid}/{lang} renders and lints" + (f" <- {e}" if e else "")); fails += bool(e)
     # decision tests (synthetic cases)
@@ -584,28 +570,28 @@ def cmd_selftest() -> int:
            ("defective + delivered verified, inside window -> T9", case("received a defective product", "DELIVERED"), "T9"), ("defective + delivered unverified -> escalate", case("received a defective product", "DELIVERED", verified=False), None),
            ("refund + RTO, no refund yet -> escalate", case("want refund", "RTO_RECEIVED"), None), ("refund + refund on page -> T5", case("want refund", "RTO_RECEIVED", refunds=[999.0]), "T5"),
            ("legal wording -> escalate", case("customer will send a lawyer notice", "DELIVERED"), None), ("A to Z claim -> escalate", case("A to Z claim filed", "DELIVERED"), None),
-           ("tracking conflict -> escalate", case("cancel", "DELIVERED", notes=["refusal scan"]), None), ("Hindi cancel + in transit -> HI T1", case("cancel", "IN_TRANSIT", lang="Hindi"), "T1"),
+           ("tracking conflict -> escalate", case("cancel", "DELIVERED", notes=["refusal scan"]), None), ("Hindi-locale cancel + in transit -> English T1", case("cancel", "IN_TRANSIT", lang="Hindi"), "T1"),
            ("language Tamil -> escalate", case("cancel", "IN_TRANSIT", lang="Tamil"), None), ("no order page -> escalate", case("cancel", "IN_TRANSIT", order_page=False), None),
            ("returned claim, no refund, delivered -> escalate", case("customer already returned the item", "DELIVERED"), None),
            ("defective + window crossed (20 days) -> escalate", case("received a defective product", "DELIVERED", ago=20), None),
-           ("Hindi defective inside window -> HI T9", case("product kharab hai defective", "DELIVERED", lang="Hindi"), "T9")]
+           ("Hindi-locale defective inside window -> English T9", case("product kharab hai defective", "DELIVERED", lang="Hindi"), "T9")]
     for name, c, want in dec:
         it = make_item(c, set())
         okd = (it["action"] == "SEND" and it["template"] == want) if want else it["action"] == "ESCALATE"
         if want and "Hindi" in name:
-            okd = okd and it["text"].startswith("नमस्ते")
+            okd = okd and it["text"].startswith("Dear Customer")
         fails += not okd
         print(("PASS " if okd else "FAIL ") + "decide: " + name + f"  [{it['action']} {it['template']} {it['code']}]")
     # thread tests: follow-ups, delivery dispute (T7), repeats, tracking-status queries
-    def thread(msgs, state="DELIVERED", lang="English", verified=True):
+    def thread(msgs, state="DELIVERED", lang="English", verified=True, refunds=()):
         tr = {"awb": "222222222222", "state": state, "courier": "Bluedart", "delivery_verified": verified, "notes": [], "delivered_at": "Oct 01, 2026 12:34",
               "latest": {"at": "Oct 01, 2026 12:34", "location": "Jewar_SJRoad_D (Uttar Pradesh)", "remark": "Delivered"}}
-        op = {"carrier": "Bluedart", "tracking_id": "222222222222", "deliver_by": "Mon, 12 Oct, 2026 IST", "refunds": [], "status": "Sent"}
+        op = {"carrier": "Bluedart", "tracking_id": "222222222222", "deliver_by": "Mon, 12 Oct, 2026 IST", "refunds": list(refunds), "status": "Sent"}
         return {"name": "Test", "key": "408-0000000-0000000|x", "subject": "Order enquiry from Amazon customer Test", "messages": msgs,
                 "facts": {"order_no": "408-0000000-0000000", "language": lang, "order_page": op, "tracking": tr, "buyer_names": ["Test"]}}
     def AMZ(reason): return {"order_no": "408-0000000-0000000", "reason": reason, "raw": "Dear Amazon Seller,\nReason for contact: " + reason}
     ME = {"order_no": None, "reason": None, "raw": "Hello,\nRegarding your order 408-0000000-0000000: our records show delivered.\nRegards,\nBadeja Enterprises"}
-    ME7 = {"order_no": None, "reason": None, "raw": "Hello,\nRegarding your order 408-0000000-0000000: in the courier's tracking this shipment is marked as Delivered.\nRegards,\nBadeja Enterprises"}
+    ME7 = {"order_no": None, "reason": None, "raw": "Hello,\nRegarding your order 408-0000000-0000000: Delivery was recorded on 1 Oct 2026.\nRegards,\nBadeja Enterprises"}
     def BUY(t): return {"order_no": None, "reason": None, "raw": "Hello,\n" + t}
     NR = AMZ("customer not received order but showing delivered")
     tests = [("dispute after T6 -> T7 (proof, alert)", thread([NR, ME, BUY("still not received the parcel, please check")]), "SEND", "T7", "DELIVERY_DISPUTE_PROOF"),
@@ -617,14 +603,14 @@ def cmd_selftest() -> int:
              ("'did not receive my refund' is not a not-received parcel -> not T6", thread([AMZ("I did not receive my refund")]), "ESCALATE", None, "REFUND_STATUS_QUERY"),
              ("fresh Amazon forward after our reply is a new first answer", thread([AMZ("old"), ME, AMZ("cancel the order")]), "SEND", "T1", None),
              ("not received + tracker EXCEPTION -> escalate", thread([AMZ("order not received")], state="EXCEPTION"), "ESCALATE", None, "TRACKING_UNVERIFIED"),
-             ("T7 in Hindi", thread([NR, ME, BUY("abhi tak nahi mila, not received")], lang="Hindi"), "SEND", "T7", None)]
+             ("T7 with a Hindi-locale buyer is answered in English", thread([NR, ME, BUY("abhi tak nahi mila, not received")], lang="Hindi"), "SEND", "T7", None)]
     for name, c, want_action, want_tpl, want_code in tests:
         it = make_item(c, set())
         okd = it["action"] == want_action and (want_tpl is None or it["template"] == want_tpl) and (want_code is None or it["code"] == want_code)
         if want_tpl == "T7":
             okd = okd and it.get("proof") and it.get("alert") and it["proof_awb"] == "222222222222" and it["order_no"] == "408-0000000-0000000" and not it["lint"]
             okd = okd and "http" not in it["text"] and "12:34" in it["text"] and "Jewar SJRoad D" in it["text"] and any(mk in it["text"] for mk in T7_MARKS)
-            okd = okd and it["text"].startswith("नमस्ते" if "Hindi" in name else "Hello")
+            okd = okd and it["text"].startswith("Dear Customer")
         fails += not okd
         print(("PASS " if okd else "FAIL ") + "thread: " + name + f"  [{it['action']} {it['template']} {it['code']}]")
     it = make_item(case("received a defective product", "DELIVERED", ago=20), set())
@@ -652,6 +638,17 @@ def cmd_selftest() -> int:
     e8 = lint(t8, thread([])["facts"], "T8")
     okd = not e8 and "1 Oct 2026" in t8 and "Bluedart" in t8
     fails += not okd; print(("PASS " if okd else "FAIL ") + "T8 renders and lints" + (f" <- {e8}" if e8 else ""))
+    ME11 = {"order_no": None, "reason": None, "raw": "A refund of Rs 3,011.00 has already been issued for this order. Regards, Badeja Enterprises"}
+    r_tests = [("refund issued, buyer says not received after our reply -> T11 (Amazon Customer Support)", thread([AMZ("refund issue"), ME, BUY("I did not receive my refund yet")], refunds=[3011.0]), "SEND", "T11", "REFUND_ISSUED_ASK_AMAZON"),
+               ("T11 already sent, buyer asks again -> escalate", thread([AMZ("refund issue"), ME, BUY("no refund yet"), ME11, BUY("still no refund")], refunds=[3011.0]), "ESCALATE", None, "REFUND_QUERY_REPEAT"),
+               ("refund asked first and a refund is on the page -> T5", thread([AMZ("want refund")], refunds=[3011.0]), "SEND", "T5", "REFUND_PROCESSED"),
+               ("refund status asked, nothing issued -> escalate for Sir", thread([AMZ("refund issue"), ME, BUY("my refund is not received")]), "ESCALATE", None, "REFUND_STATUS_QUERY")]
+    for name, c, want_action, want_tpl, want_code in r_tests:
+        it = make_item(c, set())
+        okd = it["action"] == want_action and (want_tpl is None or it["template"] == want_tpl) and (want_code is None or it["code"] == want_code)
+        if want_tpl:
+            okd = okd and not it["lint"] and "Amazon Customer Support" in it["text"] and "Rs 3,011.00" in it["text"]
+        fails += not okd; print(("PASS " if okd else "FAIL ") + "refund: " + name + f"  [{it['action']} {it['template']} {it['code']}] {it['lint']}")
     _support_override = None
     return 1 if fails else 0
 
