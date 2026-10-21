@@ -72,7 +72,11 @@ TEMPLATES = {
     # RTO state, no conflicting scans, no refund yet. Sir monitors the first orders; whether this ever becomes more automatic is his decision.
     "T14": {"name": "RTO (refused / undelivered): courier status for the buyer, refund card for Sir", "resolve": False, "alert": True,
             "en": "Dear Customer,\nRegarding order {order_no}: the shipment ({carrier}, tracking ID {awb}) could not be delivered and {rto_verb} to the seller (return to origin, RTO). Current courier status: {rto_status}. The refund will be processed against this return to origin.\n" + SIGN["en"]},
+    # Sir 2026-10-21: Sir cancels in Nimbus first, then on Amazon; when both show cancelled, confirm to the buyer and resolve the case. Amazon refunds on cancel by itself (we trigger nothing).
+    "T15": {"name": "order cancelled (Amazon + Nimbus): confirmation, then resolve", "resolve": True,
+            "en": "Dear Customer,\nRegarding order {order_no}: your order has been cancelled. Any amount paid for this order will be refunded by Amazon to the original payment method.\n" + SIGN["en"]},
 }
+T15_MARKS = ("your order has been cancelled",)
 T14_MARKS = ("could not be delivered and",)
 T7_MARKS = ("Delivery was recorded on",)         # a seller message containing one of these = T7 already sent in this thread
 T11_MARKS = ("has already been issued",)         # T11 already sent in this thread
@@ -131,8 +135,8 @@ def lint(text: str, facts: dict | None = None, template: str | None = None, lang
         if re.search(pat, text, re.I):
             errs.append(f"banned wording /{pat}/")
     has_refund = bool((facts.get("order_page") or {}).get("refunds"))
-    if re.search(r"refund", text, re.I) and not (template in ("T1", "T13", "T14") or (template in ("T5", "T11") and has_refund)):
-        errs.append("refund wording only allowed in T1 / T13 / T14 (policy, RTO) and in T5 / T11 with a refund on the order page")
+    if re.search(r"refund", text, re.I) and not (template in ("T1", "T13", "T14", "T15") or (template in ("T5", "T11") and has_refund)):
+        errs.append("refund wording only allowed in T1 / T13 / T14 / T15 (policy, RTO, cancel) and in T5 / T11 with a refund on the order page")
     if facts:
         allowed = _fact_numbers(facts)
         if template == "T10" and support_number():
@@ -239,6 +243,16 @@ def is_past(deliver_by: str | None) -> bool:
         return False
 
 
+THANKS_OK = set("ok okay thanks thank thankyou thx you u received it got noted fine done great good nice sir mam madam welcome will do so much very for your help the product item order hello hi dear team regards customer now is working well perfect my and".split())
+PHOTO_WORDS = re.compile(r"\b(photos?|images?|pics?|pictures?|videos?|screenshots?|attached|attachment)\b", re.I)
+
+
+def is_thanks(text: str) -> bool:
+    """A clean closing message: only polite / positive words (no 'not', 'no', 'but', refund, return ...). Short."""
+    words = re.findall(r"[a-z]+", (text or "").lower())
+    return 1 <= len(words) <= 14 and all(w in THANKS_OK for w in words) and any(w in ("ok", "okay", "thanks", "thank", "thankyou", "thx", "received", "noted", "done") for w in words)
+
+
 RETURN_WINDOW_DAYS = 7                      # Sir 2026-10-20: return/replacement window, counted from the courier delivery date
 
 
@@ -321,6 +335,8 @@ def decide(case: dict) -> dict:
     mine = " ".join(m.get("raw") or m.get("text") or "" for m, b in zip(msgs, by) if b == "seller")
     if "abuse" in t_all:
         return esc("SENSITIVE", "legal / fraud / A-to-z wording: Sir only", "S8")
+    if seller_replied and by[-1] == "buyer" and is_thanks(msg_text(buyer_msgs[-1])):         # Sir 2026-10-21: a clean closing message -> resolve silently
+        return {"scenario": "S12", "template": None, "action": "RESOLVE", "code": "BUYER_THANKS", "why": "the buyer only said thanks / ok after our reply: resolve the case, no message"}
     if facts.get("language") not in ("English", "Hindi") and not intent:
         return esc("LANGUAGE", f"thread language {facts.get('language')}: the agent reads the message, translates the intent and records it with the `intent` command, then re-plans (reply stays English)")
     if not thread_order(msgs):
@@ -343,7 +359,9 @@ def decide(case: dict) -> dict:
                 "sir_action": f"STOP: order {thread_order(msgs)} is cancelled on Amazon but the Nimbus shipment {op.get('tracking_id')} is {state} (last scan {(tr.get('latest') or {}).get('at')}). Cancel the shipment in Nimbus NOW and make sure nothing is physically dispatched (Amazon cancel does not cancel Nimbus).",
                 "why": f"order cancelled on Amazon but the shipment is still {state} in Nimbus"}
     if re.search("cancel", op.get("status") or "", re.I) and state == "CANCELLED":
-        return esc("CANCEL_DONE", "order cancelled on Amazon and the Nimbus shipment is cancelled too: what to send / whether to resolve is Sir's call (not decided yet)", "S1")
+        if any(mk in mine for mk in T15_MARKS) or "defect" in t_last:
+            return esc("CANCEL_DONE", "order cancelled on Amazon and in Nimbus, the buyer wrote again or raised another issue: Sir reads it", "S1")
+        return {"scenario": "S1", "template": "T15", "action": "SEND", "code": "CANCEL_CONFIRMED", "why": "cancelled on Amazon AND in Nimbus (Sir's cancel flow done): confirmation reply, then resolve (Sir 2026-10-21)"}
     if op.get("refunds") and t_last & {"refund", "refundq", "cancel", "returned", "notrec"}:
         if seller_replied:                                                          # Sir 2026-10-21: refund not seen -> Amazon Customer Support by phone (T11), once
             if any(mk in mine for mk in T11_MARKS):
@@ -372,6 +390,10 @@ def decide(case: dict) -> dict:
             return esc("DELIVERY_UNVERIFIED", "dispute but the tracker has no delivery time", "S11")
         return {"scenario": "S11", "template": "T7", "action": "SEND", "code": "DELIVERY_DISPUTE_PROOF", "alert": True, "proof": True,
                 "why": "buyer disputes a delivered shipment: text-only courier facts, tracker screenshot saved for Sir (Sir 2026-10-20), Sir is alerted"}
+    if seller_replied and (buyer_msgs[-1].get("attachments") or PHOTO_WORDS.search(msg_text(buyer_msgs[-1]))):
+        return {"scenario": "S4", "template": None, "action": "ESCALATE", "code": "EVIDENCE_RECEIVED", "alert": True,
+                "sir_action": f"EVIDENCE RECEIVED: order {thread_order(msgs)}: the buyer sent photos / a video after our request. Open the case, review them; the replacement request is raised by the buyer in Amazon (Sir 2026-10-21).",
+                "why": "buyer shared photos / video (attachment or wording) after our evidence request: Sir reviews"}
     if seller_replied:                                                              # templates are first answers; a follow-up is for Sir
         if returned:
             return esc("RETURN_CLAIM_UNVERIFIED", f"customer-initiated return (follow-up after our reply): do NOT refund (SAFE-T); {delivery_note}: Sir decides", "S5")
@@ -479,7 +501,7 @@ def cmd_plan() -> int:
             print("    >> SIR ACTION: " + it["sir_action"])
         if it["text"]:
             print("    " + it["text"].replace("\n", "\n    "))
-    print(f"mode: auto_send={st['auto_send']} auto_resolve={st['auto_resolve']} | SEND={sum(i['action']=='SEND' for i in items)} ESCALATE={sum(i['action']=='ESCALATE' for i in items)} SKIP={sum(i['action']=='SKIP' for i in items)}")
+    print(f"mode: auto_send={st['auto_send']} auto_resolve={st['auto_resolve']} | SEND={sum(i['action']=='SEND' for i in items)} ESCALATE={sum(i['action']=='ESCALATE' for i in items)} SKIP={sum(i['action']=='SKIP' for i in items)} RESOLVE={sum(i['action']=='RESOLVE' for i in items)}")
     return 0
 
 
@@ -537,7 +559,8 @@ def cmd_send(args: list[str]) -> int:
     if not dry and not (st["auto_send"] or (only and approve)):
         print("BLOCKED: auto_send is false. Sir must approve: use --only <case> --approve for a single case, or set auto_send=true in samvaad_state.json."); return 4
     plan = json.loads((OUT / "plan.json").read_text(encoding="utf-8"))
-    items = [i for i in plan["items"] if i["action"] == "SEND" and (not only or only.lower() in (i["name"] or "").lower() or only == i["order_no"])]
+    do_resolve = resolve_flag or st["auto_resolve"]
+    items = [i for i in plan["items"] if (i["action"] == "SEND" or (i["action"] == "RESOLVE" and do_resolve)) and (not only or only.lower() in (i["name"] or "").lower() or only == i["order_no"])]
     force = args[args.index("--force-template") + 1] if "--force-template" in args else None
     if force:                                       # Sir picks the template for ONE case (still template + facts + lint, never free text)
         if not (only and approve) or force not in TEMPLATES:
@@ -574,7 +597,7 @@ def cmd_send(args: list[str]) -> int:
         p = ctx.pages[0] if ctx.pages else ctx.new_page()
         for it in items[:budget]:
             rec = {"at": datetime.now().isoformat(timespec="seconds"), "key": it["key"], "order_no": it["order_no"], "name": it["name"], "template": it["template"],
-                   "sha16": sha16(it["text"]), "text": it["text"], "dry": dry, "sent": False, "verified": False, "resolved": False}
+                   "sha16": sha16(it["text"]) if it.get("text") else None, "text": it.get("text"), "dry": dry, "sent": False, "verified": False, "resolved": False}
             if it.get("proof_awb"):                                   # dispute proof: tracker screenshot saved for Sir (non-fatal if it fails)
                 rec["proof_path"], rec["proof_error"] = capture_proof(ctx, it["proof_awb"], it["order_no"])
             try:
@@ -583,12 +606,23 @@ def cmd_send(args: list[str]) -> int:
                     rec["error"] = "LOGIN_REQUIRED"; results.append(rec); break
                 p.get_by_text(it["name"], exact=True).first.click(timeout=8000); p.wait_for_timeout(3000)
                 pane = p.evaluate("() => document.body.innerText")
+                anchor = it["order_no"] or it["name"]                  # pre-sales threads have no order number: the buyer's name is the anchor
                 for _ in range(8):                                    # the pane can take a few seconds to render the clicked case
-                    if it["order_no"] in pane:
+                    if anchor in pane:
                         break
                     p.wait_for_timeout(2000); pane = p.evaluate("() => document.body.innerText")
-                if it["order_no"] not in pane:
-                    rec["error"] = "case pane does not show the expected order number: not sending"; results.append(rec); continue
+                if anchor not in pane:
+                    rec["error"] = "case pane does not show the expected order number / buyer name: not sending"; results.append(rec); continue
+                if it["action"] == "RESOLVE":                         # the buyer's closing message ("ok thanks"): resolve silently, no reply (Sir 2026-10-21)
+                    if dry:
+                        p.screenshot(path=str(OUT / "shots" / f"{(it['order_no'] or it['name'])}_RESOLVE_dry.png")); rec["verified"] = True; results.append(rec); continue
+                    p.locator("kat-button[label='Resolve case']").first.click(); p.wait_for_timeout(5000)
+                    rec["resolved"] = bool(re.search(r"Resolved on " + chr(92) + "d", p.evaluate("() => document.body.innerText")))
+                    rec["verified"] = rec["resolved"]
+                    p.screenshot(path=str(OUT / "shots" / f"{(it['order_no'] or it['name'])}_RESOLVE.png"))
+                    if not rec["resolved"]:
+                        rec["error"] = "Resolve case clicked but the case does not show Resolved: stopping"; results.append(rec); break
+                    results.append(rec); continue
                 ta = p.locator("textarea[placeholder^='Please limit your text']")
                 if ta.count() == 0:                                   # topic cases (e.g. Cancel Order) show Amazon templates + a "Write Message" button first
                     wm = p.locator("kat-button[label='Write Message']")
@@ -613,7 +647,7 @@ def cmd_send(args: list[str]) -> int:
                 p.screenshot(path=str(OUT / "shots" / f"{it['order_no']}_{it['template']}_sent.png"))
                 if rec["verified"] and it["resolve_after"] and (resolve_flag or st["auto_resolve"]):
                     p.locator("kat-button[label='Resolve case']").click(); p.wait_for_timeout(5000)
-                    rec["resolved"] = "Resolved" in p.evaluate("() => document.body.innerText")
+                    rec["resolved"] = bool(re.search(r"Resolved on " + chr(92) + "d", p.evaluate("() => document.body.innerText")))
                 if not rec["verified"]:
                     rec["error"] = "sent but the message text was not found in the thread afterwards: stopping"; results.append(rec); break
             except Exception as e:
@@ -624,7 +658,7 @@ def cmd_send(args: list[str]) -> int:
         for r in results:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
     for r in results:
-        print(f"{r['name']:11s} {r['order_no']} {r['template']} dry={r['dry']} sent={r['sent']} verified={r['verified']} resolved={r['resolved']} {r.get('error', '')}"
+        print(f"{r['name']:11s} {r['order_no']} {r['template'] or 'RESOLVE'} dry={r['dry']} sent={r['sent']} verified={r['verified']} resolved={r['resolved']} {r.get('error', '')}"
               + (f" proof={r.get('proof_path') or 'MISSING ' + str(r.get('proof_error'))}" if r["template"] == "T7" else ""))
     return 0
 
@@ -808,8 +842,12 @@ def cmd_selftest() -> int:
     okd = it["action"] == "ESCALATE" and it["code"] == "CANCELLED_BUT_SHIPMENT_ACTIVE" and it.get("alert") and it["sir_action"].startswith("STOP")
     fails += not okd; print(("PASS " if okd else "FAIL ") + "guardrail: cancelled on Amazon but the Nimbus shipment is still active -> STOP alert")
     it = make_item(ship(fut, state="CANCELLED", reason="kindly cancel this order", status="Canceled"), set())
-    okd = it["action"] == "ESCALATE" and it["code"] == "CANCEL_DONE"
-    fails += not okd; print(("PASS " if okd else "FAIL ") + "cancelled on Amazon and in Nimbus -> CANCEL_DONE (Sir decides the closing message)")
+    okd = (it["action"] == "SEND" and it["template"] == "T15" and it["code"] == "CANCEL_CONFIRMED" and it["resolve_after"] and not it["lint"]
+           and "has been cancelled" in it["text"] and "refunded by Amazon" in it["text"])
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"cancelled on Amazon AND in Nimbus -> T15 confirmation + resolve [{it['action']} {it['template']} {it['code']}] {it['lint']}")
+    it = make_item(thread([AMZ("kindly cancel this order"), {"order_no": None, "reason": None, "raw": "Dear Customer, your order has been cancelled. Regards, Badeja Enterprises", "by": "seller"}, BUY("but I want a refund now")]), set())
+    okd = it["action"] != "SEND" or it["template"] != "T15"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "T15 is sent once: a follow-up after it is not answered with T15 again")
     it = make_item(ship("Mon, 28 Sept, 2026 IST", lang="Telugu", reason="telugu text the regexes cannot read"), set())
     okd = it["action"] == "ESCALATE" and it["code"] == "LANGUAGE" and "intent" in it["why"]
     fails += not okd; print(("PASS " if okd else "FAIL ") + "Telugu without an intent -> LANGUAGE escalate (agent must read it)")
@@ -819,6 +857,29 @@ def cmd_selftest() -> int:
     it = make_item(ship("Mon, 28 Sept, 2026 IST", lang="Telugu", reason="x", tags=["abuse"]), set())
     okd = it["code"] == "SENSITIVE"
     fails += not okd; print(("PASS " if okd else "FAIL ") + "intent [abuse] -> SENSITIVE, never answered")
+    # Sir 2026-10-21 round 4: thanks -> silent resolve, evidence received -> Sir, cancel confirmation
+    for txt, want in [("ok thanks", True), ("Thank you sir, product is working now", True), ("Received, thank you", True), ("ok but it is not working", False), ("thanks, refund please", False),
+                      ("no thanks", False), ("ok", True), ("", False), ("thanks for nothing, still no refund", False)]:
+        okd = is_thanks(txt) == want
+        fails += not okd; print(("PASS " if okd else "FAIL ") + f"is_thanks({txt!r}) == {want}")
+    it = make_item(thread([NR, ME, BUY("ok thanks")]), set())
+    okd = it["action"] == "RESOLVE" and it["code"] == "BUYER_THANKS" and it["text"] is None
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "buyer says thanks after our reply -> RESOLVE silently, no text")
+    it = make_item(thread([NR, ME, BUY("ok but still not received")]), set())
+    okd = it["action"] != "RESOLVE"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "thanks mixed with a complaint is never resolved silently")
+    it = make_item(thread([AMZ("ok thanks")]), set())
+    okd = it["action"] != "RESOLVE"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "a first contact (Amazon forward) is never auto-resolved")
+    c5 = PRE("what is the price"); c5["messages"] = [{"order_no": None, "reason": None, "raw": "what is the price", "by": "buyer"}, {"order_no": None, "reason": None, "raw": "Dear Customer, thanks. Regards, Badeja Enterprises", "by": "seller"}, {"order_no": None, "reason": None, "raw": "ok thank you", "by": "buyer"}]
+    it = make_item(c5, set()); okd = it["action"] == "RESOLVE"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "pre-sales thread: thanks after our generic reply -> RESOLVE")
+    it = make_item(thread([AMZ("display not working"), ME, BUY("Here are the photos and the video of the problem")]), set())
+    okd = it["action"] == "ESCALATE" and it["code"] == "EVIDENCE_RECEIVED" and it.get("alert") and "EVIDENCE RECEIVED" in it["sir_action"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"buyer sends photos / video after our request -> EVIDENCE_RECEIVED for Sir [{it['action']} {it['code']}]")
+    c6 = thread([AMZ("display not working"), ME, {"order_no": None, "reason": None, "raw": "", "by": "buyer", "attachments": 2}])
+    it = make_item(c6, set()); okd = it["code"] == "EVIDENCE_RECEIVED"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "a message with attachments and no text -> EVIDENCE_RECEIVED")
     _support_override = None
     return 1 if fails else 0
     _support_override = None
