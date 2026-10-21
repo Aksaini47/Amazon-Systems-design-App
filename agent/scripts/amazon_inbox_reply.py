@@ -54,7 +54,7 @@ TEMPLATES = {
     # Sir 2026-10-20: defective product inside the return/replacement window (7 days from the courier delivery date): photos here first, then a replacement request in Amazon.
     # Replacements and refunds are raised and processed by Amazon and the buyer, never by us; policy = steer to a replacement ONLY, even when the buyer asked for a refund (Sir 2026-10-21).
     "T9": {"name": "defect inside the return/replacement window: share received-product + defect photos here, then raise a replacement request", "resolve": False,
-           "en": "Dear Customer,\nRegarding order {order_no}: we are sorry about the issue with the product. To investigate your request, please share here in this chat clear photos of the product you received (with the packaging label visible) and clear photos or a video that show the problem.\nAfter sharing them, please raise a replacement request for this order from Your Orders in your Amazon account. Replacement requests are raised and processed through Amazon.\n" + SIGN["en"]},
+           "en": "Dear Customer,\nRegarding order {order_no}: we are sorry about the issue with the product. To investigate your request, please share here in this chat clear photos of the product you received (with the packaging label visible), clear photos of all sides of the product, and a video that shows the problem (an unboxing video for a missing, wrong or damaged item).\nAfter sharing them, please raise a replacement request for this order from Your Orders in your Amazon account. Replacement requests are raised and processed through Amazon.\nPlease note that a replacement is available only for a defect on arrival. The warranty does not apply once the screen has been pasted or fitted on the device, or if the warranty protection film or sticker has been removed.\n" + SIGN["en"]},
     # Sir 2026-10-21: defect/refund asked AFTER the 7-day window -> WhatsApp support (number lives in samvaad_state.json "support_whatsapp", not in code; remove the key = kill switch,
     # the case then escalates as WINDOW_CROSSED). Amazon G1701 bans phone numbers / moving buyers off Amazon: Sir's own risk decision.
     "T10": {"name": "defect/refund asked after the return/replacement window: point to WhatsApp support (Sir's risk decision)", "resolve": False, "alert": True,
@@ -68,7 +68,12 @@ TEMPLATES = {
     # Sir 2026-10-21: change-of-mind return ('I no longer want the item') on a delivered order -> policy reply. Policy text = Sir's own wording (7 days replacement for defects on arrival, warranty conditions).
     "T13": {"name": "change of mind on a delivered order: return policy", "resolve": False,
             "en": "Dear Customer,\nRegarding order {order_no}: as per our return policy, a replacement is available only for a defect on arrival, reported within 7 days of delivery. Returns or refunds for reasons such as a change of mind are not accepted. The warranty does not apply once the screen has been pasted or fitted on the device, or if the warranty protection film or sticker has been removed.\n" + SIGN["en"]},
+    # Sir 2026-10-21: refused / undelivered shipment on its way back (RTO): tell the buyer the status; Sir gets a refund card (Samvaad never refunds). Guardrails: tracker order-id match,
+    # RTO state, no conflicting scans, no refund yet. Sir monitors the first orders; whether this ever becomes more automatic is his decision.
+    "T14": {"name": "RTO (refused / undelivered): courier status for the buyer, refund card for Sir", "resolve": False, "alert": True,
+            "en": "Dear Customer,\nRegarding order {order_no}: the shipment ({carrier}, tracking ID {awb}) could not be delivered and {rto_verb} to the seller (return to origin, RTO). Current courier status: {rto_status}. The refund will be processed against this return to origin.\n" + SIGN["en"]},
 }
+T14_MARKS = ("could not be delivered and",)
 T7_MARKS = ("Delivery was recorded on",)         # a seller message containing one of these = T7 already sent in this thread
 T11_MARKS = ("has already been issued",)         # T11 already sent in this thread
 
@@ -126,8 +131,8 @@ def lint(text: str, facts: dict | None = None, template: str | None = None, lang
         if re.search(pat, text, re.I):
             errs.append(f"banned wording /{pat}/")
     has_refund = bool((facts.get("order_page") or {}).get("refunds"))
-    if re.search(r"refund", text, re.I) and not (template in ("T1", "T13") or (template in ("T5", "T11") and has_refund)):
-        errs.append("refund wording only allowed in T1 / T13 (policy) and in T5 / T11 with a refund on the order page")
+    if re.search(r"refund", text, re.I) and not (template in ("T1", "T13", "T14") or (template in ("T5", "T11") and has_refund)):
+        errs.append("refund wording only allowed in T1 / T13 / T14 (policy, RTO) and in T5 / T11 with a refund on the order page")
     if facts:
         allowed = _fact_numbers(facts)
         if template == "T10" and support_number():
@@ -174,7 +179,7 @@ REFUND = re.compile(r"refund|money back|paise|पैसे|रिफंड", re.
 RETURNED = re.compile(r"already returned|returned the|return(ed)? (the )?(item|product|order)|self[- ]?return|return (picked|pick ?up|delivered|reached)|item return|वापस (कर|भेज)", re.I)
 NOTREC = re.compile(r"not (yet )?(received|recieved|delivered|come|arrived)|undeliver|did(n.?t| not) (get|receive|recieve)|haven.?t (got|received)|mark(ed)? (as )?delivered|showing delivered|shows delivered|never received|नहीं मिला", re.I)
 DELAY = re.compile(r"delay|\blate\b|where is|when (will|can|i will)|how long|\bstatus\b|\btrack|कब (तक|मिलेगा)", re.I)
-DEFECT = re.compile(r"defect|damag|not working|broken|dead|not starting|wrong (item|product|size|model)|not what i ordered|display (is )?not|touch (is )?not|crack|खराब|टूट", re.I)
+DEFECT = re.compile(r"defect|damag|not working|broken|dead|not starting|wrong (item|product|size|model)|not what i ordered|display (is )?not|touch (is )?not|crack|खराब|टूट|item (is )?missing|missing (item|part)|incomplete|short (item|piece)", re.I)
 ABUSE = re.compile(r"\bpolice\b|\blegal\b|\blawyer\b|\bcourt\b|consumer (forum|court)|\bfraud|\bcheat|\bscam|\ba[\s-]?to[\s-]?z\b|\bharass|complaint (against|to)|action against|\bsue\b|\bsuing\b", re.I)
 
 
@@ -263,6 +268,9 @@ def render(tid: str, lang: str, facts: dict) -> str:
     f["loc_en"] = f", last scan location: {loc}" if loc else ""
     f["t1_tail"] = (" If you have a concern about the product, please share the details in this chat so that we can look into it." if st == "DELIVERED" else
                     " Please accept the shipment, or refuse it at the time of delivery. The refund will be processed once the return to origin (RTO) has been initiated and the shipment is in transit back to us.")
+    rto_d = fmt_date((tr.get("latest") or {}).get("at"))
+    f["rto_verb"] = "was returned" if st == "RTO_RECEIVED" else "is being returned"
+    f["rto_status"] = (f"returned to the seller on {rto_d}" if st == "RTO_RECEIVED" else f"in transit back to the seller, last updated on {rto_d}")
     f["whatsapp"] = support_number() or ""
     f["ver_en"] = " The courier's record shows this delivery as verified." if tr.get("delivery_verified") else ""
     text = TEMPLATES[tid]["en"].format(**f)
@@ -321,7 +329,13 @@ def decide(case: dict) -> dict:
         return esc("TRACKING_CONFLICT", "; ".join(tr["notes"]))
     if state in RTO:
         lt = tr.get("latest") or {}
-        return esc("REFUND_PENDING", f"RTO ({state}; customer refused / undelivered, last scan {lt.get('at')} {lt.get('remark')}) and no refund on the order page: refund is eligible, Sir issues it (Sir 2026-10-21: refund only for RTO, verified)", "S5")
+        card = (f"REFUND DUE (RTO, refund eligible): order {thread_order(msgs)} | Rs {op.get('grand_total') or '?'} | {op.get('carrier')} {op.get('tracking_id')} | RTO {state}, last scan {lt.get('at')} {lt.get('location')} ({lt.get('remark')}) | "
+                "guardrails OK: tracker order id matches, no conflicting scans, no refund on the order page | Sir: Seller Central > Manage Orders > open the order > Refund order (full refund, reason: customer refused / undelivered RTO)")
+        if any(mk in mine for mk in T14_MARKS):                                    # the buyer already has the status: only Sir's refund step is left
+            return {"scenario": "S5", "template": None, "action": "ESCALATE", "code": "REFUND_PENDING", "sir_action": card,
+                    "why": f"RTO {state}, buyer already told (T14), no refund on the order page yet: Sir issues the refund"}
+        return {"scenario": "S5", "template": "T14", "action": "SEND", "code": "RTO_STATUS_REFUND_DUE", "alert": True, "sir_action": card,
+                "why": f"RTO {state} (customer refused / undelivered): status to the buyer + refund card for Sir (Sir 2026-10-21; Samvaad never refunds)"}
     if "refundq" in t_last and not (t_last & {"defect"} or returned):
         return esc("REFUND_STATUS_QUERY", "buyer asks where a refund is (not a new product claim): Sir checks", "S5")
     if seller_replied and state == "DELIVERED" and "notrec" in t_last:             # delivery DISPUTE (Sir 2026-10-20): facts-only proof, once
@@ -427,6 +441,8 @@ def cmd_plan() -> int:
     (OUT / "plan.json").write_text(json.dumps({"generated_at": datetime.now().isoformat(timespec="seconds"), "checked_at": d.get("checked_at"), "state": st, "items": items}, ensure_ascii=False, indent=1), encoding="utf-8")
     for it in items:
         print(f"{it['name']:11s} | {it['order_no']} | {it['action']:8s} | {it['scenario']} {it['template'] or '--'} | {it['code']} | {it['why'][:90]}")
+        if it.get("sir_action"):
+            print("    >> SIR ACTION: " + it["sir_action"])
         if it["text"]:
             print("    " + it["text"].replace("\n", "\n    "))
     print(f"mode: auto_send={st['auto_send']} auto_resolve={st['auto_resolve']} | SEND={sum(i['action']=='SEND' for i in items)} ESCALATE={sum(i['action']=='ESCALATE' for i in items)} SKIP={sum(i['action']=='SKIP' for i in items)}")
@@ -596,7 +612,7 @@ def cmd_selftest() -> int:
            ("cancel + not moving -> escalate", case("cancel", "NOT_MOVING"), None), ("where is my order + in transit -> T3", case("when will I get my package", "IN_TRANSIT"), "T3"),
            ("delay + not moving -> T2", case("order is too delay", "NOT_MOVING"), "T2"), ("not received + delivered -> T6", case("customer not received order but showing delivered", "DELIVERED"), "T6"),
            ("defective + delivered verified, inside window -> T9", case("received a defective product", "DELIVERED"), "T9"), ("defective + delivered unverified -> escalate", case("received a defective product", "DELIVERED", verified=False), None),
-           ("refund + RTO, no refund yet -> escalate", case("want refund", "RTO_RECEIVED"), None), ("refund + refund on page -> T5", case("want refund", "RTO_RECEIVED", refunds=[999.0]), "T5"),
+           ("refund + RTO, no refund yet -> T14 (status + refund card for Sir)", case("want refund", "RTO_RECEIVED"), "T14"), ("refund + refund on page -> T5", case("want refund", "RTO_RECEIVED", refunds=[999.0]), "T5"),
            ("legal wording -> escalate", case("customer will send a lawyer notice", "DELIVERED"), None), ("A to Z claim -> escalate", case("A to Z claim filed", "DELIVERED"), None),
            ("tracking conflict -> escalate", case("cancel", "DELIVERED", notes=["refusal scan"]), None), ("Hindi-locale cancel + in transit -> English T1", case("cancel", "IN_TRANSIT", lang="Hindi"), "T1"),
            ("language Tamil -> escalate", case("cancel", "IN_TRANSIT", lang="Tamil"), None), ("no order page -> escalate", case("cancel", "IN_TRANSIT", order_page=False), None),
@@ -706,8 +722,23 @@ def cmd_selftest() -> int:
     c3 = case("want refund", "DELIVERED"); c3["messages"][0]["return_requested"] = "Yes"
     it = make_item(c3, set()); okd = it["action"] == "ESCALATE" and it["code"] == "RETURN_CLAIM_UNVERIFIED"
     fails += not okd; print(("PASS " if okd else "FAIL ") + "'Return requested: Yes' on the Amazon forward -> customer return, escalate")
-    rto = make_item(case("want refund", "RTO_IN_TRANSIT"), set()); okd = rto["code"] == "REFUND_PENDING" and "refund is eligible" in rto["why"]
-    fails += not okd; print(("PASS " if okd else "FAIL ") + "RTO (customer refused) without refund -> REFUND_PENDING, refund eligible")
+    rto = make_item(case("want refund", "RTO_IN_TRANSIT"), set())
+    okd = (rto["action"] == "SEND" and rto["template"] == "T14" and rto["code"] == "RTO_STATUS_REFUND_DUE" and rto.get("alert") and not rto["lint"]
+           and "REFUND DUE" in rto["sir_action"] and "Refund order" in rto["sir_action"] and "in transit back to the seller" in rto["text"] and "Samvaad" not in rto["text"])
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"RTO in transit -> T14 + refund card [{rto['action']} {rto['template']} {rto['code']}] {rto['lint']}")
+    rto2 = make_item(case("want refund", "RTO_RECEIVED"), set()); okd = "returned to the seller on" in rto2["text"] and not rto2["lint"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "RTO received -> T14 says returned to the seller on <date>")
+    c4 = case("want refund", "RTO_RECEIVED"); c4["messages"] += [{"order_no": None, "reason": None, "raw": "Dear Customer, the shipment could not be delivered and was returned to the seller. Regards, Badeja Enterprises", "by": "seller"},
+                                                              {"order_no": None, "reason": None, "raw": "where is my refund", "by": "buyer"}]
+    it = make_item(c4, set()); okd = it["action"] == "ESCALATE" and it["code"] == "REFUND_PENDING" and "REFUND DUE" in it["sir_action"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "RTO already told (T14) and the buyer asks again -> escalate with the refund card only")
+    it = make_item(case("want refund", "RTO_RECEIVED", notes=["conflicting scan"]), set()); okd = it["action"] == "ESCALATE" and it["code"] == "TRACKING_CONFLICT"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "guardrail: RTO with a conflicting scan is never auto-answered")
+    it = make_item(case("The package arrived but an item is missing", "DELIVERED"), set())
+    okd = it["template"] == "T9" and "unboxing video" in it["text"] and "warranty protection film" in it["text"] and not it["lint"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"missing item inside the window -> T9 with unboxing video + warranty conditions [{it['action']} {it['template']} {it['code']}] {it['lint']}")
+    _support_override = None
+    return 1 if fails else 0
     _support_override = None
     return 1 if fails else 0
 

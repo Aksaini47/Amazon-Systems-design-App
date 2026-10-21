@@ -86,7 +86,7 @@ def parse_order_page(t: str) -> dict:
     return {"status": st.group(1) if st else None, "purchase_date": g(r"Purchase date:\s*([^\n]+)"), "ship_by": g(r"Ship by:\s*([^\n]+)"),
             "deliver_by": g(r"Deliver by:\s*([^\n]+)"), "carrier": g(r"\nCarrier\s*\n([^\n]+)"), "tracking_id": g(r"\nTracking ID\s*\n([^\n]+)"),
             "ship_date": g(r"\nShip date\s*\n([^\n]+)"), "refunds": refunds, "title": title, "sku": g(r"SKU:\s*(\S+)"), "asin": g(r"ASIN:\s*(\S+)"),
-            "ship_to_name": g(r"Ship to\s*\n([^\n]+)"), "contact_buyer": g(r"Contact Buyer:\s*([^\n]+)")}
+            "grand_total": g(r"Grand total:\s*₹\s*([\d,]+(?:\.\d+)?)"), "ship_to_name": g(r"Ship to\s*\n([^\n]+)"), "contact_buyer": g(r"Contact Buyer:\s*([^\n]+)")}
 
 
 def collect_facts(p, case: dict) -> dict:
