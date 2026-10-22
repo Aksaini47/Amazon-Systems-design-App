@@ -78,7 +78,12 @@ TEMPLATES = {
     # Sir 2026-10-21 (Himani): a CUSTOMER return (Amazon return request) -> the buyer gets the return shipment's status; the refund is processed ONLY by Amazon (we are bound by Amazon's policy,
     # a refund we trigger forfeits SAFE-T). Neutral on purpose: no accusation, no promise, no word about the inspection result (a fake / wrong-item return stays between Sir and Amazon).
     "T16": {"name": "customer return: return shipment status + the refund is processed by Amazon only (Amazon Customer Support for the status)", "resolve": False, "alert": True,
-            "en": "Dear Customer,\nRegarding order {order_no}: {return_line}\nRefunds for customer returns are processed by Amazon in line with Amazon's return policy, so we cannot process or track this refund from our side. Please contact Amazon Customer Support by phone from the Customer Service section of your Amazon account to check the refund status.\n" + SIGN["en"]},
+            "en": "Dear Customer,\nRegarding order {order_no}: {return_line}\nRefunds for customer returns are processed by Amazon in line with Amazon's return policy, so we cannot process or track this refund from our side. Please contact Amazon Customer Support by phone from the Customer Service section of your Amazon account to check the refund status.{photo_line}\n" + SIGN["en"]},
+    # Sir 2026-10-22 round 5 (recommended options): pre-sales without an order, two specific questions. Honest wording only: our listings are COMPATIBLE replacement parts.
+    "T17": {"name": "pre-sales: is it original / OEM? honest listing-based answer, Sir alerted", "resolve": False, "alert": True,
+            "en": "Dear Customer,\nThank you for your enquiry. Our product is a compatible replacement display as described in the listing title and bullet points. We do not describe it as an OEM or original part. Please refer to the product listing for specifications and compatibility, and reply here with your phone brand and model name so that we can confirm availability.\n" + SIGN["en"]},
+    "T18": {"name": "pre-sales: price / discount / COD / bulk: as shown on the listing, Sir alerted", "resolve": False, "alert": True,
+            "en": "Dear Customer,\nThank you for your enquiry. Price and payment options are as shown on the product listing. We are unable to change them through messages.\n" + SIGN["en"]},
 }
 T16_MARKS = ("Refunds for customer returns are processed by Amazon",)
 T15_MARKS = ("your order has been cancelled",)
@@ -133,7 +138,7 @@ def lint(text: str, facts: dict | None = None, template: str | None = None, lang
     if PHONE_RE.search(stripped):
         errs.append("phone number")
     for pat in BANNED_EN:
-        if template in ("T9", "T10", "T13") and pat == r"\breplac":   # T9 guides the buyer to raise a replacement request, T10 names the ended window (promises stay banned)
+        if template in ("T9", "T10", "T13", "T17") and pat == r"\breplac":   # T9 guides the buyer to raise a replacement request, T10 names the ended window (promises stay banned)
             continue
         if template == "T10" and pat == r"\bwhatsapp":         # T10 only: Sir's WhatsApp-support rule (his risk decision)
             continue
@@ -196,11 +201,15 @@ ABUSE = re.compile(r"\bpolice\b|\blegal\b|\blawyer\b|\bcourt\b|consumer (forum|c
 REFUND_NOTREC = re.compile(r"(refund|रिफंड|paise|पैसे)[^.,\n]{0,25}\b(not|never|nahi)\b|\b(not|never|nahi)\b[^.,\n]{0,25}(receiv\w*|reciev\w*|got|मिला)[^.,\n]{0,12}(refund|रिफंड|paise|पैसे)", re.I)
 
 
+# Sir 2026-10-22 round 5: address / NDR problems, original-OEM questions, price / COD / discount / bulk questions
+ADDRESS_RX = re.compile(r"address|pin ?code|landmark|unable to deliver|undeliverable|\bndr\b|incorrect add|wrong add", re.I)
+PRICE_Q = re.compile(r"\b(cod|cash on delivery|discount|price|prise|cheaper|bulk|wholesale|best price|last price|rate|sasta|kam kar|offer)\b|कीमत|दाम", re.I)
+ORIG_Q = re.compile(r"\b(original|orignal|oem|genuine|copy|duplicate|first copy|og|branded)\b|ओरिजिनल", re.I)
 CHANGEMIND = re.compile(r"no longer (want|need)|don.?t (want|need)|do not (want|need)|changed my mind|change of mind|ordered by mistake|order(ed)? (it )?by mistake|not needed|no need now", re.I)
 
 
 def tags_of(text: str) -> set[str]:
-    tags = {n for n, rx in (("cancel", CANCEL), ("refund", REFUND), ("returned", RETURNED), ("notrec", NOTREC), ("delay", DELAY), ("defect", DEFECT), ("abuse", ABUSE), ("changemind", CHANGEMIND)) if rx.search(text or "")}
+    tags = {n for n, rx in (("cancel", CANCEL), ("refund", REFUND), ("returned", RETURNED), ("notrec", NOTREC), ("delay", DELAY), ("defect", DEFECT), ("abuse", ABUSE), ("changemind", CHANGEMIND), ("address", ADDRESS_RX)) if rx.search(text or "")}
     if REFUND_NOTREC.search(text or ""):
         tags.discard("notrec")
         tags.add("refundq")                                    # a question about a refund's status, not a new product claim
@@ -232,7 +241,7 @@ def thread_order(msgs: list[dict]) -> str | None:
 
 
 INTENT_F = OUT / "intent_overrides.json"
-VALID_TAGS = {"cancel", "refund", "refundq", "returned", "notrec", "delay", "defect", "changemind", "abuse"}
+VALID_TAGS = {"cancel", "refund", "refundq", "returned", "notrec", "delay", "defect", "changemind", "address", "abuse"}
 
 
 def load_intents() -> dict:
@@ -318,6 +327,7 @@ def render(tid: str, lang: str, facts: dict) -> str:
         f["return_line"] = f"your return shipment (tracking ID {pick.get('tracking_id')}) was delivered to us on {fmt_date(pick.get('last_event')) or 'the date shown in the tracking'}."
     else:
         f["return_line"] = f"your return shipment (tracking ID {pick.get('tracking_id')}) currently shows the status: {pick.get('tracking_status')}."
+    f["photo_line"] = "" if (pick and (pick.get("tracking_status") or "").lower() == "delivered") else " To process your return request, please also share here clear photos of the product you are returning (all four sides) and of the shipping box."
     f["whatsapp"] = support_number() or ""
     f["ver_en"] = " The courier's record shows this delivery as verified." if tr.get("delivery_verified") else ""
     text = TEMPLATES[tid]["en"].format(**f)
@@ -358,6 +368,14 @@ def decide(case: dict) -> dict:
             return esc("FOLLOWUP_NEEDS_SIR", "buyer replied to our pre-sales answer: Sir reads it", "S6")
         if not msg_text(buyer_msgs[-1]).strip() or subj.startswith(("update from seller", "important update")):
             return esc("PRESALES_OR_NO_ORDER", "no order and no readable question (seller-initiated / empty forward): Sir decides", "S6")
+        pt = msg_text(buyer_msgs[-1])
+        is_price, is_orig = bool(PRICE_Q.search(pt)), bool(ORIG_Q.search(pt))
+        if is_price and not is_orig:
+            return {"scenario": "S6", "template": "T18", "action": "SEND", "code": "PRESALES_PRICE", "alert": True,
+                    "why": "pre-sales price / discount / COD / bulk question (Sir 2026-10-22): price and payment are as shown on the listing, Sir is alerted"}
+        if is_orig and not is_price:
+            return {"scenario": "S6", "template": "T17", "action": "SEND", "code": "PRESALES_ORIGINAL", "alert": True,
+                    "why": "pre-sales original / OEM / quality question (Sir 2026-10-22): honest compatible-replacement answer, Sir is alerted"}
         return {"scenario": "S6", "template": "T12", "action": "SEND", "code": "PRESALES_GENERIC", "alert": True,
                 "why": "pre-sales question without an order (Sir 2026-10-21): generic reply, Sir is alerted to answer the specifics"}
     op, tr = facts.get("order_page"), facts.get("tracking")
@@ -413,6 +431,12 @@ def decide(case: dict) -> dict:
             return esc("DELIVERY_UNVERIFIED", "dispute but the tracker has no delivery time", "S11")
         return {"scenario": "S11", "template": "T7", "action": "SEND", "code": "DELIVERY_DISPUTE_PROOF", "alert": True, "proof": True,
                 "why": "buyer disputes a delivered shipment: text-only courier facts, tracker screenshot saved for Sir (Sir 2026-10-20), Sir is alerted"}
+    if "address" in t_last and not t_last & {"cancel", "defect"}:                  # Sir 2026-10-22: NDR / address problems are Sir's (Nimbus NDR), no buyer reply
+        lt = (tr or {}).get("latest") or {}
+        card = (f"ADDRESS / NDR: order {thread_order(msgs)} | {op.get('carrier')} {op.get('tracking_id')} tracker {state}, last scan {lt.get('at')} {lt.get('location')} ({lt.get('remark')}) | "
+                f"the buyer / Amazon says: {msg_text(buyer_msgs[-1])[:170]} | Sir: Nimbus > NDR (ship.nimbuspost.com/ndr), open the AWB and re-attempt or update the address with the courier. No reply is sent to the buyer.")
+        return {"scenario": "S11", "template": None, "action": "ESCALATE", "code": "ADDRESS_NDR", "alert": True, "sir_action": card,
+                "why": "address / delivery-attempt problem: Sir handles it in Nimbus NDR (Sir 2026-10-22)"}
     if seller_replied and (buyer_msgs[-1].get("attachments") or PHOTO_WORDS.search(msg_text(buyer_msgs[-1]))):
         return {"scenario": "S4", "template": None, "action": "ESCALATE", "code": "EVIDENCE_RECEIVED", "alert": True,
                 "sir_action": f"EVIDENCE RECEIVED: order {thread_order(msgs)}: the buyer sent photos / a video after our request. Open the case, review them; the replacement request is raised by the buyer in Amazon (Sir 2026-10-21).",
@@ -920,6 +944,30 @@ def cmd_selftest() -> int:
     c10 = thread([AMZ("issue"), ME, BUY("i already returned the item but no refund")]); c10["facts"]["returns"] = c7["facts"]["returns"]
     it = make_item(c10, set()); okd = it["template"] == "T16"
     fails += not okd; print(("PASS " if okd else "FAIL ") + "Himani-style follow-up (already returned, no refund) with return facts -> T16")
+    # Sir 2026-10-22 round 5
+    for txt, tpl, code in [("Kya aapke pass oppo reno 10 pro ki display original available h", "T17", "PRESALES_ORIGINAL"), ("looking for J7 Max OG display, the copy display is small", "T17", "PRESALES_ORIGINAL"),
+                           ("COD at my pincode please", "T18", "PRESALES_PRICE"), ("pehle price 3000 thi ab badha di, wapis same price kijiye", "T18", "PRESALES_PRICE"), ("bulk order discount do", "T18", "PRESALES_PRICE"),
+                           ("original display ka price kya hai", "T12", "PRESALES_GENERIC"), ("do you have Redmi Note 10 display", "T12", "PRESALES_GENERIC")]:
+        it = make_item(PRE(txt), set())
+        okd = it["template"] == tpl and it["code"] == code and it.get("alert") and not it["lint"]
+        fails += not okd; print(("PASS " if okd else "FAIL ") + f"pre-sales {txt[:44]!r} -> {tpl} [{it['template']} {it['code']}] {it['lint']}")
+    it = make_item(PRE("is it original"), set()); okd = "compatible replacement display" in it["text"] and "do not describe it as an OEM" in it["text"] and "http" not in it["text"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "T17 text is honest: compatible replacement, not OEM")
+    it = make_item(PRE("discount"), set()); okd = "unable to change them through messages" in it["text"] and "discount" not in it["text"].lower().replace("price and payment", "")
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "T18 text promises no discount / COD")
+    cn = thread([AMZ("BLUE DART unable to deliver customer product as you have given incorrect address, kindly contact the courier")], state="EXCEPTION")
+    it = make_item(cn, set()); okd = it["action"] == "ESCALATE" and it["code"] == "ADDRESS_NDR" and "Nimbus > NDR" in it["sir_action"] and it.get("alert") and it["text"] is None
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"address / NDR -> escalate with the NDR card, no reply [{it['action']} {it['code']}]")
+    it = make_item(thread([AMZ("The entire package is missing and my address has changed")], state="IN_TRANSIT"), set()); okd = it["code"] == "ADDRESS_NDR"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "'my address has changed' -> ADDRESS_NDR")
+    it = make_item(thread([AMZ("please cancel, wrong address given")], state="NOT_MOVING"), set()); okd = it["code"] != "ADDRESS_NDR"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "a cancel request that mentions the address stays a cancel (not NDR)")
+    cr = case("Item return kindly refund asap", "DELIVERED"); cr["facts"]["returns"] = [{"requested": "24 Sep 2026", "state": "Pending refund", "reason": "x", "carrier": "ATS", "tracking_id": "515245263825", "tracking_status": "Package delayed in transit", "last_event": "Sep 28, 2026 10:30:00 PM"}]
+    it = make_item(cr, set()); okd = it["template"] == "T16" and "all four sides" in it["text"] and "shipping box" in it["text"] and not it["lint"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"T16 asks for 4-side photos + shipping box while the return parcel is not back [{it['template']}] {it['lint']}")
+    cr2 = case("Item return kindly refund asap", "DELIVERED"); cr2["facts"]["returns"] = [{"requested": "24 Sep 2026", "state": "Pending refund", "reason": "x", "carrier": "ATS", "tracking_id": "515245263825", "tracking_status": "Delivered", "last_event": "Oct 06, 2026 09:04:27 PM Pataudi"}]
+    it = make_item(cr2, set()); okd = it["template"] == "T16" and "all four sides" not in it["text"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "T16 does not ask for photos once the return parcel was delivered back")
     _support_override = None
     return 1 if fails else 0
     _support_override = None
