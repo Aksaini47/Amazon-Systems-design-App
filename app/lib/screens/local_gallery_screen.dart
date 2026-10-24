@@ -1579,10 +1579,25 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
       }
     }
 
+    // The sub-reason stored under the current main reason — only one that
+    // belongs to it counts (a stale or legacy value under another verdict, e.g.
+    // the old DAMAGED + DIFFERENT pair, is not shown as a pick).
+    QCSubReason? currentSub;
+    final storedSubNames = meta?['qc_sub_reasons'];
+    if (storedSubNames is List && currentVerdict != null) {
+      for (final r in currentVerdict.subReasonChoices) {
+        if (storedSubNames.contains(r.name)) {
+          currentSub = r;
+          break;
+        }
+      }
+    }
+
     final orderCtrl = TextEditingController(text: bareId);
     final originalAwb = (meta?['awb'] as String? ?? '').trim();
     final awbCtrl = TextEditingController(text: originalAwb);
     QCVerdict? selectedVerdict = currentVerdict;
+    QCSubReason? selectedSub = currentSub;
     final originalStartedAt =
         DateTime.tryParse(meta?['session_started_at'] as String? ?? '') ?? DateTime.now();
     DateTime selectedStartedAt = originalStartedAt;
@@ -1611,6 +1626,16 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
               final rtAwbBlocked = mode == CaptureMode.rt &&
                   awbCtrl.text.trim() != originalAwb &&
                   !awbAllowsSave(mode, awbCtrl.text);
+              // Sub-reasons exist only under DAMAGED and DIFFERENT. Moving an
+              // order to one of them needs a pick (the old sub-reason belongs
+              // to another main reason); an untouched legacy order without
+              // one can still be edited.
+              final subChoices = mode == CaptureMode.rt
+                  ? (selectedVerdict?.subReasonChoices ?? const <QCSubReason>[])
+                  : const <QCSubReason>[];
+              final subMissing = subChoices.isNotEmpty &&
+                  selectedSub == null &&
+                  selectedVerdict != currentVerdict;
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1702,10 +1727,38 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                         return RfChip(
                           label: v.name,
                           active: active,
-                          onPressed: () => setSheetState(() => selectedVerdict = v),
+                          onPressed: () => setSheetState(() {
+                            selectedVerdict = v;
+                            // A sub-reason follows its main reason only.
+                            if (!v.subReasonChoices.contains(selectedSub)) selectedSub = null;
+                          }),
                         );
                       }).toList(),
                     ),
+                    if (subChoices.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      const Text('Sub-reason', style: TextStyle(color: RfColors.textSecondary, fontSize: 12)),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: subChoices.map((r) {
+                          return RfChip(
+                            label: r.shortLabel,
+                            active: selectedSub == r,
+                            onPressed: () => setSheetState(() => selectedSub = r),
+                          );
+                        }).toList(),
+                      ),
+                      if (subMissing)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 6),
+                          child: Text(
+                            'Pick a sub-reason to save',
+                            style: TextStyle(color: RfColors.warning, fontSize: 12),
+                          ),
+                        ),
+                    ],
                   ],
                   const SizedBox(height: 20),
                   Row(
@@ -1720,7 +1773,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                       Expanded(
                         child: RfButton.service(
                           label: _savingEdit ? 'Saving...' : 'Save',
-                          onPressed: (_savingEdit || rtAwbBlocked)
+                          onPressed: (_savingEdit || rtAwbBlocked || subMissing)
                               ? null
                               : () async {
                                   setSheetState(() => _savingEdit = true);
@@ -1730,6 +1783,9 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                                       newBareOrderId: orderCtrl.text.trim(),
                                       awb: awbCtrl.text.trim(),
                                       verdict: mode == CaptureMode.rt ? selectedVerdict : null,
+                                      subReasons: mode == CaptureMode.rt && selectedSub != null
+                                          ? [selectedSub!]
+                                          : null,
                                       newSessionStartedAt: selectedStartedAt == originalStartedAt
                                           ? null
                                           : selectedStartedAt,

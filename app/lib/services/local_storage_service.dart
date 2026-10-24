@@ -885,7 +885,7 @@ class LocalStorageService {
       debugPrint('Could not read existing meta.json: $e');
     }
 
-    final merged = _mergeSession(existing, session);
+    final merged = mergeSession(existing, session);
     final encoder = const JsonEncoder.withIndent('  ');
 
     // Safely write meta.json with fallback
@@ -898,6 +898,7 @@ class LocalStorageService {
         orderId: session.orderId,
         awb: session.awb,
         qc: session.verdict?.name,
+        qcSub: session.verdict?.logSubReasons(session.subReasons),
         extra: {'folder': folder.path},
       );
     } catch (e) {
@@ -1080,14 +1081,21 @@ class LocalStorageService {
     }
   }
 
-  /// Update saved order metadata — order ID, AWB, RT QC verdict, capture
-  /// timestamp. Renames folder + files when order ID changes. Returns new
-  /// folder path.
+  /// Update saved order metadata — order ID, AWB, RT QC verdict (+ its
+  /// sub-reason), capture timestamp. Renames folder + files when order ID
+  /// changes. Returns new folder path.
+  ///
+  /// [subReasons] null leaves the stored sub-reason alone — unless [verdict]
+  /// changes the main reason, in which case only a sub-reason that belongs to
+  /// the NEW main reason survives ([QCVerdict.keepValidSubReasons]). So
+  /// turning DAMAGED into DIFFERENT never leaves "heavily damaged" behind, and
+  /// OK / DAMAGED + DIFFERENT end up with none.
   Future<String> updateOrderMetadata({
     required String folderKey,
     required String newBareOrderId,
     String? awb,
     QCVerdict? verdict,
+    List<QCSubReason>? subReasons,
     DateTime? newSessionStartedAt,
   }) async {
     final trimmed = newBareOrderId.trim();
@@ -1158,10 +1166,19 @@ class LocalStorageService {
 
     final normalizedAwb = awb?.trim();
     final previousStartedAt = session.sessionStartedAt;
+    final newVerdict = mode == CaptureMode.rt ? (verdict ?? session.verdict) : session.verdict;
+    // Untouched legacy data stays as it is; sub-reasons are only reconciled
+    // when this edit changed the main reason or picked a sub-reason itself.
+    final reconcileSubs = newVerdict != null &&
+        mode == CaptureMode.rt &&
+        (subReasons != null || newVerdict != session.verdict);
     final updated = session.copyWith(
       orderId: safeNewId,
       awb: (normalizedAwb == null || normalizedAwb.isEmpty) ? null : normalizedAwb,
-      verdict: mode == CaptureMode.rt ? (verdict ?? session.verdict) : session.verdict,
+      verdict: newVerdict,
+      subReasons: reconcileSubs
+          ? newVerdict.keepValidSubReasons(subReasons ?? session.subReasons)
+          : null,
       sessionStartedAt: newSessionStartedAt,
     );
     await writeMetaJson(updated);
@@ -1172,6 +1189,7 @@ class LocalStorageService {
       orderId: safeNewId,
       awb: updated.awb,
       qc: updated.verdict?.name,
+      qcSub: updated.verdict?.logSubReasons(updated.subReasons),
       extra: {
         'folder': targetFolder.path,
         'previousId': oldBareId,
@@ -1186,7 +1204,8 @@ class LocalStorageService {
   }
 
   /// Merge partial session into existing meta.
-  Map<String, dynamic> _mergeSession(Map<String, dynamic> existing, CaptureSession session) {
+  @visibleForTesting
+  Map<String, dynamic> mergeSession(Map<String, dynamic> existing, CaptureSession session) {
     final mode = session.mode.name.toUpperCase();
 
     final merged = Map<String, dynamic>.from(existing);
@@ -1229,17 +1248,25 @@ class LocalStorageService {
       merged['verdict'] = session.verdict!.name;
       merged['qc_reason_label'] = session.verdict!.label;
       merged['claim_trigger'] = session.verdict!.triggersClaim;
-    }
 
-    // Sub-reason was being picked in the verdict sheet, carried all the way
-    // into this CaptureSession, and then dropped silently right here — meta
-    // files never had it even though the whole flow upstream behaved as if
-    // they would. Amazon's SAFE-T claim-form wording is included alongside
-    // the raw enum names, same as qc_reason_label above, for direct use
-    // when filing a claim without decoding anything.
-    if (session.subReasons.isNotEmpty) {
-      merged['qc_sub_reasons'] = session.subReasons.map((r) => r.name).toList();
-      merged['qc_sub_reason_labels'] = session.subReasons.map((r) => r.label).toList();
+      // Sub-reason was being picked in the verdict sheet, carried all the way
+      // into this CaptureSession, and then dropped silently right here — meta
+      // files never had it even though the whole flow upstream behaved as if
+      // they would. Amazon's SAFE-T claim-form wording is included alongside
+      // the raw enum names, same as qc_reason_label above, for direct use
+      // when filing a claim without decoding anything.
+      //
+      // Written WITH the verdict and replaced with it: the main reason and its
+      // sub-reason always describe the same decision. An empty list removes
+      // the keys instead of leaving an earlier verdict's sub-reason behind
+      // (DAMAGED edited to OK used to keep "heavily damaged").
+      if (session.subReasons.isNotEmpty) {
+        merged['qc_sub_reasons'] = session.subReasons.map((r) => r.name).toList();
+        merged['qc_sub_reason_labels'] = session.subReasons.map((r) => r.label).toList();
+      } else {
+        merged.remove('qc_sub_reasons');
+        merged.remove('qc_sub_reason_labels');
+      }
     }
 
     if (session.productTitle != null) {

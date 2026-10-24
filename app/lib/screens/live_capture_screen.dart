@@ -535,6 +535,7 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
       orderId: _session.orderId,
       awb: _session.awb,
       qc: verdict?.name,
+      qcSub: verdict?.logSubReasons(_session.subReasons),
       extra: extra,
     );
   }
@@ -1602,10 +1603,12 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
     _session.verdict = verdictResult.verdict;
     _session.subReasons = verdictResult.subReasons;
+    // The main reason and its sub-reason ride on every line as qc= / qc_sub=
+    // (see _logActivity); the verdict line adds the readable wording of both.
     _logActivity('qc_verdict', extra: {
-      'qc': verdictResult.verdict.name,
-      if (verdictResult.subReasons.isNotEmpty)
-        'qc_sub': verdictResult.subReasons.map((r) => r.name).join('+'),
+      'qc_label': verdictResult.verdict.label,
+      if (verdictResult.verdict.logSubReasons(verdictResult.subReasons).isNotEmpty)
+        'qc_sub_label': verdictResult.subReasons.map((r) => r.label).join(' + '),
     });
 
     // Non-OK: claim photos first, on the camera the verdict sheet kept alive.

@@ -29,6 +29,36 @@ enum QCVerdict {
         QCVerdict.damagedDifferent => 'Item received damaged and different from what was sent',
         QCVerdict.emptyBox => 'Empty box received',
       };
+
+  /// The sub-reasons asked under this main reason. Only DAMAGED and
+  /// DIFFERENT have any — OK, EMPTY BOX and the combined [damagedDifferent]
+  /// never ask for one: sub-reasons live inside "damaged" and "different"
+  /// and nowhere else (Sir, 2026-10-24; the combined verdict used to ask the
+  /// damaged family first, then the different family).
+  List<QCSubReason> get subReasonChoices => switch (this) {
+        QCVerdict.damaged => QCSubReason.damagedFamily,
+        QCVerdict.different => QCSubReason.differentFamily,
+        _ => const [],
+      };
+
+  /// [picked] reduced to what may be stored with this main reason: a
+  /// sub-reason survives only if it belongs to it, so "heavily damaged" can
+  /// never ride along with DIFFERENT or with the combined verdict. EMPTY BOX
+  /// keeps its auto-assigned "Empty box received" (it is Amazon's claim-form
+  /// wording and meta.json has always carried it).
+  List<QCSubReason> keepValidSubReasons(List<QCSubReason> picked) {
+    if (this == QCVerdict.emptyBox) return const [QCSubReason.emptyBoxReceived];
+    final choices = subReasonChoices;
+    return [for (final r in picked) if (choices.contains(r)) r];
+  }
+
+  /// Sub-reason text for the activity-log txt, written right after
+  /// `qc=<main reason>` as `qc_sub=…` so every line names the main reason AND
+  /// its sub-reason together. Empty for a main reason that has none (EMPTY
+  /// BOX's auto-assigned sub-reason would only repeat the main reason).
+  String logSubReasons(List<QCSubReason> picked) => subReasonChoices.isEmpty
+      ? ''
+      : keepValidSubReasons(picked).map((r) => r.name).join('+');
 }
 
 /// Sub-reason under a claim-triggering [QCVerdict] — wording is Amazon's
@@ -36,7 +66,8 @@ enum QCVerdict {
 /// form later without re-translating). Sir picked a filtered subset of
 /// Amazon's "damaged/used" list (2026-09-12): only heavily-damaged,
 /// minor-damage, mildly-used, heavily-used — "packaging only damaged" and
-/// "open seal" were deliberately dropped.
+/// "open seal" were deliberately dropped. Which main reason owns which
+/// sub-reason: see [QCVerdict.subReasonChoices].
 enum QCSubReason {
   // ── "I received damaged/ used item" family ──────────────────────────
   heavilyDamaged,
@@ -63,6 +94,18 @@ enum QCSubReason {
         QCSubReason.differentItem => 'Different item received',
         QCSubReason.counterfeitItem => 'Fake/ replica/ counterfeit item received',
         QCSubReason.emptyBoxReceived => 'Empty box received',
+      };
+
+  /// Short card title — the same wording on the QC verdict sheet and in the
+  /// gallery edit sheet.
+  String get shortLabel => switch (this) {
+        QCSubReason.heavilyDamaged => 'HEAVILY DAMAGED',
+        QCSubReason.minorDamage => 'MINOR DAMAGE',
+        QCSubReason.mildlyUsed => 'MILDLY USED',
+        QCSubReason.heavilyUsed => 'HEAVILY USED',
+        QCSubReason.differentItem => 'DIFFERENT ITEM',
+        QCSubReason.counterfeitItem => 'COUNTERFEIT / FAKE',
+        QCSubReason.emptyBoxReceived => 'EMPTY BOX',
       };
 
   static const damagedFamily = [heavilyDamaged, minorDamage, mildlyUsed, heavilyUsed];

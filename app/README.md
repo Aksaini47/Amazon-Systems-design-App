@@ -10,10 +10,16 @@ on the phone (backend sync was removed in 2.0.0 patch 8).
 - **PK** — scan the order label (barcode/OCR) → record packing video →
   front/back photos → saved to `{orderId}-PK/`.
 - **RT** — record unpacking → QC verdict (OK / DAMAGED / DIFFERENT /
-  DAMAGED + DIFFERENT) → claim photos when the verdict is not OK (return label
-  first, as the parcel is unpacked) → scan the return label (Order ID + a
-  12-digit AWB — an RT order is not saved without one) →
+  DAMAGED + DIFFERENT / EMPTY BOX) → claim photos when the verdict is not OK
+  (return label first, as the parcel is unpacked) → scan the return label
+  (Order ID + a 12-digit AWB — an RT order is not saved without one) →
   saved to `{orderId}-RT/` with `claim_trigger` in `meta.json`.
+  Sub-reasons (Amazon's SAFE-T wording) exist only inside DAMAGED (heavily
+  damaged / minor damage / mildly used / heavily used) and DIFFERENT
+  (different item / counterfeit); DAMAGED + DIFFERENT, OK and EMPTY BOX ask
+  none. The main reason and its sub-reason are written together — `qc=` +
+  `qc_sub=` on every activity-log line, `verdict` + `qc_sub_reasons` in
+  `meta.json`.
 - Gallery: browse, edit, re-tag, pinch-zoom; drafts auto-recovered after a
   crash.
 

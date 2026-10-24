@@ -14,6 +14,53 @@ void main() {
     });
   });
 
+  // Sir, 2026-10-24: sub-reasons live inside "damaged" and "different" only —
+  // never under the combined DAMAGED + DIFFERENT, OK or EMPTY BOX.
+  group('QC sub-reasons belong to damaged / different only', () {
+    test('only damaged and different offer sub-reasons', () {
+      expect(QCVerdict.damaged.subReasonChoices, QCSubReason.damagedFamily);
+      expect(QCVerdict.different.subReasonChoices, QCSubReason.differentFamily);
+      expect(QCVerdict.damagedDifferent.subReasonChoices, isEmpty);
+      expect(QCVerdict.ok.subReasonChoices, isEmpty);
+      expect(QCVerdict.emptyBox.subReasonChoices, isEmpty);
+    });
+
+    test('keepValidSubReasons drops a sub-reason that belongs to another main reason', () {
+      const damagedPick = QCSubReason.heavilyDamaged;
+      const differentPick = QCSubReason.counterfeitItem;
+      expect(QCVerdict.damaged.keepValidSubReasons([damagedPick]), [damagedPick]);
+      expect(QCVerdict.damaged.keepValidSubReasons([differentPick]), isEmpty);
+      expect(QCVerdict.different.keepValidSubReasons([differentPick]), [differentPick]);
+      expect(QCVerdict.different.keepValidSubReasons([damagedPick]), isEmpty);
+      // The combined verdict carries none — not the damaged ones, not the different ones.
+      expect(QCVerdict.damagedDifferent.keepValidSubReasons([damagedPick, differentPick]), isEmpty);
+      expect(QCVerdict.ok.keepValidSubReasons([damagedPick]), isEmpty);
+    });
+
+    test('EMPTY BOX keeps only its auto-assigned sub-reason', () {
+      expect(QCVerdict.emptyBox.keepValidSubReasons(const []), [QCSubReason.emptyBoxReceived]);
+      expect(
+        QCVerdict.emptyBox.keepValidSubReasons([QCSubReason.minorDamage]),
+        [QCSubReason.emptyBoxReceived],
+      );
+    });
+
+    test('logSubReasons gives the picked sub-reason, and nothing for the others', () {
+      expect(QCVerdict.damaged.logSubReasons([QCSubReason.minorDamage]), 'minorDamage');
+      expect(QCVerdict.different.logSubReasons([QCSubReason.differentItem]), 'differentItem');
+      expect(QCVerdict.damagedDifferent.logSubReasons([QCSubReason.heavilyDamaged]), '');
+      expect(QCVerdict.ok.logSubReasons(const []), '');
+      // EMPTY BOX's auto sub-reason only repeats the main reason.
+      expect(QCVerdict.emptyBox.logSubReasons([QCSubReason.emptyBoxReceived]), '');
+    });
+
+    test('every sub-reason card has a short title', () {
+      for (final r in QCSubReason.values) {
+        expect(r.shortLabel, isNotEmpty);
+      }
+    });
+  });
+
   group('CaptureSession.toJson', () {
     CaptureSession session({QCVerdict? verdict}) => CaptureSession(
           orderId: '407-1234567-1234567',

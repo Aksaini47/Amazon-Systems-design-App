@@ -113,3 +113,12 @@ graphify-out/*.py
 # sensitive local state (OTP / telegram offsets, raw chat dumps containing credentials)
 agent/storage/
 **/_chat-migration-data/
+
+# Debug screenshots / network captures / payout exports: they show customer names, order IDs, AWBs and
+# seller payouts, and this repo is PUBLIC. Keep them on disk, never in git (Sir 2026-10-24).
+/*.png
+/*.jpg
+/*.jpeg
+*.har
+payouts_raw.json
+agent/archive/login-debug-scratch/*.png

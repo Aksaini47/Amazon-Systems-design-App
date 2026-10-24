@@ -152,6 +152,7 @@ class DraftSaveService {
       orderId: orderId,
       awb: awb,
       qc: verdict?.name,
+      qcSub: verdict?.logSubReasons(subReasons),
       extra: {'folder': orderFolder.path},
     );
 

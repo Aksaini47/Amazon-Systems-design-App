@@ -36,6 +36,45 @@ class ActivityLogService {
 
   static String _fileNameFor(DateTime dt) => 'activity_${_dayKey(dt)}.txt';
 
+  /// One activity line (no trailing newline), e.g.
+  /// `2026-10-24 11:02:09 | RT | order=402-… | awb=… | event=qc_verdict |
+  /// qc=damaged | qc_sub=heavilyDamaged`.
+  ///
+  /// [qc] is the main QC reason and [qcSub] its sub-reason, written as two
+  /// neighbouring `key=value` fields so a line always names both together.
+  /// Callers get [qcSub] from [QCVerdict.logSubReasons].
+  @visibleForTesting
+  static String formatLine({
+    required DateTime now,
+    required String event,
+    CaptureMode? mode,
+    String? orderId,
+    String? awb,
+    String? qc,
+    String? qcSub,
+    Map<String, String>? extra,
+  }) {
+    final ts = '${_dayKey(now)} '
+        '${now.hour.toString().padLeft(2, '0')}:'
+        '${now.minute.toString().padLeft(2, '0')}:'
+        '${now.second.toString().padLeft(2, '0')}';
+
+    final parts = <String>[
+      ts,
+      if (mode != null) mode.name.toUpperCase(),
+      if (orderId != null && orderId.isNotEmpty) 'order=$orderId',
+      if (awb != null && awb.isNotEmpty) 'awb=$awb',
+      'event=$event',
+      if (qc != null && qc.isNotEmpty) 'qc=$qc',
+      if (qcSub != null && qcSub.isNotEmpty) 'qc_sub=$qcSub',
+      if (extra != null)
+        ...extra.entries
+            .where((e) => e.value.isNotEmpty)
+            .map((e) => '${e.key}=${e.value}'),
+    ];
+    return parts.join(' | ');
+  }
+
   /// Append one activity line. Fire-and-forget — never throws to callers.
   static Future<void> log({
     required String event,
@@ -43,6 +82,7 @@ class ActivityLogService {
     String? orderId,
     String? awb,
     String? qc,
+    String? qcSub,
     Map<String, String>? extra,
   }) async {
     // Cloud mirror — independent of the local-file write below, so a
@@ -54,30 +94,22 @@ class ActivityLogService {
       orderId: orderId,
       awb: awb,
       qc: qc,
+      qcSub: qcSub,
       extra: extra,
     ));
 
     try {
       final now = DateTime.now();
-      final ts = '${_dayKey(now)} '
-          '${now.hour.toString().padLeft(2, '0')}:'
-          '${now.minute.toString().padLeft(2, '0')}:'
-          '${now.second.toString().padLeft(2, '0')}';
-
-      final parts = <String>[
-        ts,
-        if (mode != null) mode.name.toUpperCase(),
-        if (orderId != null && orderId.isNotEmpty) 'order=$orderId',
-        if (awb != null && awb.isNotEmpty) 'awb=$awb',
-        'event=$event',
-        if (qc != null && qc.isNotEmpty) 'qc=$qc',
-        if (extra != null)
-          ...extra.entries
-              .where((e) => e.value.isNotEmpty)
-              .map((e) => '${e.key}=${e.value}'),
-      ];
-
-      final line = '${parts.join(' | ')}\n';
+      final line = '${formatLine(
+        now: now,
+        event: event,
+        mode: mode,
+        orderId: orderId,
+        awb: awb,
+        qc: qc,
+        qcSub: qcSub,
+        extra: extra,
+      )}\n';
       final dir = await _logsDir();
       final file = File('${dir.path}/${_fileNameFor(now)}');
       await file.writeAsString(line, mode: FileMode.append, flush: true);

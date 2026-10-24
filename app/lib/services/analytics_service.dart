@@ -63,6 +63,7 @@ class AnalyticsService {
     String? orderId,
     String? awb,
     String? qc,
+    String? qcSub,
     Map<String, String>? extra,
   }) async {
     if (Firebase.apps.isEmpty) return;
@@ -83,6 +84,7 @@ class AnalyticsService {
         if (orderId != null && orderId.isNotEmpty) 'order_id': orderId,
         if (awb != null && awb.isNotEmpty) 'awb': awb,
         if (qc != null && qc.isNotEmpty) 'qc': qc,
+        if (qcSub != null && qcSub.isNotEmpty) 'qc_sub': qcSub,
         'app_version': CaptureSession.appVersion,
         if (patch != null) 'patch_number': patch,
         if (extra != null && extra.isNotEmpty) 'extra': extra,

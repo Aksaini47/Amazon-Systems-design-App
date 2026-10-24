@@ -4,21 +4,27 @@ import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
 import '../widgets/rf_button.dart';
 
-/// What [VerdictBottomSheet] resolves to — the verdict, plus whichever
-/// sub-reason card(s) were picked underneath it. Empty for OK; exactly one
-/// for DAMAGED / DIFFERENT / EMPTY BOX; two for DAMAGED + DIFFERENT (one
-/// from each family, collected across the two sub-panels in sequence).
+/// What [VerdictBottomSheet] resolves to — the verdict, plus the sub-reason
+/// card picked underneath it. Exactly one for DAMAGED / DIFFERENT (and the
+/// auto-assigned "Empty box received" for EMPTY BOX); none for OK and for
+/// DAMAGED + DIFFERENT — sub-reasons exist only inside "damaged" and
+/// "different" (Sir, 2026-10-24).
 class QcVerdictResult {
   final QCVerdict verdict;
   final List<QCSubReason> subReasons;
-  const QcVerdictResult(this.verdict, this.subReasons);
+  QcVerdictResult(this.verdict, this.subReasons)
+      : assert(
+          verdict.keepValidSubReasons(subReasons).length == subReasons.length,
+          'sub-reason does not belong to ${verdict.name}',
+        );
 }
 
 /// Which card grid is currently showing inside the sheet. A tap on DAMAGED
 /// or DIFFERENT on the main panel doesn't close the sheet — it SLIDES to a
 /// sub-reason panel underneath (Sir, 2026-09-12: "tap karte hi suboptions
-/// slide hoke aata hai, dropdown nahi"). EMPTY BOX and OK have nothing to
-/// ask, so they resolve straight from the main panel.
+/// slide hoke aata hai, dropdown nahi"). OK, EMPTY BOX and DAMAGED +
+/// DIFFERENT have nothing to ask, so they resolve straight from the main
+/// panel.
 enum _Panel { main, damagedSub, differentSub }
 
 class VerdictBottomSheet extends StatefulWidget {
@@ -31,24 +37,14 @@ class VerdictBottomSheet extends StatefulWidget {
 }
 
 class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
-  // Explicit history stack rather than a hardcoded "back goes to main" —
-  // DAMAGED + DIFFERENT visits damagedSub then differentSub, and Back from
-  // differentSub in THAT flow must return to damagedSub, not main, while
-  // Back from differentSub reached via plain DIFFERENT must return to main.
+  // Explicit history stack rather than a hardcoded "back goes to main": a
+  // sub-panel is only ever entered from main (DAMAGED or DIFFERENT), so Back
+  // from it returns to main, and Back from main closes the sheet.
   final List<_Panel> _history = [_Panel.main];
   _Panel get _panel => _history.last;
   bool _forward = true;
 
-  // Verdict the sub-panels are currently resolving, and the damaged-family
-  // pick made on the way to differentSub in the DAMAGED+DIFFERENT flow.
-  // A single overwritable field, not an accumulating list — Back from
-  // differentSub returns to damagedSub with the flow still "live", and
-  // picking again must REPLACE the earlier choice, not add a second one.
-  QCVerdict? _pendingVerdict;
-  QCSubReason? _damagedPick;
-
-  void _goTo(_Panel panel, {QCVerdict? verdict}) {
-    if (verdict != null) _pendingVerdict = verdict;
+  void _goTo(_Panel panel) {
     setState(() {
       _forward = true;
       _history.add(panel);
@@ -63,10 +59,6 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
     setState(() {
       _forward = false;
       _history.removeLast();
-      if (_history.last == _Panel.main) {
-        _pendingVerdict = null;
-        _damagedPick = null;
-      }
     });
   }
 
@@ -74,25 +66,9 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
     Navigator.pop(context, QcVerdictResult(verdict, subReasons));
   }
 
-  void _onDamagedSubPicked(QCSubReason picked) {
-    if (_pendingVerdict == QCVerdict.damagedDifferent) {
-      _damagedPick = picked; // overwrite, not accumulate — see field doc
-      _goTo(_Panel.differentSub);
-    } else {
-      _finish(QCVerdict.damaged, [picked]);
-    }
-  }
+  void _onDamagedSubPicked(QCSubReason picked) => _finish(QCVerdict.damaged, [picked]);
 
-  void _onDifferentSubPicked(QCSubReason picked) {
-    if (_pendingVerdict == QCVerdict.damagedDifferent) {
-      // No fraud-confirm dialog on this path — matches the pre-existing
-      // behaviour where DAMAGED + DIFFERENT never showed it either, only
-      // plain DIFFERENT did.
-      _finish(QCVerdict.damagedDifferent, [_damagedPick!, picked]);
-      return;
-    }
-    _confirmDifferent(picked);
-  }
+  void _onDifferentSubPicked(QCSubReason picked) => _confirmDifferent(picked);
 
   void _confirmDifferent(QCSubReason picked) {
     showDialog<void>(
@@ -224,7 +200,7 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               label: 'DAMAGED',
               description: 'Arrived damaged or defective',
               color: RfColors.amber,
-              onTap: () => _goTo(_Panel.damagedSub, verdict: QCVerdict.damaged),
+              onTap: () => _goTo(_Panel.damagedSub),
             ),
             const SizedBox(height: 8),
             _VerdictButton(
@@ -232,15 +208,19 @@ class _VerdictBottomSheetState extends State<VerdictBottomSheet> {
               label: 'DIFFERENT',
               description: 'Fraud / swap — different item',
               color: RfColors.error,
-              onTap: () => _goTo(_Panel.differentSub, verdict: QCVerdict.different),
+              onTap: () => _goTo(_Panel.differentSub),
             ),
             const SizedBox(height: 8),
+            // No sub-reason panel here: the damaged / different sub-reasons
+            // belong to DAMAGED and DIFFERENT only (Sir, 2026-10-24). It
+            // resolves straight away, and — as before — without the
+            // fraud-confirm dialog that only plain DIFFERENT shows.
             _VerdictButton(
               icon: Icons.broken_image_outlined,
               label: 'DAMAGED + DIFFERENT',
               description: 'Damaged AND different item',
               color: RfColors.rtAccent,
-              onTap: () => _goTo(_Panel.damagedSub, verdict: QCVerdict.damagedDifferent),
+              onTap: () => _finish(QCVerdict.damagedDifferent, const []),
             ),
             const SizedBox(height: 8),
             _VerdictButton(
