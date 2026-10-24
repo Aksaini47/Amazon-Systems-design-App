@@ -122,3 +122,4 @@ agent/storage/
 *.har
 payouts_raw.json
 agent/archive/login-debug-scratch/*.png
+settings.json*.bak
