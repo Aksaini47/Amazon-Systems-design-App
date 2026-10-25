@@ -193,7 +193,7 @@ REFUND = re.compile(r"refund|money back|paise|पैसे|रिफंड", re.
 RETURNED = re.compile(r"already returned|returned the|return(ed)? (the )?(item|product|order)|self[- ]?return|return (picked|pick ?up|delivered|reached)|item return|वापस (कर|भेज)", re.I)
 NOTREC = re.compile(r"not (yet )?(received|recieved|delivered|come|arrived)|undeliver|did(n.?t| not) (get|receive|recieve)|haven.?t (got|received)|mark(ed)? (as )?delivered|showing delivered|shows delivered|never received|नहीं मिला", re.I)
 DELAY = re.compile(r"delay|\blate\b|where is|when (will|can|i will)|how long|\bstatus\b|\btrack|कब (तक|मिलेगा)", re.I)
-DEFECT = re.compile(r"defect|damag|not working|broken|dead|not starting|wrong (item|product|size|model)|not what i ordered|display (is )?not|touch (is )?not|crack|खराब|टूट|item (is )?missing|missing (item|part)|incomplete|short (item|piece)", re.I)
+DEFECT = re.compile(r"defect|damag|not working|broken|dead|not starting|wrong (item|product|size|model)|wor?ng (item|product|size|model)|not what i ordered|display (is )?not|touch (is )?not|crack|खराब|टूट|item (is )?missing|missing (item|part)|incomplete|short (item|piece)", re.I)
 ABUSE = re.compile(r"\bpolice\b|\blegal\b|\blawyer\b|\bcourt\b|consumer (forum|court)|\bfraud|\bcheat|\bscam|\ba[\s-]?to[\s-]?z\b|\bharass|complaint (against|to)|action against|\bsue\b|\bsuing\b", re.I)
 
 
@@ -205,6 +205,7 @@ REFUND_NOTREC = re.compile(r"(refund|रिफंड|paise|पैसे)[^.,\n]{
 ADDRESS_RX = re.compile(r"address|pin ?code|landmark|unable to deliver|undeliverable|\bndr\b|incorrect add|wrong add", re.I)
 PRICE_Q = re.compile(r"\b(cod|cash on delivery|discount|price|prise|cheaper|bulk|wholesale|best price|last price|rate|sasta|kam kar|offer)\b|कीमत|दाम", re.I)
 ORIG_Q = re.compile(r"\b(original|orignal|oem|genuine|copy|duplicate|first copy|og|branded)\b|ओरिजिनल", re.I)
+RECEIPT_ACK = re.compile(r"\b(arrived|received|recieved|delivered to me|got (the|my|it)|i have the)\b", re.I)         # the buyer confirms the parcel reached them
 CHANGEMIND = re.compile(r"no longer (want|need)|don.?t (want|need)|do not (want|need)|changed my mind|change of mind|ordered by mistake|order(ed)? (it )?by mistake|not needed|no need now", re.I)
 
 
@@ -352,13 +353,20 @@ def decide(case: dict) -> dict:
         return {"scenario": "-", "template": None, "action": "SKIP", "code": "WAITING_BUYER", "why": "the last message in the thread is ours: waiting for the buyer"}
     buyer_msgs = [m for m, b in zip(msgs, by) if b != "seller"]
     intent = {t for t in (case.get("intent_tags") or []) if t in VALID_TAGS}       # set by the agent after reading a message the regexes cannot (other language, Devanagari)
-    t_last, t_all = (set(intent), set(intent)) if intent else (tags_of(msg_text(buyer_msgs[-1])), tags_of(" ".join(msg_text(m) for m in buyer_msgs)))
+    unanswered = []
+    for m, b in zip(reversed(msgs), reversed(by)):
+        if b == "seller":
+            break
+        unanswered.append(m)
+    unanswered.reverse()
+    last_text = " ".join(msg_text(m) for m in unanswered) or msg_text(buyer_msgs[-1])
+    t_last, t_all = (set(intent), set(intent)) if intent else (tags_of(last_text), tags_of(" ".join(msg_text(m) for m in buyer_msgs)))
     last_amz = max((i for i, b in enumerate(by) if b == "amazon"), default=-1)
     seller_replied = "seller" in by[last_amz + 1:]               # we already answered the newest Amazon forward: this is a follow-up
     mine = " ".join(m.get("raw") or m.get("text") or "" for m, b in zip(msgs, by) if b == "seller")
     if "abuse" in t_all:
         return esc("SENSITIVE", "legal / fraud / A-to-z wording: Sir only", "S8")
-    if seller_replied and by[-1] == "buyer" and is_thanks(msg_text(buyer_msgs[-1])):         # Sir 2026-10-21: a clean closing message -> resolve silently
+    if seller_replied and by[-1] == "buyer" and is_thanks(last_text):         # Sir 2026-10-21: a clean closing message -> resolve silently
         return {"scenario": "S12", "template": None, "action": "RESOLVE", "code": "BUYER_THANKS", "why": "the buyer only said thanks / ok after our reply: resolve the case, no message"}
     if facts.get("language") not in ("English", "Hindi") and not intent:
         return esc("LANGUAGE", f"thread language {facts.get('language')}: the agent reads the message, translates the intent and records it with the `intent` command, then re-plans (reply stays English)")
@@ -366,9 +374,9 @@ def decide(case: dict) -> dict:
         subj = (case.get("subject") or "").lower()
         if seller_replied:
             return esc("FOLLOWUP_NEEDS_SIR", "buyer replied to our pre-sales answer: Sir reads it", "S6")
-        if not msg_text(buyer_msgs[-1]).strip() or subj.startswith(("update from seller", "important update")):
+        if not last_text.strip() or subj.startswith(("update from seller", "important update")):
             return esc("PRESALES_OR_NO_ORDER", "no order and no readable question (seller-initiated / empty forward): Sir decides", "S6")
-        pt = msg_text(buyer_msgs[-1])
+        pt = last_text
         is_price, is_orig = bool(PRICE_Q.search(pt)), bool(ORIG_Q.search(pt))
         if is_price and not is_orig:
             return {"scenario": "S6", "template": "T18", "action": "SEND", "code": "PRESALES_PRICE", "alert": True,
@@ -382,7 +390,8 @@ def decide(case: dict) -> dict:
     if not op:
         return esc("FACTS_MISSING", "order page not read")
     ret_req = any((m.get("return_requested") or "").lower().startswith("yes") for m in msgs)
-    returned = "returned" in t_last or ret_req                  # a customer-initiated return: NEVER refunded by us (SAFE-T), Sir is informed with the delivery facts
+    ret_open = bool(facts.get("returns")) and bool(t_last & {"defect", "refund", "refundq"})       # a return request already exists for this order
+    returned = "returned" in t_last or ret_req or ret_open                  # a customer-initiated return: NEVER refunded by us (SAFE-T), Sir is informed with the delivery facts
     delivery_note = f"tracker {state_of(tr)}, delivered {(tr or {}).get('delivered_at')}, code verified={(tr or {}).get('delivery_verified')}"
     rets = facts.get("returns") or []
     ret_note = " | ".join(f"return request {r.get('requested')} ({r.get('state')}; {r.get('reason')}{': ' + r['comment'] if r.get('comment') else ''}): {r.get('carrier')} {r.get('tracking_id')} = {r.get('tracking_status')} {r.get('last_event') or ''}".strip()
@@ -437,7 +446,7 @@ def decide(case: dict) -> dict:
                 f"the buyer / Amazon says: {msg_text(buyer_msgs[-1])[:170]} | Sir: Nimbus > NDR (ship.nimbuspost.com/ndr), open the AWB and re-attempt or update the address with the courier. No reply is sent to the buyer.")
         return {"scenario": "S11", "template": None, "action": "ESCALATE", "code": "ADDRESS_NDR", "alert": True, "sir_action": card,
                 "why": "address / delivery-attempt problem: Sir handles it in Nimbus NDR (Sir 2026-10-22)"}
-    if seller_replied and (buyer_msgs[-1].get("attachments") or PHOTO_WORDS.search(msg_text(buyer_msgs[-1]))):
+    if seller_replied and (buyer_msgs[-1].get("attachments") or PHOTO_WORDS.search(last_text)):
         return {"scenario": "S4", "template": None, "action": "ESCALATE", "code": "EVIDENCE_RECEIVED", "alert": True,
                 "sir_action": f"EVIDENCE RECEIVED: order {thread_order(msgs)}: the buyer sent photos / a video after our request. Open the case, review them; the replacement request is raised by the buyer in Amazon (Sir 2026-10-21).",
                 "why": "buyer shared photos / video (attachment or wording) after our evidence request: Sir reviews"}
@@ -445,6 +454,8 @@ def decide(case: dict) -> dict:
         if returned:
             return customer_return(f"customer-initiated return (follow-up after our reply): do NOT refund (SAFE-T); {delivery_note}; {ret_note}: Sir decides")
         return esc("FOLLOWUP_NEEDS_SIR", "buyer wrote again after our reply and it is not a delivery dispute: Sir reads it", "S11")
+    if ret_open:                                                                    # a return request already exists: this is a customer return (T16, refunds only by Amazon)
+        return customer_return(f"defect / refund claim while a return request is open: do NOT refund (SAFE-T); {delivery_note}; {ret_note}: Sir decides")
     if "cancel" in t_last or ("changemind" in t_last and state != "DELIVERED"):
         if state in MOVING:
             return {"scenario": "S1", "template": "T1", "action": "SEND", "code": "CANCEL_SHIPPED", "why": f"tracker {state}"}
@@ -466,7 +477,7 @@ def decide(case: dict) -> dict:
                     "why": "tracker says delivered, buyer says not received: delivery facts + check with family/neighbours (Sir 2026-10-17), Sir is alerted"}
         return esc("DELIVERED_TRACKING_QUERY", "buyer asks about tracking/status but does not say the parcel is missing and the tracker says delivered: Sir reads it", "S11")
     if "defect" in t_last or ("refund" in t_last and not returned):
-        if state == "DELIVERED" and tr.get("delivery_verified"):
+        if state == "DELIVERED" and (tr.get("delivery_verified") or RECEIPT_ACK.search(last_text)):
             days = days_since(tr.get("delivered_at"))
             if days is None:
                 return esc("DELIVERY_UNVERIFIED", "defect asked but the tracker has no delivery date to check the return/replacement window", "S4")
@@ -532,14 +543,45 @@ def sha16(t: str) -> str:
     return hashlib.sha256(t.replace("\r\n", "\n").strip("\n ").encode("utf-8")).hexdigest()[:16]
 
 
-def cmd_plan() -> int:
+HOLDS_F = OUT / "holds.json"
+
+
+def load_holds() -> dict:
+    return json.loads(HOLDS_F.read_text(encoding="utf-8")) if HOLDS_F.exists() else {}
+
+
+def build_items() -> tuple[dict, list[dict]]:
+    """latest.json -> decided items (intents + holds applied). Used by BOTH `plan` and `send`, so editing plan.json by hand can never change what is sent."""
     d = json.loads((OUT / "latest.json").read_text(encoding="utf-8"))
     sent = {x["key"] for x in read_log() if x.get("sent") and not x.get("dry")}
-    intents = load_intents()
+    intents, holds = load_intents(), load_holds()
+    items = []
     for c in d["cases"]:
         if intents.get(c.get("key")):
             c["intent_tags"] = intents[c["key"]]
-    items = [make_item(c, sent) for c in d["cases"]]
+        it = make_item(c, sent)
+        if c.get("key") in holds and it["action"] in ("SEND", "RESOLVE"):               # the agent / Sir held this item back
+            it.update(action="ESCALATE", code="AGENT_HOLD", why="held back: " + holds[c["key"]], text=None, resolve_after=False)
+        items.append(it)
+    return d, items
+
+
+def cmd_hold(args: list[str]) -> int:
+    """hold --case <name|order> --reason "why" : downgrade a SEND / RESOLVE item to ESCALATE (the ONLY way an agent may hold an item back; never edit plan.json)."""
+    if "--case" not in args or "--reason" not in args:
+        print('usage: hold --case <name|order> --reason "why"'); return 2
+    who, why = args[args.index("--case") + 1], args[args.index("--reason") + 1]
+    d = json.loads((OUT / "latest.json").read_text(encoding="utf-8"))
+    case = next((c for c in d["cases"] if who.lower() in (c.get("name") or "").lower() or who == thread_order(c.get("messages") or [])), None)
+    if not case:
+        print("NOT_FOUND: no such case in latest.json"); return 4
+    cur = load_holds(); cur[case["key"]] = why[:300]
+    HOLDS_F.write_text(json.dumps(cur, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"held {case['name']} ({case['key']}): {why[:80]}; run `plan` again and check the action column"); return 0
+
+
+def cmd_plan() -> int:
+    d, items = build_items()
     st = load_state()
     (OUT / "plan.json").write_text(json.dumps({"generated_at": datetime.now().isoformat(timespec="seconds"), "checked_at": d.get("checked_at"), "state": st, "items": items}, ensure_ascii=False, indent=1), encoding="utf-8")
     for it in items:
@@ -605,9 +647,9 @@ def cmd_send(args: list[str]) -> int:
     st = load_state()
     if not dry and not (st["auto_send"] or (only and approve)):
         print("BLOCKED: auto_send is false. Sir must approve: use --only <case> --approve for a single case, or set auto_send=true in samvaad_state.json."); return 4
-    plan = json.loads((OUT / "plan.json").read_text(encoding="utf-8"))
+    _, all_items = build_items()
     do_resolve = resolve_flag or st["auto_resolve"]
-    items = [i for i in plan["items"] if (i["action"] == "SEND" or (i["action"] == "RESOLVE" and do_resolve)) and (not only or only.lower() in (i["name"] or "").lower() or only == i["order_no"])]
+    items = [i for i in all_items if (i["action"] == "SEND" or (i["action"] == "RESOLVE" and do_resolve)) and (not only or only.lower() in (i["name"] or "").lower() or only == i["order_no"])]
     force = args[args.index("--force-template") + 1] if "--force-template" in args else None
     if force:                                       # Sir picks the template for ONE case (still template + facts + lint, never free text)
         if not (only and approve) or force not in TEMPLATES:
@@ -744,7 +786,7 @@ def cmd_selftest() -> int:
     dec = [("cancel + in transit -> T1", case("cx want to cancel", "IN_TRANSIT"), "T1"), ("cancel + delivered -> T1", case("cancel the item", "DELIVERED"), "T1"),
            ("cancel + not moving -> escalate", case("cancel", "NOT_MOVING"), None), ("where is my order + in transit -> T3", case("when will I get my package", "IN_TRANSIT"), "T3"),
            ("delay + not moving -> T2", case("order is too delay", "NOT_MOVING"), "T2"), ("not received + delivered -> T6", case("customer not received order but showing delivered", "DELIVERED"), "T6"),
-           ("defective + delivered verified, inside window -> T9", case("received a defective product", "DELIVERED"), "T9"), ("defective + delivered unverified -> escalate", case("received a defective product", "DELIVERED", verified=False), None),
+           ("defective + delivered verified, inside window -> T9", case("received a defective product", "DELIVERED"), "T9"), ("defective + delivered unverified, buyer does not say it arrived -> escalate", case("the display is dead", "DELIVERED", verified=False), None), ("defective + delivered unverified but the buyer says it arrived -> T9", case("received a defective product", "DELIVERED", verified=False), "T9"),
            ("refund + RTO, no refund yet -> T14 (status + refund card for Sir)", case("want refund", "RTO_RECEIVED"), "T14"), ("refund + refund on page -> T5", case("want refund", "RTO_RECEIVED", refunds=[999.0]), "T5"),
            ("legal wording -> escalate", case("customer will send a lawyer notice", "DELIVERED"), None), ("A to Z claim -> escalate", case("A to Z claim filed", "DELIVERED"), None),
            ("tracking conflict -> escalate", case("cancel", "DELIVERED", notes=["refusal scan"]), None), ("Hindi-locale cancel + in transit -> English T1", case("cancel", "IN_TRANSIT", lang="Hindi"), "T1"),
@@ -968,6 +1010,14 @@ def cmd_selftest() -> int:
     cr2 = case("Item return kindly refund asap", "DELIVERED"); cr2["facts"]["returns"] = [{"requested": "24 Sep 2026", "state": "Pending refund", "reason": "x", "carrier": "ATS", "tracking_id": "515245263825", "tracking_status": "Delivered", "last_event": "Oct 06, 2026 09:04:27 PM Pataudi"}]
     it = make_item(cr2, set()); okd = it["template"] == "T16" and "all four sides" not in it["text"]
     fails += not okd; print(("PASS " if okd else "FAIL ") + "T16 does not ask for photos once the return parcel was delivered back")
+    # 2026-10-25: open return request -> customer return (T16); an unverified code is fine when the buyer says it arrived
+    cr3 = case("package arrived but an item is missing", "DELIVERED", verified=False)
+    cr3["facts"]["returns"] = [{"requested": "09 Oct 2026", "state": "Pending refund", "reason": "CR-DEFECTIVE", "carrier": "ATS", "tracking_id": "515288164790", "tracking_status": "Returning to seller", "last_event": "Oct 23, 2026 04:36:00 PM Mainpuri"}]
+    it = make_item(cr3, set()); okd = it["template"] == "T16" and it["code"] == "CUSTOMER_RETURN_STATUS" and "Returning to seller" in it["text"] and not it["lint"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"defect / missing claim while a return request is open -> T16 customer return, not T9 [{it['template']} {it['code']}] {it['lint']}")
+    cr4 = case("package arrived but an item is missing", "DELIVERED", verified=False)
+    it = make_item(cr4, set()); okd = it["template"] == "T9"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "no open return and the buyer says it arrived -> T9 even with an unverified delivery code")
     _support_override = None
     return 1 if fails else 0
     _support_override = None
@@ -984,6 +1034,8 @@ def main() -> int:
         return cmd_send(a[1:])
     if a[0] == "intent":
         return cmd_intent(a[1:])
+    if a[0] == "hold":
+        return cmd_hold(a[1:])
     if a[0] == "templates":
         return cmd_templates()
     if a[0] == "selftest":
