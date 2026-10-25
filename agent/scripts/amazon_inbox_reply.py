@@ -84,7 +84,12 @@ TEMPLATES = {
             "en": "Dear Customer,\nThank you for your enquiry. Our product is a compatible replacement display as described in the listing title and bullet points. We do not describe it as an OEM or original part. Please refer to the product listing for specifications and compatibility, and reply here with your phone brand and model name so that we can confirm availability.\n" + SIGN["en"]},
     "T18": {"name": "pre-sales: price / discount / COD / bulk: as shown on the listing, Sir alerted", "resolve": False, "alert": True,
             "en": "Dear Customer,\nThank you for your enquiry. Price and payment options are as shown on the product listing. We are unable to change them through messages.\n" + SIGN["en"]},
+    # Sir 2026-10-25: a buyer who keeps asking us to refund gets one final default message and the case is resolved (refunds on returns are Amazon's, we are bound by its policy).
+    # Never used for abuse / legal / A-to-z wording (those stay with Sir), never when we owe the refund (RTO), never twice for one order.
+    "T19": {"name": "repeated refund demand: final default message, then resolve", "resolve": True, "alert": True,
+            "en": "Dear Customer,\nRegarding order {order_no}: we have already responded to your refund request and our position remains the same. We are unable to help you further on this request. For any refund-related query, please contact Amazon Customer Support by phone from the Customer Service section of your Amazon account.\n" + SIGN["en"]},
 }
+T19_MARKS = ("We are unable to help you further on this request",)
 T16_MARKS = ("Refunds for customer returns are processed by Amazon",)
 T15_MARKS = ("your order has been cancelled",)
 T14_MARKS = ("could not be delivered and",)
@@ -145,8 +150,8 @@ def lint(text: str, facts: dict | None = None, template: str | None = None, lang
         if re.search(pat, text, re.I):
             errs.append(f"banned wording /{pat}/")
     has_refund = bool((facts.get("order_page") or {}).get("refunds"))
-    if re.search(r"refund", text, re.I) and not (template in ("T1", "T13", "T14", "T15", "T16") or (template in ("T5", "T11") and has_refund)):
-        errs.append("refund wording only allowed in T1 / T13 / T14 / T15 / T16 (policy, RTO, cancel, customer return) and in T5 / T11 with a refund on the order page")
+    if re.search(r"refund", text, re.I) and not (template in ("T1", "T13", "T14", "T15", "T16", "T19") or (template in ("T5", "T11") and has_refund)):
+        errs.append("refund wording only allowed in T1 / T13 / T14 / T15 / T16 / T19 (policy, RTO, cancel, customer return, final reply) and in T5 / T11 with a refund on the order page")
     if facts:
         allowed = _fact_numbers(facts)
         if template == "T10" and support_number():
@@ -364,6 +369,9 @@ def decide(case: dict) -> dict:
     last_amz = max((i for i, b in enumerate(by) if b == "amazon"), default=-1)
     seller_replied = "seller" in by[last_amz + 1:]               # we already answered the newest Amazon forward: this is a follow-up
     mine = " ".join(m.get("raw") or m.get("text") or "" for m, b in zip(msgs, by) if b == "seller")
+    last_seller = max((i for i, b in enumerate(by) if b == "seller"), default=-1)
+    DEMAND = {"refund", "refundq", "returned", "changemind"}
+    prior_demands = sum(1 for m, b in zip(msgs[:last_seller], by[:last_seller]) if b != "seller" and tags_of(msg_text(m)) & DEMAND)
     if "abuse" in t_all:
         return esc("SENSITIVE", "legal / fraud / A-to-z wording: Sir only", "S8")
     if seller_replied and by[-1] == "buyer" and is_thanks(last_text):         # Sir 2026-10-21: a clean closing message -> resolve silently
@@ -390,6 +398,9 @@ def decide(case: dict) -> dict:
     if not op:
         return esc("FACTS_MISSING", "order page not read")
     ret_req = any((m.get("return_requested") or "").lower().startswith("yes") for m in msgs)
+    def final_refund_reply(why_tail: str = "") -> dict:
+        return {"scenario": "S5", "template": "T19", "action": "SEND", "code": "REFUND_REPEAT_CLOSE", "alert": True, "sir_action": ret_card if (returned or ret_open) else None,
+                "why": "the buyer keeps asking for a refund after our answer: final default message + resolve (Sir 2026-10-25). " + why_tail}
     ret_open = bool(facts.get("returns")) and bool(t_last & {"defect", "refund", "refundq"})       # a return request already exists for this order
     returned = "returned" in t_last or ret_req or ret_open                  # a customer-initiated return: NEVER refunded by us (SAFE-T), Sir is informed with the delivery facts
     delivery_note = f"tracker {state_of(tr)}, delivered {(tr or {}).get('delivered_at')}, code verified={(tr or {}).get('delivery_verified')}"
@@ -397,6 +408,8 @@ def decide(case: dict) -> dict:
     ret_note = " | ".join(f"return request {r.get('requested')} ({r.get('state')}; {r.get('reason')}{': ' + r['comment'] if r.get('comment') else ''}): {r.get('carrier')} {r.get('tracking_id')} = {r.get('tracking_status')} {r.get('last_event') or ''}".strip()
                           for r in rets) or "no return request found in Manage Returns"
     def customer_return(why_tail: str) -> dict:
+        if any(mk in mine for mk in T16_MARKS) and seller_replied and not any(mk in mine for mk in T19_MARKS):
+            return final_refund_reply(why_tail)
         if facts.get("returns") is None or any(mk in mine for mk in T16_MARKS):
             return {"scenario": "S5", "template": None, "action": "ESCALATE", "code": "RETURN_CLAIM_UNVERIFIED", "sir_action": ret_card, "why": why_tail}
         return {"scenario": "S5", "template": "T16", "action": "SEND", "code": "CUSTOMER_RETURN_STATUS", "alert": True, "sir_action": ret_card,
@@ -415,7 +428,10 @@ def decide(case: dict) -> dict:
     if op.get("refunds") and t_last & {"refund", "refundq", "cancel", "returned", "notrec"}:
         if seller_replied:                                                          # Sir 2026-10-21: refund not seen -> Amazon Customer Support by phone (T11), once
             if any(mk in mine for mk in T11_MARKS):
-                return esc("REFUND_QUERY_REPEAT", "buyer asks about the refund again after we pointed to Amazon Customer Support: Sir checks", "S5")
+                if any(mk in mine for mk in T19_MARKS):
+                    return esc("REFUND_QUERY_REPEAT", "buyer writes again after the final default message: Sir checks", "S5")
+                return {"scenario": "S5", "template": "T19", "action": "SEND", "code": "REFUND_REPEAT_CLOSE", "alert": True, "sir_action": None,
+                        "why": "buyer asks about an issued refund again after T11: final default message + resolve (Sir 2026-10-25)"}
             return {"scenario": "S5", "template": "T11", "action": "SEND", "code": "REFUND_ISSUED_ASK_AMAZON", "why": f"refund {op['refunds']} is already on the order page; buyer asks again: Amazon Customer Support by phone"}
         return {"scenario": "S5", "template": "T5", "action": "SEND", "code": "REFUND_PROCESSED", "why": f"refund {op['refunds']} is on the order page"}
     if not tr or state in ("ERROR", "NOT_FOUND", "UNKNOWN", "ORDER_MISMATCH"):
@@ -450,6 +466,10 @@ def decide(case: dict) -> dict:
         return {"scenario": "S4", "template": None, "action": "ESCALATE", "code": "EVIDENCE_RECEIVED", "alert": True,
                 "sir_action": f"EVIDENCE RECEIVED: order {thread_order(msgs)}: the buyer sent photos / a video after our request. Open the case, review them; the replacement request is raised by the buyer in Amazon (Sir 2026-10-21).",
                 "why": "buyer shared photos / video (attachment or wording) after our evidence request: Sir reviews"}
+    if seller_replied and prior_demands >= 1 and t_last & DEMAND and not t_last & {"notrec", "address"}:        # Sir 2026-10-25: the buyer keeps demanding a refund
+        if any(mk in mine for mk in T19_MARKS):
+            return esc("REFUND_PRESSURE_REPEAT", "the buyer writes again after the final default message (case was resolved, it re-opened): Sir reads it", "S5")
+        return final_refund_reply()
     if seller_replied:                                                              # templates are first answers; a follow-up is for Sir
         if returned:
             return customer_return(f"customer-initiated return (follow-up after our reply): do NOT refund (SAFE-T); {delivery_note}; {ret_note}: Sir decides")
@@ -816,7 +836,7 @@ def cmd_selftest() -> int:
     tests = [("dispute after T6 -> T7 (proof, alert)", thread([NR, ME, BUY("still not received the parcel, please check")]), "SEND", "T7", "DELIVERY_DISPUTE_PROOF"),
              ("dispute repeats after T7 -> escalate", thread([NR, ME, BUY("not received"), ME7, BUY("I did not receive it")]), "ESCALATE", None, "DELIVERY_DISPUTE_REPEAT"),
              ("tracking-status query on a delivered order -> escalate (T6 misfire fix)", thread([AMZ("Customer receive the item on 1 Oct but the tracking still didnt updated, kindly update the tracking")]), "ESCALATE", None, "DELIVERED_TRACKING_QUERY"),
-             ("follow-up that is not a dispute -> escalate", thread([AMZ("want refund"), ME, BUY("please refund quickly")]), "ESCALATE", None, "FOLLOWUP_NEEDS_SIR"),
+             ("follow-up that is not a dispute -> escalate", thread([AMZ("want refund"), ME, BUY("what is the next step now")]), "ESCALATE", None, "FOLLOWUP_NEEDS_SIR"),
              ("follow-up returned claim -> escalate", thread([AMZ("issue"), ME, BUY("i already returned the item but not received refund")]), "ESCALATE", None, "RETURN_CLAIM_UNVERIFIED"),
              ("last message is ours -> skip", thread([NR, ME]), "SKIP", None, "WAITING_BUYER"),
              ("'did not receive my refund' is not a not-received parcel -> not T6", thread([AMZ("I did not receive my refund")]), "ESCALATE", None, "REFUND_STATUS_QUERY"),
@@ -859,14 +879,14 @@ def cmd_selftest() -> int:
     fails += not okd; print(("PASS " if okd else "FAIL ") + "T8 renders and lints" + (f" <- {e8}" if e8 else ""))
     ME11 = {"order_no": None, "reason": None, "raw": "A refund of Rs 3,011.00 has already been issued for this order. Regards, Badeja Enterprises"}
     r_tests = [("refund issued, buyer says not received after our reply -> T11 (Amazon Customer Support)", thread([AMZ("refund issue"), ME, BUY("I did not receive my refund yet")], refunds=[3011.0]), "SEND", "T11", "REFUND_ISSUED_ASK_AMAZON"),
-               ("T11 already sent, buyer asks again -> escalate", thread([AMZ("refund issue"), ME, BUY("no refund yet"), ME11, BUY("still no refund")], refunds=[3011.0]), "ESCALATE", None, "REFUND_QUERY_REPEAT"),
+               ("T11 already sent, buyer asks again -> T19 final message + resolve", thread([AMZ("refund issue"), ME, BUY("no refund yet"), ME11, BUY("still no refund")], refunds=[3011.0]), "SEND", "T19", "REFUND_REPEAT_CLOSE"),
                ("refund asked first and a refund is on the page -> T5", thread([AMZ("want refund")], refunds=[3011.0]), "SEND", "T5", "REFUND_PROCESSED"),
                ("refund status asked, nothing issued -> escalate for Sir", thread([AMZ("refund issue"), ME, BUY("my refund is not received")]), "ESCALATE", None, "REFUND_STATUS_QUERY")]
     for name, c, want_action, want_tpl, want_code in r_tests:
         it = make_item(c, set())
         okd = it["action"] == want_action and (want_tpl is None or it["template"] == want_tpl) and (want_code is None or it["code"] == want_code)
         if want_tpl:
-            okd = okd and not it["lint"] and "Amazon Customer Support" in it["text"] and "Rs 3,011.00" in it["text"]
+            okd = okd and not it["lint"] and "Amazon Customer Support" in it["text"] and (want_tpl == "T19" or "Rs 3,011.00" in it["text"])
         fails += not okd; print(("PASS " if okd else "FAIL ") + "refund: " + name + f"  [{it['action']} {it['template']} {it['code']}] {it['lint']}")
     # Sir 2026-10-21 round-1 answers: T1 rejection wording, pre-sales T12, change of mind T13, refund policy (never refund a customer return)
     e_x = lint(ok_text.replace("Regards,", "Refund later." + chr(10) + "Regards,"), good_facts, "T3")
@@ -981,8 +1001,8 @@ def cmd_selftest() -> int:
     fails += not okd; print(("PASS " if okd else "FAIL ") + "customer return, no return request found in Manage Returns -> T16 says so")
     c9 = thread([AMZ("item return kindly refund"), {"order_no": None, "reason": None, "raw": "Dear Customer, Refunds for customer returns are processed by Amazon in line with policy. Regards, Badeja Enterprises", "by": "seller"}, BUY("I already returned the item, still no refund")])
     c9["facts"]["returns"] = c7["facts"]["returns"]
-    it = make_item(c9, set()); okd = it["action"] == "ESCALATE" and it["code"] == "RETURN_CLAIM_UNVERIFIED" and "CUSTOMER RETURN" in it["sir_action"]
-    fails += not okd; print(("PASS " if okd else "FAIL ") + "T16 is sent once: a repeat after it goes to Sir with the card")
+    it = make_item(c9, set()); okd = it["action"] == "SEND" and it["template"] == "T19" and "CUSTOMER RETURN" in (it["sir_action"] or "")
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "T16 is sent once: a repeated demand after it gets T19 (final message + resolve) with the card for Sir")
     c10 = thread([AMZ("issue"), ME, BUY("i already returned the item but no refund")]); c10["facts"]["returns"] = c7["facts"]["returns"]
     it = make_item(c10, set()); okd = it["template"] == "T16"
     fails += not okd; print(("PASS " if okd else "FAIL ") + "Himani-style follow-up (already returned, no refund) with return facts -> T16")
@@ -1018,6 +1038,30 @@ def cmd_selftest() -> int:
     cr4 = case("package arrived but an item is missing", "DELIVERED", verified=False)
     it = make_item(cr4, set()); okd = it["template"] == "T9"
     fails += not okd; print(("PASS " if okd else "FAIL ") + "no open return and the buyer says it arrived -> T9 even with an unverified delivery code")
+    # Sir 2026-10-25: repeated refund demand -> final default message + resolve
+    c11 = case("Item return kindly refund asap", "DELIVERED"); c11["facts"]["returns"] = c7["facts"]["returns"]
+    c11["messages"] += [{"order_no": None, "reason": None, "raw": "Dear Customer, Refunds for customer returns are processed by Amazon in line with Amazon's return policy. Regards, Badeja Enterprises", "by": "seller"},
+                        {"order_no": None, "reason": None, "raw": "But Amazon could not initiate my refund, please refund me", "by": "buyer"}]
+    it = make_item(c11, set())
+    okd = it["action"] == "SEND" and it["template"] == "T19" and it["code"] == "REFUND_REPEAT_CLOSE" and it["resolve_after"] and it.get("alert") and not it["lint"] and "unable to help you further" in it["text"]
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"customer return, buyer demands a refund again after T16 -> T19 + resolve [{it['action']} {it['template']} {it['code']}] {it['lint']}")
+    c12 = case("Item return kindly refund asap", "DELIVERED"); c12["facts"]["returns"] = c7["facts"]["returns"]
+    c12["messages"] += [{"order_no": None, "reason": None, "raw": "Dear Customer, Refunds for customer returns are processed by Amazon in line with Amazon's return policy. We are unable to help you further on this request. Regards, Badeja Enterprises", "by": "seller"},
+                        {"order_no": None, "reason": None, "raw": "refund me now", "by": "buyer"}]
+    it = make_item(c12, set()); okd = it["action"] == "ESCALATE"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"T19 is sent once per order: a later message goes to Sir [{it['action']} {it['code']}]")
+    c13 = thread([AMZ("want refund"), ME, BUY("I will file an A to Z claim, refund me")], refunds=())
+    it = make_item(c13, set()); okd = it["code"] == "SENSITIVE"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "A-to-z / legal wording is never auto-closed")
+    c14 = thread([AMZ("customer wants refund"), ME, BUY("please refund quickly")], state="RTO_RECEIVED")
+    it = make_item(c14, set()); okd = it["template"] != "T19"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"RTO refund we owe is never closed with the default message [{it['template']} {it['code']}]")
+    c15 = thread([AMZ("refund issue"), ME, BUY("I did not receive my refund yet")], refunds=[3011.0]); c15["messages"] += [{"order_no": None, "reason": None, "raw": "A refund of Rs 3,011.00 has already been issued for this order. Regards, Badeja Enterprises", "by": "seller"}, BUY("still no refund")]
+    it = make_item(c15, set()); okd = it["template"] == "T19" and it["action"] == "SEND"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + f"issued refund asked about a third time -> T19 + resolve [{it['template']} {it['code']}]")
+    c16 = thread([AMZ("defective product, want refund"), {"order_no": None, "reason": None, "raw": "Dear Customer, share photos here. Regards, Badeja Enterprises", "by": "seller"}, BUY("here are the photos, please refund")])
+    it = make_item(c16, set()); okd = it["code"] == "EVIDENCE_RECEIVED"
+    fails += not okd; print(("PASS " if okd else "FAIL ") + "photos after our evidence request still go to Sir, not to the default message")
     _support_override = None
     return 1 if fails else 0
     _support_override = None
