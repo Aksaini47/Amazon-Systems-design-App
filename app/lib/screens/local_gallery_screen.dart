@@ -1618,7 +1618,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
           ),
           child: StatefulBuilder(
             builder: (ctx, setSheetState) {
-              // RT needs a 12-digit AWB to be saved (awbAllowsSave). An
+              // RT needs an AWB of at least 12 digits to be saved (awbAllowsSave). An
               // untouched older value is left alone, so a legacy order whose
               // AWB is empty or another format can still have its Order ID /
               // verdict / time corrected; changing or clearing the AWB is what
@@ -1663,10 +1663,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                     onChanged: (_) => setSheetState(() {}),
                     decoration: InputDecoration(
                       labelText: mode == CaptureMode.rt
-                          ? 'AWB / tracking * (12 digits)'
+                          ? 'AWB / tracking * (min 12 digits)'
                           : 'AWB / tracking (optional)',
                       labelStyle: const TextStyle(color: RfColors.textSecondary),
-                      errorText: rtAwbBlocked ? 'RT AWB must be exactly 12 digits' : null,
+                      errorText: rtAwbBlocked ? 'RT AWB must be at least 12 digits' : null,
                       enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: RfColors.border)),
                       focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: RfColors.action)),
                     ),

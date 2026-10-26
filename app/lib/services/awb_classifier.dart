@@ -30,21 +30,36 @@ import '../models/capture_session.dart';
 
 // ─── Save rule ──────────────────────────────────────────────────────────────
 
-/// An RT (return) AWB must be exactly 12 digits to be SAVED (Sir, 2026-10-16).
+/// Minimum digits of an RT (return) AWB (Sir, 2026-10-16; the maximum was
+/// dropped on 2026-10-26).
+const returnAwbMinDigits = 12;
+
+/// An RT (return) AWB must be digits only and AT LEAST 12 long to be SAVED —
+/// there is no maximum.
 ///
 /// A faded return label once made the app save an AWB two characters short,
 /// and the office's PK/RT merge and SAFE-T claim script could not repair it.
 /// The carrier patterns below could never have caught that: Trackon
 /// (`[A-Z0-9]{9,14}`) and "Unknown carrier" (`\d{9,16}`) accept almost any
-/// 9-16 character value, so a truncated AWB still looked valid. PK keeps the
-/// open rule — its AWBs come in many carrier formats (11, 13 and 14 digits
-/// too).
+/// 9-16 character value, so a truncated AWB still looked valid. The 12-digit
+/// floor is what stops a short read. Patch #19 made it "exactly 12", but Sir
+/// only meant the minimum: the field stopped accepting a 13th digit. PK keeps
+/// the open rule — its AWBs come in many carrier formats (11, 13 and 14
+/// digits too).
 bool isValidReturnAwb(String awb) => _returnAwb.hasMatch(awb.trim());
 
-final _returnAwb = RegExp(r'^\d{12}$');
+final _returnAwb = RegExp(r'^\d{12,}$'); // keep in step with [returnAwbMinDigits]
+
+/// The usual return AWB shape: exactly 12 digits. When a label offers both a
+/// 12-digit and a longer valid code, the scan prefers this one (see the
+/// `prefer` parameter of [CarrierPatterns.pickAwbFromBarcodes]).
+bool isStandardReturnAwb(String awb) => _standardReturnAwb.hasMatch(awb.trim());
+
+final _standardReturnAwb = RegExp(r'^\d{12}$');
 
 /// Whether [awb] is acceptable for SAVING an order of [mode]: RT needs a
-/// 12-digit AWB ([isValidReturnAwb]); PK takes any AWB, or none.
+/// digits-only AWB of at least 12 digits ([isValidReturnAwb]); PK takes any
+/// AWB, or none.
 bool awbAllowsSave(CaptureMode mode, String awb) =>
     mode != CaptureMode.rt || isValidReturnAwb(awb);
 
@@ -230,12 +245,18 @@ class CarrierPatterns {
     return best;
   }
 
+  /// Rank bonus for a `prefer`red candidate — larger than any confidence gap.
+  static const _preferBonus = 2.0;
+
   /// Pick the best AWB candidate from a list of barcode raw values.
   ///   [barcodeValues] — every raw barcode value detected in the frame
   ///   [hint] — optional carrier detected from label-text OCR; boosts that
   ///            carrier's confidence so its pattern wins ties
   ///   [accept] — values it rejects are never picked (RT passes
   ///            [isValidReturnAwb], so a truncated read cannot become the AWB)
+  ///   [prefer] — candidates it approves outrank every other accepted one
+  ///            (RT passes [isStandardReturnAwb]: a 12-digit code beats a
+  ///            longer one even when the longer one scores higher)
   ///
   /// Returns the value + matched carrier + confidence, or null if no
   /// non-Order-ID barcode passes any pattern.
@@ -243,6 +264,7 @@ class CarrierPatterns {
     List<String> barcodeValues, {
     CarrierPattern? hint,
     bool Function(String value)? accept,
+    bool Function(String value)? prefer,
   }) {
     AwbClassification? best;
     double bestScore = -1;
@@ -251,15 +273,16 @@ class CarrierPatterns {
       if (clean.isEmpty) continue;
       if (orderIdRegex.hasMatch(clean)) continue;  // skip Order ID barcodes
       if (accept != null && !accept(clean)) continue;
+      final bonus = (prefer != null && prefer(clean)) ? _preferBonus : 0.0;
       // Score every carrier that matches this value
       for (final c in all) {
         if (!c.matchesValue(clean)) continue;
         // Confidence = carrier's intrinsic specificity, boosted by hint match
         double conf = c.specificity;
         if (hint != null && hint.name == c.name) conf += 0.3;
-        if (conf > bestScore) {
+        if (conf + bonus > bestScore) {
           best = AwbClassification(value: clean, carrier: c, confidence: conf.clamp(0.0, 1.0));
-          bestScore = conf;
+          bestScore = conf + bonus;
         }
       }
     }
@@ -276,6 +299,7 @@ class CarrierPatterns {
     String ocrText, {
     CarrierPattern? hint,
     bool Function(String value)? accept,
+    bool Function(String value)? prefer,
   }) {
     final upper = ocrText.toUpperCase();
     AwbClassification? best;
@@ -287,13 +311,14 @@ class CarrierPatterns {
       if (clean.length < 8 || clean.length > 22) continue;
       if (orderIdRegex.hasMatch(clean)) continue;
       if (accept != null && !accept(clean)) continue;
+      final bonus = (prefer != null && prefer(clean)) ? _preferBonus : 0.0;
       for (final c in all) {
         if (!c.matchesValue(clean)) continue;
         double conf = c.specificity * 0.85;  // OCR text is less reliable than barcode
         if (hint != null && hint.name == c.name) conf += 0.2;
-        if (conf > bestScore) {
+        if (conf + bonus > bestScore) {
           best = AwbClassification(value: clean, carrier: c, confidence: conf.clamp(0.0, 1.0));
-          bestScore = conf;
+          bestScore = conf + bonus;
         }
       }
     }

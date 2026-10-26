@@ -6,8 +6,9 @@ import 'package:repairfully_camera/theme/rf_theme.dart';
 import 'package:repairfully_camera/widgets/rf_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// The popup's SAVE gate: an RT save needs a valid Order ID AND a 12-digit AWB
-/// (a faded return label once got an AWB two characters short saved); PK keeps
+/// The popup's SAVE gate: an RT save needs a valid Order ID AND an AWB of at
+/// least 12 digits, no maximum (a faded return label once got an AWB two
+/// characters short saved); PK keeps
 /// the open rule. The camera, scanner and storage plugins are absent in a test
 /// — the popup shrugs that off and still renders its fields, which is all this
 /// needs.
@@ -47,17 +48,17 @@ void main() {
       expect(saveEnabled(tester), isFalse);
     });
 
-    testWidgets('an AWB that is not 12 digits blocks SAVE and says how many were entered', (tester) async {
+    testWidgets('an AWB under 12 digits blocks SAVE and says how many were entered', (tester) async {
       await open(tester, CaptureMode.rt);
       await type(tester, orderField(), orderId);
 
       await type(tester, awbField(), '1234567890'); // the incident: 2 digits short
       expect(saveEnabled(tester), isFalse);
-      expect(find.text('AWB must be exactly 12 digits (10 entered)'), findsOneWidget);
+      expect(find.text('AWB must be at least 12 digits (10 entered)'), findsOneWidget);
 
       await type(tester, awbField(), '12345678901');
       expect(saveEnabled(tester), isFalse);
-      expect(find.text('AWB must be exactly 12 digits (11 entered)'), findsOneWidget);
+      expect(find.text('AWB must be at least 12 digits (11 entered)'), findsOneWidget);
     });
 
     testWidgets('12 digits unlock SAVE; losing a digit locks it again', (tester) async {
@@ -66,7 +67,7 @@ void main() {
 
       await type(tester, awbField(), '123456789012');
       expect(saveEnabled(tester), isTrue);
-      expect(find.textContaining('AWB must be exactly 12 digits'), findsNothing);
+      expect(find.textContaining('AWB must be at least 12 digits'), findsNothing);
 
       await type(tester, awbField(), '12345678901');
       expect(saveEnabled(tester), isFalse);
@@ -80,10 +81,20 @@ void main() {
       expect(find.text('Invalid Order ID prefix'), findsOneWidget);
     });
 
-    testWidgets('the AWB field takes numbers only, at most 12', (tester) async {
+    testWidgets('the AWB field takes numbers only, with no maximum length', (tester) async {
       await open(tester, CaptureMode.rt);
       await type(tester, awbField(), '12ab34-56 7890123456');
-      expect(tester.widget<TextField>(awbField()).controller!.text, '123456789012');
+      expect(tester.widget<TextField>(awbField()).controller!.text, '1234567890123456');
+    });
+
+    testWidgets('13, 14 and 20 digit AWBs save too - only a short one is blocked', (tester) async {
+      await open(tester, CaptureMode.rt);
+      await type(tester, orderField(), orderId);
+      for (final awb in ['1234567890123', '12345678901234', '12345678901234567890']) {
+        await type(tester, awbField(), awb);
+        expect(saveEnabled(tester), isTrue, reason: '${awb.length} digits');
+        expect(find.textContaining('AWB must be at least 12 digits'), findsNothing);
+      }
     });
   });
 
@@ -96,7 +107,7 @@ void main() {
 
       await type(tester, awbField(), '12345678901234'); // a 14-digit carrier AWB
       expect(saveEnabled(tester), isTrue);
-      expect(find.textContaining('AWB must be exactly 12 digits'), findsNothing);
+      expect(find.textContaining('AWB must be at least 12 digits'), findsNothing);
     });
   });
 }

@@ -82,8 +82,12 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   bool get _canSave => _isValid && _awbOk;
   String _lastAwbText = '';
 
-  /// RT only: AWB candidates the scanner may pick — 12 digits, nothing else.
+  /// RT only: AWB candidates the scanner may pick — digits, at least 12.
   bool Function(String)? get _awbAccept => widget.mode == CaptureMode.rt ? isValidReturnAwb : null;
+
+  /// RT only: when a label offers a 12-digit and a longer valid code, take the
+  /// 12-digit one (the usual return AWB).
+  bool Function(String)? get _awbPrefer => widget.mode == CaptureMode.rt ? isStandardReturnAwb : null;
 
   // Live preview camera
   CameraController? _cam;
@@ -361,7 +365,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     }
 
     // Lock-state feedback: both fields filled + Order ID is valid 3-7-7 (+ the
-    // RT AWB is 12 digits).
+    // RT AWB has at least 12 digits).
     final isLocked = _canSave && awb.isNotEmpty;
     if (isLocked && !_lockFeedbackFired) {
       _lockFeedbackFired = true;
@@ -481,7 +485,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     // a barcode too. pickAwbFromBarcodes already skips Order-ID-shaped values,
     // so the two can never take each other's slot.
     if (_awbController.text.trim().isEmpty) {
-      final pick = CarrierPatterns.pickAwbFromBarcodes(values, accept: _awbAccept);
+      final pick = CarrierPatterns.pickAwbFromBarcodes(values, accept: _awbAccept, prefer: _awbPrefer);
       if (pick != null) {
         _awbController.text = pick.value;
         _detectedCarrierName = pick.carrier.name;
@@ -739,6 +743,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         barcodeValues,
         hint: carrierHint,
         accept: _awbAccept,
+        prefer: _awbPrefer,
       );
       if (awbPick != null) {
         if (_awbController.text.trim().isEmpty) {
@@ -754,6 +759,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
           ocrResult.fullText,
           hint: carrierHint,
           accept: _awbAccept,
+          prefer: _awbPrefer,
         );
         if (textPick != null) {
           if (_awbController.text.trim().isEmpty) {
@@ -781,7 +787,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         msg = '✓ Locked${carrierName != null ? " · $carrierName" : ""} + Order ID';
       } else if (orderIdFound && !awbFound) {
         msg = widget.mode == CaptureMode.rt
-            ? 'Order ID found — no 12-digit AWB read, tap SCAN again or type it'
+            ? 'Order ID found — no valid AWB (12+ digits) read, tap SCAN again or type it'
             : 'Order ID found — no AWB detected, tap SCAN again';
       } else if (awbFound && !orderIdFound) {
         msg = '${carrierName ?? "AWB"} found — Order ID text not detected';
@@ -1373,7 +1379,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     ];
   }
 
-  /// RT: exactly 12 digits, numbers only, required. PK: free text, optional,
+  /// RT: at least 12 digits (no maximum), numbers only, required. PK: free text, optional,
   /// with the carrier the scan recognised in the label.
   Widget _buildAwbField() {
     if (widget.mode != CaptureMode.rt) {
@@ -1388,19 +1394,17 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     }
     final typed = _awbController.text.trim();
     return _buildField(
-      label: 'AWB / Tracking * — 12 digits',
+      label: 'AWB / Tracking * — 12+ digits',
       controller: _awbController,
       hint: '123456789012',
       detected: _foundAwb,
       isValid: _awbOk,
       errorText: typed.isNotEmpty && !_awbOk
-          ? 'AWB must be exactly 12 digits (${typed.length} entered)'
+          ? 'AWB must be at least 12 digits (${typed.length} entered)'
           : null,
       keyboardType: TextInputType.number,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(12),
-      ],
+      // Digits only, no upper limit — Sir only wants the 12-digit floor.
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
     );
   }
 
@@ -1416,7 +1420,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   }) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
-        Text(label, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600)),
+        Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RfColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600))),
         if (detected) ...[
           const SizedBox(width: 6),
           const Icon(Icons.auto_awesome, color: RfColors.successLight, size: 10),

@@ -74,19 +74,31 @@ void main() {
 
   // A faded return label once made the app save an AWB two characters short —
   // the carrier patterns accept almost any 9-16 character value, so nothing
-  // noticed. RT saves now need exactly 12 digits.
+  // noticed. RT saves need at least 12 digits (Sir, 2026-10-26: a minimum, no
+  // maximum - Patch #19 had made it "exactly 12").
   group('isValidReturnAwb', () {
-    test('accepts exactly 12 ASCII digits, ignoring surrounding whitespace', () {
+    test('accepts 12 ASCII digits, ignoring surrounding whitespace', () {
       expect(isValidReturnAwb('123456789012'), isTrue);
       expect(isValidReturnAwb('  123456789012 \n'), isTrue);
     });
 
-    test('rejects an AWB that lost (or gained) characters', () {
+    test('has no maximum: 13, 14, 20 and 30 digits are fine', () {
+      expect(isValidReturnAwb('1234567890123'), isTrue);
+      expect(isValidReturnAwb('12345678901234'), isTrue);
+      expect(isValidReturnAwb('1' * 20), isTrue);
+      expect(isValidReturnAwb('1' * 30), isTrue);
+    });
+
+    test('rejects an AWB that lost characters', () {
       expect(isValidReturnAwb('1234567890'), isFalse, reason: '2 short');
       expect(isValidReturnAwb('12345678901'), isFalse, reason: '1 short');
-      expect(isValidReturnAwb('1234567890123'), isFalse, reason: '1 long');
-      expect(isValidReturnAwb('12345678901234'), isFalse, reason: 'a 14-digit AWB');
       expect(isValidReturnAwb(''), isFalse);
+    });
+
+    test('isStandardReturnAwb is exactly 12 digits', () {
+      expect(isStandardReturnAwb('123456789012'), isTrue);
+      expect(isStandardReturnAwb('1234567890123'), isFalse);
+      expect(isStandardReturnAwb('12345678901'), isFalse);
     });
 
     test('rejects letters, separators and non-ASCII digits', () {
@@ -101,8 +113,9 @@ void main() {
   });
 
   group('awbAllowsSave', () {
-    test('RT saves need a 12-digit AWB', () {
+    test('RT saves need an AWB of at least 12 digits', () {
       expect(awbAllowsSave(CaptureMode.rt, '123456789012'), isTrue);
+      expect(awbAllowsSave(CaptureMode.rt, '12345678901234'), isTrue);
       expect(awbAllowsSave(CaptureMode.rt, '1234567890'), isFalse);
       expect(awbAllowsSave(CaptureMode.rt, ''), isFalse);
     });
@@ -115,8 +128,9 @@ void main() {
   });
 
   group('accept filter (what RT passes so a truncated read cannot become the AWB)', () {
-    test('barcodes: a 12-digit AWB beats a 14-digit code that scores higher', () {
-      // Unfiltered, the 14-digit value wins (Delhivery 0.75 vs 12-digit 0.65).
+    test('barcodes: a 12-digit AWB is preferred over a longer valid code that scores higher', () {
+      // Unfiltered, the 14-digit value wins (Delhivery 0.75 vs 12-digit 0.65) -
+      // and accept alone no longer rejects it (no maximum any more).
       expect(CarrierPatterns.pickAwbFromBarcodes(['12345678901234', '123456789012'])?.value,
           '12345678901234');
       expect(
@@ -124,7 +138,27 @@ void main() {
           ['12345678901234', '123456789012'],
           accept: isValidReturnAwb,
         )?.value,
+        '12345678901234',
+      );
+      // What RT passes: accept + prefer the usual 12-digit shape.
+      expect(
+        CarrierPatterns.pickAwbFromBarcodes(
+          ['12345678901234', '123456789012'],
+          accept: isValidReturnAwb,
+          prefer: isStandardReturnAwb,
+        )?.value,
         '123456789012',
+      );
+    });
+
+    test('barcodes: a longer valid code is still taken when it is the only one', () {
+      expect(
+        CarrierPatterns.pickAwbFromBarcodes(
+          ['12345678901234'],
+          accept: isValidReturnAwb,
+          prefer: isStandardReturnAwb,
+        )?.value,
+        '12345678901234',
       );
     });
 
@@ -134,13 +168,18 @@ void main() {
       expect(CarrierPatterns.pickAwbFromBarcodes(['1234567890'], accept: isValidReturnAwb), isNull);
     });
 
-    test('OCR text: only a 12-digit token is taken, order ids still skipped', () {
+    test('OCR text: only a 12+ digit token is taken, order ids still skipped', () {
       const text = 'AWB 1234567890 order 407-1234567-1234567 qty 2';
       expect(CarrierPatterns.findAwbInText(text), isNotNull,
           reason: 'without the filter the 10-digit token is taken');
       expect(CarrierPatterns.findAwbInText(text, accept: isValidReturnAwb), isNull);
       expect(
         CarrierPatterns.findAwbInText('$text 123456789012', accept: isValidReturnAwb)?.value,
+        '123456789012',
+      );
+      expect(
+        CarrierPatterns.findAwbInText('$text 12345678901234 123456789012',
+            accept: isValidReturnAwb, prefer: isStandardReturnAwb)?.value,
         '123456789012',
       );
     });
