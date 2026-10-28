@@ -76,8 +76,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   // Amazon's Order ID prefixes — every valid order id starts with one of these.
   bool _isValid = false;
   bool _prefixValid = true;
-  // RT saves need a 12-digit AWB (see awbAllowsSave); PK takes any. Kept as
-  // state, like _isValid, so the SAVE button follows every keystroke.
+  // The AWB may be blank; a typed RT AWB must have at least 12 digits (see
+  // awbAllowsSave); PK takes any. Kept as state, like _isValid, so the SAVE
+  // button follows every keystroke.
   late bool _awbOk = awbAllowsSave(widget.mode, '');
   bool get _canSave => _isValid && _awbOk;
   String _lastAwbText = '';
@@ -364,8 +365,8 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       setState(() => _duplicateWarning = warn);
     }
 
-    // Lock-state feedback: both fields filled + Order ID is valid 3-7-7 (+ the
-    // RT AWB has at least 12 digits).
+    // Lock-state feedback: both fields filled + Order ID is valid 3-7-7 (+ a
+    // typed RT AWB has at least 12 digits).
     final isLocked = _canSave && awb.isNotEmpty;
     if (isLocked && !_lockFeedbackFired) {
       _lockFeedbackFired = true;
@@ -787,7 +788,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         msg = '✓ Locked${carrierName != null ? " · $carrierName" : ""} + Order ID';
       } else if (orderIdFound && !awbFound) {
         msg = widget.mode == CaptureMode.rt
-            ? 'Order ID found — no valid AWB (12+ digits) read, tap SCAN again or type it'
+            ? 'Order ID found — no valid AWB (12+ digits) read, tap SCAN again, type it, or SAVE without'
             : 'Order ID found — no AWB detected, tap SCAN again';
       } else if (awbFound && !orderIdFound) {
         msg = '${carrierName ?? "AWB"} found — Order ID text not detected';
@@ -1379,7 +1380,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     ];
   }
 
-  /// RT: at least 12 digits (no maximum), numbers only, required. PK: free text, optional,
+  /// RT: optional, but a typed AWB needs at least 12 digits (no maximum), numbers only. PK: free text, optional,
   /// with the carrier the scan recognised in the label.
   Widget _buildAwbField() {
     if (widget.mode != CaptureMode.rt) {
@@ -1394,11 +1395,12 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     }
     final typed = _awbController.text.trim();
     return _buildField(
-      label: 'AWB / Tracking * — 12+ digits',
+      label: 'AWB / Tracking (optional) — 12+ digits',
       controller: _awbController,
       hint: '123456789012',
       detected: _foundAwb,
-      isValid: _awbOk,
+      // A blank field is allowed, but not a "valid AWB" - no green tick for it.
+      isValid: typed.isNotEmpty && _awbOk,
       errorText: typed.isNotEmpty && !_awbOk
           ? 'AWB must be at least 12 digits (${typed.length} entered)'
           : null,

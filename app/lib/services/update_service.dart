@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:21 - RT AWB: minimum 12 digit, maximum koi nahi\n- AWB box ab 12 se zyada digit bhi leta hai (pehle 13vaan digit ruk jata tha)\n- 12 se kam digit par SAVE abhi bhi band rehta hai\n- Scan pehle 12-digit AWB chunta hai, lamba code tabhi jab 12-digit na mile\n- PK mein koi badlav nahi';
+      '2.1.0+14:22 - RT mein tracking ID blank bhi save ho sakti hai\n- Tracking ID khali chhod kar SAVE kar sakte ho (sirf Order ID chahiye)\n- Agar tracking ID type karte ho to rule lagta hai: sirf digits, kam se kam 12 (max koi nahi)\n- Auto-save abhi bhi AWB padhne ke baad hi chalta hai\n- PK mein koi badlav nahi';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

@@ -57,11 +57,16 @@ bool isStandardReturnAwb(String awb) => _standardReturnAwb.hasMatch(awb.trim());
 
 final _standardReturnAwb = RegExp(r'^\d{12}$');
 
-/// Whether [awb] is acceptable for SAVING an order of [mode]: RT needs a
-/// digits-only AWB of at least 12 digits ([isValidReturnAwb]); PK takes any
-/// AWB, or none.
+/// Whether [awb] is acceptable for SAVING an order of [mode]. The tracking ID
+/// may be left BLANK in both modes (Sir, 2026-10-28) - but once anything is
+/// typed, the RT digit rule applies: digits only, at least 12
+/// ([isValidReturnAwb]). PK takes any AWB, or none.
+///
+/// Blank is a manual-save choice only: auto-save still waits for a read AWB
+/// (see the popup's `_autoSaveBlocker`), so a scan that has not found the AWB
+/// yet does not save an order without one.
 bool awbAllowsSave(CaptureMode mode, String awb) =>
-    mode != CaptureMode.rt || isValidReturnAwb(awb);
+    mode != CaptureMode.rt || awb.trim().isEmpty || isValidReturnAwb(awb);
 
 class CarrierPattern {
   /// Display name shown to the user.

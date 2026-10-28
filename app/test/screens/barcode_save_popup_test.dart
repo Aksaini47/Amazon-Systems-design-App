@@ -40,12 +40,25 @@ void main() {
   }
 
   group('RT', () {
-    testWidgets('SAVE stays disabled without an AWB, however good the Order ID', (tester) async {
+    testWidgets('a blank tracking ID can be saved - an Order ID is all it takes', (tester) async {
       await open(tester, CaptureMode.rt);
-      expect(saveEnabled(tester), isFalse);
+      expect(saveEnabled(tester), isFalse, reason: 'no Order ID yet');
       await type(tester, orderField(), orderId);
       expect(tester.widget<TextField>(orderField()).controller!.text, '407-1234567-1234567');
+      expect(saveEnabled(tester), isTrue);
+      expect(find.textContaining('AWB must be at least 12 digits'), findsNothing);
+    });
+
+    testWidgets('typing in the tracking ID brings the digit rule in; clearing it lifts it',
+        (tester) async {
+      await open(tester, CaptureMode.rt);
+      await type(tester, orderField(), orderId);
+      await type(tester, awbField(), '12345');
       expect(saveEnabled(tester), isFalse);
+      expect(find.text('AWB must be at least 12 digits (5 entered)'), findsOneWidget);
+      await type(tester, awbField(), '');
+      expect(saveEnabled(tester), isTrue);
+      expect(find.textContaining('AWB must be at least 12 digits'), findsNothing);
     });
 
     testWidgets('an AWB under 12 digits blocks SAVE and says how many were entered', (tester) async {

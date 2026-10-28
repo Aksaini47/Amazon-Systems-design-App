@@ -113,11 +113,18 @@ void main() {
   });
 
   group('awbAllowsSave', () {
-    test('RT saves need an AWB of at least 12 digits', () {
+    test('RT: a typed AWB needs at least 12 digits', () {
       expect(awbAllowsSave(CaptureMode.rt, '123456789012'), isTrue);
       expect(awbAllowsSave(CaptureMode.rt, '12345678901234'), isTrue);
       expect(awbAllowsSave(CaptureMode.rt, '1234567890'), isFalse);
-      expect(awbAllowsSave(CaptureMode.rt, ''), isFalse);
+      expect(awbAllowsSave(CaptureMode.rt, '12345678901A'), isFalse);
+    });
+
+    test('RT: the tracking ID may be left blank', () {
+      expect(awbAllowsSave(CaptureMode.rt, ''), isTrue);
+      expect(awbAllowsSave(CaptureMode.rt, '   '), isTrue, reason: 'whitespace is blank');
+      // ...but blank is not a valid AWB for the scanner / the digit rule.
+      expect(isValidReturnAwb(''), isFalse);
     });
 
     test('PK keeps the open rule: any AWB, or none', () {
