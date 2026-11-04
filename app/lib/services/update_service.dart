@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:22 - RT mein tracking ID blank bhi save ho sakti hai\n- Tracking ID khali chhod kar SAVE kar sakte ho (sirf Order ID chahiye)\n- Agar tracking ID type karte ho to rule lagta hai: sirf digits, kam se kam 12 (max koi nahi)\n- Auto-save abhi bhi AWB padhne ke baad hi chalta hai\n- PK mein koi badlav nahi';
+      '2.1.0+14:23 - Order ID mein website ka format bhi: RF-YYMMDD-NNNN\n- Order ID box mein RF-261104-0004 jaisa id ab chalta hai (RF- button se shuru, phir sirf number)\n- Date asli honi chahiye (jaise 261104 = 4 Nov 2026); galat date par SAVE band aur message\n- Amazon 3-7-7 id aur uska prefix rule bilkul pehle jaisa; dono mein clash nahi\n- Scanner RF id ko kabhi tracking ID nahi samajhta';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

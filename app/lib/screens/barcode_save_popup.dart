@@ -17,6 +17,7 @@ import '../theme/rf_glass.dart';
 import '../widgets/rf_button.dart';
 import '../services/activity_log_service.dart';
 import '../utils/order_id_matcher.dart';
+import '../utils/order_id_input_formatter.dart';
 import '../utils/volume_button_service.dart';
 
 /// Full-screen label scan — manual SCAN tap or optional auto-scan (Settings).
@@ -24,7 +25,8 @@ import '../utils/volume_button_service.dart';
 /// AWB detection logic (also documented in MainActivity DND channel comments):
 ///   - mobile_scanner.analyzeImage(frame) returns ALL barcodes in the image
 ///   - For each barcode's rawValue:
-///       * if value matches `\d{3}-\d{7}-\d{7}` → goes to Order ID field
+///       * if value matches `\d{3}-\d{7}-\d{7}` (or the website's
+///         `RF-YYMMDD-NNNN`) → goes to Order ID field
 ///         (this is also how labels encode the Order ID barcode)
 ///       * otherwise → first such barcode becomes the AWB
 ///   - OCR also runs on the same frame as a fallback path for Order ID
@@ -36,35 +38,6 @@ class BarcodeSavePopup extends StatefulWidget {
   State<BarcodeSavePopup> createState() => _BarcodeSavePopupState();
 }
 
-/// Digits-only, auto-inserts hyphens at positions 3 and 10 to match the
-/// 3-7-7 Order ID shape while typing. Caps at 17 digits. Programmatic
-/// `.text =` assignment (scan/OCR autofill) bypasses this — formatters only
-/// intercept user keystrokes, so already-correct scanned values pass through
-/// untouched.
-class _OrderIdInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-    final capped = digits.length > 17 ? digits.substring(0, 17) : digits;
-    final buf = StringBuffer();
-    for (var i = 0; i < capped.length; i++) {
-      buf.write(capped[i]);
-      if ((i == 2 || i == 9) && i != capped.length - 1) buf.write('-');
-    }
-    final formatted = buf.toString();
-
-    final digitsBeforeCursor = newValue.text
-        .substring(0, newValue.selection.end.clamp(0, newValue.text.length))
-        .replaceAll(RegExp(r'[^0-9]'), '').length;
-    var cursor = 0, seen = 0;
-    while (cursor < formatted.length && seen < digitsBeforeCursor) {
-      if (formatted[cursor] != '-') seen++;
-      cursor++;
-    }
-    return TextEditingValue(text: formatted, selection: TextSelection.collapsed(offset: cursor));
-  }
-}
-
 /// User's choice when a scanned/typed RT Order ID is a near-match (1-3
 /// digits off) of a known PK Order ID.
 enum _MismatchResolution { useSuggested, keep, retake }
@@ -72,7 +45,6 @@ enum _MismatchResolution { useSuggested, keep, retake }
 class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   final _orderIdController = TextEditingController();
   final _awbController = TextEditingController();
-  final _orderIdRegex = RegExp(r'^\d{3}-\d{7}-\d{7}$');
   // Amazon's Order ID prefixes — every valid order id starts with one of these.
   bool _isValid = false;
   bool _prefixValid = true;
@@ -343,12 +315,16 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     // set the verdict, so this never wipes a fresh one.
     if (orderId != _lastOrderIdText) {
       _lastOrderIdText = orderId;
-      if (_orderIdConflictValue != null) {
-        setState(() => _orderIdConflictValue = null);
+      // Repaint on every Order ID change: the "needs a real date" hint depends
+      // on the text, not only on the flags _validateInput flips.
+      if (mounted) {
+        setState(() {
+          if (_orderIdConflictValue != null) _orderIdConflictValue = null;
+        });
       }
     }
     String? warn;
-    if (_orderIdRegex.hasMatch(orderId)) {
+    if (isOrderIdShape(orderId)) {
       final storageKey = FileNamingService.orderFolderName(orderId, widget.mode);
       if (_existingOrderIds.contains(storageKey)) {
         warn = 'Order $orderId already saved (${widget.mode.name.toUpperCase()})';
@@ -470,9 +446,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     // number into this field in the first place. _crossCheckOrderId then
     // reads the same frame's printed digits and flags a disagreement, which
     // _maybeAutoSave treats as a block.
-    if (!_orderIdRegex.hasMatch(_orderIdController.text.trim())) {
+    if (!isOrderIdShape(_orderIdController.text.trim())) {
       for (final v in values) {
-        if (_orderIdRegex.hasMatch(v)) {
+        if (isOrderIdShape(v)) {
           _orderIdController.text = v;
           _foundOrderId = true;
           changed = true;
@@ -732,7 +708,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         final raw = b.rawValue?.trim();
         if (raw == null || raw.isEmpty) continue;
         barcodeValues.add(raw);
-        if (_orderIdRegex.hasMatch(raw)) {
+        if (isOrderIdShape(raw)) {
           barcodeOrderId ??= raw;
           orderIdFound = true;
         }
@@ -781,7 +757,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       // (Lock-feedback is fired by _onTextChanged() once both fields are
       //  valid — we let that path own the gating to keep manual-typing and
       //  scan-fill paths consistent.)
-      final orderIdOk = _orderIdRegex.hasMatch(_orderIdController.text.trim());
+      final orderIdOk = isOrderIdShape(_orderIdController.text.trim());
       if (_orderIdConflictValue != null) {
         msg = 'Order ID mismatch — barcode and label text disagree, check the label';
       } else if (awbFound && orderIdOk) {
@@ -826,7 +802,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   /// silently confirm, or overwrite, what is there).
   void _applyOrderIdReads({String? barcodeId, String? ocrId}) {
     var filledNow = false;
-    if (!_orderIdRegex.hasMatch(_orderIdController.text.trim())) {
+    if (!isOrderIdShape(_orderIdController.text.trim())) {
       final chosen = barcodeId ?? ocrId;
       if (chosen == null) return;
       _orderIdController.text = chosen;
@@ -849,8 +825,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
 
   void _validateInput() {
     final text = _orderIdController.text.trim();
-    final formatOk = _orderIdRegex.hasMatch(text);
-    final prefixOk = !formatOk || validOrderIdPrefixes.contains(text.substring(0, 3));
+    final formatOk = isOrderIdShape(text);
+    // The website id (RF-YYMMDD-NNNN) has no Amazon prefix to gate on.
+    final prefixOk = !formatOk || isWebsiteOrderId(text) || validOrderIdPrefixes.contains(text.substring(0, 3));
     final valid = formatOk && prefixOk;
     final awbOk = awbAllowsSave(widget.mode, _awbController.text);
     if (valid != _isValid || prefixOk != _prefixValid || awbOk != _awbOk) {
@@ -1165,16 +1142,19 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
                 _buildField(
                   label: 'Order ID *',
                   controller: _orderIdController,
-                  hint: '407-1234567-1234567',
+                  hint: '407-1234567-1234567  or  RF-261104-0004',
+                  labelAction: _buildRfPrefixButton(),
                   detected: _foundOrderId,
                   isValid: _isValid,
                   errorText: _orderIdConflictValue != null
                       ? 'Mismatch — the label also reads $_orderIdConflictValue, check it before saving'
                       : (!_prefixValid && _orderIdController.text.trim().isNotEmpty)
                           ? 'Invalid Order ID prefix'
-                          : null,
+                          : _badWebsiteDate
+                              ? 'Website order ID needs a real date: RF-YYMMDD-NNNN'
+                              : null,
                   keyboardType: TextInputType.number,
-                  inputFormatters: [_OrderIdInputFormatter()],
+                  inputFormatters: [OrderIdInputFormatter()],
                 ),
                 const SizedBox(height: 8),
                 _buildAwbField(),
@@ -1410,6 +1390,33 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     );
   }
 
+  /// A full-length RF- id whose date part is not a real calendar date.
+  bool get _badWebsiteDate {
+    final t = _orderIdController.text.trim();
+    return t.startsWith('RF-') && t.length == 14 && !isWebsiteOrderId(t);
+  }
+
+  /// "RF-" shortcut beside the Order ID label: the keyboard here is numeric, so
+  /// the website prefix is one tap (then digits only: 261104 and 0004).
+  Widget _buildRfPrefixButton() {
+    return GestureDetector(
+      onTap: () {
+        _orderIdController.value = const TextEditingValue(
+          text: 'RF-',
+          selection: TextSelection.collapsed(offset: 3),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: BoxDecoration(
+          border: Border.all(color: RfColors.border),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Text('RF-', style: TextStyle(color: RfColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w700)),
+      ),
+    );
+  }
+
   Widget _buildField({
     required String label,
     required TextEditingController controller,
@@ -1419,6 +1426,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     String? errorText,
     List<TextInputFormatter>? inputFormatters,
     TextInputType keyboardType = TextInputType.text,
+    Widget? labelAction,
   }) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
@@ -1429,6 +1437,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
           const SizedBox(width: 3),
           const Text('auto', style: TextStyle(color: RfColors.successLight, fontSize: 9, fontStyle: FontStyle.italic)),
         ],
+        if (labelAction != null) ...[const Spacer(), labelAction],
       ]),
       const SizedBox(height: 4),
       TextField(

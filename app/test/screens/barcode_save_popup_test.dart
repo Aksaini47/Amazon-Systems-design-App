@@ -111,6 +111,38 @@ void main() {
     });
   });
 
+  group('website order id RF-YYMMDD-NNNN', () {
+    testWidgets('typed digits after the RF- shortcut make a saveable order id (RT, blank tracking)',
+        (tester) async {
+      await open(tester, CaptureMode.rt);
+      await tester.tap(find.text('RF-'));
+      await tester.pump();
+      expect(tester.widget<TextField>(orderField()).controller!.text, 'RF-');
+      expect(saveEnabled(tester), isFalse);
+
+      await type(tester, orderField(), 'RF-2611040004');
+      expect(tester.widget<TextField>(orderField()).controller!.text, 'RF-261104-0004');
+      expect(saveEnabled(tester), isTrue, reason: 'no Amazon prefix gate for the website id');
+      expect(find.text('Invalid Order ID prefix'), findsNothing);
+    });
+
+    testWidgets('a full id with an impossible date stays unsaveable and says why', (tester) async {
+      await open(tester, CaptureMode.pk);
+      await type(tester, orderField(), 'RF-2613040004');
+      expect(saveEnabled(tester), isFalse);
+      expect(find.textContaining('real date'), findsOneWidget);
+    });
+
+    testWidgets('Amazon ids keep their prefix gate next to it', (tester) async {
+      await open(tester, CaptureMode.pk);
+      await type(tester, orderField(), '99912345671234567');
+      expect(saveEnabled(tester), isFalse);
+      expect(find.text('Invalid Order ID prefix'), findsOneWidget);
+      await type(tester, orderField(), '40712345671234567');
+      expect(saveEnabled(tester), isTrue);
+    });
+  });
+
   group('PK', () {
     testWidgets('keeps the open rule: SAVE needs only a valid Order ID', (tester) async {
       await open(tester, CaptureMode.pk);

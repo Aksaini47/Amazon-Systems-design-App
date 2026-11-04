@@ -27,6 +27,7 @@ library;
 import 'package:flutter/foundation.dart';
 
 import '../models/capture_session.dart';
+import '../utils/order_id_matcher.dart';
 
 // ─── Save rule ──────────────────────────────────────────────────────────────
 
@@ -238,7 +239,7 @@ class CarrierPatterns {
   static CarrierPattern? classify(String value) {
     final v = value.trim();
     if (v.isEmpty) return null;
-    if (orderIdRegex.hasMatch(v)) return null;  // it's an Order ID, not AWB
+    if (isOrderIdShape(v)) return null;  // it's an Order ID, not AWB
     CarrierPattern? best;
     double bestSpec = -1;
     for (final c in all) {
@@ -276,7 +277,7 @@ class CarrierPatterns {
     for (final v in barcodeValues) {
       final clean = v.trim();
       if (clean.isEmpty) continue;
-      if (orderIdRegex.hasMatch(clean)) continue;  // skip Order ID barcodes
+      if (isOrderIdShape(clean)) continue;  // skip Order ID barcodes (Amazon or website)
       if (accept != null && !accept(clean)) continue;
       final bonus = (prefer != null && prefer(clean)) ? _preferBonus : 0.0;
       // Score every carrier that matches this value
@@ -314,7 +315,7 @@ class CarrierPatterns {
     for (final tok in tokens) {
       final clean = tok.trim();
       if (clean.length < 8 || clean.length > 22) continue;
-      if (orderIdRegex.hasMatch(clean)) continue;
+      if (isOrderIdShape(clean)) continue;
       if (accept != null && !accept(clean)) continue;
       final bonus = (prefer != null && prefer(clean)) ? _preferBonus : 0.0;
       for (final c in all) {

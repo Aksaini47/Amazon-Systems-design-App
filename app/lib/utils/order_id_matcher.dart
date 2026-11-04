@@ -18,13 +18,40 @@ const validOrderIdPrefixes = {
   '171', '402', '403', '404', '405', '406', '407', '408', '409',
 };
 
+final _amazonShape = RegExp(r'^\d{3}-\d{7}-\d{7}$');
+final _websiteShape = RegExp(r'^RF-(\d{2})(\d{2})(\d{2})-\d{4}$');
+
 /// True when [orderId] is exactly 3-7-7 digits AND carries a real Amazon
 /// prefix. Shape alone is not enough — that was the old bug.
 bool isPlausibleOrderId(String orderId) {
   final t = orderId.trim();
-  if (!RegExp(r'^\d{3}-\d{7}-\d{7}$').hasMatch(t)) return false;
+  if (!_amazonShape.hasMatch(t)) return false;
   return validOrderIdPrefixes.contains(t.substring(0, 3));
 }
+
+/// The website's own order ID: `RF-YYMMDD-NNNN` (Sir, 2026-11-04, e.g.
+/// `RF-261104-0004` = 4 Nov 2026, serial 0004). The date part must be a real
+/// calendar date. It starts with letters, so it can never be mistaken for an
+/// Amazon 3-7-7 id, a tracking number or a PK/RT near-match candidate.
+bool isWebsiteOrderId(String orderId) {
+  final m = _websiteShape.firstMatch(orderId.trim());
+  if (m == null) return false;
+  final year = 2000 + int.parse(m[1]!);
+  final month = int.parse(m[2]!);
+  final day = int.parse(m[3]!);
+  if (month < 1 || month > 12 || day < 1) return false;
+  return day <= DateTime(year, month + 1, 0).day;
+}
+
+/// Shape of EITHER accepted order id (Amazon 3-7-7 or website RF-YYMMDD-NNNN) -
+/// no prefix gate; see [isValidOrderId] for the full rule.
+bool isOrderIdShape(String orderId) {
+  final t = orderId.trim();
+  return _amazonShape.hasMatch(t) || isWebsiteOrderId(t);
+}
+
+/// Complete Order ID rule: a website id, or an Amazon id with a real prefix.
+bool isValidOrderId(String orderId) => isWebsiteOrderId(orderId) || isPlausibleOrderId(orderId);
 
 // ─── Dual-channel cross-check ───────────────────────────────────────────
 //
