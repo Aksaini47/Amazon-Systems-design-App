@@ -65,17 +65,22 @@ class DraftSaveService {
     }
   }
 
-  static Future<String?> captureMissingPhoto(
+  /// Stores a photo just taken with the in-app camera
+  /// (`captureInAppPhoto`) as a draft photo and returns its path. The camera's
+  /// own temp file is removed once copied.
+  static Future<String> saveCapturedPhoto(
+    XFile shot,
     CaptureMode mode,
     PhotoSide side,
     LocalStorageService storage,
   ) async {
-    final picked = await ImagePicker().pickImage(
-      source: ImageSource.camera,
-      imageQuality: 92,
-    );
-    if (picked == null) return null;
-    return storage.saveDraftPhoto(File(picked.path), mode, side);
+    try {
+      return await storage.saveDraftPhoto(File(shot.path), mode, side);
+    } finally {
+      try {
+        await File(shot.path).delete();
+      } catch (_) {}
+    }
   }
 
   static Future<CaptureSession> promoteDraftSession({

@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:24 - Label scan: BARCODE default + TEXT switcher, English keyboard, courier letters\n- Label screen ab seedha BARCODE mode mein khulta hai (patli strip, ek barcode ek baar)\n- Barcode reader tez: har frame check, sirf label wale barcode types\n- "Stuck" ab sirf tab jab camera sach mein start na ho; Retry poora naya scanner chalata hai\n- Neeche BARCODE | TEXT switcher; TEXT (OCR) ka frame 3:4\n- Order ID aur AWB mein English keyboard, sab CAPITALS\n- RT AWB: 12+ digit, ya India Post / DTDC / Shadowfax / Ekart / Xpressbees ka exact format\n- OCR ki 0/O, 1/I jaisi galti format ke hisaab se theek; letter wala OCR AWB auto-save nahi, SAVE tap karo';
+      '2.1.0+14:25 - Video player polish + in-app camera for Replace photo + Edit order sheet\n- Video: pinch zoom, zoom ke baad pan/swipe, double-tap center = zoom\n- Left/right edge double-tap = 10 sec peeche/aage (tap karte raho to aur skip)\n- Sideways swipe se scrub, bada seek bar (48dp), time bubble, 0.5x-2x speed\n- Proper full screen: immersive, rotate button, neeche swipe se band, playback jaari rehta hai\n- Replace photo ab app ke apne camera se (3:4, focus, zoom, flash, Retake/Use)\n- Edit order sheet navigation buttons aur keyboard ke upar, scroll hota hai, AWB English keyboard';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

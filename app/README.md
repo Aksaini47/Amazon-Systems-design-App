@@ -22,7 +22,16 @@ on the phone (backend sync was removed in 2.0.0 patch 8).
   `meta.json`.
 - Label screen (PK + RT): opens on the live BARCODE reader (a short strip frame, one barcode at a time); a floating BARCODE | TEXT switcher moves to OCR (3:4 frame) for torn/faded labels. The reader analyses every frame for Code128 / Code39 / QR only; "Camera not starting" + Retry appears only when the camera itself fails (no barcode in view just changes the hint), and Retry rebuilds the scanner from scratch. OCR AWBs are repaired by position (0/O, 1/I, 5/S ...) against the courier format, and a lettered or repaired OCR read waits for a SAVE tap instead of auto-saving. Both fields use the English keyboard, capitals only.
 - Gallery: browse, edit, re-tag, pinch-zoom; drafts auto-recovered after a
-  crash.
+  crash. "Replace photo" (and capturing a missing draft photo) opens the app's
+  own camera — 3:4 viewfinder, tap to focus, pinch zoom, flash, Retake / Use
+  photo — never the phone's camera app.
+- Video player (`widgets/rf_video_player.dart`): pinch to zoom (6x) and pan
+  while zoomed; double-tap the left / right edge for -10 s / +10 s (keep
+  tapping to keep skipping), middle double-tap zooms; swipe sideways to scrub;
+  48 dp seek bar with a time bubble; 0.5x-2x speed; real full screen
+  (immersive, screen kept awake, rotate button, swipe down to close) that hands
+  the same controller over, so playback carries on. Bottom sheets with fields
+  (Edit order) use `RfSheetBody`, which clears the navigation bar and keyboard.
 
 ## Stack
 

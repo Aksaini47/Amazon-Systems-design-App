@@ -2,19 +2,21 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:video_player/video_player.dart';
 import '../models/capture_session.dart';
 import '../services/awb_classifier.dart';
 import '../services/draft_save_service.dart';
 import '../services/file_naming_service.dart';
 import '../services/local_storage_service.dart';
 import '../utils/debug_session_log.dart';
+import '../utils/order_id_input_formatter.dart';
 import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
 import '../widgets/rf_button.dart';
+import '../widgets/rf_sheet_body.dart';
+import '../widgets/rf_video_player.dart';
 import 'barcode_save_popup.dart';
+import 'photo_capture_screen.dart';
 import 'verdict_bottom_sheet.dart';
 
 /// Local Gallery — browses videos and photos saved on this device.
@@ -672,6 +674,14 @@ Future<_PhotoAction?> _showPhotoActionSheet(
   );
 }
 
+/// A save error as a plain sentence: "Order ID is required", not
+/// "Invalid argument(s): Order ID is required" / "Bad state: ...".
+String _editErrorText(Object e) {
+  if (e is ArgumentError) return '${e.message}';
+  if (e is StateError) return e.message;
+  return '$e'.replaceFirst('Exception: ', '');
+}
+
 Future<bool> _confirmRemovePhoto(BuildContext context, String sideLabel) async {
   final ok = await showDialog<bool>(
     context: context,
@@ -1046,250 +1056,6 @@ class _DraftSessionCard extends StatelessWidget {
   }
 }
 
-// ─── Inline video player (used on OrderDetailScreen) ─────────────────
-
-class _InlineVideoPlayer extends StatefulWidget {
-  final String path;
-  const _InlineVideoPlayer({required this.path});
-
-  @override
-  State<_InlineVideoPlayer> createState() => _InlineVideoPlayerState();
-}
-
-class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
-  VideoPlayerController? _ctrl;
-  bool _failed = false;
-  bool _showControls = true;
-  String? _errorMessage;
-  TransformationController? _zoomCtrl;
-
-  @override
-  void initState() {
-    super.initState();
-    _zoomCtrl = TransformationController();
-    _init();
-  }
-
-  Future<void> _init() async {
-    try {
-      final file = File(widget.path);
-      if (!await file.exists()) {
-        setState(() { _failed = true; _errorMessage = 'File missing'; });
-        return;
-      }
-      _ctrl = VideoPlayerController.file(file);
-      await _ctrl!.initialize();
-      _ctrl!.addListener(() { if (mounted) setState(() {}); });
-      if (mounted) setState(() {});
-    } catch (e) {
-      debugPrint('Video init failed: $e');
-      if (mounted) setState(() { _failed = true; _errorMessage = e.toString(); });
-    }
-  }
-
-  @override
-  void dispose() {
-    _zoomCtrl?.dispose();
-    _ctrl?.dispose();
-    super.dispose();
-  }
-
-  void _resetVideoZoom() {
-    _zoomCtrl?.value = Matrix4.identity();
-  }
-
-  void _toggleVideoZoom() {
-    final ctrl = _zoomCtrl;
-    if (ctrl == null) return;
-    final scale = ctrl.value.getMaxScaleOnAxis();
-    if (scale > 1.01) {
-      ctrl.value = Matrix4.identity();
-    } else {
-      ctrl.value = Matrix4.diagonal3Values(2.5, 2.5, 1.0);
-    }
-  }
-
-  String _fmt(Duration d) {
-    final m = d.inMinutes.toString().padLeft(2, '0');
-    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_failed) {
-      return Container(
-        height: 200,
-        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(12)),
-        child: Center(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.broken_image, color: Colors.white24, size: 40),
-            const SizedBox(height: 8),
-            Text(_errorMessage ?? 'Could not load video', style: const TextStyle(color: RfColors.textSecondary, fontSize: 12)),
-          ]),
-        ),
-      );
-    }
-    if (_ctrl == null || !_ctrl!.value.isInitialized) {
-      return Container(
-        height: 200,
-        decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(12)),
-        child: const Center(child: CircularProgressIndicator(color: RfColors.textMuted)),
-      );
-    }
-    final v = _ctrl!.value;
-    // ─── ASPECT FIX (no rotation) ─────────────────────────────────────
-    //
-    // ROOT CAUSE (verified via ffprobe + ffmpeg frame extraction on a
-    // real recording):
-    //   - MP4 reports coded dimensions 1920×1080 with rotation=-90 in the
-    //     Display Matrix side_data
-    //   - video_player_android v2.7.x reports value.size = (1920, 1080)
-    //     and value.aspectRatio = 1.78 — i.e. it returns the LANDSCAPE
-    //     coded dims, ignoring the rotation matrix
-    //   - BUT the texture content the platform decoder hands to the
-    //     player IS already pre-rotated portrait pixels (1080×1920) —
-    //     extracting a frame with `ffmpeg -frames:v 1` produces a 1080×1920
-    //     portrait image. The texture content matches what's stored.
-    //
-    // So: the player widget needs a PORTRAIT-shaped slot. If we render
-    // it into a landscape AspectRatio (1.78), the portrait texture gets
-    // squished into a landscape rectangle → that's the "stretch" the
-    // user reported. A previous attempt added RotatedBox, which only
-    // rotated the already-stretched content (still stretched, just
-    // sideways).
-    //
-    // FIX: Detect "ignored rotation" via the same heuristic (our app
-    // records portrait, so coded dims > height = ignored rotation) and
-    // pass the SWAPPED aspect (height/width = portrait) to AspectRatio.
-    // No RotatedBox — the texture is already pre-rotated.
-    final ignoredRotation = v.size.width > v.size.height && v.size.height > 0;
-    final effectiveAspect = ignoredRotation
-        ? v.size.height / v.size.width  // 1080/1920 = 0.5625 portrait
-        : v.aspectRatio;
-
-    Widget videoSurface = AspectRatio(
-      aspectRatio: effectiveAspect,
-      child: VideoPlayer(_ctrl!),
-    );
-    if (_zoomCtrl != null) {
-      videoSurface = GestureDetector(
-        onDoubleTap: _toggleVideoZoom,
-        onTap: () => setState(() => _showControls = !_showControls),
-        child: InteractiveViewer(
-          transformationController: _zoomCtrl,
-          minScale: 1.0,
-          maxScale: 5.0,
-          child: videoSurface,
-        ),
-      );
-    } else {
-      videoSurface = GestureDetector(
-        onTap: () => setState(() => _showControls = !_showControls),
-        child: videoSurface,
-      );
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Stack(
-        children: [
-          Container(
-            constraints: const BoxConstraints(
-              minHeight: 220,
-              maxHeight: 520,
-            ),
-            color: Colors.black,
-            child: Center(child: videoSurface),
-          ),
-          // Gradient + play/pause fade with the controls (250ms), matching the
-          // scrubber below — no unmount-guard, or the fade could never run.
-          Positioned.fill(
-            child: IgnorePointer(
-              child: AnimatedOpacity(
-                opacity: _showControls || !v.isPlaying ? 1 : 0,
-                duration: const Duration(milliseconds: 250),
-                child: Container(
-                  decoration: BoxDecoration(gradient: LinearGradient(
-                    begin: Alignment.topCenter, end: Alignment.bottomCenter,
-                    colors: [Colors.black.withAlpha(60), Colors.transparent, Colors.black.withAlpha(140)],
-                  )),
-                ),
-              ),
-            ),
-          ),
-          Center(
-            // When faded out the button must not eat the "show controls" tap.
-            child: IgnorePointer(
-              ignoring: !(_showControls || !v.isPlaying),
-              child: GestureDetector(
-                onTap: () {
-                  v.isPlaying ? _ctrl!.pause() : _ctrl!.play();
-                },
-                child: AnimatedOpacity(
-                  opacity: _showControls || !v.isPlaying ? 1 : 0,
-                  duration: const Duration(milliseconds: 250),
-                  child: Container(
-                    decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
-                    padding: const EdgeInsets.all(14),
-                    child: Icon(v.isPlaying ? Icons.pause : Icons.play_arrow, color: RfColors.textPrimary, size: 40),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          if (_zoomCtrl != null)
-            Positioned(
-              top: 8,
-              right: 8,
-              child: AnimatedOpacity(
-                opacity: _showControls ? 1 : 0,
-                duration: const Duration(milliseconds: 250),
-                child: RfIconButton(
-                  icon: Icons.zoom_out_map,
-                  color: RfColors.textSecondary,
-                  tooltip: 'Reset zoom',
-                  size: 40,
-                  onPressed: _resetVideoZoom,
-                ),
-              ),
-            ),
-            // Bottom: scrubber + time
-            Positioned(
-              left: 0, right: 0, bottom: 0,
-              child: AnimatedOpacity(
-                opacity: _showControls || !v.isPlaying ? 1 : 0,
-                duration: const Duration(milliseconds: 250),
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-                  color: Colors.black.withAlpha(140),
-                  child: Row(children: [
-                    Text(_fmt(v.position), style: const TextStyle(color: RfColors.textPrimary, fontSize: 11, fontFamily: 'monospace')),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: VideoProgressIndicator(
-                          _ctrl!,
-                          allowScrubbing: true,
-                          colors: const VideoProgressColors(
-                            playedColor: RfColors.pkAccent,
-                            bufferedColor: Colors.white24,
-                            backgroundColor: Colors.white10,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Text(_fmt(v.duration), style: const TextStyle(color: RfColors.textPrimary, fontSize: 11, fontFamily: 'monospace')),
-                  ]),
-                ),
-              ),
-            ),
-          ],
-        ),
-    );
-  }
-}
-
 // ─── Order detail screen ───────────────────────────────────────────────
 
 class _OrderDetailScreen extends StatefulWidget {
@@ -1301,6 +1067,7 @@ class _OrderDetailScreen extends StatefulWidget {
 class _OrderDetailScreenState extends State<_OrderDetailScreen> {
   late Map<String, dynamic> order;
   bool _savingEdit = false;
+  bool _videoZoomed = false;
   final _storage = LocalStorageService();
 
   @override void initState() {
@@ -1362,9 +1129,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
       return;
     }
 
-    final picked = await ImagePicker().pickImage(
-      source: ImageSource.camera,
-      imageQuality: 92,
+    // The app's own camera, not the phone's camera app.
+    final picked = await captureInAppPhoto(
+      context,
+      title: 'Replace · ${DraftSaveService.labelForSide(resolvedSide)}',
     );
     if (picked == null || !mounted) return;
 
@@ -1377,6 +1145,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
       side: resolvedSide,
       newPhoto: picked,
     );
+    // The camera's temp copy is no longer needed (savePhoto wrote its own).
+    try {
+      await File(picked.path).delete();
+    } catch (_) {}
     if (!mounted) return;
     if (ok) {
       await _reloadOrder();
@@ -1603,19 +1375,17 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     DateTime selectedStartedAt = originalStartedAt;
 
     if (!mounted) return;
+    String? saveError;
     final saved = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
+      // Below the status bar; RfSheetBody keeps the buttons above the
+      // navigation bar and the keyboard, and scrolls when space runs out.
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         return RfGlassSheet(
-          child: Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-          ),
+          child: RfSheetBody(
           child: StatefulBuilder(
             builder: (ctx, setSheetState) {
               // An RT AWB may be blank, but a typed one needs at least 12
@@ -1648,6 +1418,8 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                   TextField(
                     controller: orderCtrl,
                     style: const TextStyle(color: RfColors.textPrimary, fontFamily: 'monospace'),
+                    textInputAction: TextInputAction.next,
+                    onChanged: (_) => setSheetState(() => saveError = null),
                     decoration: const InputDecoration(
                       labelText: 'Order ID',
                       labelStyle: TextStyle(color: RfColors.textSecondary),
@@ -1659,14 +1431,24 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                   TextField(
                     controller: awbCtrl,
                     style: const TextStyle(color: RfColors.textPrimary, fontFamily: 'monospace'),
-                    keyboardType: mode == CaptureMode.rt ? TextInputType.number : null,
-                    onChanged: (_) => setSheetState(() {}),
+                    // Same as the label screen: English keyboard, capitals,
+                    // letters and digits only — RT now takes courier AWBs
+                    // with letters (India Post, DTDC, ...), which a number
+                    // keyboard could not type.
+                    keyboardType: TextInputType.visiblePassword,
+                    textCapitalization: TextCapitalization.characters,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    inputFormatters: [AwbInputFormatter()],
+                    textInputAction: TextInputAction.done,
+                    onChanged: (_) => setSheetState(() => saveError = null),
                     decoration: InputDecoration(
-                      labelText: mode == CaptureMode.rt
-                          ? 'AWB / tracking (optional, min 12 digits)'
-                          : 'AWB / tracking (optional)',
+                      labelText: 'AWB / tracking (optional)',
                       labelStyle: const TextStyle(color: RfColors.textSecondary),
-                      errorText: rtAwbBlocked ? 'RT AWB must be at least 12 digits, or leave it blank' : null,
+                      errorText: rtAwbBlocked
+                          ? 'Needs 12+ digits, or India Post / DTDC / Shadowfax / Ekart / Xpressbees format — or leave it blank'
+                          : null,
+                      errorMaxLines: 3,
                       enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: RfColors.border)),
                       focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: RfColors.action)),
                     ),
@@ -1760,6 +1542,16 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                         ),
                     ],
                   ],
+                  // A failed save is explained here, in the sheet — a
+                  // SnackBar would appear behind it.
+                  if (saveError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        saveError!,
+                        style: const TextStyle(color: RfColors.error, fontSize: 13),
+                      ),
+                    ),
                   const SizedBox(height: 20),
                   Row(
                     children: [
@@ -1773,10 +1565,16 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                       Expanded(
                         child: RfButton.service(
                           label: _savingEdit ? 'Saving...' : 'Save',
-                          onPressed: (_savingEdit || rtAwbBlocked || subMissing)
+                          onPressed: (_savingEdit ||
+                                  rtAwbBlocked ||
+                                  subMissing ||
+                                  orderCtrl.text.trim().isEmpty)
                               ? null
                               : () async {
-                                  setSheetState(() => _savingEdit = true);
+                                  setSheetState(() {
+                                    _savingEdit = true;
+                                    saveError = null;
+                                  });
                                   try {
                                     final newPath = await _storage.updateOrderMetadata(
                                       folderKey: folderKey,
@@ -1792,12 +1590,11 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                                     );
                                     if (ctx.mounted) Navigator.pop(ctx, newPath);
                                   } catch (e) {
-                                    setSheetState(() => _savingEdit = false);
-                                    if (ctx.mounted) {
-                                      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
-                                        content: Text('$e'),
-                                      ));
-                                    }
+                                    if (!ctx.mounted) return;
+                                    setSheetState(() {
+                                      _savingEdit = false;
+                                      saveError = _editErrorText(e);
+                                    });
                                   }
                                 },
                         ),
@@ -1861,6 +1658,9 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
+        // A zoomed video is panned with one finger; the page must not scroll
+        // under it.
+        physics: _videoZoomed ? const NeverScrollableScrollPhysics() : null,
         children: [
           RfGlassContainer(
             blurEnabled: false,
@@ -1886,7 +1686,12 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
           if (videoPath != null) ...[
             const _SectionLabel('Video'),
             const SizedBox(height: 8),
-            _InlineVideoPlayer(path: videoPath),
+            RfVideoPlayer(
+              path: videoPath,
+              onZoomChanged: (z) {
+                if (mounted) setState(() => _videoZoomed = z);
+              },
+            ),
             const SizedBox(height: 6),
             Align(
               alignment: Alignment.centerRight,
@@ -2205,6 +2010,7 @@ class _DraftDetailScreen extends StatefulWidget {
 class _DraftDetailScreenState extends State<_DraftDetailScreen> {
   late Map<String, dynamic> session;
   bool _saving = false;
+  bool _videoZoomed = false;
   final _storage = LocalStorageService();
 
   @override
@@ -2248,8 +2054,20 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
       return;
     }
 
-    final newPath = await DraftSaveService.captureMissingPhoto(mode, side, _storage);
-    if (newPath == null || !mounted) return;
+    final shot = await captureInAppPhoto(
+      context,
+      title: 'Replace · ${DraftSaveService.labelForSide(side)}',
+    );
+    if (shot == null || !mounted) return;
+    final String newPath;
+    try {
+      newPath = await DraftSaveService.saveCapturedPhoto(shot, mode, side, _storage);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Replace failed: $e')));
+      return;
+    }
+    if (!mounted) return;
 
     await _storage.deleteDraft(oldPath);
     if (!mounted) return;
@@ -2365,8 +2183,19 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
         ),
       );
       if (capture != true || !mounted) return;
-      final path = await DraftSaveService.captureMissingPhoto(mode, side, _storage);
-      if (path == null) return;
+      final shot = await captureInAppPhoto(
+        context,
+        title: DraftSaveService.labelForSide(side),
+      );
+      if (shot == null || !mounted) return;
+      final String path;
+      try {
+        path = await DraftSaveService.saveCapturedPhoto(shot, mode, side, _storage);
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Photo failed: $e')));
+        return;
+      }
       photos = {...photos, side: path};
       (session['photoPaths'] as List<String>).add(path);
       (session['draftPaths'] as List<String>).add(path);
@@ -2479,6 +2308,7 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
+        physics: _videoZoomed ? const NeverScrollableScrollPhysics() : null,
         children: [
           // ── Status banner ─────────────────────────────────────────────
           Container(
@@ -2524,7 +2354,12 @@ class _DraftDetailScreenState extends State<_DraftDetailScreen> {
           if (videoPath != null) ...[
             const _SectionLabel('Video'),
             const SizedBox(height: 8),
-            _InlineVideoPlayer(path: videoPath),
+            RfVideoPlayer(
+              path: videoPath,
+              onZoomChanged: (z) {
+                if (mounted) setState(() => _videoZoomed = z);
+              },
+            ),
             const SizedBox(height: 6),
             Align(
               alignment: Alignment.centerRight,
