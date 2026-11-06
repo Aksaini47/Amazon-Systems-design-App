@@ -12,7 +12,7 @@ on the phone (backend sync was removed in 2.0.0 patch 8).
 - **RT** — record unpacking → QC verdict (OK / DAMAGED / DIFFERENT /
   DAMAGED + DIFFERENT / EMPTY BOX) → claim photos when the verdict is not OK
   (return label first, as the parcel is unpacked) → scan the return label
-  (Order ID — Amazon `407-1234567-1234567` or the website's `RF-YYMMDD-NNNN`, e.g. `RF-261104-0004`, typed with the RF- shortcut; the tracking ID may be left blank, but a typed one needs at least 12 digits, no maximum) →
+  (Order ID — Amazon `407-1234567-1234567` or the website's `RF-YYMMDD-NNNN`, e.g. `RF-261104-0004`, typed with the RF- shortcut; the tracking ID may be left blank, but a typed one needs 12+ digits or the exact format of India Post / DTDC / Shadowfax / Ekart / Xpressbees) →
   saved to `{orderId}-RT/` with `claim_trigger` in `meta.json`.
   Sub-reasons (Amazon's SAFE-T wording) exist only inside DAMAGED (heavily
   damaged / minor damage / mildly used / heavily used) and DIFFERENT
@@ -20,6 +20,7 @@ on the phone (backend sync was removed in 2.0.0 patch 8).
   none. The main reason and its sub-reason are written together — `qc=` +
   `qc_sub=` on every activity-log line, `verdict` + `qc_sub_reasons` in
   `meta.json`.
+- Label screen (PK + RT): opens on the live BARCODE reader (a short strip frame, one barcode at a time); a floating BARCODE | TEXT switcher moves to OCR (3:4 frame) for torn/faded labels. The reader analyses every frame for Code128 / Code39 / QR only; "Camera not starting" + Retry appears only when the camera itself fails (no barcode in view just changes the hint), and Retry rebuilds the scanner from scratch. OCR AWBs are repaired by position (0/O, 1/I, 5/S ...) against the courier format, and a lettered or repaired OCR read waits for a SAVE tap instead of auto-saving. Both fields use the English keyboard, capitals only.
 - Gallery: browse, edit, re-tag, pinch-zoom; drafts auto-recovered after a
   crash.
 

@@ -35,21 +35,40 @@ import '../utils/order_id_matcher.dart';
 /// dropped on 2026-10-26).
 const returnAwbMinDigits = 12;
 
-/// An RT (return) AWB must be digits only and AT LEAST 12 long to be SAVED —
-/// there is no maximum.
+/// Couriers whose AWBs carry letters and are accepted for an RT save in their
+/// EXACT format (Sir, 2026-11-06). Some are shorter than 12 (DTDC is 9).
+const returnLetteredCouriers = ['India Post', 'DTDC', 'Shadowfax', 'Ekart', 'Xpressbees'];
+
+/// An RT (return) AWB is SAVED only if it is either
+///   * digits only and AT LEAST 12 long (no maximum), or
+///   * the exact format of one of [returnLetteredCouriers].
 ///
 /// A faded return label once made the app save an AWB two characters short,
 /// and the office's PK/RT merge and SAFE-T claim script could not repair it.
 /// The carrier patterns below could never have caught that: Trackon
 /// (`[A-Z0-9]{9,14}`) and "Unknown carrier" (`\d{9,16}`) accept almost any
 /// 9-16 character value, so a truncated AWB still looked valid. The 12-digit
-/// floor is what stops a short read. Patch #19 made it "exactly 12", but Sir
-/// only meant the minimum: the field stopped accepting a 13th digit. PK keeps
-/// the open rule — its AWBs come in many carrier formats (11, 13 and 14
-/// digits too).
-bool isValidReturnAwb(String awb) => _returnAwb.hasMatch(awb.trim());
+/// floor is what stops a short numeric read; a lettered AWB has to match its
+/// courier's exact shape instead (Trackon's loose pattern is NOT accepted).
+/// PK keeps the open rule — its AWBs come in many carrier formats.
+bool isValidReturnAwb(String awb) {
+  final t = awb.trim();
+  return _returnAwb.hasMatch(t) || returnLetteredCourierFor(t) != null;
+}
 
 final _returnAwb = RegExp(r'^\d{12,}$'); // keep in step with [returnAwbMinDigits]
+
+/// Name of the lettered courier ([returnLetteredCouriers]) whose exact format
+/// [awb] has, or null. Only values that contain a letter qualify — an
+/// all-digit value is judged by the 12-digit rule alone.
+String? returnLetteredCourierFor(String awb) {
+  final t = awb.trim();
+  if (!t.contains(RegExp(r'[A-Z]'))) return null;
+  for (final c in CarrierPatterns.all) {
+    if (returnLetteredCouriers.contains(c.name) && c.matchesValue(t)) return c.name;
+  }
+  return null;
+}
 
 /// The usual return AWB shape: exactly 12 digits. When a label offers both a
 /// 12-digit and a longer valid code, the scan prefers this one (see the
@@ -60,8 +79,8 @@ final _standardReturnAwb = RegExp(r'^\d{12}$');
 
 /// Whether [awb] is acceptable for SAVING an order of [mode]. The tracking ID
 /// may be left BLANK in both modes (Sir, 2026-10-28) - but once anything is
-/// typed, the RT digit rule applies: digits only, at least 12
-/// ([isValidReturnAwb]). PK takes any AWB, or none.
+/// typed, the RT rule applies ([isValidReturnAwb]: 12+ digits, or an exact
+/// lettered-courier format). PK takes any AWB, or none.
 ///
 /// Blank is a manual-save choice only: auto-save still waits for a read AWB
 /// (see the popup's `_autoSaveBlocker`), so a scan that has not found the AWB
@@ -100,11 +119,23 @@ class AwbClassification {
   final CarrierPattern carrier;
   final double confidence; // 0-1 — higher when carrier name also detected on label
 
+  /// How many characters [CarrierPatterns.repairOcrToken] had to swap to make
+  /// an OCR read fit its courier's format (0 = read as-is, or from a barcode).
+  final int ocrFixes;
+
   const AwbClassification({
     required this.value,
     required this.carrier,
     required this.confidence,
+    this.ocrFixes = 0,
   });
+}
+
+/// One OCR token after look-alike repair — see [CarrierPatterns.repairOcrToken].
+class OcrAwbRepair {
+  final String value;
+  final int fixes;
+  const OcrAwbRepair(this.value, this.fixes);
 }
 
 class CarrierPatterns {
@@ -301,6 +332,10 @@ class CarrierPatterns {
   /// Fallback path: scan free-form OCR text for any AWB-shaped substring
   /// (when no barcode was successfully decoded). Returns the best match
   /// or null. [accept] filters candidates as in [pickAwbFromBarcodes].
+  ///
+  /// A token that fits no format as read gets one more chance through
+  /// [repairOcrToken] (O/0, I/1, S/5 ... swapped by position); the result
+  /// carries [AwbClassification.ocrFixes] and ranks below an as-read match.
   static AwbClassification? findAwbInText(
     String ocrText, {
     CarrierPattern? hint,
@@ -313,21 +348,113 @@ class CarrierPatterns {
     // Try each carrier's regex against every token in the text
     final tokens = upper.split(RegExp(r'[\s,.;:|\\/()\[\]{}"‘’]+'));
     for (final tok in tokens) {
-      final clean = tok.trim();
-      if (clean.length < 8 || clean.length > 22) continue;
-      if (isOrderIdShape(clean)) continue;
-      if (accept != null && !accept(clean)) continue;
+      final raw = tok.trim();
+      if (raw.length < 8 || raw.length > 22) continue;
+      if (isOrderIdShape(raw)) continue;
+      var clean = raw;
+      var fixes = 0;
+      final asRead = all.any((c) => c.matchesValue(raw)) && (accept == null || accept(raw));
+      if (!asRead) {
+        final repaired = repairOcrToken(raw, accept: accept);
+        if (repaired == null || isOrderIdShape(repaired.value)) continue;
+        clean = repaired.value;
+        fixes = repaired.fixes;
+      }
       final bonus = (prefer != null && prefer(clean)) ? _preferBonus : 0.0;
       for (final c in all) {
         if (!c.matchesValue(clean)) continue;
-        double conf = c.specificity * 0.85;  // OCR text is less reliable than barcode
+        // OCR text is less reliable than a barcode, and every repaired
+        // character makes it less so.
+        double conf = c.specificity * 0.85 - 0.1 * fixes;
         if (hint != null && hint.name == c.name) conf += 0.2;
         if (conf + bonus > bestScore) {
-          best = AwbClassification(value: clean, carrier: c, confidence: conf.clamp(0.0, 1.0));
+          best = AwbClassification(
+            value: clean,
+            carrier: c,
+            confidence: conf.clamp(0.0, 1.0),
+            ocrFixes: fixes,
+          );
           bestScore = conf + bonus;
         }
       }
     }
     return best;
+  }
+
+  // ─── OCR look-alike repair ─────────────────────────────────────────────
+  //
+  // OCR confuses look-alike characters (0/O, 1/I, 5/S, 8/B ...). A courier's
+  // AWB format fixes, for every POSITION, whether a letter or a digit belongs
+  // there - India Post is 2 letters + 9 digits + "IN", DTDC 1 letter + 8
+  // digits. So a misread character can be put back by position instead of by
+  // guessing. A token is repaired only when exactly ONE result needs the
+  // fewest swaps, and never with more than [_maxOcrFixes] swaps.
+
+  static const _lookAsDigit = {
+    'O': '0', 'Q': '0', 'D': '0', 'I': '1', 'L': '1',
+    'Z': '2', 'S': '5', 'G': '6', 'T': '7', 'B': '8',
+  };
+  static const _lookAsLetter = {
+    '0': 'O', '1': 'I', '2': 'Z', '5': 'S', '6': 'G', '7': 'T', '8': 'B',
+  };
+  static const _maxOcrFixes = 2;
+
+  /// Position templates for a token of [length]: `L` letter, `D` digit,
+  /// `A` letter or digit, anything else a literal character.
+  static List<String> _templatesFor(int length) => [
+        if (length == 13) 'LLDDDDDDDDDIN', // India Post (UPU S10)
+        if (length == 9) 'LDDDDDDDD', // DTDC
+        if (length == 14) 'LLLLDDDDDDDDDD', // Ekart
+        if (length == 14) 'LLDDDDDDDDDDDD', // Xpressbees
+        if (length >= 8 && length <= 20) 'SF${'A' * (length - 2)}', // Shadowfax
+        if (length >= 9) 'D' * length, // numeric couriers
+      ];
+
+  static OcrAwbRepair? _fit(String token, String template) {
+    final out = StringBuffer();
+    var fixes = 0;
+    for (var i = 0; i < token.length; i++) {
+      final ch = token[i];
+      final t = template[i];
+      final isDigit = ch.codeUnitAt(0) >= 0x30 && ch.codeUnitAt(0) <= 0x39;
+      final isLetter = ch.codeUnitAt(0) >= 0x41 && ch.codeUnitAt(0) <= 0x5A;
+      String? put;
+      if (t == 'D') {
+        put = isDigit ? ch : _lookAsDigit[ch];
+      } else if (t == 'L') {
+        put = isLetter ? ch : _lookAsLetter[ch];
+      } else if (t == 'A') {
+        put = (isDigit || isLetter) ? ch : null;
+      } else {
+        put = ch == t ? ch : (_lookAsLetter[ch] == t ? t : null);
+      }
+      if (put == null) return null;
+      if (put != ch) fixes++;
+      out.write(put);
+    }
+    return OcrAwbRepair(out.toString(), fixes);
+  }
+
+  /// Repairs an OCR [token] into a courier AWB by position (see above), or
+  /// returns null when nothing fits, more than [_maxOcrFixes] swaps would be
+  /// needed, or two DIFFERENT values tie for the fewest swaps. [accept]
+  /// filters results as in [pickAwbFromBarcodes].
+  static OcrAwbRepair? repairOcrToken(String token, {bool Function(String value)? accept}) {
+    final t = token.trim().toUpperCase();
+    OcrAwbRepair? best;
+    var tie = false;
+    for (final template in _templatesFor(t.length)) {
+      final r = _fit(t, template);
+      if (r == null || r.fixes > _maxOcrFixes) continue;
+      if (!all.any((c) => c.matchesValue(r.value))) continue;
+      if (accept != null && !accept(r.value)) continue;
+      if (best == null || r.fixes < best.fixes) {
+        best = r;
+        tie = false;
+      } else if (r.fixes == best.fixes && r.value != best.value) {
+        tie = true;
+      }
+    }
+    return tie ? null : best;
   }
 }

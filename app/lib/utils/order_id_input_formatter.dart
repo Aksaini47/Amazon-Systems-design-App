@@ -61,3 +61,17 @@ class OrderIdInputFormatter extends TextInputFormatter {
     return TextEditingValue(text: formatted, selection: TextSelection.collapsed(offset: cursor));
   }
 }
+
+/// Keystroke formatter for the AWB / tracking field: CAPITALS, letters and
+/// digits only (spaces, hyphens and anything else dropped), 30 characters at
+/// most. Courier AWBs never contain other characters, and typed letters are
+/// safe here - unlike OCR, the person typing reads the label themselves.
+class AwbInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    final clean = newValue.text.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+    final text = clean.length > 30 ? clean.substring(0, 30) : clean;
+    if (text == newValue.text) return newValue;
+    return TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length));
+  }
+}

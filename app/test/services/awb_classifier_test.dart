@@ -103,7 +103,7 @@ void main() {
 
     test('rejects letters, separators and non-ASCII digits', () {
       expect(isValidReturnAwb('12345678901A'), isFalse);
-      expect(isValidReturnAwb('EK123456789IN'), isFalse);
+      // (India Post EK123456789IN is accepted since 2026-11-06 - see awb_lettered_ocr_test.)
       expect(isValidReturnAwb('1234-5678-9012'), isFalse);
       expect(isValidReturnAwb('123 456 789 012'), isFalse);
       // Twelve Arabic-Indic digits.

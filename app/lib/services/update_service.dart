@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:23 - Order ID mein website ka format bhi: RF-YYMMDD-NNNN\n- Order ID box mein RF-261104-0004 jaisa id ab chalta hai (RF- button se shuru, phir sirf number)\n- Date asli honi chahiye (jaise 261104 = 4 Nov 2026); galat date par SAVE band aur message\n- Amazon 3-7-7 id aur uska prefix rule bilkul pehle jaisa; dono mein clash nahi\n- Scanner RF id ko kabhi tracking ID nahi samajhta';
+      '2.1.0+14:24 - Label scan: BARCODE default + TEXT switcher, English keyboard, courier letters\n- Label screen ab seedha BARCODE mode mein khulta hai (patli strip, ek barcode ek baar)\n- Barcode reader tez: har frame check, sirf label wale barcode types\n- "Stuck" ab sirf tab jab camera sach mein start na ho; Retry poora naya scanner chalata hai\n- Neeche BARCODE | TEXT switcher; TEXT (OCR) ka frame 3:4\n- Order ID aur AWB mein English keyboard, sab CAPITALS\n- RT AWB: 12+ digit, ya India Post / DTDC / Shadowfax / Ekart / Xpressbees ka exact format\n- OCR ki 0/O, 1/I jaisi galti format ke hisaab se theek; letter wala OCR AWB auto-save nahi, SAVE tap karo';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';

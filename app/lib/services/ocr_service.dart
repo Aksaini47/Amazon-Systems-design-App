@@ -34,6 +34,10 @@ class OcrService {
   /// Captures the three numeric groups so we can rejoin with hyphens.
   static final _loose = RegExp(r'(\d{3})[\s\-_–—]+(\d{7})[\s\-_–—]+(\d{7})');
 
+  /// Website id — "RF" then 6 + 4 digit groups (look-alike letters allowed in
+  /// the groups, fixed by _digitize), any of [space, hyphen, dash] between.
+  static final _website = RegExp(r'\bR\s*F\s*[\-–—]?\s*([0-9OQDILZSGTB]{6})\s*[\-–—]?\s*([0-9OQDILZSGTB]{4})(?![0-9A-Z])');
+
   /// Tight — exactly 17 consecutive digits at a word boundary.
   static final _tight = RegExp(r'\b(\d{17})\b');
 
@@ -72,6 +76,16 @@ class OcrService {
   /// the strict 3-7-7 final check.
   static String? _extractFrom(String text) {
     if (text.isEmpty) return null;
+
+    // Stage 0: the website's own id, RF-YYMMDD-NNNN (Sir, 2026-11-04). The
+    // literal "RF" anchors it; only the digit groups get the look-alike fix,
+    // and the date has to be real (isWebsiteOrderId), so a stray "RF" on a
+    // label cannot produce an id.
+    final w = _website.firstMatch(text.toUpperCase());
+    if (w != null) {
+      final id = 'RF-${_digitize(w.group(1)!)}-${_digitize(w.group(2)!)}';
+      if (isWebsiteOrderId(id)) return id;
+    }
 
     // Stage 1: strict on raw
     final m1 = _strict.firstMatch(text);

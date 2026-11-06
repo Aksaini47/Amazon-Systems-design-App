@@ -23,7 +23,8 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(MaterialApp(
       theme: buildRfTheme(),
-      home: BarcodeSavePopup(mode: mode),
+      // TEXT mode: the barcode reader's plugin does not exist in a test.
+      home: BarcodeSavePopup(mode: mode, startInBarcodeMode: false),
     ));
     await tester.pump(const Duration(milliseconds: 100));
   }
@@ -94,10 +95,22 @@ void main() {
       expect(find.text('Invalid Order ID prefix'), findsOneWidget);
     });
 
-    testWidgets('the AWB field takes numbers only, with no maximum length', (tester) async {
+    testWidgets('the AWB field keeps letters + digits in CAPITALS and drops the rest', (tester) async {
       await open(tester, CaptureMode.rt);
-      await type(tester, awbField(), '12ab34-56 7890123456');
-      expect(tester.widget<TextField>(awbField()).controller!.text, '1234567890123456');
+      await type(tester, awbField(), 'ek-123 456 789in');
+      expect(tester.widget<TextField>(awbField()).controller!.text, 'EK123456789IN');
+    });
+
+    testWidgets('the 5 lettered courier formats save, an unknown lettered code does not', (tester) async {
+      await open(tester, CaptureMode.rt);
+      await type(tester, orderField(), orderId);
+      for (final awb in ['EK123456789IN', 'X12345678', 'SF12345678AB', 'FMPC1234567890', 'XB123456789012']) {
+        await type(tester, awbField(), awb);
+        expect(saveEnabled(tester), isTrue, reason: awb);
+      }
+      await type(tester, awbField(), 'ABC12345');
+      expect(saveEnabled(tester), isFalse);
+      expect(find.textContaining('Not a known format'), findsOneWidget);
     });
 
     testWidgets('13, 14 and 20 digit AWBs save too - only a short one is blocked', (tester) async {

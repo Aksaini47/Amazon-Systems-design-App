@@ -33,7 +33,12 @@ import '../utils/volume_button_service.dart';
 ///   - Final 3-7-7 validation gate stops malformed values from saving
 class BarcodeSavePopup extends StatefulWidget {
   final CaptureMode mode;
-  const BarcodeSavePopup({super.key, required this.mode});
+
+  /// Opens on the live barcode reader (the default since 2026-11-06). Widget
+  /// tests pass false: the scanner plugin does not exist in a test.
+  final bool startInBarcodeMode;
+
+  const BarcodeSavePopup({super.key, required this.mode, this.startInBarcodeMode = true});
   @override
   State<BarcodeSavePopup> createState() => _BarcodeSavePopupState();
 }
@@ -96,6 +101,14 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   bool _foundOrderId = false;
   String? _detectedCarrierName;  // shown next to AWB field once classified
 
+  // An AWB that came from OCR TEXT (not a barcode) and either holds letters
+  // or needed look-alike repair: shown amber, and auto-save waits for Sir's
+  // SAVE tap. Cleared by a barcode read or by any manual edit of the field.
+  bool _awbNeedsReview = false;
+  bool _awbFromScan = false;
+
+  static const _barcodeHint = 'Barcode: hold the strip over ONE barcode — Order ID, then AWB';
+
   // Popup-open timestamp + one-shot latch, purely for the
   // barcode_scanner_first_detection analytics event — lets Sir/Claude see
   // actual on-device time-to-first-frame instead of guessing at lag.
@@ -117,7 +130,6 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   // its own without needing an explicit reset at every call site that
   // touches the field.
   String? _verifiedOrderIdValue;
-  bool _orderIdChecking = false;
   String? _orderIdConflictValue;  // the disagreeing read, blocks auto-save
   String _lastOrderIdText = '';
 
@@ -149,16 +161,73 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   String? _lastAutoSaveBlock;
 
   // ── Scanner-stuck watchdog ───────────────────────────────────────────────
-  // 2026-09-23: on a live device, the barcode reader occasionally never
-  // produces a single detection after opening — the camera-release race this
-  // screen already guards against (500ms delay before this popup opens; see
-  // live_capture_screen.dart's _openBarcodePopup) isn't airtight, so this
-  // catches the tail case instead of leaving Sir staring at a frozen preview
-  // with no feedback and no way to recover short of backing out and redoing
-  // the whole video. Every successful scan detects within ~2.5-3.5s
-  // (see barcode_scanner_first_detection events), so 6s is a safe margin.
+  // Watches the CAMERA, not the barcodes. mobile_scanner's Android side sends
+  // nothing at all while no barcode is in the window, so the first version
+  // (2026-09-23: "no detection within 6s = stuck") flagged a perfectly live
+  // preview as stuck whenever Sir simply had not put a label under it yet —
+  // and Retry "never worked" because the same 6s clock fired again (Sir,
+  // 2026-11-06, screenshot with a live preview behind "Camera scanner
+  // stuck"). Stuck now means the camera itself failed: start() reported an
+  // error, or the session is still not running 5s after it was asked to.
+  // A running camera with no barcode yet only changes the hint line.
   Timer? _scanWatchdog;
   bool _scanStuck = false;
+  /// Bumped on every hard reset so the MobileScanner widget is rebuilt
+  /// from scratch around the fresh controller.
+  int _scannerGeneration = 0;
+
+  static const _noBarcodeHint = 'No barcode in the strip yet — bring the label closer, or use TEXT';
+
+  /// The live reader's controller. Tuned for speed (Sir, 2026-11-06, "barcode
+  /// laggy"):
+  ///  - Only the symbologies shipping labels use. ML Kit runs one detector per
+  ///    requested format on every frame; dropping PDF417, DataMatrix and
+  ///    EAN-13 (a retail product code, never an Order ID or AWB) cuts the work
+  ///    per frame — Google's own ML Kit guidance for faster scanning.
+  ///  - DetectionSpeed.unrestricted: every camera frame is analysed. The
+  ///    default (normal) analyses at most one frame per 250 ms, which is the
+  ///    "it sees the barcode but takes a moment" feel. CameraX's
+  ///    keep-only-latest backpressure means frames never queue up, so this
+  ///    costs CPU, not latency, and the reader is open only for seconds.
+  ///  - 1920x1080 analysis: the Order ID barcode has narrower bars than the
+  ///    AWB one and only decodes at ~1.5-2x the default resolution.
+  ///  - No frame image (returnImage false): the per-frame PNG + OCR
+  ///    cross-check was the 2026-09-23 lag. A decoded Code128 value carries
+  ///    its own checksum, so it is trusted as read.
+  MobileScannerController _newScanner() {
+    return MobileScannerController(
+      formats: const [
+        BarcodeFormat.code128,
+        BarcodeFormat.code39,
+        BarcodeFormat.qrCode,
+      ],
+      detectionSpeed: DetectionSpeed.unrestricted,
+      cameraResolution: const Size(1920, 1080),
+    )..addListener(_onScannerState);
+  }
+
+  /// Camera session changes (running / error). An error is a real failure —
+  /// show Retry at once; a running session clears any stuck overlay.
+  void _onScannerState() {
+    final state = _scanner?.value;
+    if (state == null || !mounted || !_barcodeMode || _switchingMode) return;
+    if (state.error != null) {
+      _markScannerStuck('error_${state.error!.errorCode.name}');
+    } else if (state.isRunning && _scanStuck) {
+      setState(() => _scanStuck = false);
+    }
+  }
+
+  void _markScannerStuck(String reason) {
+    if (_scanStuck || !mounted) return;
+    _scanWatchdog?.cancel();
+    setState(() => _scanStuck = true);
+    unawaited(ActivityLogService.log(
+      event: 'barcode_scanner_stuck',
+      mode: widget.mode,
+      extra: {'reason': reason},
+    ));
+  }
 
   @override
   void initState() {
@@ -166,41 +235,14 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     _scanOpenedAt = DateTime.now();
     _orderIdController.addListener(_onTextChanged);
     _awbController.addListener(_onTextChanged);
-    _scanner = MobileScannerController(
-      formats: const [
-        BarcodeFormat.code128,
-        BarcodeFormat.code39,
-        BarcodeFormat.qrCode,
-        BarcodeFormat.dataMatrix,
-        BarcodeFormat.pdf417,
-        BarcodeFormat.ean13,
-      ],
-      // The Order ID barcode is printed with noticeably narrower bars than
-      // the AWB barcode on the same label (verified by decoding a real label
-      // at increasing render DPI: the AWB barcode decodes at the plugin's
-      // default analysis resolution, the Order ID one only decodes once the
-      // image is ~1.5-2x finer) — this is why AWB reads reliably while Order
-      // ID does not at the same phone distance/zoom. Requesting a higher
-      // camera analysis resolution resolves the narrower bars without Sir
-      // needing to hold the phone closer or more zoomed in.
-      cameraResolution: const Size(1920, 1080),
-      // Needed so BarcodeCapture.image carries the PNG frame the barcode was
-      // just decoded from — the cross-check OCR pass runs on THAT exact
-      // frame, not a fresh capture, so the two channels are reading the same
-      // physical moment. Only costs a bitmap encode on frames where a
-      // barcode was actually found, not every frame.
-      returnImage: true,
-    );
-    // 2026-09-23 (Sir): the continuous live barcode reader — ML Kit decoding
-    // every frame at a forced 1920x1080 analysis resolution — stayed
-    // perceptibly laggy even after the camera-release-race fixes above, and
-    // still occasionally hung outright despite the watchdog. Reverting PK's
-    // default to the same tap/auto-scan flow RT already uses: one still,
-    // OCR + barcode read together, cross-checked (_crossCheckOrderId /
-    // OrderIdCrossCheck below still fully applies) — same safety, lighter
-    // camera load. The live reader is still one tap away via the BARCODE
-    // chip below for labels whose barcode reads better that way.
-    _barcodeMode = false;
+    _scanner = _newScanner();
+    // Barcode reader is the DEFAULT in both PK and RT again (Sir, 2026-11-06):
+    // Nimbus now prints a proper Order ID barcode, and a barcode read is exact
+    // where OCR mixes up 0/O, 1/I and friends. It was switched off on
+    // 2026-09-23 for lag; the per-frame PNG + OCR cross-check behind that is
+    // gone (returnImage above). OCR ("TEXT") stays one tap away on the
+    // switcher for torn or faded labels.
+    _barcodeMode = widget.startInBarcodeMode;
     _bootstrap();
     VolumeButtonService().registerListener('barcode_popup', (event) {
       if (!mounted) return;
@@ -214,7 +256,12 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     await _loadLabelSettings();
     // In barcode mode the MobileScanner widget opens the camera itself —
     // initialising a CameraController here too would fight it for the device.
-    if (!_barcodeMode) await _initCamera();
+    if (_barcodeMode) {
+      if (mounted) setState(() => _statusMessage = _barcodeHint);
+      _armScanWatchdog();
+    } else {
+      await _initCamera();
+    }
     await _loadExistingOrders();
   }
 
@@ -308,6 +355,8 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     // change has to repaint — not only the ones that flip _awbOk.
     if (awb != _lastAwbText) {
       _lastAwbText = awb;
+      // Sir typing in the field is the check the review flag asked for.
+      if (!_awbFromScan) _awbNeedsReview = false;
       if (mounted) setState(() {});
     }
     // A mismatch verdict belongs to the value it was reached about; a new or
@@ -440,19 +489,18 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
 
     var changed = false;
 
-    // Order ID — taken verbatim from the barcode, accepted only if it is
-    // ALREADY exactly 3-7-7. No digit-guessing, no letter→digit fixups, no
-    // "any 17 digits on the page" fallback: those are what put a tracking
-    // number into this field in the first place. _crossCheckOrderId then
-    // reads the same frame's printed digits and flags a disagreement, which
-    // _maybeAutoSave treats as a block.
+    // Order ID — taken verbatim from the barcode, accepted only if it ALREADY
+    // has an order id shape (Amazon 3-7-7 or website RF-YYMMDD-NNNN). No
+    // digit-guessing, no letter→digit fixups, no "any 17 digits on the page"
+    // fallback: those are what put a tracking number into this field in the
+    // first place.
     if (!isOrderIdShape(_orderIdController.text.trim())) {
       for (final v in values) {
         if (isOrderIdShape(v)) {
           _orderIdController.text = v;
+          _orderIdConflictValue = null;
           _foundOrderId = true;
           changed = true;
-          unawaited(_crossCheckOrderId(v, capture.image));
           break;
         }
       }
@@ -464,7 +512,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     if (_awbController.text.trim().isEmpty) {
       final pick = CarrierPatterns.pickAwbFromBarcodes(values, accept: _awbAccept, prefer: _awbPrefer);
       if (pick != null) {
-        _awbController.text = pick.value;
+        _fillAwb(pick.value, needsReview: false);
         _detectedCarrierName = pick.carrier.name;
         _foundAwb = true;
         changed = true;
@@ -483,46 +531,12 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     _maybeAutoSave('live');
   }
 
-  /// Reads the SAME frame's printed digits and compares them with a
-  /// barcode-read Order ID. Never touches the field's TEXT — only
-  /// [_verifiedOrderIdValue]/[_orderIdConflictValue]; a disagreement is what
-  /// makes [_maybeAutoSave] hold off.
-  Future<void> _crossCheckOrderId(String barcodeValue, Uint8List? pngBytes) async {
-    if (pngBytes == null) {
-      // returnImage produced nothing for this frame (rare): no second read
-      // to compare against, so nothing can disagree.
-      _maybeAutoSave('live');
-      return;
-    }
-    setState(() => _orderIdChecking = true);
-    final ocrValue = await OcrService.extractOrderIdFromBytes(pngBytes);
-    if (!mounted) return;
-    // A newer detection or a manual edit may have superseded this candidate
-    // while OCR ran — only apply the result to the value it was actually
-    // checking.
-    if (_orderIdController.text.trim() != barcodeValue) {
-      setState(() => _orderIdChecking = false);
-      return;
-    }
-    final check = OrderIdCrossCheck(barcode: barcodeValue, ocr: ocrValue);
-    setState(() {
-      _orderIdChecking = false;
-      _orderIdConflictValue = check.conflicting ? ocrValue : null;
-      if (check.confirmed) _verifiedOrderIdValue = barcodeValue;
-      if (check.conflicting) {
-        _statusMessage = 'Mismatch: barcode reads $barcodeValue, label text reads $ocrValue — check the label';
-      }
-    });
-    if (check.conflicting) {
-      unawaited(HapticFeedback.heavyImpact());
-      unawaited(ActivityLogService.log(
-        event: 'order_id_cross_check_conflict',
-        mode: widget.mode,
-        orderId: barcodeValue,
-        extra: {'ocr_read': ocrValue ?? ''},
-      ));
-    }
-    _maybeAutoSave('live');
+  /// Puts a scanned AWB into the field without it counting as a manual edit.
+  void _fillAwb(String value, {required bool needsReview}) {
+    _awbFromScan = true;
+    _awbController.text = value;
+    _awbFromScan = false;
+    _awbNeedsReview = needsReview;
   }
 
   // ─── Auto-save ─────────────────────────────────────────────────────────
@@ -539,8 +553,8 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     if (!_autoLabelSave) return 'setting_off';
     if (!_isValid) return 'order_id_invalid';
     if (_awbController.text.trim().isEmpty) return 'awb_missing';
+    if (_awbNeedsReview) return 'awb_needs_review';
     if (!_awbOk) return 'awb_not_12_digits';
-    if (_orderIdChecking) return 'order_id_checking';
     if (_orderIdConflictValue != null) return 'order_id_conflict';
     if (_duplicateWarning != null) return 'duplicate';
     return null;
@@ -597,7 +611,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         if (mounted) {
           setState(() {
             _barcodeMode = true;
-            _statusMessage = 'Point the box at the barcode';
+            _statusMessage = _barcodeHint;
           });
         }
         _armScanWatchdog();
@@ -608,7 +622,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         if (mounted) {
           setState(() {
             _barcodeMode = false;
-            _statusMessage = 'Text scan — tap SCAN with the label in frame';
+            _statusMessage = 'Text (OCR): put the label in the box, then tap SCAN';
           });
         }
         await _initCamera();
@@ -621,35 +635,60 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     }
   }
 
-  /// Starts (or restarts) the "has the reader detected anything yet" clock.
-  /// Cancelled the moment [_onBarcodesDetected] sees its first real barcode,
-  /// or when leaving barcode mode entirely.
+  /// Gives the camera 5 s to come up after the reader is mounted (open,
+  /// switch back from TEXT, Retry). Still not running, or errored = stuck.
+  /// Running but no barcode yet is normal — only the hint line changes.
   void _armScanWatchdog() {
     _scanWatchdog?.cancel();
-    _scanWatchdog = Timer(const Duration(seconds: 6), () {
-      if (!mounted || !_barcodeMode || _firstDetectionLogged) return;
-      setState(() => _scanStuck = true);
-      unawaited(ActivityLogService.log(event: 'barcode_scanner_stuck', mode: widget.mode));
+    _scanWatchdog = Timer(const Duration(seconds: 5), () {
+      if (!mounted || !_barcodeMode || _switchingMode || _hardwareReleased) return;
+      final state = _scanner?.value;
+      if (state == null || state.error != null || !state.isRunning) {
+        _markScannerStuck(state?.error != null ? 'error' : 'not_running_5s');
+        return;
+      }
+      if (!_firstDetectionLogged && !_foundOrderId && !_foundAwb) {
+        setState(() => _statusMessage = _noBarcodeHint);
+      }
     });
   }
 
-  /// Stops and restarts the scanner's own camera session in place — the
-  /// camera device should be long free by the time this is ever reachable
-  /// (6s+ after this popup opened), so a fresh start() almost always clears
-  /// whatever the initial race left stuck. "BARCODE TORN? USE TEXT SCAN"
-  /// remains available underneath as a second escape hatch if it doesn't.
+  /// Hard reset of the live reader: the old controller is unmounted and
+  /// disposed (which also stops the native camera session), and a brand-new
+  /// controller + MobileScanner widget start from scratch. The old Retry only
+  /// did stop()/start() on the same controller, and a start() that had hung
+  /// half-way was left exactly where it was.
   Future<void> _retryScanner() async {
+    if (_switchingMode || _hardwareReleased) return;
+    _switchingMode = true;
     unawaited(HapticFeedback.selectionClick());
-    setState(() => _scanStuck = false);
     unawaited(ActivityLogService.log(event: 'barcode_scanner_retry', mode: widget.mode));
+    _scanWatchdog?.cancel();
+    final old = _scanner;
+    old?.removeListener(_onScannerState);
+    setState(() {
+      _scanStuck = false;
+      _scanner = null;
+      _statusMessage = 'Restarting the barcode camera…';
+    });
     try {
-      await _scanner?.stop();
+      // Let the frame that unmounts the old reader land before its
+      // controller goes away underneath it.
+      await WidgetsBinding.instance.endOfFrame;
+      await old?.dispose();
       await Future<void>.delayed(const Duration(milliseconds: 300));
-      await _scanner?.start();
     } catch (e) {
-      debugPrint('Scanner retry failed: $e');
+      debugPrint('Scanner reset failed: $e');
+    } finally {
+      _switchingMode = false;
     }
-    if (mounted && _barcodeMode) _armScanWatchdog();
+    if (!mounted || _hardwareReleased) return;
+    setState(() {
+      _scanner = _newScanner();
+      _scannerGeneration++;
+      _statusMessage = _barcodeHint;
+    });
+    if (_barcodeMode) _armScanWatchdog();
   }
 
   /// Manual scan — captures a still, runs barcode + OCR in parallel, then
@@ -724,7 +763,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       );
       if (awbPick != null) {
         if (_awbController.text.trim().isEmpty) {
-          _awbController.text = awbPick.value;
+          _fillAwb(awbPick.value, needsReview: false);
         }
         awbFound = true;
         carrierName = awbPick.carrier.name;  // override hint with actual match
@@ -740,7 +779,12 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         );
         if (textPick != null) {
           if (_awbController.text.trim().isEmpty) {
-            _awbController.text = textPick.value;
+            // Letters or repaired look-alikes from OCR are exactly what goes
+            // wrong — Sir checks those before the save.
+            _fillAwb(
+              textPick.value,
+              needsReview: textPick.ocrFixes > 0 || textPick.value.contains(RegExp(r'[A-Z]')),
+            );
           }
           awbFound = true;
           carrierName = textPick.carrier.name;
@@ -760,11 +804,13 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
       final orderIdOk = isOrderIdShape(_orderIdController.text.trim());
       if (_orderIdConflictValue != null) {
         msg = 'Order ID mismatch — barcode and label text disagree, check the label';
+      } else if (_awbNeedsReview) {
+        msg = 'AWB read from label TEXT — check it, then tap SAVE';
       } else if (awbFound && orderIdOk) {
         msg = '✓ Locked${carrierName != null ? " · $carrierName" : ""} + Order ID';
       } else if (orderIdFound && !awbFound) {
         msg = widget.mode == CaptureMode.rt
-            ? 'Order ID found — no valid AWB (12+ digits) read, tap SCAN again, type it, or SAVE without'
+            ? 'Order ID found — no valid AWB read, tap SCAN again, type it, or SAVE without'
             : 'Order ID found — no AWB detected, tap SCAN again';
       } else if (awbFound && !orderIdFound) {
         msg = '${carrierName ?? "AWB"} found — Order ID text not detected';
@@ -1074,26 +1120,12 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
             const SizedBox(height: 10),
 
             // Controls row. The barcode reader is continuous — there is no
-            // shot to take — so it shows only the escape hatch to text scan.
+            // shot to take, so only TEXT (OCR) mode has zoom + SCAN. Switching
+            // between the two is the floating switcher under the camera box.
+            if (!_barcodeMode)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: _barcodeMode
-                  ? RfButton.secondary(
-                      label: 'BARCODE TORN? USE TEXT SCAN',
-                      icon: Icons.text_fields_rounded,
-                      size: RfButtonSize.large,
-                      fullWidth: true,
-                      onPressed: _switchingMode ? null : _toggleScanMode,
-                    )
-                  : Row(children: [
-                if (widget.mode == CaptureMode.pk) ...[
-                  RfChip(
-                    label: 'BARCODE',
-                    active: false,
-                    onPressed: _switchingMode ? null : _toggleScanMode,
-                  ),
-                  const SizedBox(width: 10),
-                ],
+              child: Row(children: [
                 RfChip(label: '1×', active: _zoomIndex == 0, onPressed: () => _setZoom(0)),
                 const SizedBox(width: 4),
                 RfChip(label: '2×', active: _zoomIndex == 1, onPressed: () => _setZoom(1)),
@@ -1153,7 +1185,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
                           : _badWebsiteDate
                               ? 'Website order ID needs a real date: RF-YYMMDD-NNNN'
                               : null,
-                  keyboardType: TextInputType.number,
+                  // English keyboard (letters for RF- ids); OrderIdInputFormatter
+                  // keeps each shape strict.
+                  keyboardType: TextInputType.visiblePassword,
                   inputFormatters: [OrderIdInputFormatter()],
                 ),
                 const SizedBox(height: 8),
@@ -1170,24 +1204,34 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     );
   }
 
-  /// 4:6 portrait camera box — sized to fill the Expanded slot. The camera
-  /// preview IS the box (cover-cropped); no surrounding letterbox.
+  /// Height kept free under the camera box for the mode switcher.
+  static const _switcherSpace = 56.0;
+
+  /// Camera box — sized to fill the Expanded slot. The camera preview IS the
+  /// box (cover-cropped); no surrounding letterbox. Its shape follows the
+  /// mode (Sir, 2026-11-06): BARCODE is a very short, full-width strip, so
+  /// only one 1D barcode fits in it at a time; TEXT (OCR) is 3:4 portrait,
+  /// enough of the label for the printed lines.
   Widget _buildCameraBox() {
     final locked = _foundAwb && _foundOrderId;
     final accent = locked ? RfColors.successLight : RfColors.amber;
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Pick the largest 4:6 box that fits in available space
+        final maxH = (constraints.maxHeight - _switcherSpace).clamp(0.0, double.infinity);
         double width, height;
-        if (constraints.maxWidth * 1.5 <= constraints.maxHeight) {
+        if (_barcodeMode) {
           width = constraints.maxWidth;
-          height = width * 1.5;
+          height = (width * 0.42).clamp(0.0, maxH);
+        } else if (constraints.maxWidth * 4 / 3 <= maxH) {
+          width = constraints.maxWidth;
+          height = width * 4 / 3;
         } else {
-          height = constraints.maxHeight;
-          width = height / 1.5;
+          height = maxH;
+          width = height * 3 / 4;
         }
         return Center(
-          child: SizedBox(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+          SizedBox(
             width: width,
             height: height,
             child: Stack(
@@ -1245,8 +1289,8 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
                         locked
                             ? '✓ LOCKED'
                             : _barcodeMode
-                                ? 'BARCODE READER'
-                                : 'AMAZON LABEL',
+                                ? 'BARCODE'
+                                : 'TEXT (OCR)',
                         style: TextStyle(color: accent, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2),
                       ),
                     ),
@@ -1261,8 +1305,57 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
               ],
             ),
           ),
+          const SizedBox(height: 10),
+          _buildModeSwitcher(),
+          ]),
         );
       },
+    );
+  }
+
+  /// Floating BARCODE | TEXT switcher under the camera box. One tap hands the
+  /// camera over (see [_toggleScanMode]); a tap on the active side does nothing.
+  Widget _buildModeSwitcher() {
+    Widget side(String label, IconData icon, bool barcode) {
+      final active = _barcodeMode == barcode;
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: (active || _switchingMode) ? null : _toggleScanMode,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          decoration: BoxDecoration(
+            color: active ? RfColors.amber.withValues(alpha: 0.9) : Colors.transparent,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(icon, size: 15, color: active ? Colors.black : Colors.white70),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: active ? Colors.black : Colors.white70,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ]),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: Colors.black.withAlpha(170),
+        borderRadius: BorderRadius.circular(21),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        side('BARCODE', Icons.view_week_rounded, true),
+        side('TEXT', Icons.text_fields_rounded, false),
+      ]),
     );
   }
 
@@ -1281,20 +1374,23 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   /// across frames, so a sweep across the label catches Order ID and AWB one
   /// at a time just as well as it did with the taller window.
   Widget _buildBarcodeReader(double w, double h) {
-    final winWidth = w * 0.86;
-    final window = Rect.fromCenter(
-      center: Offset(w / 2, h / 2),
-      width: winWidth,
-      height: winWidth * 0.30,
-    );
+    // The camera box itself is already the short strip, so the window is
+    // that strip with a small margin.
+    final window = Rect.fromLTWH(w * 0.04, h * 0.12, w * 0.92, h * 0.76);
+    final scanner = _scanner;
     return Stack(
       fit: StackFit.expand,
       children: [
-        MobileScanner(
-          controller: _scanner!,
-          scanWindow: window,
-          onDetect: _onBarcodesDetected,
-        ),
+        if (scanner == null)
+          // Between the old and the new controller during a Retry.
+          const Center(child: CircularProgressIndicator(strokeWidth: 2, color: RfColors.textMuted))
+        else
+          MobileScanner(
+            key: ValueKey('barcode_reader_$_scannerGeneration'),
+            controller: scanner,
+            scanWindow: window,
+            onDetect: _onBarcodesDetected,
+          ),
         Positioned.fill(
           child: IgnorePointer(
             child: CustomPaint(
@@ -1313,22 +1409,27 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
               color: Colors.black.withAlpha(200),
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  // Compact: the barcode strip is short.
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 10,
+                    runSpacing: 6,
                     children: [
-                      const Icon(Icons.camera_alt_outlined, color: Colors.white70, size: 28),
-                      const SizedBox(height: 10),
                       const Text(
-                        'Camera scanner stuck',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700),
+                        'Camera not starting',
+                        style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
                       ),
-                      const SizedBox(height: 14),
                       RfButton.primary(
                         label: 'Retry',
                         icon: Icons.refresh_rounded,
                         onPressed: _retryScanner,
+                      ),
+                      RfButton.secondary(
+                        label: 'TEXT',
+                        icon: Icons.text_fields_rounded,
+                        onPressed: _switchingMode ? null : _toggleScanMode,
                       ),
                     ],
                   ),
@@ -1360,9 +1461,13 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     ];
   }
 
-  /// RT: optional, but a typed AWB needs at least 12 digits (no maximum), numbers only. PK: free text, optional,
-  /// with the carrier the scan recognised in the label.
+  /// Tracking field, English keyboard, CAPITALS, letters/digits only.
+  /// RT: optional, but a typed AWB needs 12+ digits or an exact lettered
+  /// courier format (India Post / DTDC / Shadowfax / Ekart / Xpressbees).
+  /// PK: free, optional, with the carrier the scan recognised in the label.
   Widget _buildAwbField() {
+    final typed = _awbController.text.trim();
+    final review = _awbNeedsReview ? 'Read from the label TEXT — check it, then tap SAVE' : null;
     if (widget.mode != CaptureMode.rt) {
       return _buildField(
         label: _detectedCarrierName != null
@@ -1371,22 +1476,31 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         controller: _awbController,
         hint: '1Z999AA10123456784',
         detected: _foundAwb,
+        helperText: review,
+        keyboardType: TextInputType.visiblePassword,
+        inputFormatters: [AwbInputFormatter()],
       );
     }
-    final typed = _awbController.text.trim();
+    String? error;
+    if (typed.isNotEmpty && !_awbOk) {
+      error = RegExp(r'^\d+$').hasMatch(typed)
+          ? 'AWB must be at least 12 digits (${typed.length} entered)'
+          : 'Not a known format — 12+ digits, or India Post / DTDC / Shadowfax / Ekart / Xpressbees';
+    }
+    final courier = returnLetteredCourierFor(typed);
     return _buildField(
-      label: 'AWB / Tracking (optional) — 12+ digits',
+      label: courier != null
+          ? 'AWB / Tracking (optional) — $courier'
+          : 'AWB / Tracking (optional) — 12+ digits or courier',
       controller: _awbController,
-      hint: '123456789012',
+      hint: '123456789012  or  EK123456789IN',
       detected: _foundAwb,
       // A blank field is allowed, but not a "valid AWB" - no green tick for it.
       isValid: typed.isNotEmpty && _awbOk,
-      errorText: typed.isNotEmpty && !_awbOk
-          ? 'AWB must be at least 12 digits (${typed.length} entered)'
-          : null,
-      keyboardType: TextInputType.number,
-      // Digits only, no upper limit — Sir only wants the 12-digit floor.
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      errorText: error,
+      helperText: error == null ? review : null,
+      keyboardType: TextInputType.visiblePassword,
+      inputFormatters: [AwbInputFormatter()],
     );
   }
 
@@ -1427,6 +1541,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     List<TextInputFormatter>? inputFormatters,
     TextInputType keyboardType = TextInputType.text,
     Widget? labelAction,
+    String? helperText,
   }) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
@@ -1456,6 +1571,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.action, width: 1.5)),
           errorText: errorText,
           errorMaxLines: 2,
+          helperText: helperText,
+          helperMaxLines: 2,
+          helperStyle: const TextStyle(color: RfColors.amber, fontSize: 11, fontWeight: FontWeight.w600),
           errorStyle: const TextStyle(color: RfColors.error, fontSize: 11),
           errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.error, width: 1.5)),
           focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: RfColors.error, width: 1.5)),
@@ -1465,6 +1583,8 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
           suffixIconConstraints: const BoxConstraints(minWidth: 28, minHeight: 28),
         ),
         keyboardType: keyboardType,
+        textCapitalization: TextCapitalization.characters,
+        enableSuggestions: false,
         autocorrect: false,
         textInputAction: TextInputAction.done,
       ),
