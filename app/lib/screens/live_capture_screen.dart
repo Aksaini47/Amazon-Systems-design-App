@@ -1704,12 +1704,18 @@ class _LiveCaptureScreenState extends State<LiveCaptureScreen> with TickerProvid
 
       // Only reached for a non-OK verdict (QC OK takes no photos — see
       // _openRtPostVideoFlow). Serial is optional and skippable.
+      //
+      // Order (Sir, 2026-11-09): contents, front, back, serial, LABEL LAST.
+      // When the unpack video stops and the reason is picked, the product is
+      // already in hand, so the photos start from the product; the return
+      // label is the last thing shot. (Patch #18 had the label first, back
+      // when the parcel was still thought of as sealed at this point.)
       const sequence = <(PhotoSide, String)>[
-        (PhotoSide.label, 'Position RETURN LABEL in frame'),
         (PhotoSide.contents, 'Position package CONTENTS in frame'),
         (PhotoSide.front, 'Position product FRONT facing up'),
         (PhotoSide.back, 'Position product BACK facing up'),
         (PhotoSide.serial, 'Capture SERIAL / FPC closeup (optional)'),
+        (PhotoSide.label, 'Position RETURN LABEL in frame'),
       ];
 
       for (final (side, _) in sequence) {

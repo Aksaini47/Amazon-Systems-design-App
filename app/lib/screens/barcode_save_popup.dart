@@ -34,11 +34,13 @@ import '../utils/volume_button_service.dart';
 class BarcodeSavePopup extends StatefulWidget {
   final CaptureMode mode;
 
-  /// Opens on the live barcode reader (the default since 2026-11-06). Widget
-  /// tests pass false: the scanner plugin does not exist in a test.
-  final bool startInBarcodeMode;
+  /// Which scanner the popup opens on. Null (the normal case) follows the
+  /// "Default label scanner" setting (Settings > Capture & QC; barcode unless
+  /// Sir changed it). Widget tests pass false: the scanner plugin does not
+  /// exist in a test, and it also skips the settings read.
+  final bool? startInBarcodeMode;
 
-  const BarcodeSavePopup({super.key, required this.mode, this.startInBarcodeMode = true});
+  const BarcodeSavePopup({super.key, required this.mode, this.startInBarcodeMode});
   @override
   State<BarcodeSavePopup> createState() => _BarcodeSavePopupState();
 }
@@ -89,6 +91,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   // field. OCR is still one tap away for labels whose barcode is torn or
   // faded — it just is not the default any more. RT is unchanged.
   late bool _barcodeMode;
+  /// False only until the default-scanner setting has been read; nothing
+  /// that opens the camera is mounted before that.
+  bool _modeReady = true;
   bool _switchingMode = false;
   /// Latches once the reader has handed off to save/review, so the next
   /// detection frame — they arrive several times a second — cannot fire a
@@ -242,7 +247,13 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     // 2026-09-23 for lag; the per-frame PNG + OCR cross-check behind that is
     // gone (returnImage above). OCR ("TEXT") stays one tap away on the
     // switcher for torn or faded labels.
-    _barcodeMode = widget.startInBarcodeMode;
+    //
+    // Since 2026-11-09 the starting scanner is a setting (Settings >
+    // Capture & QC > Default label scanner). Barcode until it is read, but no
+    // camera is mounted before then (_modeReady), so a TEXT default never
+    // flashes the barcode reader first.
+    _barcodeMode = widget.startInBarcodeMode ?? true;
+    _modeReady = widget.startInBarcodeMode != null;
     _bootstrap();
     VolumeButtonService().registerListener('barcode_popup', (event) {
       if (!mounted) return;
@@ -254,6 +265,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
 
   Future<void> _bootstrap() async {
     await _loadLabelSettings();
+    if (mounted) setState(() => _modeReady = true);
     // In barcode mode the MobileScanner widget opens the camera itself —
     // initialising a CameraController here too would fight it for the device.
     if (_barcodeMode) {
@@ -266,6 +278,10 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   }
 
   Future<void> _loadLabelSettings() async {
+    if (widget.startInBarcodeMode == null) {
+      final method = await CameraSettingsService.getDefaultScanMethod();
+      _barcodeMode = method == LabelScanMethod.barcode;
+    }
     _autoLabelScan = await CameraSettingsService.getAutoLabelScanForMode(widget.mode);
     _autoLabelSave = await CameraSettingsService.getAutoLabelSave();
     _autoScanDelayMs = await CameraSettingsService.getAutoScanDelayMs();
@@ -592,7 +608,7 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
   /// fail with "camera busy" if both were live at once. Order matters —
   /// release the old owner fully before the new one asks for the device.
   Future<void> _toggleScanMode() async {
-    if (_switchingMode) return;
+    if (_switchingMode || !_modeReady) return;
     _switchingMode = true;
     unawaited(HapticFeedback.selectionClick());
     _stopAutoScanLoop();
@@ -1243,6 +1259,8 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
                       color: Colors.black,
                       child: _hardwareReleased
                           ? const SizedBox.expand()
+                          : !_modeReady
+                          ? const Center(child: CircularProgressIndicator(strokeWidth: 2, color: RfColors.textMuted))
                           : _barcodeMode
                           ? _buildBarcodeReader(width, height)
                           : _camReady && _cam != null

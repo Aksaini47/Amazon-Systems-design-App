@@ -42,11 +42,12 @@ class DraftSaveService {
     }
     // RT QC OK needs no photos (see CaptureSession.isPhotoComplete).
     if (verdict == null || verdict == QCVerdict.ok) return const [];
+    // Same order the capture flow shoots them in: label last.
     return [
-      if (!photos.containsKey(PhotoSide.label)) PhotoSide.label,
       if (!photos.containsKey(PhotoSide.contents)) PhotoSide.contents,
       if (!photos.containsKey(PhotoSide.front)) PhotoSide.front,
       if (!photos.containsKey(PhotoSide.back)) PhotoSide.back,
+      if (!photos.containsKey(PhotoSide.label)) PhotoSide.label,
     ];
   }
 

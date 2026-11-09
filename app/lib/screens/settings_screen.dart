@@ -34,6 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _autoLabelScanRt = false;
   int _autoScanDelayMs = 900;
   bool _autoLabelSave = true;
+  LabelScanMethod _scanMethod = LabelScanMethod.barcode;
   bool _claimPhotoCountdown = false;
   // New: capture countdown (0=manual, 3/5/10=seconds)
   int _captureCountdown = 3;
@@ -71,6 +72,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _autoLabelScanRt = await CameraSettingsService.getAutoLabelScanForMode(CaptureMode.rt);
     _autoScanDelayMs = await CameraSettingsService.getAutoScanDelayMs();
     _autoLabelSave = await CameraSettingsService.getAutoLabelSave();
+    _scanMethod = await CameraSettingsService.getDefaultScanMethod();
     _claimPhotoCountdown = await CameraSettingsService.getClaimPhotoCountdown();
     _selectedStoragePath = await CameraSettingsService.getStoragePath();
     if (mounted) setState(() {});
@@ -270,8 +272,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _buildRow(
                   label: 'Return images by QC',
-                  subtitle: 'QC OK: front/back only. Damaged or different: label, contents, front and back. Fixed by design.',
+                  subtitle: 'QC OK: no photos. Damaged or different: contents, front, back, serial (optional), then the return label last. Fixed by design.',
                   trailing: const Icon(Icons.lock_outline_rounded, size: 18, color: RfColors.textMuted),
+                ),
+                _buildRow(
+                  label: 'Default label scanner',
+                  subtitle: 'What the label screen opens with, PK and RT. BARCODE | TEXT on that screen still switches it for one label.',
+                  trailing: _buildDropdown<LabelScanMethod>(
+                    value: _scanMethod,
+                    items: const {
+                      LabelScanMethod.barcode: 'Barcode',
+                      LabelScanMethod.text: 'OCR (text)',
+                    },
+                    onChanged: (v) {
+                      setState(() => _scanMethod = v);
+                      CameraSettingsService.setDefaultScanMethod(v);
+                    },
+                  ),
                 ),
                 _buildRow(
                   label: 'Photo timestamp',

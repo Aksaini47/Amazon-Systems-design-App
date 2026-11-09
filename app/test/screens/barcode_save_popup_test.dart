@@ -168,4 +168,28 @@ void main() {
       expect(find.textContaining('AWB must be at least 12 digits'), findsNothing);
     });
   });
+
+  // Sir, 2026-11-09: Settings > Capture & QC > Default label scanner. Only the
+  // OCR side can be opened here — the barcode reader's plugin is absent in a
+  // test — which is the side that proves the setting is read at all (the
+  // built-in default is barcode).
+  group('default label scanner setting', () {
+    for (final mode in CaptureMode.values) {
+      testWidgets('a TEXT default opens ${mode.name.toUpperCase()} on OCR with no argument',
+          (tester) async {
+        SharedPreferences.setMockInitialValues({'default_scan_method': 'text'});
+        tester.view.physicalSize = const Size(1080, 2340);
+        tester.view.devicePixelRatio = 3;
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(MaterialApp(
+          theme: buildRfTheme(),
+          home: BarcodeSavePopup(mode: mode),
+        ));
+        await tester.pump(const Duration(milliseconds: 200));
+
+        expect(find.text('TEXT (OCR)'), findsOneWidget);
+        expect(find.text('SCAN'), findsOneWidget, reason: 'the OCR controls row is up');
+      });
+    }
+  });
 }

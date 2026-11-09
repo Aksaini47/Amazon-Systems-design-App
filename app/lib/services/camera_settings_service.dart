@@ -2,6 +2,15 @@ import 'package:camera/camera.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/capture_session.dart';
 
+/// Which scanner the label screen (Order ID + AWB) opens on.
+enum LabelScanMethod {
+  /// Live barcode reader — exact, the default.
+  barcode,
+
+  /// OCR of the printed text (photo of the label).
+  text,
+}
+
 class CameraSettingsService {
   // --- Storage Path ---
   static const String storageDefault = '/storage/emulated/0/Movies/RepairFully';
@@ -121,6 +130,23 @@ class CameraSettingsService {
   static Future<void> setAutoLabelScanForMode(CaptureMode mode, bool val) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_autoScanModeKey(mode), val);
+  }
+
+  // --- Default label scanner (Sir, 2026-11-09): which scanner the label
+  // screen opens on, for PK and RT. The BARCODE | TEXT switch on that screen
+  // still changes it for the label in hand; this only sets where it starts.
+  static const String _scanMethodKey = 'default_scan_method';
+
+  static Future<LabelScanMethod> getDefaultScanMethod() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_scanMethodKey) == LabelScanMethod.text.name
+        ? LabelScanMethod.text
+        : LabelScanMethod.barcode;
+  }
+
+  static Future<void> setDefaultScanMethod(LabelScanMethod method) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_scanMethodKey, method.name);
   }
 
   // --- Delay before auto-scan fires (was hardcoded 900ms) ---
@@ -252,6 +278,7 @@ class CameraSettingsService {
     await prefs.remove('auto_label_scan_pk');
     await prefs.remove('auto_label_scan_rt');
     await prefs.remove('auto_scan_delay_ms');
+    await prefs.remove(_scanMethodKey);
     await prefs.remove('auto_label_save');
     await prefs.remove('claim_photo_countdown');
     await prefs.remove('mandatory_return_images');

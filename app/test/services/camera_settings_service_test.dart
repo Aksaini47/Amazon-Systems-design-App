@@ -13,6 +13,30 @@ void main() {
     expect(await CameraSettingsService.getClaimPhotoCountdown(), !initial);
   });
 
+  group('default label scanner (Sir, 2026-11-09)', () {
+    test('is the barcode reader until Sir changes it', () async {
+      expect(await CameraSettingsService.getDefaultScanMethod(), LabelScanMethod.barcode);
+    });
+
+    test('round-trips both ways', () async {
+      await CameraSettingsService.setDefaultScanMethod(LabelScanMethod.text);
+      expect(await CameraSettingsService.getDefaultScanMethod(), LabelScanMethod.text);
+      await CameraSettingsService.setDefaultScanMethod(LabelScanMethod.barcode);
+      expect(await CameraSettingsService.getDefaultScanMethod(), LabelScanMethod.barcode);
+    });
+
+    test('an unknown stored value falls back to barcode', () async {
+      SharedPreferences.setMockInitialValues({'default_scan_method': 'something_else'});
+      expect(await CameraSettingsService.getDefaultScanMethod(), LabelScanMethod.barcode);
+    });
+
+    test('restore defaults puts it back to barcode', () async {
+      await CameraSettingsService.setDefaultScanMethod(LabelScanMethod.text);
+      await CameraSettingsService.restoreDefaults();
+      expect(await CameraSettingsService.getDefaultScanMethod(), LabelScanMethod.barcode);
+    });
+  });
+
   test('timestamp watermark flag round-trips', () async {
     final initial = await CameraSettingsService.getTimestampImage();
     await CameraSettingsService.setTimestampImage(!initial);

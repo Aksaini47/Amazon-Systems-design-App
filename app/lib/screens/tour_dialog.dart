@@ -62,7 +62,8 @@ const _pages = <_TourPage>[
     icon: Icons.fact_check_rounded,
     title: 'QC Verdict (RT only)',
     body: 'OK, Damaged, Different, or Both. Anything other than OK walks you '
-        'automatically through label, contents, front, and back claim photos.',
+        'automatically through contents, front, back, serial, and (last) '
+        'return-label claim photos.',
   ),
   _TourPage(
     icon: Icons.verified_rounded,

@@ -281,7 +281,8 @@ class CaptureSession {
     }
     // RT QC OK: no photos at all (Sir 2026-10-05) — the video is the record.
     if (verdict == null || verdict == QCVerdict.ok) return true;
-    // RT damaged / different / etc.: label + contents + front + back (serial optional).
+    // RT damaged / different / etc.: contents + front + back + label (serial
+    // optional). Shot in that order, label last (Sir, 2026-11-09).
     return labelPhotoPath != null
         && contentsPhotoPath != null
         && frontPhotoPath != null
