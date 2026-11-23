@@ -270,7 +270,7 @@ class CarrierPatterns {
   static CarrierPattern? classify(String value) {
     final v = value.trim();
     if (v.isEmpty) return null;
-    if (isOrderIdShape(v)) return null;  // it's an Order ID, not AWB
+    if (scannedOrderId(v) != null) return null;  // it's an Order ID, not AWB
     CarrierPattern? best;
     double bestSpec = -1;
     for (final c in all) {
@@ -308,7 +308,7 @@ class CarrierPatterns {
     for (final v in barcodeValues) {
       final clean = v.trim();
       if (clean.isEmpty) continue;
-      if (isOrderIdShape(clean)) continue;  // skip Order ID barcodes (Amazon or website)
+      if (scannedOrderId(clean) != null) continue;  // skip Order ID barcodes (Amazon or website, any dress)
       if (accept != null && !accept(clean)) continue;
       final bonus = (prefer != null && prefer(clean)) ? _preferBonus : 0.0;
       // Score every carrier that matches this value

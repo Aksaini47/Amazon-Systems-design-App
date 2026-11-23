@@ -512,8 +512,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
     // first place.
     if (!isOrderIdShape(_orderIdController.text.trim())) {
       for (final v in values) {
-        if (isOrderIdShape(v)) {
-          _orderIdController.text = v;
+        final id = scannedOrderId(v);
+        if (id != null) {
+          _orderIdController.text = id;
           _orderIdConflictValue = null;
           _foundOrderId = true;
           changed = true;
@@ -763,8 +764,9 @@ class _BarcodeSavePopupState extends State<BarcodeSavePopup> {
         final raw = b.rawValue?.trim();
         if (raw == null || raw.isEmpty) continue;
         barcodeValues.add(raw);
-        if (isOrderIdShape(raw)) {
-          barcodeOrderId ??= raw;
+        final id = scannedOrderId(raw);
+        if (id != null) {
+          barcodeOrderId ??= id;
           orderIdFound = true;
         }
       }

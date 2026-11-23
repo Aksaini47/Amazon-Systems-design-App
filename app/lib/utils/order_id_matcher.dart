@@ -50,6 +50,29 @@ bool isOrderIdShape(String orderId) {
   return _amazonShape.hasMatch(t) || isWebsiteOrderId(t);
 }
 
+// The RF id as a barcode/QR can come out in a slightly different dress than the
+// printed one: lower case, no hyphens ("RF2611040004"), spaces, or inside a
+// longer payload (a QR holding a link or "Order: RF-...").
+final _websiteScan = RegExp(r'(?<![A-Z0-9])RF[-_ /.]?(\d{6})[-_ /.]?(\d{4})(?!\d)');
+
+/// The Order ID carried by one scanned barcode/QR value, in canonical form, or
+/// null when it carries none (so it may be an AWB).
+///
+/// An Amazon id must already be an exact 3-7-7 (no guessing). A website id
+/// (RF-YYMMDD-NNNN) is also recognised when lower-cased, without hyphens,
+/// spaced, or embedded in a longer payload - always rebuilt as `RF-YYMMDD-NNNN`
+/// and only if the date is a real calendar date, so the literal `RF` plus the
+/// date check keep an unrelated code from passing.
+String? scannedOrderId(String raw) {
+  final t = raw.trim().toUpperCase();
+  if (t.isEmpty) return null;
+  if (isOrderIdShape(t)) return t;
+  final m = _websiteScan.firstMatch(t);
+  if (m == null) return null;
+  final id = 'RF-${m[1]}-${m[2]}';
+  return isWebsiteOrderId(id) ? id : null;
+}
+
 /// Complete Order ID rule: a website id, or an Amazon id with a real prefix.
 bool isValidOrderId(String orderId) => isWebsiteOrderId(orderId) || isPlausibleOrderId(orderId);
 

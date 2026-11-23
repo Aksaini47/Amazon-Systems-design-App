@@ -87,4 +87,43 @@ void main() {
       expect(type('RF-261104', old: 'RF-261104-'), 'RF-261104');
     });
   });
+
+  group('scannedOrderId - the website id as a barcode / QR (Sir, 2026-11-23)', () {
+    test('the printed form and its look-alikes all come back as RF-YYMMDD-NNNN', () {
+      for (final raw in [
+        'RF-261104-0004',
+        'rf-261104-0004',
+        ' RF-261104-0004 ',
+        'RF2611040004',
+        'RF 261104 0004',
+        'RF_261104_0004',
+        'Order: RF-261104-0004',
+        'https://repairfully.in/order/RF-261104-0004?x=1',
+      ]) {
+        expect(scannedOrderId(raw), 'RF-261104-0004', reason: raw);
+      }
+    });
+
+    test('Amazon ids must already be exact 3-7-7 - nothing is guessed', () {
+      expect(scannedOrderId('407-1234567-1234567'), '407-1234567-1234567');
+      expect(scannedOrderId('40712345671234567'), isNull);
+      expect(scannedOrderId('407 1234567 1234567'), isNull);
+    });
+
+    test('a fake date, a wrong length or a longer code is not an order id', () {
+      expect(scannedOrderId('RF-261304-0004'), isNull, reason: 'month 13');
+      expect(scannedOrderId('RF-261131-0004'), isNull, reason: '31 Nov');
+      expect(scannedOrderId('RF-261104-004'), isNull);
+      expect(scannedOrderId('RF-261104-00041'), isNull);
+      expect(scannedOrderId('XRF-261104-0004'), isNull, reason: 'letter glued in front');
+    });
+
+    test('courier AWBs are not taken for it, and are still read as AWBs', () {
+      for (final awb in ['EK123456789IN', 'X12345678', '123456789012', 'SF12345678AB']) {
+        expect(scannedOrderId(awb), isNull, reason: awb);
+      }
+      final pick = CarrierPatterns.pickAwbFromBarcodes(['RF2611040004', '123456789012']);
+      expect(pick?.value, '123456789012', reason: 'the RF barcode is skipped as an AWB');
+    });
+  });
 }
