@@ -37,7 +37,7 @@ class UpdateService {
   /// changelog already display?"; everything before the colon is the
   /// associated release version.
   static const String latestChangelog =
-      '2.1.0+14:26 - RT photo order, default scanner setting, RF- website barcode\n- RT non-OK: photos ab contents, front, back, serial, label sabse aakhir mein\n- Settings > Capture & QC > Default label scanner: Barcode ya OCR\n- Website order id RF-YYMMDD-NNNN barcode/QR se bhi padhi jaati hai (hyphen ke bina, lowercase, link ke andar bhi)';
+      '2.1.0+14:27 - Activity log: simple Orders view, Find, filters\n- Settings > Activity log ab order-wise cards mein: Saved / Draft / Problem, QC reason, AWB, video length\n- Card kholo to poori kahani simple words mein; asli log lines "Technical details" mein same\n- Find (Order ID / AWB / koi shabd), PK / RT / Problems / Drafts filter, date par jump\n- "Raw log" tab mein purana every-line view';
 
   static const _kLastSeenPatchKey = 'shorebird_last_seen_patch_v1';
   static const _kLastSeenBuildKey = 'shorebird_last_seen_build_v1';
