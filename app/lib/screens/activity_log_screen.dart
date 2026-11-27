@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../services/activity_log_service.dart';
+import '../utils/activity_log_model.dart';
 import '../theme/rf_colors.dart';
 import '../theme/rf_glass.dart';
 import '../widgets/rf_button.dart';
 import '../widgets/rf_fast_scroller.dart';
+import 'activity_orders_view.dart';
 
 /// One calendar day of the activity log: the day and its raw log lines.
 class ActivityLogDay {
@@ -246,48 +248,63 @@ Future<ActivityLogSnapshot> _readDeviceLog() async {
   return (path: path, days: days);
 }
 
-/// Scrollable viewer for the last 60 days of plain-text activity logs, one
-/// blue-ruled block per day, with a Google-style fast scroller on the right.
+/// Which view of the log is up.
+enum ActivityLogView {
+  /// One card per order, in plain words (the default).
+  orders,
+
+  /// Every log line exactly as written, day by day.
+  raw,
+}
+
+/// The activity log of the last 60 days.
+///
+/// Default view: one card per order under each day, in plain words, with a
+/// result chip, the QC reason and AWB; tap a card for the whole story (the raw
+/// lines are in it, under "Technical details"). **Find** looks up an Order ID
+/// or AWB (hyphens and case do not matter), the chips narrow to PK / RT /
+/// problems / drafts, and the calendar jumps to a date. The "Raw log" tab is
+/// the old viewer: every line verbatim, with the fast scroller.
 class ActivityLogScreen extends StatefulWidget {
   const ActivityLogScreen({
     super.key,
     this.loader = _readDeviceLog,
     this.measurer = ActivityLogLayout.measure,
+    this.initialView = ActivityLogView.orders,
   });
 
   /// Where the days come from — the on-device log files. Tests pass canned data.
   final Future<ActivityLogSnapshot> Function() loader;
 
-  /// How the rows get their heights. Tests step it by hand.
+  /// How the raw view's rows get their heights. Tests step it by hand.
   final ActivityLogMeasurer measurer;
+
+  final ActivityLogView initialView;
 
   @override
   State<ActivityLogScreen> createState() => _ActivityLogScreenState();
 }
 
 class _ActivityLogScreenState extends State<ActivityLogScreen> {
-  /// Space on the right of the lines for the fast-scroller thumb, and above
-  /// the first / below the last row of the list.
-  static const _gutter = 14.0;
-  static const _listPadTop = 4.0;
-  static const _listPadBottom = 8.0;
-
-  final ScrollController _scroll = ScrollController();
+  late ActivityLogView _view = widget.initialView;
 
   List<ActivityLogDay>? _days;
-  ActivityLogLayout? _layout;
+  List<ActivityDayModel> _models = const [];
+  // What the views show: [_days] / [_models] narrowed by the search and the
+  // chips. Same list objects when nothing is narrowed, new ones otherwise —
+  // the views re-lay themselves out only when the identity changes.
+  List<ActivityLogDay> _rawShown = const [];
+  List<ActivityDayModel> _modelsShown = const [];
 
-  /// False while [_layout] only holds the newest days and the rest is still
-  /// being measured.
-  bool _layoutComplete = false;
   DateTime _loadedAt = DateTime.now();
   String _logPath = '';
   bool _loading = true;
 
-  /// Bumped whenever the measurement in flight stops being wanted (new data,
-  /// new width, screen gone).
-  int _measureToken = 0;
-  ({double width, TextScaler scaler})? _measuring;
+  bool _searching = false;
+  String _query = '';
+  ActivityFilter _filter = ActivityFilter.all;
+  final TextEditingController _searchCtrl = TextEditingController();
+  final GlobalKey<ActivityOrdersViewState> _ordersKey = GlobalKey<ActivityOrdersViewState>();
 
   @override
   void initState() {
@@ -297,8 +314,7 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
 
   @override
   void dispose() {
-    _measureToken++;
-    _scroll.dispose();
+    _searchCtrl.dispose();
     super.dispose();
   }
 
@@ -313,23 +329,369 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
       snapshot = (path: _logPath, days: const <ActivityLogDay>[]);
     }
     if (!mounted) return;
-    _measureToken++;
     setState(() {
       _logPath = snapshot.path;
       _days = snapshot.days;
+      _models = [for (final d in snapshot.days) groupActivityDay(d.day, d.lines)];
+      _loadedAt = DateTime.now();
+      _loading = false;
+      _narrow();
+    });
+  }
+
+  /// Recomputes what the views show. Call inside setState.
+  void _narrow() {
+    final days = _days ?? const <ActivityLogDay>[];
+    final q = _query.trim();
+    _modelsShown = filterActivityDays(_models, query: q, filter: _filter);
+    if (q.isEmpty) {
+      _rawShown = days;
+    } else {
+      _rawShown = [
+        for (final d in days)
+          if (filterRawLines(d.lines, q) case final hit when hit.isNotEmpty) ActivityLogDay(d.day, hit),
+      ];
+    }
+  }
+
+  void _setQuery(String q) => setState(() {
+        _query = q;
+        _narrow();
+      });
+
+  void _setFilter(ActivityFilter f) => setState(() {
+        _filter = f;
+        _narrow();
+      });
+
+  void _toggleSearch() {
+    setState(() {
+      _searching = !_searching;
+      if (!_searching) {
+        _searchCtrl.clear();
+        _query = '';
+        _narrow();
+      }
+    });
+  }
+
+  void _setView(ActivityLogView v) {
+    if (v == _view) return;
+    HapticFeedback.selectionClick();
+    setState(() => _view = v);
+  }
+
+  Future<void> _copyPath() async {
+    await Clipboard.setData(ClipboardData(text: _logPath));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Log folder path copied'),
+      duration: Duration(milliseconds: 1600),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
+  Future<void> _pickDate() async {
+    if (_models.isEmpty) return;
+    final newest = _models.first.day;
+    final oldest = _models.last.day;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: newest,
+      firstDate: oldest.isAfter(newest) ? newest : oldest,
+      lastDate: newest,
+      helpText: 'Go to date',
+    );
+    if (picked == null) return;
+    _ordersKey.currentState?.jumpToDay(picked);
+  }
+
+  bool get _narrowed => _query.trim().isNotEmpty || (_view == ActivityLogView.orders && _filter != ActivityFilter.all);
+
+  @override
+  Widget build(BuildContext context) {
+    final hasData = !_loading && (_days?.isNotEmpty ?? false);
+    return RfGlassScaffold(
+      appBar: RfGlassAppBar(
+        title: 'Activity log',
+        actions: [
+          RfIconButton(
+            icon: _searching ? Icons.search_off_rounded : Icons.search_rounded,
+            tooltip: _searching ? 'Close find' : 'Find',
+            size: 40,
+            color: _searching ? RfColors.amber : null,
+            onPressed: hasData ? _toggleSearch : null,
+          ),
+          const SizedBox(width: 8),
+          if (_view == ActivityLogView.orders) ...[
+            RfIconButton(
+              icon: Icons.calendar_month_rounded,
+              tooltip: 'Go to date',
+              size: 40,
+              onPressed: hasData && _modelsShown.isNotEmpty ? _pickDate : null,
+            ),
+            const SizedBox(width: 8),
+          ],
+          RfIconButton(
+            icon: Icons.refresh_rounded,
+            tooltip: 'Refresh',
+            size: 40,
+            onPressed: _loading ? null : _load,
+          ),
+          if (_view == ActivityLogView.raw) ...[
+            const SizedBox(width: 8),
+            RfIconButton(
+              icon: Icons.copy_rounded,
+              tooltip: 'Copy folder path',
+              size: 40,
+              onPressed: _logPath.isEmpty ? null : _copyPath,
+            ),
+          ],
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (hasData) _buildControls(),
+          Expanded(child: _buildBody()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildControls() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+          child: Row(
+            children: [
+              // Two equal halves, so large text sizes cannot push them off the row.
+              Expanded(
+                child: RfChip(label: 'Orders', active: _view == ActivityLogView.orders, onPressed: () => _setView(ActivityLogView.orders)),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: RfChip(label: 'Raw log', active: _view == ActivityLogView.raw, onPressed: () => _setView(ActivityLogView.raw)),
+              ),
+            ],
+          ),
+        ),
+        if (_searching)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: TextField(
+              controller: _searchCtrl,
+              autofocus: true,
+              textInputAction: TextInputAction.search,
+              autocorrect: false,
+              enableSuggestions: false,
+              onChanged: _setQuery,
+              style: const TextStyle(color: RfColors.textPrimary, fontSize: 15),
+              decoration: InputDecoration(
+                hintText: _view == ActivityLogView.orders ? 'Order ID, AWB or a word (damaged, failed…)' : 'Search the log lines',
+                hintStyle: const TextStyle(color: RfColors.textMuted, fontSize: 14),
+                prefixIcon: const Icon(Icons.search_rounded, color: RfColors.textSecondary),
+                suffixIcon: _query.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: 'Clear',
+                        icon: const Icon(Icons.close_rounded, color: RfColors.textSecondary),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          _setQuery('');
+                        },
+                      ),
+                filled: true,
+                fillColor: RfColors.card,
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: RfColors.border)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: RfColors.amber)),
+              ),
+            ),
+          ),
+        if (_view == ActivityLogView.orders)
+          SizedBox(
+            height: 44,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              children: [
+                for (final f in ActivityFilter.values) ...[
+                  RfChip(label: _filterLabel(f), active: _filter == f, onPressed: () => _setFilter(f)),
+                  const SizedBox(width: 8),
+                ],
+              ],
+            ),
+          ),
+        if (_narrowed) _buildResultLine(),
+      ],
+    );
+  }
+
+  static String _filterLabel(ActivityFilter f) => switch (f) {
+        ActivityFilter.all => 'All',
+        ActivityFilter.pk => 'PK',
+        ActivityFilter.rt => 'RT',
+        ActivityFilter.problems => 'Problems',
+        ActivityFilter.drafts => 'Drafts',
+      };
+
+  Widget _buildResultLine() {
+    final int count;
+    final int days;
+    final String noun;
+    if (_view == ActivityLogView.orders) {
+      count = _modelsShown.fold(0, (n, d) => n + d.groups.length + (d.system == null ? 0 : 1));
+      days = _modelsShown.length;
+      noun = count == 1 ? 'match' : 'matches';
+    } else {
+      count = _rawShown.fold(0, (n, d) => n + d.lines.length);
+      days = _rawShown.length;
+      noun = count == 1 ? 'line' : 'lines';
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 8, 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              count == 0 ? 'Nothing found' : '$count $noun in $days day${days == 1 ? '' : 's'}',
+              style: const TextStyle(color: RfColors.textSecondary, fontSize: 12.5),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              _searchCtrl.clear();
+              setState(() {
+                _query = '';
+                _filter = ActivityFilter.all;
+                _narrow();
+              });
+            },
+            style: TextButton.styleFrom(minimumSize: const Size(48, 40), foregroundColor: RfColors.info),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    const spinner = Center(child: CircularProgressIndicator(color: RfColors.textMuted));
+    final days = _days;
+    if (_loading || days == null) return spinner;
+    if (days.isEmpty) {
+      return const Center(
+        child: Text(
+          'No activity logged yet.',
+          style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
+        ),
+      );
+    }
+    final nothing = _view == ActivityLogView.orders ? _modelsShown.isEmpty : _rawShown.isEmpty;
+    if (nothing) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.search_off_rounded, color: RfColors.textMuted, size: 44),
+              const SizedBox(height: 12),
+              const Text(
+                'Nothing found',
+                style: TextStyle(color: RfColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                _query.trim().isEmpty
+                    ? 'No orders match this filter in the last ${ActivityLogService.retentionDays} days.'
+                    : 'Nothing matches "${_query.trim()}". Try a shorter part of the Order ID or AWB.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: RfColors.textSecondary, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if (_view == ActivityLogView.orders) {
+      return ActivityOrdersView(key: _ordersKey, days: _modelsShown, query: _query, now: _loadedAt);
+    }
+    return _RawLogView(
+      days: _rawShown,
+      measurer: widget.measurer,
+      loadedAt: _loadedAt,
+      logPath: _logPath,
+    );
+  }
+}
+
+/// The old viewer: every line verbatim, one blue-ruled block per day, with the
+/// Google-style fast scroller on the right.
+class _RawLogView extends StatefulWidget {
+  const _RawLogView({
+    required this.days,
+    required this.measurer,
+    required this.loadedAt,
+    required this.logPath,
+  });
+
+  final List<ActivityLogDay> days;
+  final ActivityLogMeasurer measurer;
+  final DateTime loadedAt;
+  final String logPath;
+
+  @override
+  State<_RawLogView> createState() => _RawLogViewState();
+}
+
+class _RawLogViewState extends State<_RawLogView> {
+  /// Space on the right of the lines for the fast-scroller thumb, and above
+  /// the first / below the last row of the list.
+  static const _gutter = 14.0;
+  static const _listPadTop = 4.0;
+  static const _listPadBottom = 8.0;
+
+  final ScrollController _scroll = ScrollController();
+
+  ActivityLogLayout? _layout;
+
+  /// False while [_layout] only holds the newest days and the rest is still
+  /// being measured.
+  bool _layoutComplete = false;
+
+  /// Bumped whenever the measurement in flight stops being wanted (new data,
+  /// new width, screen gone).
+  int _measureToken = 0;
+  ({double width, TextScaler scaler})? _measuring;
+
+  @override
+  void didUpdateWidget(_RawLogView old) {
+    super.didUpdateWidget(old);
+    if (!identical(old.days, widget.days)) {
+      _measureToken++;
       _layout = null;
       _layoutComplete = false;
       _measuring = null;
-      _loadedAt = DateTime.now();
-      _loading = false;
-    });
+    }
+  }
+
+  @override
+  void dispose() {
+    _measureToken++;
+    _scroll.dispose();
+    super.dispose();
   }
 
   /// Makes sure a layout for this width / text scale is measured or being
   /// measured. Called from build, so the work itself starts after the frame.
   void _ensureLayout(double width, TextScaler scaler) {
-    final days = _days;
-    if (days == null || days.isEmpty) return;
+    final days = widget.days;
+    if (days.isEmpty) return;
     final current = _layout;
     if (current != null && current.width == width && current.textScaler == scaler) return;
     final inFlight = _measuring;
@@ -361,77 +723,36 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
     });
   }
 
-  Future<void> _copyPath() async {
-    await Clipboard.setData(ClipboardData(text: _logPath));
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Log folder path copied'),
-      duration: Duration(milliseconds: 1600),
-      behavior: SnackBarBehavior.floating,
-    ));
-  }
-
   @override
   Widget build(BuildContext context) {
-    return RfGlassScaffold(
-      appBar: RfGlassAppBar(
-        title: 'Activity log',
-        actions: [
-          RfIconButton(
-            icon: Icons.refresh_rounded,
-            tooltip: 'Refresh',
-            size: 40,
-            onPressed: _loading ? null : _load,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Text(
+            'Last ${ActivityLogService.retentionDays} days · ${widget.logPath}',
+            style: const TextStyle(color: RfColors.textSecondary, fontSize: 11),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(width: 8),
-          RfIconButton(
-            icon: Icons.copy_rounded,
-            tooltip: 'Copy folder path',
-            size: 40,
-            onPressed: _logPath.isEmpty ? null : _copyPath,
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: Text(
-              'Last ${ActivityLogService.retentionDays} days · $_logPath',
-              style: const TextStyle(color: RfColors.textSecondary, fontSize: 11),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+            child: RfGlassContainer(
+              blurEnabled: false,
+              padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
+              child: _content(),
             ),
           ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-              child: RfGlassContainer(
-                blurEnabled: false,
-                padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
-                child: _content(),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _content() {
     const spinner = Center(child: CircularProgressIndicator(color: RfColors.textMuted));
-    final days = _days;
-    if (_loading || days == null) return spinner;
-    if (days.isEmpty) {
-      return const Center(
-        child: Text(
-          'No activity logged yet.',
-          style: TextStyle(color: RfColors.textSecondary, fontSize: 13),
-        ),
-      );
-    }
     return LayoutBuilder(builder: (context, constraints) {
       final width = constraints.maxWidth - _gutter;
       final scaler = MediaQuery.textScalerOf(context);
@@ -475,7 +796,7 @@ class _ActivityLogScreenState extends State<ActivityLogScreen> {
           key: ValueKey('activity_day_header_$d'),
           day: day.day,
           events: day.lines.length,
-          now: _loadedAt,
+          now: widget.loadedAt,
         );
       case ActivityLogRowKind.lines:
         return _LogLines(layout.linesAt(row));

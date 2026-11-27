@@ -210,7 +210,7 @@ void main() {
     Future<void> open(WidgetTester tester, Future<ActivityLogSnapshot> Function() loader) async {
       await tester.pumpWidget(MaterialApp(
         theme: buildRfTheme(),
-        home: ActivityLogScreen(loader: loader),
+        home: ActivityLogScreen(loader: loader, initialView: ActivityLogView.raw),
       ));
       await tester.pumpAndSettle();
     }
@@ -250,6 +250,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         theme: buildRfTheme(),
         home: ActivityLogScreen(
+          initialView: ActivityLogView.raw,
           loader: () async => (path: '/p', days: days),
           // A measurer stepped by hand: the newest two days, then — once the
           // test says so — everything.

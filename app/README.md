@@ -22,6 +22,14 @@ on the phone (backend sync was removed in 2.0.0 patch 8).
   `qc_sub=` on every activity-log line, `verdict` + `qc_sub_reasons` in
   `meta.json`.
 - Label screen (PK + RT): opens on the scanner chosen in Settings > Capture & QC > Default label scanner (Barcode unless changed); BARCODE is the live reader (a short strip frame, one barcode at a time); a floating BARCODE | TEXT switcher moves to OCR (3:4 frame) for torn/faded labels. The reader analyses every frame for Code128 / Code39 / QR only; "Camera not starting" + Retry appears only when the camera itself fails (no barcode in view just changes the hint), and Retry rebuilds the scanner from scratch. OCR AWBs are repaired by position (0/O, 1/I, 5/S ...) against the courier format, and a lettered or repaired OCR read waits for a SAVE tap instead of auto-saving. Both fields use the English keyboard, capitals only.
+- Activity log (Settings): opens on **Orders** — one card per order under each
+  day, in plain words (result chip Saved / Draft / Problem, QC reason, AWB,
+  video length); tap a card for the whole story, with the raw log lines
+  verbatim under "Technical details". **Find** (Order ID or AWB, hyphens and
+  case ignored, or a word like "damaged"), quick filters (All / PK / RT /
+  Problems / Drafts) and a go-to-date calendar. The **Raw log** tab is the
+  every-line viewer with the fast scroller. Parsing / grouping / find live in
+  `utils/activity_log_model.dart`; the log file format is unchanged.
 - Gallery: browse, edit, re-tag, pinch-zoom; drafts auto-recovered after a
   crash. "Replace photo" (and capturing a missing draft photo) opens the app's
   own camera — 3:4 viewfinder, tap to focus, pinch zoom, flash, Retake / Use
